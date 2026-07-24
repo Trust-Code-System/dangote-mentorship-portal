@@ -216,23 +216,24 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Themed scrollbars (§1) — kept deliberately quiet so the bar barely reads:
-   * a transparent track (no green stripe), a slim neutral thumb that only tints
-   * green on hover, and no native up/down arrow buttons. Firefox uses
-   * scrollbar-width/color; Chromium/WebKit use the pseudo elements. */
+  /* Themed scrollbars (§1) — branded to the portal's green scheme (no native
+   * grey bar): a faint green-soft track, a green thumb that deepens on hover, and
+   * no native up/down arrow buttons. Firefox uses scrollbar-width/color;
+   * Chromium/WebKit use the pseudo elements. */
   html {
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--ink-3) / 0.35) transparent;
+    scrollbar-color: rgb(var(--green) / 0.55) rgb(var(--green-soft) / 0.5);
   }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background-color: rgb(var(--green-soft) / 0.5);
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--ink-3) / 0.35);
+    background-color: rgb(var(--green) / 0.55);
     border-radius: 999px;
     /* Transparent border + content-box clip leaves breathing room around the
      * thumb so it looks slim and pill-shaped, not edge-to-edge. */
@@ -240,7 +241,7 @@
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--green) / 0.7);
+    background-color: rgb(var(--green-strong) / 0.9);
   }
   /* Remove the native arrow buttons (single + double, both ends). */
   ::-webkit-scrollbar-button,

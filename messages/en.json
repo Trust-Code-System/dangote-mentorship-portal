@@ -41,6 +41,7 @@
     "help": "Help",
     "midTermReview": "Mid-term review",
     "finalReview": "Final review",
+    "certificate": "Certificate",
     "notifications": "Notifications",
     "login": "Login",
     "signup": "Sign up"
@@ -317,6 +318,18 @@
   "admin": {
     "title": "Administration",
     "overviewSubtitle": "Programme health at a glance — pairs, matching, goals and support.",
+    "dashboardTitle": "Enterprise Health Dashboard",
+    "dashboardSubtitle": "Monitoring engagement across all global business units.",
+    "last90": "Last 90 days",
+    "exportReport": "Export report",
+    "tileParticipants": "Total participants",
+    "tileUnmatched": "Unmatched",
+    "tileOpenSupport": "Open support",
+    "tileMatchRate": "Match rate",
+    "healthTitle": "Match rate",
+    "healthOnTrack": "On track",
+    "healthRamping": "Ramping up",
+    "healthEarly": "Early — mostly unmatched",
     "setup": "Programme setup",
     "programmes": "Programmes",
     "cohorts": "Cohorts",
@@ -693,6 +706,13 @@
     "signedConfirmation": "Signed — thank you.",
     "conflict": "You have already signed this agreement.",
     "forbidden": "You need an active pairing before you can sign."
+  },
+  "certificate": {
+    "title": "Completion Certificate",
+    "download": "Download / Print",
+    "earnedNote": "Congratulations — your certificate is ready. Download or print it below.",
+    "previewNote": "A preview of your certificate. It becomes official once you complete training, an approved goal, and your reviews.",
+    "noPairing": "Your certificate unlocks once you and your partner have accepted your match."
   },
   "goals": {
     "title": "Goals",

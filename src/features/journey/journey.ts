@@ -143,7 +143,7 @@ const LINKS: Record<JourneyStepKey, string | null> = {
   sessions: '/sessions',
   midterm: '/mid-term-review',
   final: '/final-review',
-  completion: null,
+  completion: '/certificate',
 };
 
 export function computeJourney(facts: JourneyFacts): JourneyResult {

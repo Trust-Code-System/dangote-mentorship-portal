@@ -1,0 +1,441 @@
+<title>Dangote Mentorship Portal — Programme Overview</title>
+<style>
+  :root {
+    /* Palette grounded in the portal's own green & white identity */
+    --bg: #F4F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #EEF3EF;
+    --border: #E2E9E3;
+    --ink: #14201A;
+    --ink-2: #47574D;
+    --ink-3: #7E8C83;
+    --green-light: #34A853;
+    --green: #1F7A3C;
+    --green-strong: #175E2D;
+    --green-soft: #E6F4EA;
+    --gold: #9A6A12;
+    --gold-soft: #F6EFDD;
+    --ok: #1E7A46;
+    --warn: #B06A0F;
+    --risk: #B23327;
+    --info: #2C6E8F;
+    --shadow: 0 1px 2px rgba(16,42,26,.05), 0 10px 30px -12px rgba(16,42,26,.14);
+    --shadow-sm: 0 1px 2px rgba(16,42,26,.06);
+    --maxw: 1080px;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0E1613;
+      --surface: #16211C;
+      --surface-2: #1D2A24;
+      --border: #26332C;
+      --ink: #EAF1EC;
+      --ink-2: #AEBEB4;
+      --ink-3: #7B8B81;
+      --green-light: #4FC06B;
+      --green: #46B265;
+      --green-strong: #6FCF88;
+      --green-soft: #16321F;
+      --gold: #D6A94E;
+      --gold-soft: #2B2415;
+      --ok: #56C281;
+      --warn: #D79A44;
+      --risk: #E0776B;
+      --info: #6FB2CE;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 34px -14px rgba(0,0,0,.6);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F4F7F5; --surface: #FFFFFF; --surface-2: #EEF3EF; --border: #E2E9E3;
+    --ink: #14201A; --ink-2: #47574D; --ink-3: #7E8C83;
+    --green-light: #34A853; --green: #1F7A3C; --green-strong: #175E2D; --green-soft: #E6F4EA;
+    --gold: #9A6A12; --gold-soft: #F6EFDD;
+    --ok: #1E7A46; --warn: #B06A0F; --risk: #B23327; --info: #2C6E8F;
+    --shadow: 0 1px 2px rgba(16,42,26,.05), 0 10px 30px -12px rgba(16,42,26,.14);
+    --shadow-sm: 0 1px 2px rgba(16,42,26,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1613; --surface: #16211C; --surface-2: #1D2A24; --border: #26332C;
+    --ink: #EAF1EC; --ink-2: #AEBEB4; --ink-3: #7B8B81;
+    --green-light: #4FC06B; --green: #46B265; --green-strong: #6FCF88; --green-soft: #16321F;
+    --gold: #D6A94E; --gold-soft: #2B2415;
+    --ok: #56C281; --warn: #D79A44; --risk: #E0776B; --info: #6FB2CE;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 34px -14px rgba(0,0,0,.6);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { line-height: 1.15; text-wrap: balance; margin: 0; letter-spacing: -0.02em; font-weight: 650; }
+  p { margin: 0; }
+  a { color: var(--green); }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 14px;
+  }
+
+  /* ── Hero ── */
+  header.hero {
+    background:
+      radial-gradient(120% 140% at 85% -10%, var(--green-soft) 0%, transparent 55%),
+      var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-inner { padding: 72px 0 60px; }
+  .brandline { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
+  .mark {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(150deg, var(--green-light), var(--green-strong));
+    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 17px;
+    box-shadow: 0 6px 16px -6px rgba(31,122,60,.6);
+  }
+  .brandline span { font-weight: 650; letter-spacing: -0.01em; }
+  .hero h1 { font-size: clamp(2.1rem, 5vw, 3.3rem); }
+  .hero .lede { font-size: clamp(1.05rem, 2.2vw, 1.3rem); color: var(--ink-2); max-width: 42ch; margin-top: 20px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--ink-2); font-size: 13.5px; font-weight: 550;
+    padding: 7px 13px; border-radius: 999px;
+  }
+  .chip b { color: var(--ink); font-weight: 650; }
+  .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--green-light); }
+
+  /* ── Sections ── */
+  section { padding: 60px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .sec-head { max-width: 60ch; margin-bottom: 40px; }
+  .sec-head h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+  .sec-head p { color: var(--ink-2); margin-top: 14px; font-size: 1.05rem; }
+
+  /* ── Journey rail ── */
+  .rail { display: flex; flex-direction: column; gap: 0; }
+  .step { display: grid; grid-template-columns: 44px 1fr; gap: 18px; }
+  .step .node-col { display: flex; flex-direction: column; align-items: center; }
+  .node {
+    width: 30px; height: 30px; border-radius: 999px; flex: none;
+    display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    background: var(--green); color: #fff; box-shadow: 0 4px 10px -4px rgba(31,122,60,.5);
+    z-index: 1;
+  }
+  .node.cert { background: linear-gradient(150deg, var(--gold), #7c550d); box-shadow: 0 4px 10px -4px rgba(154,106,18,.5); }
+  .line { width: 2px; flex: 1; background: var(--border); min-height: 20px; }
+  .step:last-child .line { display: none; }
+  .step .body { padding-bottom: 28px; }
+  .step .body h3 { font-size: 1.08rem; }
+  .step .body p { color: var(--ink-2); margin-top: 5px; font-size: 0.97rem; }
+
+  /* ── Phases ── */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 26px; box-shadow: var(--shadow-sm);
+  }
+  .panel .tag { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green); }
+  .panel h3 { font-size: 1.2rem; margin-top: 8px; }
+  .panel p { color: var(--ink-2); margin-top: 10px; }
+  .panel ul { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .panel li { position: relative; padding-left: 22px; color: var(--ink-2); font-size: 0.96rem; }
+  .panel li::before { content: ""; position: absolute; left: 2px; top: 9px; width: 8px; height: 8px; border-radius: 999px; background: var(--green-light); }
+
+  /* ── Roles ── */
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .role {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .role h3 { font-size: 1.02rem; display: flex; align-items: center; gap: 9px; }
+  .role .ic { width: 26px; height: 26px; border-radius: 8px; background: var(--green-soft); color: var(--green); display: grid; place-items: center; font-size: 14px; flex: none; }
+  .role p { color: var(--ink-2); font-size: 0.92rem; margin-top: 9px; }
+
+  /* ── Features ── */
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .feat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px; box-shadow: var(--shadow-sm); position: relative;
+  }
+  .feat h3 { font-size: 1.12rem; }
+  .feat p { color: var(--ink-2); margin-top: 10px; font-size: 0.97rem; }
+  .feat .badge-new {
+    position: absolute; top: 18px; right: 18px;
+    background: var(--gold-soft); color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+    font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px;
+  }
+
+  /* ── AI assistants ── */
+  .ai-note {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: color-mix(in srgb, var(--info) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--info) 26%, transparent);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 30px; color: var(--ink-2);
+  }
+  .ai-note .k { color: var(--info); font-weight: 700; }
+  .ai-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; }
+  .ai-item { display: grid; grid-template-columns: 30px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .ai-item .num { color: var(--green); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ai-item h3 { font-size: 1rem; }
+  .ai-item p { color: var(--ink-2); font-size: 0.92rem; margin-top: 3px; }
+
+  /* ── Status / roadmap ── */
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .status-col h3 { font-size: 1.05rem; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .status-col .lbl { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 4px 10px; border-radius: 999px; }
+  .lbl.now { background: var(--green-soft); color: var(--green); }
+  .lbl.next { background: var(--gold-soft); color: var(--gold); }
+  .status-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .status-col li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; color: var(--ink-2); font-size: 0.96rem; }
+  .status-col .tick { color: var(--green-light); font-weight: 700; }
+  .status-col .soon { color: var(--gold); font-weight: 700; }
+
+  /* ── Trust ── */
+  .trust-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .trust { padding: 20px 22px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
+  .trust h3 { font-size: 1rem; }
+  .trust p { color: var(--ink-2); margin-top: 8px; font-size: 0.94rem; }
+
+  /* ── Closing ── */
+  .close {
+    background: linear-gradient(160deg, var(--green-strong), var(--green));
+    color: #fff; border-radius: 20px; padding: 48px 40px; text-align: center; margin: 8px 0 4px;
+    box-shadow: 0 20px 50px -20px rgba(23,94,45,.7);
+  }
+  .close h2 { color: #fff; font-size: clamp(1.5rem, 3.4vw, 2.15rem); }
+  .close p { color: rgba(255,255,255,.86); max-width: 46ch; margin: 16px auto 0; font-size: 1.08rem; }
+
+  footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 0.86rem; text-align: center; }
+
+  @media (max-width: 760px) {
+    .two, .grid3, .feat-grid, .ai-list, .status-grid, .trust-grid { grid-template-columns: 1fr; }
+    .hero-inner { padding: 52px 0 44px; }
+    section { padding: 46px 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div class="brandline">
+      <div class="mark" aria-hidden="true">D</div>
+      <span>Dangote Mentorship Portal</span>
+    </div>
+    <p class="eyebrow">Programme overview</p>
+    <h1>One place to run Dangote's mentorship programme, end to end.</h1>
+    <p class="lede">A bilingual, AI-assisted portal that takes the programme from spreadsheets and paperwork to a single, measurable system — from the first import of names to the certificate at the finish.</p>
+    <div class="meta-row">
+      <span class="chip"><span class="dot"></span><b>9-month</b> journey</span>
+      <span class="chip"><span class="dot"></span><b>Bilingual</b> — English &amp; French</span>
+      <span class="chip"><span class="dot"></span><b>AI-assisted</b>, human-approved</span>
+      <span class="chip"><span class="dot"></span>Built for <b>~120 mentors &amp; ~300 mentees</b></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- WHAT IT IS -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">The idea in one minute</p>
+        <h2>What the portal is</h2>
+        <p>Today, running a mentorship programme means chasing forms, matching people by hand, and hoping pairs stay active. The portal replaces all of that with one guided system. Every participant follows the same clear journey; administrators see exactly what's happening; and an AI assistant does the heavy lifting — drafting, summarising, translating, and flagging problems — while people stay in control of every real decision.</p>
+      </div>
+      <div class="two">
+        <div class="panel">
+          <span class="tag">Phase 1</span>
+          <h3>Get everyone in, and matched</h3>
+          <p>Bring in mentor and mentee details, clean and check the data, let the system suggest the best pairings, and have an administrator review and approve them before anyone is matched.</p>
+          <ul>
+            <li>Import from Excel, CSV or Google Forms</li>
+            <li>Automatic checks flag missing or messy information</li>
+            <li>Smart matching ranks the best mentor for each mentee</li>
+            <li>An admin approves — the system never matches on its own</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <span class="tag">Phase 2</span>
+          <h3>Run the mentorship, month by month</h3>
+          <p>Once pairs are set, the portal carries them through the whole nine months: agreements, goals, sessions, reviews and recognition — with reminders and reporting throughout.</p>
+          <ul>
+            <li>Signed mentoring &amp; confidentiality agreements</li>
+            <li>Goal setting, session logs and action items</li>
+            <li>Mid-term and final reviews</li>
+            <li>Private messaging and progress reporting</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOURNEY -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">The spine of the product</p>
+        <h2>The nine-month journey</h2>
+        <p>Every participant sees the same simple progress line across the top of their screen. It shows where they are, what they've finished, and the one thing to do next — so nobody gets lost, and administrators can see the whole cohort's progress at a glance.</p>
+      </div>
+      <div class="rail">
+        <div class="step"><div class="node-col"><div class="node">1</div><div class="line"></div></div><div class="body"><h3>Profile</h3><p>Each person completes their profile — background, skills, goals, and preferred language.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">2</div><div class="line"></div></div><div class="body"><h3>Training</h3><p>Mentors and mentees complete their onboarding training before being matched.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">3</div><div class="line"></div></div><div class="body"><h3>Matched</h3><p>The system suggests pairings, an admin approves, and both people accept the match.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">4</div><div class="line"></div></div><div class="body"><h3>Agreement</h3><p>The pair digitally signs a mentoring agreement and a confidentiality agreement.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">5</div><div class="line"></div></div><div class="body"><h3>Goals</h3><p>The mentee sets clear, measurable goals — with an AI coach to help sharpen them — and the mentor approves.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">6</div><div class="line"></div></div><div class="body"><h3>Sessions</h3><p>The pair meets regularly. Each session is logged, summarised, and turned into follow-up actions.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">7</div><div class="line"></div></div><div class="body"><h3>Mid-term review</h3><p>Both sides reflect halfway through, so the programme can spot what's working and what isn't.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node">8</div><div class="line"></div></div><div class="body"><h3>Final review</h3><p>A closing review captures results, growth, and lessons for the next cohort.</p></div></div>
+        <div class="step"><div class="node-col"><div class="node cert">★</div></div><div class="body"><h3>Certificate</h3><p>The mentee completes the programme and earns recognition for the journey.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Who uses it</p>
+        <h2>Six roles, one portal</h2>
+        <p>Everyone sees a version of the portal built for their job — and can only see and do what their role allows.</p>
+      </div>
+      <div class="grid3">
+        <div class="role"><h3><span class="ic">◆</span>Super Admin</h3><p>Runs the whole platform — sets up programmes and yearly cohorts, and manages users and settings.</p></div>
+        <div class="role"><h3><span class="ic">◆</span>Programme Admin</h3><p>Runs the day-to-day programme — imports, matching, training, reviews and reporting.</p></div>
+        <div class="role"><h3><span class="ic">◆</span>Mentor</h3><p>Guides their mentees — logs sessions, approves goals, and completes reviews.</p></div>
+        <div class="role"><h3><span class="ic">◆</span>Mentee</h3><p>Sets goals, reflects on sessions, and works through the journey with their mentor.</p></div>
+        <div class="role"><h3><span class="ic">◆</span>Trainer / Facilitator</h3><p>Runs the training batches and tracks who has completed onboarding.</p></div>
+        <div class="role"><h3><span class="ic">◆</span>Reviewer / HR &amp; L&amp;D</h3><p>Sees programme-wide impact — completion, engagement, skills and outcomes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">What it does</p>
+        <h2>The features, in plain terms</h2>
+        <p>Everything a programme needs to run — grouped by what people actually do.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat"><h3>Intake &amp; data checks</h3><p>Upload participant lists from a spreadsheet or form. The portal cleans the data and flags problems in plain language — "this mentor has no language selected", "these five people look like duplicates" — so an admin fixes them before anyone becomes a profile.</p></div>
+        <div class="feat"><h3>Smart matching</h3><p>The system scores every possible mentor–mentee pairing on language, skills, career goals, experience and availability, then explains its reasoning in a sentence. An administrator reviews the ranked suggestions and approves or overrides — the match is always a human decision.</p></div>
+        <div class="feat"><h3>Agreements &amp; e-signing</h3><p>Each pair signs a mentoring agreement and a confidentiality agreement right in the portal, saved as PDFs for the record.</p></div>
+        <div class="feat"><h3>Goal setting with an AI coach</h3><p>Mentees write goals; the AI coach rewrites vague ones into clear, measurable targets as a suggestion. The mentee edits, and the mentor approves — nothing is set without sign-off.</p></div>
+        <div class="feat"><span class="badge-new">New</span><h3>Session logs &amp; mentor reports</h3><p>After each meeting, the mentor records what was discussed and the actions agreed — the AI can tidy rough notes into a clean summary. Mentors can always re-open and re-read every report they've filed, and administrators now have a read-only view of every session report across the programme.</p></div>
+        <div class="feat"><h3>Meetings &amp; calendar</h3><p>Schedule sessions, see upcoming meetings, and keep a shared calendar for each pair — with reminders so meetings don't slip.</p></div>
+        <div class="feat"><h3>Reviews &amp; programme health</h3><p>Editable mid-term and final review forms, plus an AI monitor that quietly flags pairs that haven't met, stale goals, or missing logs — so problems surface early.</p></div>
+        <div class="feat"><h3>Private messaging</h3><p>Each pair gets a private one-to-one chat with read receipts and a one-tap translate button. Message content stays private between the two people.</p></div>
+        <div class="feat"><h3>Dashboards for every role</h3><p>Admins see totals and alerts; mentors see their mentees and to-dos; mentees see their goals and next steps; executives see programme-wide impact.</p></div>
+        <div class="feat"><h3>Bilingual, everywhere</h3><p>The whole portal works in English and French, and no French speaker is ever forced to write in English. Any note, goal or message can be translated with one tap, and both versions are kept.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">The intelligent layer</p>
+        <h2>Eight AI assistants — you stay in charge</h2>
+      </div>
+      <div class="ai-note">
+        <span class="k">The rule:</span>
+        <p>The AI <b>proposes</b>; a person <b>decides</b>. It never matches a pair, approves a goal, or sends a newsletter on its own. Every real action is confirmed by an administrator, mentor or mentee.</p>
+      </div>
+      <div class="ai-list">
+        <div class="ai-item"><div class="num">1</div><div><h3>Matching Assistant</h3><p>Scores and explains the best pairings, flags weak or missing data.</p></div></div>
+        <div class="ai-item"><div class="num">2</div><div><h3>Goal Coach</h3><p>Turns vague goals into clear, measurable ones as a suggestion.</p></div></div>
+        <div class="ai-item"><div class="num">3</div><div><h3>Session Assistant</h3><p>Summarises notes, pulls out action items, drafts the next agenda.</p></div></div>
+        <div class="ai-item"><div class="num">4</div><div><h3>Review Assistant</h3><p>Analyses reviews, summarises progress, drafts the programme report.</p></div></div>
+        <div class="ai-item"><div class="num">5</div><div><h3>Newsletter Assistant</h3><p>Drafts updates from real activity for an admin to review and send.</p></div></div>
+        <div class="ai-item"><div class="num">6</div><div><h3>Clinic Assistant</h3><p>Groups common challenges into themes and drafts session agendas.</p></div></div>
+        <div class="ai-item"><div class="num">7</div><div><h3>Translation Assistant</h3><p>Professional English↔French for notes, goals, messages and more.</p></div></div>
+        <div class="ai-item"><div class="num">8</div><div><h3>Risk &amp; Engagement Monitor</h3><p>Flags at-risk pairs using activity signals only — never message content.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Where things stand</p>
+        <h2>Available today, and what's next</h2>
+        <p>The core programme — from intake through reviews, messaging and dashboards — is built and working. A set of community and integration features is planned for the next stages.</p>
+      </div>
+      <div class="status-grid">
+        <div class="status-col">
+          <h3><span class="lbl now">Available now</span></h3>
+          <ul>
+            <li><span class="tick">✓</span>Data import &amp; validation</li>
+            <li><span class="tick">✓</span>Smart matching with admin approval</li>
+            <li><span class="tick">✓</span>Mentor &amp; mentee profiles</li>
+            <li><span class="tick">✓</span>Mentoring &amp; confidentiality agreements (e-sign + PDF)</li>
+            <li><span class="tick">✓</span>Goal setting with the AI Goal Coach</li>
+            <li><span class="tick">✓</span>Session logs, AI summaries &amp; action items</li>
+            <li><span class="tick">✓</span>Admin visibility of mentor session reports</li>
+            <li><span class="tick">✓</span>Meeting scheduling &amp; calendar</li>
+            <li><span class="tick">✓</span>Mid-term &amp; final reviews</li>
+            <li><span class="tick">✓</span>AI review &amp; risk monitoring</li>
+            <li><span class="tick">✓</span>Private 1:1 messaging with translate</li>
+            <li><span class="tick">✓</span>Dashboards for every role</li>
+            <li><span class="tick">✓</span>Full English / French experience</li>
+          </ul>
+        </div>
+        <div class="status-col">
+          <h3><span class="lbl next">On the roadmap</span></h3>
+          <ul>
+            <li><span class="soon">→</span>Monthly clinics (live topic sessions with RSVP &amp; summaries)</li>
+            <li><span class="soon">→</span>Weekly AI-drafted newsletters</li>
+            <li><span class="soon">→</span>Community forum with a French-speaking corner</li>
+            <li><span class="soon">→</span>Live Zoom &amp; Outlook / Google Calendar links</li>
+            <li><span class="soon">→</span>WhatsApp notifications</li>
+            <li><span class="soon">→</span>One-click PDF &amp; Excel report exports</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Built to be trusted</p>
+        <h2>Privacy, security &amp; fairness</h2>
+      </div>
+      <div class="trust-grid">
+        <div class="trust"><h3>Private conversations stay private</h3><p>Messages between a mentor and mentee are confidential. Administrators can see activity signals — how active a pair is — but never the content of their messages.</p></div>
+        <div class="trust"><h3>Nothing is ever really deleted</h3><p>Participant work is safely archived rather than erased, with clear data-retention and export rules for each cohort.</p></div>
+        <div class="trust"><h3>The right people see the right things</h3><p>Every screen and action is checked against a person's role, so information is only ever shown to those who should see it.</p></div>
+        <div class="trust"><h3>Fair, language-first design</h3><p>French and English are treated equally, the interface meets accessibility standards, and the matching rules are transparent and reviewable.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="close">
+        <h2>From paperwork to a measurable programme</h2>
+        <p>One portal that guides every participant, keeps administrators in control, and lets AI do the busywork — purpose-built for the way Dangote runs mentorship.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Dangote Mentorship Portal — internal programme overview. Prepared for programme owners.</div>
+</footer>

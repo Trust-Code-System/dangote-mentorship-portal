@@ -14,6 +14,7 @@ import {
   FileSignature,
   ClipboardCheck,
   Award,
+  ScrollText,
   LifeBuoy,
   HelpCircle,
   Bell,
@@ -58,6 +59,7 @@ export type IconKey =
   | 'agreements'
   | 'midterm'
   | 'final'
+  | 'certificate'
   | 'support'
   | 'help'
   | 'notifications'
@@ -85,6 +87,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   agreements: FileSignature,
   midterm: ClipboardCheck,
   final: Award,
+  certificate: ScrollText,
   support: LifeBuoy,
   help: HelpCircle,
   notifications: Bell,

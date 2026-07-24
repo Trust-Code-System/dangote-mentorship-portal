@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { AgreementType, Language } from '@prisma/client';
 import { requireUser } from '@/lib/auth/rbac';
 import { getAgreementContext } from '@/features/agreements/data';
@@ -23,7 +23,10 @@ export default async function AgreementsPage() {
     );
   }
 
-  const lang = user.locale === 'FR' ? Language.FR : Language.EN;
+  // QA-I18N-006: follow the ACTIVE UI locale (header switcher), not the saved
+  // account locale, so a French reader sees the agreement terms in French.
+  const activeLocale = await getLocale();
+  const lang = activeLocale.toLowerCase().startsWith('fr') ? Language.FR : Language.EN;
   const signedByType = new Map(ctx.signed.map((a) => [a.type, a]));
 
   return (

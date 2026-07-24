@@ -41,6 +41,7 @@
     "help": "Aide",
     "midTermReview": "Revue de mi-parcours",
     "finalReview": "Revue finale",
+    "certificate": "Certificat",
     "notifications": "Notifications",
     "login": "Connexion",
     "signup": "S’inscrire"
@@ -317,6 +318,18 @@
   "admin": {
     "title": "Administration",
     "overviewSubtitle": "L’état du programme en un coup d’œil — binômes, jumelage, objectifs et soutien.",
+    "dashboardTitle": "Tableau de bord de santé",
+    "dashboardSubtitle": "Suivi de l’engagement dans toutes les unités opérationnelles.",
+    "last90": "90 derniers jours",
+    "exportReport": "Exporter le rapport",
+    "tileParticipants": "Participants au total",
+    "tileUnmatched": "Non jumelés",
+    "tileOpenSupport": "Demandes ouvertes",
+    "tileMatchRate": "Taux de jumelage",
+    "healthTitle": "Taux de jumelage",
+    "healthOnTrack": "En bonne voie",
+    "healthRamping": "En progression",
+    "healthEarly": "Début — en majorité non jumelés",
     "setup": "Configuration du programme",
     "programmes": "Programmes",
     "cohorts": "Cohortes",
@@ -693,6 +706,13 @@
     "signedConfirmation": "Signé — merci.",
     "conflict": "Vous avez déjà signé cet accord.",
     "forbidden": "Vous devez avoir un jumelage actif avant de pouvoir signer."
+  },
+  "certificate": {
+    "title": "Certificat de réussite",
+    "download": "Télécharger / Imprimer",
+    "earnedNote": "Félicitations — votre certificat est prêt. Téléchargez-le ou imprimez-le ci-dessous.",
+    "previewNote": "Un aperçu de votre certificat. Il devient officiel une fois la formation terminée, un objectif approuvé et vos évaluations effectuées.",
+    "noPairing": "Votre certificat se débloque une fois que vous et votre partenaire avez accepté votre jumelage."
   },
   "goals": {
     "title": "Objectifs",

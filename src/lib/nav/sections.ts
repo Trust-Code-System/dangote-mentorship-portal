@@ -112,6 +112,7 @@ export async function buildParticipantNavSections(
             items: [
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
+              { href: '/certificate', label: tNav('certificate'), icon: 'certificate' as const },
             ],
           },
         ]

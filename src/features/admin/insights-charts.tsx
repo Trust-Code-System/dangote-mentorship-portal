@@ -130,8 +130,10 @@ export function InsightsCharts({
                 paddingAngle={2}
                 strokeWidth={0}
               >
+                {/* QA-INSIGHT-004: two perceptually-distinct hues for the EN/FR
+                    categorical series (was two near-identical greens). */}
                 <Cell fill={C.green} />
-                <Cell fill={C.greenLight} />
+                <Cell fill={C.warn} />
               </Pie>
               <Tooltip contentStyle={tooltipStyle} />
               <Legend iconType="circle" />
