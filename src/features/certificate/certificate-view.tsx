@@ -108,6 +108,12 @@ export function CertificateView({ data, lang }: { data: CertificateData; lang: '
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', textAlign: 'center', padding: '6.5% 9% 5.5%' }}>
         {/* Header */}
         <div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/blak-moh-mark.png"
+            alt=""
+            style={{ height: '7cqw', width: 'auto', margin: '0 auto 1cqw', display: 'block' }}
+          />
           <div style={{ fontFamily: 'Arial, sans-serif', fontWeight: 800, fontSize: '2.6cqw', letterSpacing: '0.02em' }}>
             <span style={{ color: INK }}>BLAK </span>
             <span style={{ color: GREEN }}>MOH</span>

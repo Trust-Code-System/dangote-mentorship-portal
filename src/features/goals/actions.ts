@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { GoalStage, GoalStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -57,7 +58,10 @@ export async function requestGoalCoach(
     if (!(await checkRateLimit(`ai:goal-coach:${user.id}`, 10, 60_000)).ok) {
       return fail({ code: 'CONFLICT', message: 'Too many AI requests. Please wait a moment.' });
     }
-    const lang = user.locale === 'FR' ? 'FR' : 'EN';
+    // QA-I18N-006 follow-up: coach responds in the ACTIVE UI locale (header
+    // switcher), not the saved account locale.
+    const activeLocale = await getLocale();
+    const lang = activeLocale.toLowerCase().startsWith('fr') ? 'FR' : 'EN';
     const result = await coachGoal(fields, lang);
     return ok(result);
   } catch (error) {

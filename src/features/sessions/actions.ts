@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { ActionItemStatus, MeetingType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -65,7 +66,9 @@ export async function requestSessionAssistant(
       getPairGoalTitles(menteeId, cohortId),
       prisma.user.findUnique({ where: { id: menteeId }, select: { name: true } }),
     ]);
-    const lang = user.locale === 'FR' ? 'FR' : 'EN';
+    // QA-I18N-006 follow-up: summarize in the ACTIVE UI locale, not account locale.
+    const activeLocale = await getLocale();
+    const lang = activeLocale.toLowerCase().startsWith('fr') ? 'FR' : 'EN';
     const outcome = await summarizeSession(notes, { goalTitles, menteeName: mentee?.name }, lang);
     return ok(outcome);
   } catch (error) {
