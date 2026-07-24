@@ -45,6 +45,7 @@ export async function buildAdminNavSections(
         { href: '/admin/imports', label: tImports('title'), icon: 'imports' },
         { href: '/admin/forms', label: tForms('title'), icon: 'forms' },
         { href: '/admin/goals', label: tLists('navGoals'), icon: 'goals' },
+        { href: '/admin/sessions', label: tLists('navSessions'), icon: 'sessions' },
         { href: '/admin/meetings', label: tLists('navMeetings'), icon: 'meetings' },
         { href: '/admin/training', label: tLists('navTraining'), icon: 'training' },
       ],

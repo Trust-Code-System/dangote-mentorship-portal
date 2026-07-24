@@ -1458,7 +1458,12 @@
     "noTraining": "Aucun participant pour le moment.",
     "mentorsTrained": "Mentors formés",
     "menteesTrained": "Mentorés formés",
-    "notScheduled": "Non planifié"
+    "notScheduled": "Non planifié",
+    "navSessions": "Comptes rendus",
+    "sessionsTitle": "Comptes rendus de séance",
+    "sessionsSubtitle": "Chaque séance rapportée par un mentor dans le programme, la plus récente en premier. En lecture seule ; les notes privées du mentor ne sont pas affichées.",
+    "noSessions": "Aucun compte rendu de séance n'a encore été déposé.",
+    "sessionEmpty": "Cette séance a été consignée sans autre détail."
   },
   "insights": {
     "title": "Analyses",
