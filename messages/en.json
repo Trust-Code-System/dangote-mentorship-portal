@@ -1458,7 +1458,12 @@
     "noTraining": "No participants yet.",
     "mentorsTrained": "Mentors trained",
     "menteesTrained": "Mentees trained",
-    "notScheduled": "Not scheduled"
+    "notScheduled": "Not scheduled",
+    "navSessions": "Session logs",
+    "sessionsTitle": "Session logs",
+    "sessionsSubtitle": "Every session a mentor has reported across the programme, newest first. Read-only; the mentor's private notes are not shown.",
+    "noSessions": "No session logs have been filed yet.",
+    "sessionEmpty": "This session was logged without further detail."
   },
   "insights": {
     "title": "Insights",
