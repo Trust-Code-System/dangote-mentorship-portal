@@ -106,20 +106,24 @@ export function CertificateView({ data, lang }: { data: CertificateData; lang: '
       )}
 
       <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', textAlign: 'center', padding: '6.5% 9% 5.5%' }}>
-        {/* Header */}
+        {/* Header — official BLAK MOH lockup (mark + wordmark + tagline) */}
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/brand/blak-moh-mark.png"
-            alt=""
-            style={{ height: '7cqw', width: 'auto', margin: '0 auto 1cqw', display: 'block' }}
+            src="/brand/blak-moh-original.png"
+            alt="BLAK MOH"
+            style={{
+              height: '9.5cqw',
+              width: 'auto',
+              maxWidth: '42%',
+              margin: '0 auto',
+              display: 'block',
+              objectFit: 'contain',
+              // Original lockup ships on white; multiply knocks the white out on cream paper.
+              mixBlendMode: 'multiply',
+            }}
           />
-          <div style={{ fontFamily: 'Arial, sans-serif', fontWeight: 800, fontSize: '2.6cqw', letterSpacing: '0.02em' }}>
-            <span style={{ color: INK }}>BLAK </span>
-            <span style={{ color: GREEN }}>MOH</span>
-            <span style={{ color: GOLD }}>.</span>
-          </div>
-          <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.95cqw', letterSpacing: '0.35em', textTransform: 'uppercase', color: GOLD, marginTop: 2 }}>
+          <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.95cqw', letterSpacing: '0.35em', textTransform: 'uppercase', color: GOLD, marginTop: '0.8cqw' }}>
             {t.kicker}
           </div>
         </div>

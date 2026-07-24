@@ -279,3 +279,7 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 ## Feature — admin visibility of mentor session reports
 
 - **Admins can now read the session logs mentors file.** Added a read-only `/admin/sessions` page (linked from the admin "Manage" nav) listing every session a mentor has reported across the programme, newest first, via `getProgrammeSessionLogs()` — the RBAC §4 "admins may *view* session logs" capability that had no UI. Mentors keep their existing editable read-back on `/sessions`. Each entry shows date/type/competency, the (AI or raw) discussion summary, actions agreed, challenges, next plan, timeline and the mentee's reflection, with mentor/mentee names linking to their admin profiles. The mentor's private notes field is deliberately excluded (it stays "visible to the mentor only", consistent with the mentee view). EN/FR strings added; typecheck ✅, lint ✅ (0 errors), 272/272 tests ✅.
+
+## Design — certificate uses the original BLAK MOH lockup
+
+- **Certificate header now shows the official full logo** (`public/brand/blak-moh-original.png` — mark + wordmark + tagline) instead of the cropped mark plus a typed "BLAK MOH." line; white paper keyed out with `mix-blend-mode: multiply` so it sits cleanly on the cream certificate.
