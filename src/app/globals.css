@@ -253,32 +253,31 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Themed scrollbars (§1) — branded to the portal's green scheme (no native
-   * grey bar): a faint green-soft track, a green thumb that deepens on hover, and
-   * no native up/down arrow buttons. Firefox uses scrollbar-width/color;
+  /* Themed scrollbars (§1) — subtle branded bar: thin thumb, soft track, no
+   * native up/down arrow buttons. Firefox uses scrollbar-width/color;
    * Chromium/WebKit use the pseudo elements. */
   html {
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--green) / 0.55) rgb(var(--green-soft) / 0.5);
+    scrollbar-color: rgb(var(--green) / 0.35) transparent;
   }
   ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background-color: rgb(var(--green-soft) / 0.5);
+    background-color: transparent;
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--green) / 0.55);
+    background-color: rgb(var(--green) / 0.35);
     border-radius: 999px;
     /* Transparent border + content-box clip leaves breathing room around the
      * thumb so it looks slim and pill-shaped, not edge-to-edge. */
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--green-strong) / 0.9);
+    background-color: rgb(var(--green) / 0.55);
   }
   /* Remove the native arrow buttons (single + double, both ends). */
   ::-webkit-scrollbar-button,
@@ -291,6 +290,33 @@
   }
   ::-webkit-scrollbar-corner {
     background: transparent;
+  }
+
+  /* Sidebar nav — nearly invisible so it doesn't compete with the rail. */
+  .shell-sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--ink-3) / 0.22) transparent;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--ink-3) / 0.22);
+    border-radius: 999px;
+    border: none;
+    background-clip: border-box;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--ink-3) / 0.4);
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   /* Native form controls on-brand (§19): `accent-color` recolours the browser's

@@ -55,6 +55,8 @@ import { cn } from '@/lib/utils';
 const PENDING_NAV_TIMEOUT_MS = 12_000;
 /** Avoid flicker for very fast background refreshes. */
 const REFRESH_INDICATOR_MIN_MS = 150;
+/** Survives AppShell remount when crossing (admin) ↔ (dashboard) layouts. */
+const SIDEBAR_SCROLL_KEY = 'shell:sidebar-scroll';
 
 // AppShell (§19 §3) — the authenticated chrome shared by the participant and
 // admin areas: a collapsible left sidebar (icons + grouped nav), a slim top bar
@@ -227,6 +229,23 @@ export function AppShell({
   const visitedRef = React.useRef(new Set<string>());
   const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshGenRef = React.useRef(0);
+  const sidebarNavRef = React.useRef<HTMLElement>(null);
+
+  // Restore sidebar scroll after layout remounts (e.g. /admin → /notifications).
+  // sessionStorage so it survives the unmount; useLayoutEffect avoids a top→saved flash.
+  React.useLayoutEffect(() => {
+    const nav = sidebarNavRef.current;
+    if (!nav) return;
+    try {
+      const saved = window.sessionStorage.getItem(SIDEBAR_SCROLL_KEY);
+      if (saved != null) {
+        const top = Number(saved);
+        if (Number.isFinite(top) && top > 0) nav.scrollTop = top;
+      }
+    } catch {
+      // sessionStorage can throw in private mode; ignore.
+    }
+  }, []);
 
   function clearPendingTimer() {
     if (pendingTimerRef.current) {
@@ -475,8 +494,21 @@ export function AppShell({
           </button>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-2">
+        {/* Nav — thin near-invisible scrollbar; scroll position persisted across layout remounts */}
+        <nav
+          ref={sidebarNavRef}
+          className="shell-sidebar-nav flex-1 space-y-3 overflow-y-auto px-2 py-2"
+          onScroll={(event) => {
+            try {
+              window.sessionStorage.setItem(
+                SIDEBAR_SCROLL_KEY,
+                String(event.currentTarget.scrollTop),
+              );
+            } catch {
+              // Ignore quota / private-mode failures.
+            }
+          }}
+        >
           {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
               {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
