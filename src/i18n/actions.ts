@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getCurrentUser } from '@/lib/auth/rbac';
@@ -26,4 +27,9 @@ export async function setLocale(locale: AppLocale): Promise<void> {
       data: { locale: locale === 'fr' ? Language.FR : Language.EN },
     });
   }
+
+  // Cookie writes alone do not refresh the RSC tree in production (`next start`).
+  // Revalidate the root layout so `<html lang>` and next-intl messages update
+  // in place — without a full navigation that would wipe half-typed forms.
+  revalidatePath('/', 'layout');
 }
