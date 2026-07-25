@@ -48,14 +48,17 @@ export default async function ConversationPage({
         />
       </div>
       <MessageThread
+        key={`${conversationId}:${thread.messages.at(-1)?.id ?? 'empty'}:${thread.nextCursor ?? 'end'}`}
         conversationId={conversationId}
         otherName={thread.otherName}
         initialMessages={thread.messages}
+        initialNextCursor={thread.nextCursor}
         labels={{
           placeholder: t('placeholder'),
           send: t('send'),
           empty: t('threadEmpty'),
           back: t('back'),
+          loadOlder: t('loadOlder'),
         }}
       />
 
@@ -87,17 +90,33 @@ export default async function ConversationPage({
           </Link>
         </div>
         <div className="mt-6 border-t border-border pt-5 text-left">
-          <p className="text-micro font-bold uppercase tracking-wider text-ink-3">Mentorship focus</p>
+          <p className="text-micro font-bold uppercase tracking-wider text-ink-3">
+            Mentorship focus
+          </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">Strategy</span>
-            <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">Leadership</span>
+            <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">
+              Strategy
+            </span>
+            <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">
+              Leadership
+            </span>
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-5 text-left">
           <p className="text-micro font-bold uppercase tracking-wider text-ink-3">Shared assets</p>
           <div className="mt-3 space-y-2">
-            <Link href="/agreements" className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"><FileText className="size-4 text-info" /> Agreement.pdf</Link>
-            <Link href="/sessions" className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"><Video className="size-4 text-green-light" /> Session notes</Link>
+            <Link
+              href="/agreements"
+              className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"
+            >
+              <FileText className="size-4 text-info" /> Agreement.pdf
+            </Link>
+            <Link
+              href="/sessions"
+              className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"
+            >
+              <Video className="size-4 text-green-light" /> Session notes
+            </Link>
           </div>
         </div>
       </aside>

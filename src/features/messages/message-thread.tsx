@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { ArrowLeft, Send } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { sendMessage } from './actions';
+import { loadOlderMessages, sendMessage } from './actions';
 import { cn } from '@/lib/utils';
 import type { ThreadMessage } from './data';
 
@@ -18,6 +18,7 @@ export interface ThreadLabels {
   send: string;
   empty: string;
   back: string;
+  loadOlder: string;
 }
 
 // Client thread: renders the message history and a composer. Sends via the
@@ -27,24 +28,23 @@ export function MessageThread({
   conversationId,
   otherName,
   initialMessages,
+  initialNextCursor,
   labels,
 }: {
   conversationId: string;
   otherName: string | null;
   initialMessages: ThreadMessage[];
+  initialNextCursor: string | null;
   labels: ThreadLabels;
 }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<ThreadMessage[]>(initialMessages);
   const [input, setInput] = React.useState('');
   const [pending, setPending] = React.useState(false);
+  const [nextCursor, setNextCursor] = React.useState(initialNextCursor);
+  const [loadingOlder, setLoadingOlder] = React.useState(false);
   const listRef = React.useRef<HTMLDivElement>(null);
   const channelRef = React.useRef<RealtimeChannel | null>(null);
-
-  // Reconcile when the server sends fresh props (after refresh / navigation).
-  React.useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
 
   // Supabase Realtime (CLAUDE.md §10). Both participants join a per-conversation
   // Broadcast channel. The payload is a content-free nudge — on receipt we
@@ -57,9 +57,7 @@ export function MessageThread({
     const channel = supabase.channel(`${CHANNEL_PREFIX}${conversationId}`, {
       config: { broadcast: { self: false } },
     });
-    channel
-      .on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh())
-      .subscribe();
+    channel.on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh()).subscribe();
     channelRef.current = channel;
     return () => {
       void supabase.removeChannel(channel);
@@ -112,11 +110,32 @@ export function MessageThread({
     }
   }
 
+  async function loadOlder() {
+    if (!nextCursor || loadingOlder) return;
+    setLoadingOlder(true);
+    try {
+      const result = await loadOlderMessages({ conversationId, cursor: nextCursor });
+      if (!result.ok) return;
+      const older = result.data.messages.map((message) => ({
+        ...message,
+        createdAt: new Date(message.createdAt),
+      }));
+      setMessages((current) => [...older, ...current]);
+      setNextCursor(result.data.nextCursor);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
+
   return (
     <section className="flex h-full min-h-[34rem] flex-col overflow-hidden bg-surface">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <Link href="/messages" className="rounded-md p-1.5 text-ink-2 hover:bg-surface-2 lg:hidden" aria-label={labels.back}>
+        <Link
+          href="/messages"
+          className="rounded-md p-1.5 text-ink-2 hover:bg-surface-2 lg:hidden"
+          aria-label={labels.back}
+        >
           <ArrowLeft className="size-5" />
         </Link>
         <span className="flex size-9 items-center justify-center rounded-full bg-green-soft text-small font-semibold text-green-strong">
@@ -127,6 +146,18 @@ export function MessageThread({
 
       {/* Messages */}
       <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-4">
+        {nextCursor ? (
+          <div className="pb-2 text-center">
+            <button
+              type="button"
+              onClick={() => void loadOlder()}
+              disabled={loadingOlder}
+              className="rounded-md border border-border px-3 py-1.5 text-small text-ink-2 hover:bg-surface-2 disabled:opacity-50"
+            >
+              {labels.loadOlder}
+            </button>
+          </div>
+        ) : null}
         {messages.length === 0 ? (
           <p className="py-10 text-center text-small text-ink-3">{labels.empty}</p>
         ) : (

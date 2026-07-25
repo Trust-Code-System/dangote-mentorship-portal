@@ -8,6 +8,11 @@ import { ADMIN_ROLES } from './roles';
 import type { AdminCohortScope } from './scope';
 import { verifyPassword } from './password';
 import { authConfig } from './auth.config';
+import { clientIpFromHeaders } from './rate-limit';
+import { checkRateLimit } from './rate-limit-shared';
+
+const LOGIN_LIMIT = 5;
+const LOGIN_WINDOW_MS = 60_000;
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -58,11 +63,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
+        const ip = clientIpFromHeaders(
+          request.headers.get('x-forwarded-for'),
+          request.headers.get('x-real-ip'),
+        );
+        const limit = await checkRateLimit(
+          `login:${ip}:${email.toLowerCase()}`,
+          LOGIN_LIMIT,
+          LOGIN_WINDOW_MS,
+        );
+        if (!limit.ok) return null;
+
         const user = await prisma.user.findFirst({
           where: { email: email.toLowerCase(), deletedAt: null, isActive: true },
         });

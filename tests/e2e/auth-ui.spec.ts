@@ -54,12 +54,12 @@ test.describe('authentication experience', () => {
   test('every footer destination is reachable while signed out', async ({ page }) => {
     await page.goto('/login');
 
-    // Support must not point at an auth-gated route: the whole point is that
-    // you can reach it when you cannot sign in. It is a mailto: for that reason.
+    // Support must not point at the authenticated /support workflow: signed-out
+    // users use the dedicated public contact page.
     const support = page.getByRole('link', { name: 'Support' });
-    await expect(support).toHaveAttribute('href', /^mailto:/);
+    await expect(support).toHaveAttribute('href', '/contact');
 
-    for (const path of ['/faq', '/', '/signup', '/forgot-password']) {
+    for (const path of ['/contact', '/faq', '/', '/signup', '/forgot-password']) {
       const response = await page.request.get(path);
       expect(response.status(), `${path} should be reachable`).toBeLessThan(400);
     }
@@ -130,7 +130,7 @@ test.describe('authentication experience', () => {
   test('an unusable reset link explains itself and offers a way forward', async ({ page }) => {
     await page.goto('/reset-password/not-a-real-token');
 
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').filter({ hasText: 'This reset link is not' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Request a new link' })).toHaveAttribute(
       'href',
       '/forgot-password',

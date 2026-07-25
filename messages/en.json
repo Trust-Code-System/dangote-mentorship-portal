@@ -924,6 +924,7 @@
     "send": "Send",
     "threadEmpty": "No messages yet — say hello.",
     "back": "Back to conversations",
+    "loadOlder": "Load older messages",
     "participantSubtitle": "Mentorship pair",
     "viewPair": "Open pair workspace",
     "viewGoals": "Shared goals"

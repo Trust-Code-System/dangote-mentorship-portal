@@ -57,7 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Vercel Web Analytics — first-party script (/_vercel/insights/*),
             same-origin beacon, so the existing CSP ('self') already allows it.
             Inert outside Vercel; no PII collected (no cookies, anonymized). */}
-        <Analytics />
+        {process.env.VERCEL === '1' ? <Analytics /> : null}
       </body>
     </html>
   );

@@ -924,6 +924,7 @@
     "send": "Envoyer",
     "threadEmpty": "Aucun message — dites bonjour.",
     "back": "Retour aux conversations",
+    "loadOlder": "Charger les messages précédents",
     "participantSubtitle": "Binôme de mentorat",
     "viewPair": "Ouvrir l’espace du binôme",
     "viewGoals": "Objectifs partagés"

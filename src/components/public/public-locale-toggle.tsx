@@ -30,8 +30,8 @@ export function PublicLocaleToggle({ className }: { className?: string }) {
 
   function choose(next: AppLocale) {
     if (next === active) return;
-    startTransition(() => {
-      void setLocale(next);
+    startTransition(async () => {
+      await setLocale(next);
     });
   }
 

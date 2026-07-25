@@ -96,11 +96,16 @@ test.describe('landing page', () => {
 
   test('the skip link is the first focusable element and targets main', async ({ page }) => {
     await page.goto('/');
-    await page.keyboard.press('Tab');
 
-    const focused = page.locator(':focus');
-    await expect(focused).toHaveAttribute('href', '#landing-main');
-    await expect(focused).toBeVisible();
+    // Assert the document's focus order directly. Relying on an initial Tab is
+    // flaky in headless browsers because the browser viewport does not always
+    // begin with document focus.
+    const firstFocusable = page
+      .locator('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      .first();
+    await expect(firstFocusable).toHaveAttribute('href', '#landing-main');
+    await firstFocusable.focus();
+    await expect(firstFocusable).toBeVisible();
   });
 
   test('the matching demo is operable from the keyboard', async ({ page }) => {
