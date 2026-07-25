@@ -35,6 +35,27 @@ export interface Thread {
 
 const MESSAGE_PAGE_SIZE = 50;
 
+async function findDirectConversation(
+  userId: string,
+  otherId: string,
+  cohortId: string,
+): Promise<{ id: string } | null> {
+  // "exactly these two" = every participant is in {me, other} AND both present.
+  return prisma.conversation.findFirst({
+    where: {
+      type: ConversationType.DIRECT,
+      cohortId,
+      deletedAt: null,
+      participants: { every: { userId: { in: [userId, otherId] } } },
+      AND: [
+        { participants: { some: { userId } } },
+        { participants: { some: { userId: otherId } } },
+      ],
+    },
+    select: { id: true },
+  });
+}
+
 /** Provision a DIRECT conversation for each of the user's accepted pairings. */
 export async function ensureDirectConversations(userId: string): Promise<void> {
   const pairs: { cohortId: string; otherId: string }[] = [];
@@ -45,21 +66,12 @@ export async function ensureDirectConversations(userId: string): Promise<void> {
   if (asMentee) pairs.push({ cohortId: asMentee.cohortId, otherId: asMentee.mentorId });
 
   for (const { cohortId, otherId } of pairs) {
-    // "exactly these two" = every participant is in {me, other} AND both present.
-    const existing = await prisma.conversation.findFirst({
-      where: {
-        type: ConversationType.DIRECT,
-        cohortId,
-        deletedAt: null,
-        participants: { every: { userId: { in: [userId, otherId] } } },
-        AND: [
-          { participants: { some: { userId } } },
-          { participants: { some: { userId: otherId } } },
-        ],
-      },
-      select: { id: true },
-    });
-    if (!existing) {
+    const existing = await findDirectConversation(userId, otherId, cohortId);
+    if (existing) continue;
+
+    // Prefetch + click (or double RSC) can race two creates. Treat create
+    // failures as benign when the peer request already inserted the row.
+    try {
       await prisma.conversation.create({
         data: {
           cohortId,
@@ -67,6 +79,9 @@ export async function ensureDirectConversations(userId: string): Promise<void> {
           participants: { create: [{ userId }, { userId: otherId }] },
         },
       });
+    } catch (error) {
+      const raced = await findDirectConversation(userId, otherId, cohortId);
+      if (!raced) throw error;
     }
   }
 }

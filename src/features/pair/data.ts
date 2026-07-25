@@ -120,16 +120,18 @@ export async function getPairWorkspace(
   const { cohortId } = match;
   const now = new Date();
 
+  // Optional widgets (profiles, goals, meetings, …) must not take down the
+  // workspace when one secondary query fails — settle each independently.
   const [
-    mentorProfile,
-    menteeProfile,
-    agreements,
-    goals,
-    nextMeeting,
-    meetingCount,
-    sessionAgg,
-    actionItems,
-  ] = await Promise.all([
+    mentorProfileResult,
+    menteeProfileResult,
+    agreementsResult,
+    goalsResult,
+    nextMeetingResult,
+    meetingCountResult,
+    sessionAggResult,
+    actionItemsResult,
+  ] = await Promise.allSettled([
     prisma.mentorProfile.findFirst({
       where: { userId: mentorId, cohortId, deletedAt: null },
       select: { department: true, jobTitle: true, phone: true, preferredLanguage: true, availability: true },
@@ -176,6 +178,18 @@ export async function getPairWorkspace(
       include: { assignee: { select: { name: true } } },
     }),
   ]);
+
+  const mentorProfile = mentorProfileResult.status === 'fulfilled' ? mentorProfileResult.value : null;
+  const menteeProfile = menteeProfileResult.status === 'fulfilled' ? menteeProfileResult.value : null;
+  const agreements = agreementsResult.status === 'fulfilled' ? agreementsResult.value : [];
+  const goals = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
+  const nextMeeting = nextMeetingResult.status === 'fulfilled' ? nextMeetingResult.value : null;
+  const meetingCount = meetingCountResult.status === 'fulfilled' ? meetingCountResult.value : 0;
+  const sessionAgg =
+    sessionAggResult.status === 'fulfilled'
+      ? sessionAggResult.value
+      : { _count: { _all: 0 }, _max: { date: null } };
+  const actionItems = actionItemsResult.status === 'fulfilled' ? actionItemsResult.value : [];
 
   const agreementStatus = (type: AgreementType): PairAgreementStatus => ({
     type,

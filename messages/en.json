@@ -21,6 +21,7 @@
     "no": "No",
     "errorTitle": "Something went wrong",
     "errorBody": "Please try again. If the problem persists, contact an administrator.",
+    "retry": "Retry",
     "appShortName": "BLAK MOH"
   },
   "nav": {

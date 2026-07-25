@@ -300,6 +300,11 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **Intent prefetch** (`prefetch={false}` + `router.prefetch` on hover/focus); **staleTimes** dynamic 60s / static 300s; quiet “Updating” indicator on tab focus revalidation (no TanStack/SWR dependency).
 - **More route `loading.tsx` skeletons** (programmes, cohorts, imports, forms, invites, admin lists, notifications, support, pair, agreements). Features/routes removed: **0**. Report: `NAVIGATION_CACHE_REFINEMENT_REPORT.md`.
 
+## Fix — intermittent `/pair` and `/messages` soft-navigation crash
+
+- **Root cause:** happy-path server `redirect()` on `/messages` and mentee `/pair` raced with hover prefetch + client router cache, surfacing Next’s default “This page couldn’t load” global screen; page `requireUser()` throws could compound it. Reloads bypassed the soft-nav Flight race.
+- **Fix:** render workspaces in-place (no redirect), `requirePageUser()` redirects to login, segment error boundaries with Retry, race-safe DM provisioning, optional pair queries via `Promise.allSettled`. Report: `PAIR_MESSAGES_FAILURE_FIX_REPORT.md`. Features/routes removed: **0**.
+
 ## Fix — locale switcher refreshes UI after language change
 
 - **Restored `revalidatePath('/', 'layout')` in `setLocale`.** A merge conflict resolution dropped the layout revalidation that applies the `NEXT_LOCALE` cookie to the RSC tree. Without it, clicking Français set the cookie but left `<html lang="en">` and English copy in place under `next start` (CI E2E). Cookie write alone does not refresh production RSC caches.

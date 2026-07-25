@@ -21,6 +21,7 @@
     "no": "Non",
     "errorTitle": "Une erreur est survenue",
     "errorBody": "Veuillez réessayer. Si le problème persiste, contactez un administrateur.",
+    "retry": "Réessayer",
     "appShortName": "BLAK MOH"
   },
   "nav": {

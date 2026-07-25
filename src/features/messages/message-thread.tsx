@@ -54,13 +54,22 @@ export function MessageThread({
   React.useEffect(() => {
     const supabase = getSupabaseBrowser();
     if (!supabase) return;
-    const channel = supabase.channel(`${CHANNEL_PREFIX}${conversationId}`, {
-      config: { broadcast: { self: false } },
-    });
-    channel.on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh()).subscribe();
-    channelRef.current = channel;
+
+    let channel: RealtimeChannel | null = null;
+    try {
+      channel = supabase.channel(`${CHANNEL_PREFIX}${conversationId}`, {
+        config: { broadcast: { self: false } },
+      });
+      channel.on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh()).subscribe();
+      channelRef.current = channel;
+    } catch {
+      // Realtime is best-effort — never crash the thread if the channel fails.
+      channelRef.current = null;
+      channel = null;
+    }
+
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
       channelRef.current = null;
     };
   }, [conversationId, router]);
