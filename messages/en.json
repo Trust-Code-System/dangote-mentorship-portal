@@ -243,10 +243,66 @@
     "corporateEmail": "Corporate email",
     "emailPlaceholder": "name@blakmoh.com",
     "forgotShort": "Forgot?",
-    "rememberMe": "Remember me for 30 days",
     "dangoteSso": "BLAK MOH SSO login",
     "orCredentials": "Or use credentials",
-    "backToHome": "Back to home"
+    "backToHome": "Back to home",
+    "brandEyebrow": "BLAK MOH Mentorship Programme",
+    "brandHeadline": "Continue your",
+    "brandHeadlineAccent": "journey.",
+    "brandBody": "Pick up your goals, sessions, conversations and programme milestones exactly where you left off.",
+    "brandPointBilingual": "Bilingual English and French experience",
+    "brandPointMatching": "AI-assisted, human-approved matching",
+    "brandPointPrivate": "Private mentorship workspaces",
+    "loginHeading": "Welcome back",
+    "loginSupporting": "Sign in to continue your mentorship journey.",
+    "signingIn": "Signing in…",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "capsLock": "Caps Lock is on.",
+    "languageLabel": "Interface language",
+    "orContinueWithEmail": "or continue with email",
+    "sessionExpiredTitle": "Your session has expired",
+    "sessionExpiredBody": "Sign in again to continue where you left off.",
+    "authErrorTitle": "We could not complete sign-in",
+    "authErrorBody": "Something went wrong on the way back from the sign-in provider. Please try again.",
+    "trustNote": "Your account and mentorship activity are protected by role-based access, enforced on every request.",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "As it should appear in the programme",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Both passwords must match.",
+    "passwordRequirementsLabel": "Password must",
+    "passwordRuleLength": "be at least 8 characters",
+    "passwordRuleUnique": "not be a password you use elsewhere",
+    "forgotHeading": "Reset your password",
+    "forgotSupporting": "Enter your email and we will send you a secure reset link.",
+    "forgotSentTitle": "Check your email",
+    "backToSignIn": "Return to sign in",
+    "resetHeading": "Choose a new password",
+    "resetSupporting": "Enter a new password for your account.",
+    "resetExpiredTitle": "This reset link has expired",
+    "resetExpiredBody": "Reset links are valid for 60 minutes. Request a new one and we will send it straight over.",
+    "resetInvalidTitle": "This reset link is not valid",
+    "resetInvalidBody": "The link may have already been used, or it was not copied in full. Request a new one to continue.",
+    "requestNewLink": "Request a new link",
+    "resetSuccessTitle": "Password updated",
+    "resetSuccessBody": "You can now sign in with your new password.",
+    "inviteHeading": "Activate your account",
+    "inviteSupporting": "Set a password to finish setting up your BLAK MOH account.",
+    "inviteEmailHelp": "This is the address your invitation was sent to.",
+    "inviteExpiredTitle": "This invitation has expired",
+    "inviteExpiredBody": "Ask your programme administrator to send you a new invitation link.",
+    "inviteUsedTitle": "This invitation has already been used",
+    "inviteUsedBody": "The account is already active. Sign in instead, or reset your password if you cannot remember it.",
+    "inviteInvalidTitle": "This invitation is not valid",
+    "inviteInvalidBody": "The link may not have been copied in full. Ask your programme administrator for a new one.",
+    "requestHeading": "Request programme access",
+    "requestSupporting": "Accounts are created by your programme administrator.",
+    "footerPrivacy": "Confidentiality",
+    "footerSupport": "Support",
+    "footerBackHome": "Back to home",
+    "requestBrandHeadline": "Begin your mentorship",
+    "requestBrandHeadlineAccent": "journey.",
+    "requestBrandBody": "Accounts are created by your programme administrator. Activate yours with the invitation you were sent, or ask your administrator for one."
   },
   "signup": {
     "title": "Join the programme",
@@ -1527,5 +1583,768 @@
     "title": "Maintenance mode",
     "body": "The portal is temporarily unavailable while we carry out scheduled maintenance. Please check back shortly.",
     "signOut": "Sign out"
+  },
+  "landing": {
+    "meta": {
+      "title": "BLAK MOH — Experience becomes direction",
+      "description": "A bilingual, AI-assisted mentorship programme connecting experience, ambition and opportunity through a structured, human-led nine-month journey."
+    },
+    "nav": {
+      "skip": "Skip to content",
+      "home": "BLAK MOH — home",
+      "primaryLabel": "Primary",
+      "programme": "Programme",
+      "matching": "Matching",
+      "journey": "Journey",
+      "experience": "Experience",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "requestAccess": "Request access",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "menuTitle": "Menu",
+      "dashboard": "Go to dashboard"
+    },
+    "hero": {
+      "micro": "Bilingual mentorship · AI-assisted · Human-approved",
+      "line1": "Experience becomes direction.",
+      "line2": "Ambition becomes leadership.",
+      "body": "BLAK MOH is a bilingual, AI-assisted mentorship programme connecting experience, ambition and opportunity through a structured human-led journey.",
+      "ctaPrimary": "Enter the portal",
+      "ctaSecondary": "Explore the journey",
+      "sceneDescription": "A mentor and a mentee stand apart in darkness, joined by a stream of light that carries knowledge between them.",
+      "mentorLabel": "Mentor",
+      "menteeLabel": "Mentee",
+      "coreLabel": "Shared goal",
+      "scrollHint": "Scroll to begin"
+    },
+    "problem": {
+      "eyebrow": "Why this exists",
+      "line1": "Valuable experience should not disappear.",
+      "line2": "Ambitious people should not have to grow alone.",
+      "body": "In a large organisation, decades of hard-won judgement live in people's heads — and leave with them. Meanwhile the people who need that judgement most are working it out alone, one mistake at a time.",
+      "close": "BLAK MOH exists to close that distance deliberately, and to make the closing of it visible.",
+      "experienceLabel": "Experience",
+      "ambitionLabel": "Ambition",
+      "gapLabel": "The distance between them"
+    },
+    "matching": {
+      "eyebrow": "AI-assisted matching",
+      "title": "Intelligent suggestions.",
+      "titleAccent": "Human decisions.",
+      "body": "The matching engine scores every possible pairing against six weighted criteria and one rule it can never break. It ranks, it explains, and then it stops. An administrator approves every pairing before it becomes real.",
+      "hardRuleLabel": "The rule the engine cannot break",
+      "hardRuleTitle": "Language must match exactly",
+      "hardRuleBody": "An English-speaking mentor is never proposed to a French-speaking mentee. This is not a preference or a weighting — it is enforced inside the engine and cannot be switched off for any cohort.",
+      "criteriaLabel": "Weighted criteria",
+      "criteria": {
+        "competency": "Competency match",
+        "careerGoal": "Career-goal alignment",
+        "experience": "Experience relevance",
+        "department": "Department relevance",
+        "availability": "Availability",
+        "personality": "Personality fit"
+      },
+      "demoLabel": "Try the criteria",
+      "demoHint": "Choose a language and a criterion to see how the network responds.",
+      "languageLabel": "Programme language",
+      "languageEn": "English",
+      "languageFr": "Français",
+      "steps": {
+        "candidates": "Candidate profiles enter the pool",
+        "language": "Cross-language pairings are removed",
+        "score": "Remaining pairings are scored",
+        "shortlist": "A ranked shortlist is proposed",
+        "approve": "An administrator approves the pairing"
+      },
+      "rationaleLabel": "Why this pairing",
+      "approvedLabel": "Approved by an administrator",
+      "pendingLabel": "Awaiting approval",
+      "rejectedLabel": "Different language — not eligible",
+      "scoreLabel": "Match score",
+      "disclaimer": "Illustrative demonstration using fictional profiles. No participant data is shown here, and nothing on this page is connected to the live programme.",
+      "mentorsLabel": "Mentors",
+      "menteesLabel": "Mentees",
+      "profiles": {
+        "mentorA": "Operations lead · 15 yrs",
+        "mentorB": "Finance director · 11 yrs",
+        "mentorC": "Plant engineering · 18 yrs",
+        "mentorD": "Supply chain lead · 9 yrs",
+        "menteeA": "Wants operations leadership",
+        "menteeB": "Wants stakeholder management",
+        "menteeC": "Wants technical depth"
+      },
+      "rationale": {
+        "competency": "Shared competency area: operations leadership and stakeholder management.",
+        "careerGoal": "The mentee's stated career goal maps directly onto the mentor's current role.",
+        "experience": "Fifteen years of operations experience against a mentee moving into their first leadership role.",
+        "department": "Adjacent functions — close enough to be relevant, far enough to avoid a reporting line.",
+        "availability": "Both have declared availability in the same weekly window.",
+        "personality": "Complementary working styles recorded at intake."
+      },
+      "approveCta": "Simulate administrator approval"
+    },
+    "journey": {
+      "eyebrow": "The nine-month journey",
+      "title": "One path. Nine stages.",
+      "titleAccent": "Every step visible.",
+      "body": "Every mentor and mentee follows the same structured path, so nobody is ever left wondering what comes next — or who is waiting on whom.",
+      "progressLabel": "Stage {current} of {total}",
+      "stageLabel": "Stage",
+      "stages": {
+        "profile": {
+          "title": "Profile",
+          "body": "Mentors and mentees complete a structured profile: competencies, career goals, experience, availability and preferred language. Fragments become a whole person.",
+          "fragment": "Profile · complete"
+        },
+        "training": {
+          "title": "Training",
+          "body": "Both sides complete programme training before any pairing is proposed. Mentors who have not finished it are not eligible to be matched.",
+          "fragment": "Training · attendance recorded"
+        },
+        "matched": {
+          "title": "Matched",
+          "body": "The engine proposes a ranked, explained shortlist. An administrator reviews it, overrides it where they disagree, and approves the pairing.",
+          "fragment": "Match · approved by administrator"
+        },
+        "agreement": {
+          "title": "Agreement",
+          "body": "The pair sign a mentoring agreement and a confidentiality agreement. The relationship now has a shared, recorded foundation.",
+          "fragment": "Mentoring agreement · signed"
+        },
+        "goals": {
+          "title": "Goals",
+          "body": "The mentee sets SMART development goals with help from the AI goal coach. The mentor approves, edits or comments — approval is always a human act.",
+          "fragment": "Goal · awaiting mentor approval"
+        },
+        "sessions": {
+          "title": "Sessions",
+          "body": "Meetings are scheduled and sessions logged: what was discussed, what was agreed, what happens next. Repetition is where the progress actually lives.",
+          "fragment": "Session log · AI summary drafted"
+        },
+        "midterm": {
+          "title": "Mid-term review",
+          "body": "Halfway through, both sides step back and review the path so far — what has moved, what has stalled, what needs to change.",
+          "fragment": "Mid-term review · open"
+        },
+        "final": {
+          "title": "Final review",
+          "body": "The full nine months become a clear summary: goals met, sessions held, competencies developed, evidence recorded.",
+          "fragment": "Final review · submitted"
+        },
+        "certificate": {
+          "title": "Certificate",
+          "body": "The programme closes with a completion certificate — and a mentee who no longer needs to be led.",
+          "fragment": "Certificate · issued"
+        }
+      }
+    },
+    "tools": {
+      "eyebrow": "Inside the programme",
+      "title": "What mentors and mentees",
+      "titleAccent": "actually do",
+      "body": "Not features on a slide — the working surfaces participants open every week.",
+      "items": {
+        "goals": {
+          "title": "Set development goals",
+          "body": "Turn a vague ambition into a SMART goal with a measure, a timeline and evidence of progress. Your mentor approves it in a single step.",
+          "detail": "Goal · awaiting mentor approval"
+        },
+        "sessions": {
+          "title": "Log sessions",
+          "body": "Capture a session in a few fields — what was discussed, what was agreed, what is blocked. An AI summary and the next agenda are drafted for you.",
+          "detail": "Session log · AI summary drafted"
+        },
+        "meetings": {
+          "title": "Schedule meetings",
+          "body": "Book the next conversation, get reminders, and arrive prepared with an agenda built from the last session's action items.",
+          "detail": "Next meeting · agenda ready"
+        },
+        "messages": {
+          "title": "Message privately",
+          "body": "A direct, private thread between the two of you. Translate any message on demand, with the original always preserved alongside it.",
+          "detail": "Private thread · participants only"
+        },
+        "journal": {
+          "title": "Keep reflections",
+          "body": "A private space for notes and reflections that belong to you alone — not to your pair, and not to the programme office.",
+          "detail": "Private note · visible only to you"
+        },
+        "reviews": {
+          "title": "Complete reviews",
+          "body": "Mid-term and final review forms, editable by programme administrators without a code change, feeding the programme's own reporting.",
+          "detail": "Mid-term review · open"
+        }
+      }
+    },
+    "bilingual": {
+      "eyebrow": "Bilingual by design",
+      "title": "Grow in the language",
+      "titleAccent": "that feels natural to you.",
+      "body": "English and French are not a primary and a translation here. They are two equal paths through the same programme, reaching the same destination.",
+      "enLabel": "English",
+      "frLabel": "Français",
+      "sameDestination": "The same programme. The same standard. The same certificate.",
+      "sampleLabel": "Real interface copy, both languages",
+      "sampleEn": "Set SMART development goals, get them approved by your mentor, and track your progress.",
+      "sampleFr": "Définissez des objectifs de développement SMART, faites-les approuver par votre mentor et suivez vos progrès.",
+      "switchHint": "Switch the whole page with the language control above.",
+      "points": {
+        "interface": "The entire interface, in your language",
+        "interfaceBody": "Every screen, label and notification exists in both English and French. Your choice is remembered.",
+        "content": "Translate any content on demand",
+        "contentBody": "Goals, session notes and messages can be translated in place — and the original is always kept next to the translation.",
+        "matching": "Never matched across a language",
+        "matchingBody": "The engine's one unbreakable rule guarantees you are paired with someone you can actually talk to."
+      }
+    },
+    "privacy": {
+      "eyebrow": "Privacy and human control",
+      "title": "The programme watches the path,",
+      "titleAccent": "never the conversation.",
+      "body": "Confidentiality is not a policy page here — it is how the system is built.",
+      "items": {
+        "approval": {
+          "title": "Human-approved matching",
+          "body": "The AI proposes and explains. It never commits a pairing, approves a goal, or sends a newsletter on its own. A named human makes every decision that counts, and every override is recorded."
+        },
+        "private": {
+          "title": "Private participant spaces",
+          "body": "Direct messages belong to the two participants. Journal reflections belong to one. Administrators see activity metadata — when a pair last met, how often — never the words exchanged."
+        },
+        "roles": {
+          "title": "Role-based access",
+          "body": "Six roles, each with a defined boundary, enforced on the server for every single action — not hidden in the interface and hoped for."
+        }
+      },
+      "note": "Any policy that would allow an administrator to read message content is off by default and would be logged if it were ever enabled."
+    },
+    "principles": {
+      "eyebrow": "The programme",
+      "title": "Structure you can count on",
+      "body": "The figures below describe how the programme is built. Participation numbers are published by the programme office once a cohort is confirmed.",
+      "facts": {
+        "monthsValue": "9",
+        "months": "Months, start to certificate",
+        "stagesValue": "9",
+        "stages": "Stages on the shared path",
+        "languagesValue": "2",
+        "languages": "Equal programme languages",
+        "criteriaValue": "6",
+        "criteria": "Weighted matching criteria",
+        "rolesValue": "6",
+        "roles": "Roles with enforced boundaries",
+        "hardRuleValue": "1",
+        "hardRule": "Rule the engine cannot break"
+      }
+    },
+    "transformation": {
+      "line1": "Guidance begins the journey.",
+      "line2": "Leadership is the destination.",
+      "body": "Nine months on, the mentor is still there — but they are no longer the one leading. Whether you are continuing your programme or asking to join the next cohort, this is where it starts.",
+      "signIn": "Sign in",
+      "requestAccess": "Request access",
+      "learnMore": "Learn about the programme",
+      "sceneDescription": "The mentee steps forward alone, carrying the light that once travelled between them, toward an open horizon."
+    },
+    "footer": {
+      "statement": "A bilingual, AI-assisted mentorship programme built around learning and optimal wellbeing — with a human approving every decision that matters.",
+      "navLabel": "Footer",
+      "sectionsLabel": "Programme",
+      "accessLabel": "Access",
+      "about": "About the programme",
+      "faq": "FAQ",
+      "support": "Support",
+      "signIn": "Sign in",
+      "requestAccess": "Request access",
+      "languageLabel": "Language",
+      "copyright": "© {year} BLAK MOH. Confidential internal programme.",
+      "confidential": "Direct messages stay private to participants.",
+      "confidentiality": "Confidentiality",
+      "languageHint": "Switching language keeps you on this page — nothing is lost."
+    }
+  },
+  "publicPages": {
+    "shared": {
+      "home": "Home",
+      "breadcrumbLabel": "Breadcrumb",
+      "readFaq": "Read the FAQ",
+      "signIn": "Sign in",
+      "requestAccess": "Request access",
+      "contactSupport": "Contact support",
+      "aboutProgramme": "About the programme",
+      "confidentiality": "Confidentiality"
+    },
+    "about": {
+      "meta": {
+        "title": "About the programme — BLAK MOH",
+        "description": "BLAK MOH is a nine-month bilingual mentorship programme: structured stages, AI-assisted matching, and a human approving every decision that matters."
+      },
+      "hero": {
+        "eyebrow": "The programme",
+        "breadcrumb": "About the programme",
+        "title": "Mentorship built to",
+        "titleAccent": "move people forward.",
+        "lede": "BLAK MOH is a nine-month bilingual mentorship programme. It runs on a structured path that every pair follows together, supported by intelligent tools that suggest and explain — and by people who decide."
+      },
+      "why": {
+        "eyebrow": "Why this exists",
+        "title": "Experience should not",
+        "titleAccent": "leave with the person who has it.",
+        "statement": "Valuable experience should not disappear. Ambitious people should not have to grow alone.",
+        "p1": "In a large organisation, decades of hard-won judgement live in people's heads — and leave with them. Meanwhile the people who need that judgement most are working it out alone, one mistake at a time.",
+        "p2": "BLAK MOH exists to close that distance deliberately, and to make the closing of it visible. Not as an initiative that runs for a quarter, but as a path with named stages, recorded progress and a certificate at the end of it."
+      },
+      "different": {
+        "eyebrow": "What makes it different",
+        "title": "A programme with",
+        "titleAccent": "working parts, not a policy.",
+        "lede": "Everything below is a surface participants actually open. Nothing here is a roadmap item.",
+        "matching": {
+          "title": "AI-assisted, human-approved matching",
+          "body": "The engine scores every possible pairing against six weighted criteria — competency match, career-goal alignment, experience relevance, department relevance, availability and personality fit — and against one rule it can never break: language must match exactly. It ranks the options and explains each one. Then it stops, and an administrator approves the pairing before it becomes real.",
+          "detail": "Ranked shortlist · administrator approves"
+        },
+        "bilingual": {
+          "title": "Bilingual participation",
+          "body": "English and French are two equal paths through the same programme. Every screen, label and notification exists in both, your choice is remembered, and you are never required to write in a language that is not yours.",
+          "detail": "EN · FR, equally"
+        },
+        "goals": {
+          "title": "SMART goal coaching",
+          "body": "The goal coach turns a vague ambition into a specific, measurable goal with a timeline and evidence of progress. It suggests; you edit; your mentor approves, comments or sends it back. Approval is always a human act.",
+          "detail": "Goal · awaiting mentor approval"
+        },
+        "sessions": {
+          "title": "Structured sessions",
+          "body": "Log what was discussed, agreed and blocked. A summary and the next agenda are drafted for you to review before anything is saved."
+        },
+        "private": {
+          "title": "Private workspaces",
+          "body": "A direct thread that belongs to the pair, and a reflection journal that belongs to one person alone."
+        },
+        "reviews": {
+          "title": "Mid-term and final reviews",
+          "body": "Review forms that programme administrators can edit without a code change, feeding the programme's own reporting."
+        },
+        "support": {
+          "title": "Support and intervention",
+          "body": "A private route to the programme team when a pairing stalls, a goal is stuck or something is not working."
+        }
+      },
+      "journey": {
+        "eyebrow": "The nine-month journey",
+        "title": "One path. Nine stages.",
+        "titleAccent": "Every step visible.",
+        "lede": "Every mentor and mentee follows the same structured path, so nobody is left wondering what comes next — or who is waiting on whom.",
+        "stageLabel": "Stage {number} of 9",
+        "progressLabel": "Journey progress"
+      },
+      "human": {
+        "eyebrow": "Human-led intelligence",
+        "title": "The assistant proposes.",
+        "titleAccent": "A person decides.",
+        "statement": "AI explains the options. It never gets to choose one.",
+        "p1": "The assistant ranks pairings, drafts session summaries, rewrites goals into SMART form and prepares review and newsletter drafts. Every one of those outputs arrives as a suggestion in an editable field.",
+        "p2": "Nothing an assistant produces is written to the programme record on its own. A matching suggestion becomes a pairing when an administrator approves it. A drafted goal becomes a goal when a mentee accepts it and a mentor approves it. A newsletter is sent when an administrator sends it. Every override is recorded.",
+        "points": {
+          "suggest": "Assistants suggest, ranked and explained",
+          "suggestBody": "You always see why something was proposed, not just what was proposed.",
+          "editable": "Every draft stays editable",
+          "editableBody": "AI output lands in a normal field. Rewrite it, replace it, or ignore it.",
+          "commit": "Only a person commits",
+          "commitBody": "Matches, goal approvals and sends are human actions, and each one is audited."
+        }
+      },
+      "bilingual": {
+        "eyebrow": "Bilingual by design",
+        "title": "Grow in the language",
+        "titleAccent": "that feels natural to you.",
+        "lede": "English and French are not a primary and a translation here. They are two equal paths through the same programme, reaching the same destination.",
+        "enLabel": "English",
+        "frLabel": "Français",
+        "sampleLabel": "Real interface copy, both languages",
+        "sampleEn": "Set SMART development goals, get them approved by your mentor, and track your progress.",
+        "sampleFr": "Définissez des objectifs de développement SMART, faites-les approuver par votre mentor et suivez vos progrès.",
+        "sameDestination": "The same programme. The same standard. The same certificate.",
+        "switchHint": "Switch the whole site with the language control in the navigation or the footer."
+      },
+      "principles": {
+        "eyebrow": "How it is built",
+        "title": "Structure you can count on",
+        "lede": "These figures describe how the programme is built. Participation numbers are published by the programme office once a cohort is confirmed."
+      },
+      "cta": {
+        "title": "Continue your journey,",
+        "titleAccent": "or ask to begin one.",
+        "body": "Participants sign in to pick up their goals, sessions and conversations. Everyone else starts with an invitation from the programme office."
+      }
+    },
+    "faq": {
+      "meta": {
+        "title": "Help and FAQ — BLAK MOH",
+        "description": "Answers on access, matching, goals, sessions, privacy, language and programme support."
+      },
+      "hero": {
+        "eyebrow": "Help",
+        "breadcrumb": "FAQ",
+        "title": "Answers for every",
+        "titleAccent": "stage of the journey.",
+        "lede": "Quick guidance on access, matching, goals, sessions, privacy and programme support. Search it, or browse by category."
+      },
+      "search": {
+        "label": "Search the FAQ",
+        "placeholder": "Search questions and answers…",
+        "clear": "Clear search",
+        "resultsOne": "1 question matches.",
+        "resultsMany": "{count} questions match.",
+        "resultsNone": "No questions match.",
+        "emptyTitle": "Nothing matched that search",
+        "emptyBody": "Try a shorter phrase, choose a different category, or ask the programme team directly.",
+        "emptyReset": "Clear search and filters",
+        "allCategories": "All questions",
+        "categoryLabel": "Filter by category"
+      },
+      "featured": {
+        "eyebrow": "Start here",
+        "title": "The questions we are asked most"
+      },
+      "all": {
+        "eyebrow": "Everything else",
+        "title": "Browse every question",
+        "lede": "Use the categories to narrow the list. Your search term is kept when you switch category."
+      },
+      "categories": {
+        "start": "Getting started",
+        "access": "Access and accounts",
+        "matching": "Matching",
+        "goals": "Goals",
+        "sessions": "Sessions and meetings",
+        "private": "Messages and journal",
+        "language": "English and French",
+        "privacy": "Privacy",
+        "reviews": "Reviews and completion",
+        "support": "Support"
+      },
+      "items": {
+        "what-is": {
+          "q": "What is BLAK MOH?",
+          "a": "A nine-month bilingual mentorship programme. Mentors and mentees are matched, sign a mentoring and a confidentiality agreement, set development goals, meet and log sessions, complete a mid-term and a final review, and finish with a completion certificate."
+        },
+        "who-takes-part": {
+          "q": "Who takes part?",
+          "a": "Mentors and mentees make up each pairing. Around them the programme has trainers who run the training batches, reviewers who see programme-wide reporting, and administrators who run the cohort. Each role has its own boundary, enforced on the server for every action."
+        },
+        "how-long": {
+          "q": "How long does the programme run?",
+          "a": "Nine months, from profile to certificate, across nine named stages. Every pair follows the same path, so you can always see which stage you are on and what comes next."
+        },
+        "get-account": {
+          "q": "How do I get an account?",
+          "a": "Accounts are created by a programme administrator — there is no self-service sign-up. Your administrator sends you an invitation, and you activate the account by setting a password. If you have not received one, ask your programme administrator."
+        },
+        "invite-code": {
+          "q": "I have an invite code. Where do I use it?",
+          "a": "Go to Request access and paste the code from your invitation email. It takes you straight to the activation page, where you set your name and password."
+        },
+        "invite-problem": {
+          "q": "My invitation link does not work.",
+          "a": "An invitation can be invalid, expired, or already used, and the page tells you which. If it has expired or the link was not copied in full, ask your programme administrator to send a new one. If it has already been used, your account is active — sign in instead, or reset your password."
+        },
+        "forgot-password": {
+          "q": "I have forgotten my password.",
+          "a": "Use the reset link on the sign-in page. If an account exists for that address you will receive an email with a reset link, and that link is valid for 60 minutes. For your protection the page gives the same response whether or not an account exists."
+        },
+        "sso": {
+          "q": "Can I sign in with my work account?",
+          "a": "Microsoft single sign-on is supported, and appears on the sign-in page when your organisation has it configured. Email and password sign-in is always available as well."
+        },
+        "matching-how": {
+          "q": "How does matching work?",
+          "a": "The engine scores every eligible pairing out of 100 against six weighted criteria: competency match, career-goal alignment, experience relevance, department relevance, availability and personality fit. It produces a ranked shortlist with a written explanation for each suggestion. An administrator then reviews it, may override it, and approves the pairing — the engine never commits one."
+        },
+        "matching-language": {
+          "q": "Could I be matched with someone who does not speak my language?",
+          "a": "No. Language matching is a hard rule inside the engine, not a weighting: an English-speaking mentor is never proposed to a French-speaking mentee, or the reverse. It cannot be switched off for any cohort."
+        },
+        "matching-decline": {
+          "q": "Can I decline a suggested match?",
+          "a": "Yes. Once an administrator has approved a pairing, both the mentor and the mentee are asked to respond. Either of you can decline, which returns it to the administrator, and the decision is recorded."
+        },
+        "matching-after": {
+          "q": "What happens after I am matched?",
+          "a": "You and your pair sign the mentoring agreement and the confidentiality agreement, a private message thread is opened for the two of you, and the mentee begins setting development goals. From there the pair schedules meetings and logs each session."
+        },
+        "goal-submit": {
+          "q": "How do I submit a goal?",
+          "a": "Mentees create goals from the Goals page: the competency to develop, why it matters, current and desired level, the learning activity, dates, how success will be measured and the evidence of progress. Submit it and your mentor approves it, comments on it, or asks for a change."
+        },
+        "goal-coach": {
+          "q": "Does the AI write my goal for me?",
+          "a": "It offers a rewrite. The goal coach takes a rough aim and proposes a SMART version — specific, measurable, achievable, results-oriented and time-based — as a suggestion in an editable field. You accept it, change it or ignore it, and your mentor still has to approve the result."
+        },
+        "session-log": {
+          "q": "What goes into a session log?",
+          "a": "What was discussed, the competency and goal it related to, what was agreed, challenges raised, resources needed and the next action plan. The assistant can draft a summary and pull out the action items from your rough notes; you review it before anything is saved."
+        },
+        "meetings": {
+          "q": "How are meetings arranged?",
+          "a": "Meetings are scheduled in the portal and appear on the calendar for both of you, with the previous session's action items available when you prepare for the next one."
+        },
+        "messages-private": {
+          "q": "Who can see my direct messages?",
+          "a": "Only you and the person you are messaging. A direct conversation has exactly two participants, and administrators are never one of them, so message content is not part of any administrator view. The Confidentiality page sets out the full picture, including what administrators can see."
+        },
+        "journal-private": {
+          "q": "Are journal entries private?",
+          "a": "Yes. A reflection is private to the person who wrote it. You can choose to share an individual entry with your mentor, and you can stop sharing it again; only your own mentor can ever see a shared entry, and only while it is shared. Administrators are not a viewer of journal entries."
+        },
+        "french": {
+          "q": "Can I use the portal in French?",
+          "a": "Yes, completely. The entire interface exists in English and French, your choice is remembered, and you are never required to write in English. French is a full path through the programme, not a translation layer over an English one."
+        },
+        "translate": {
+          "q": "Can I translate something written in the other language?",
+          "a": "Where you see the translate control — on journal reflections, mentor notes and review answers — you can switch that content between English and French on demand. The original is always kept alongside the translation, never replaced by it."
+        },
+        "admin-visibility": {
+          "q": "What can programme administrators see?",
+          "a": "Administrators run the cohort, so they see profiles, matches, goals, training and review status, and the session reports mentors file. They do not see direct message content or journal entries. The Confidentiality page explains each of these case by case."
+        },
+        "reviews": {
+          "q": "What are the mid-term and final reviews?",
+          "a": "Two structured check-points. Halfway through, both sides review what has moved and what has stalled. At the end, the nine months become a summary of goals met, sessions held and competencies developed. The forms are defined by programme administrators, so they can change between cohorts without a code change."
+        },
+        "certificate": {
+          "q": "What happens at the end of the programme?",
+          "a": "After the final review the programme closes with a completion certificate for the mentee, and the pair's record — goals, sessions, reviews — stays part of the programme's reporting."
+        },
+        "support-how": {
+          "q": "How do I contact programme support?",
+          "a": "If you are a participant, sign in and raise a support request from the Support page — that route is private and reaches the programme team directly. If you cannot sign in, or you are not a participant yet, use the public Support page for the right next step."
+        },
+        "support-anonymous": {
+          "q": "Is a support request anonymous?",
+          "a": "It is private from other participants — your mentor or mentee is never shown that you raised one, or what it said. It is not anonymous to the programme team: administrators see who submitted the request so they can actually help."
+        }
+      },
+      "help": {
+        "eyebrow": "Still need help",
+        "title": "If the answer is not here",
+        "lede": "There are two routes, and which one you use depends on whether you can sign in.",
+        "participantTitle": "I am a participant",
+        "participantBody": "Sign in and raise a support request from the Support page inside the portal. It goes straight to the programme team, stays private from your mentor or mentee, and you can see the response on the same page.",
+        "participantCta": "Sign in to the portal",
+        "publicTitle": "I cannot sign in, or I am not a participant yet",
+        "publicBody": "The public Support page routes you to the right place — invitation problems, password resets, or a general question about the programme.",
+        "publicCta": "Go to Support"
+      },
+      "cta": {
+        "title": "Still deciding whether",
+        "titleAccent": "this is for you?",
+        "body": "The About page explains the programme end to end, and the Confidentiality page sets out exactly who can see what."
+      }
+    },
+    "confidentiality": {
+      "meta": {
+        "title": "Confidentiality — BLAK MOH",
+        "description": "How BLAK MOH protects the mentorship relationship: what stays private, what administrators can see, and how the assistants use content."
+      },
+      "hero": {
+        "eyebrow": "Confidentiality",
+        "breadcrumb": "Confidentiality",
+        "title": "Trust makes honest",
+        "titleAccent": "mentorship possible.",
+        "lede": "A mentorship conversation is only useful if both people can be candid in it. This page describes how the portal is built to protect that — including, plainly, the things administrators can see."
+      },
+      "intro": {
+        "statement": "The programme watches the path, never the conversation.",
+        "p1": "Confidentiality here is not a policy page bolted onto a product. Who can read what is decided on the server, for every request, by the role you hold and the relationship you are in.",
+        "p2": "Everything on this page describes how the application behaves today. It is informational: it does not replace the mentoring agreement and confidentiality agreement that each pair signs inside the portal, and it is not itself a contract."
+      },
+      "private": {
+        "eyebrow": "What stays private",
+        "title": "The spaces that belong",
+        "titleAccent": "to the people in them.",
+        "messages": {
+          "title": "Direct messages",
+          "body": "A direct conversation is provisioned for each matched pair and has exactly two participants. Only those two can read it. Administrators are never participants in a pair's conversation, so message content does not appear in any administrator view."
+        },
+        "journal": {
+          "title": "Journal reflections",
+          "body": "A reflection belongs to the person who wrote it. It is private by default. The author can share an individual entry with their mentor and can stop sharing it again — and only that author's own mentor can see it, only while it is shared. There is no administrator view of journal entries."
+        },
+        "notes": {
+          "title": "Mentor private notes",
+          "body": "Notes a mentor keeps about a mentee are visible only to the mentor who wrote them. They are not shown to the mentee, and they are excluded from the session reports administrators can read."
+        }
+      },
+      "visible": {
+        "eyebrow": "What administrators can see",
+        "title": "Said plainly,",
+        "titleAccent": "because half a promise is worse than none.",
+        "lede": "Programme administrators run the cohort. That job needs real visibility, and pretending otherwise would be the dishonest option.",
+        "items": {
+          "profiles": {
+            "title": "Profiles and matching",
+            "body": "Profile details, competencies, matching suggestions, scores, rationales, approvals and overrides — administrators work directly with all of it."
+          },
+          "progress": {
+            "title": "Goals, training and reviews",
+            "body": "Goal status and content, training attendance, and mid-term and final review responses are visible to administrators and feed programme reporting."
+          },
+          "sessions": {
+            "title": "Session reports",
+            "body": "Administrators have a read-only view of the session logs mentors file — date, competency, discussion summary and actions agreed. Mentor private notes are excluded from that view."
+          },
+          "activity": {
+            "title": "Activity, not content",
+            "body": "For messaging, administrators see engagement metadata: whether a pair is active, how recently, how often. Not the messages."
+          }
+        },
+        "note": "Any policy that would let an administrator read message content is off by default in this application, and enabling it would be a recorded, logged change — not a quiet setting."
+      },
+      "support": {
+        "eyebrow": "Support requests",
+        "title": "Private from your pair,",
+        "titleAccent": "visible to the programme team.",
+        "p1": "When a participant raises a support request — a pairing that has gone quiet, a goal that is stuck, a match they are uncomfortable with — that request is never shown to their mentor or mentee.",
+        "p2": "It is not anonymous to the programme team. Administrators see who submitted it and what it says, because a request they cannot attribute is a request they cannot act on. The response they write is shown back to the person who asked."
+      },
+      "ai": {
+        "eyebrow": "The assistants and your content",
+        "title": "What the assistants",
+        "titleAccent": "actually work on.",
+        "lede": "Being specific matters more here than being reassuring, so this is a list rather than a promise.",
+        "items": {
+          "processed": {
+            "title": "Content the assistants process",
+            "body": "Session notes you submit for a summary, goals you send to the goal coach, review responses, meeting preparation, and any text you explicitly ask to translate. All of it is processed server-side; nothing is sent from your browser."
+          },
+          "notProcessed": {
+            "title": "Content no assistant reads today",
+            "body": "Direct messages and journal reflections are not sent to any assistant by this application. The one exception is deliberate and user-initiated: if you press translate on your own journal entry, that entry is what gets translated."
+          },
+          "risk": {
+            "title": "The engagement monitor",
+            "body": "The monitor that flags pairs at risk is rule-based and works only on counts, dates and statuses — how long since the last session, whether goals are awaiting approval, whether a review is outstanding. It receives no message, note or journal content at all."
+          }
+        }
+      },
+      "responsibilities": {
+        "eyebrow": "What we ask of participants",
+        "title": "The part the system",
+        "titleAccent": "cannot enforce.",
+        "lede": "Access control protects what is stored. What is said between two people is protected by the people themselves.",
+        "items": {
+          "respect": {
+            "title": "Treat the conversation as confidential",
+            "body": "What your mentor or mentee tells you in confidence stays with you, during the programme and after it."
+          },
+          "consent": {
+            "title": "Ask before you share",
+            "body": "Do not repeat or forward a private discussion, a shared reflection or a session note without the other person's agreement."
+          },
+          "escalate": {
+            "title": "Raise serious concerns properly",
+            "body": "If something raises a safeguarding, conduct or safety concern, it belongs with the programme team and your organisation's own procedures — not only in the pairing."
+          }
+        },
+        "agreementsTitle": "The agreements you sign",
+        "agreementsBody": "Each pair signs a mentoring agreement and a confidentiality agreement inside the portal at the start of the relationship. Those signed records live in your account and are only reachable once you have signed in — nothing on this public page exposes them."
+      },
+      "cta": {
+        "title": "Questions about",
+        "titleAccent": "how your information is handled?",
+        "body": "The FAQ answers the common ones. For anything else, the Support page routes you to the programme team."
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Support — BLAK MOH",
+        "description": "Where to get help with BLAK MOH: signing in, invitations, programme questions, and the private support route for participants."
+      },
+      "hero": {
+        "eyebrow": "Support",
+        "breadcrumb": "Support",
+        "title": "You do not have to",
+        "titleAccent": "navigate the programme alone.",
+        "lede": "Pick the situation that matches yours. Every route below goes somewhere real — there is no ticket form on this page, because participant support runs privately inside the portal."
+      },
+      "routes": {
+        "eyebrow": "Start here",
+        "title": "Where would you like to start?",
+        "lede": "Four situations cover almost everything. If none of them fit, the FAQ is the fastest place to look next.",
+        "signin": {
+          "title": "I cannot sign in",
+          "body": "Reset your password from the sign-in page — the emailed link is valid for 60 minutes. If you have never activated your account, you need your invitation rather than a reset.",
+          "primary": "Reset your password",
+          "secondary": "Go to sign in"
+        },
+        "invite": {
+          "title": "My invitation is not working",
+          "body": "An invitation can be invalid, expired or already used, and the page tells you which. Expired or incomplete links need a new one from your administrator; an already-used link means your account is active, so sign in instead.",
+          "primary": "Use an invite code",
+          "secondary": "Sign in instead"
+        },
+        "participant": {
+          "title": "I am a participant with a programme concern",
+          "body": "A pairing that has gone quiet, a goal that is stuck, a match you are uncomfortable with, or a language need. Sign in and raise a support request — it reaches the programme team directly and is never shown to your mentor or mentee.",
+          "primary": "Sign in to raise a request",
+          "secondary": "How support requests work"
+        },
+        "general": {
+          "title": "I have a general question about the programme",
+          "body": "How matching works, what the nine stages are, who can see what, how goals and reviews run. Most of it is already written down.",
+          "primary": "Read the FAQ",
+          "secondary": "About the programme"
+        }
+      },
+      "topics": {
+        "eyebrow": "By topic",
+        "title": "Common things people need",
+        "access": {
+          "title": "Account access",
+          "body": "Password resets, Microsoft single sign-on, and activating a new account from an invitation.",
+          "cta": "Sign-in help"
+        },
+        "programme": {
+          "title": "Programme questions",
+          "body": "Stages, timelines, training, goals, sessions, reviews and the completion certificate.",
+          "cta": "Read the FAQ"
+        },
+        "matching": {
+          "title": "Matching concerns",
+          "body": "How pairings are scored and approved, and how to decline one you have been offered.",
+          "cta": "How matching works"
+        },
+        "confidentiality": {
+          "title": "Confidentiality questions",
+          "body": "What stays private, what administrators can see, and how the assistants use content.",
+          "cta": "Read the confidentiality page"
+        },
+        "technical": {
+          "title": "Something is not working",
+          "body": "If you can sign in, raise it from the Support page in the portal so the programme team has your account context.",
+          "cta": "Sign in to report it"
+        }
+      },
+      "channel": {
+        "eyebrow": "Contacting the programme office",
+        "title": "If none of the routes above apply",
+        "body": "There is no public contact form for this programme. The portal is a confidential, invitation-only internal system, and a form open to the internet would collect exactly the kind of information it should not. Reach your programme administrator through the address your organisation has published for the programme, or through the invitation email you were sent.",
+        "placeholderTitle": "Owner content required",
+        "placeholderBody": "A programme support address has not been confirmed for this build. The address currently used elsewhere in the portal is a seeded demo account and is not a monitored inbox; it is listed as an open owner item in the implementation report."
+      },
+      "urgent": {
+        "title": "This portal is not an emergency channel",
+        "body": "Support requests are read by the programme team during working hours. If something is urgent, or concerns anyone's immediate safety, use your organisation's own emergency and escalation procedures rather than the portal."
+      },
+      "cta": {
+        "title": "Most answers are",
+        "titleAccent": "already written down.",
+        "body": "The FAQ covers access, matching, goals, sessions, language and privacy. Participants can raise anything else privately after signing in."
+      }
+    }
   }
 }

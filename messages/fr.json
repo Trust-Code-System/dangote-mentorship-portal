@@ -243,10 +243,66 @@
     "corporateEmail": "E-mail professionnel",
     "emailPlaceholder": "nom@blakmoh.com",
     "forgotShort": "Oublié ?",
-    "rememberMe": "Se souvenir de moi pendant 30 jours",
     "dangoteSso": "Connexion SSO BLAK MOH",
     "orCredentials": "Ou utiliser les identifiants",
-    "backToHome": "Retour à l’accueil"
+    "backToHome": "Retour à l’accueil",
+    "brandEyebrow": "Programme de mentorat BLAK MOH",
+    "brandHeadline": "Poursuivez votre",
+    "brandHeadlineAccent": "parcours.",
+    "brandBody": "Retrouvez vos objectifs, vos séances, vos échanges et les étapes du programme exactement là où vous les avez laissés.",
+    "brandPointBilingual": "Une expérience bilingue, en anglais et en français",
+    "brandPointMatching": "Un jumelage assisté par l'IA, validé par un humain",
+    "brandPointPrivate": "Des espaces de mentorat privés",
+    "loginHeading": "Bon retour parmi nous",
+    "loginSupporting": "Connectez-vous pour poursuivre votre parcours de mentorat.",
+    "signingIn": "Connexion en cours…",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "capsLock": "La touche Verr. Maj est activée.",
+    "languageLabel": "Langue de l'interface",
+    "orContinueWithEmail": "ou continuer avec votre e-mail",
+    "sessionExpiredTitle": "Votre session a expiré",
+    "sessionExpiredBody": "Reconnectez-vous pour reprendre là où vous vous étiez arrêté.",
+    "authErrorTitle": "Impossible de finaliser la connexion",
+    "authErrorBody": "Un problème est survenu au retour du fournisseur d'identité. Veuillez réessayer.",
+    "trustNote": "Votre compte et votre activité de mentorat sont protégés par un contrôle d'accès selon le rôle, appliqué à chaque requête.",
+    "fullName": "Nom complet",
+    "fullNamePlaceholder": "Tel qu'il doit apparaître dans le programme",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordMismatch": "Les deux mots de passe doivent être identiques.",
+    "passwordRequirementsLabel": "Le mot de passe doit",
+    "passwordRuleLength": "comporter au moins 8 caractères",
+    "passwordRuleUnique": "être différent de ceux que vous utilisez ailleurs",
+    "forgotHeading": "Réinitialiser votre mot de passe",
+    "forgotSupporting": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation sécurisé.",
+    "forgotSentTitle": "Consultez votre messagerie",
+    "backToSignIn": "Revenir à la connexion",
+    "resetHeading": "Choisissez un nouveau mot de passe",
+    "resetSupporting": "Saisissez un nouveau mot de passe pour votre compte.",
+    "resetExpiredTitle": "Ce lien de réinitialisation a expiré",
+    "resetExpiredBody": "Les liens sont valables 60 minutes. Demandez-en un nouveau et nous vous l'enverrons aussitôt.",
+    "resetInvalidTitle": "Ce lien de réinitialisation n'est pas valide",
+    "resetInvalidBody": "Le lien a peut-être déjà été utilisé, ou n'a pas été copié en entier. Demandez-en un nouveau pour continuer.",
+    "requestNewLink": "Demander un nouveau lien",
+    "resetSuccessTitle": "Mot de passe mis à jour",
+    "resetSuccessBody": "Vous pouvez désormais vous connecter avec votre nouveau mot de passe.",
+    "inviteHeading": "Activer votre compte",
+    "inviteSupporting": "Définissez un mot de passe pour finaliser la création de votre compte BLAK MOH.",
+    "inviteEmailHelp": "C'est l'adresse à laquelle votre invitation a été envoyée.",
+    "inviteExpiredTitle": "Cette invitation a expiré",
+    "inviteExpiredBody": "Demandez à votre administrateur de programme de vous envoyer un nouveau lien d'invitation.",
+    "inviteUsedTitle": "Cette invitation a déjà été utilisée",
+    "inviteUsedBody": "Le compte est déjà actif. Connectez-vous, ou réinitialisez votre mot de passe si vous l'avez oublié.",
+    "inviteInvalidTitle": "Cette invitation n'est pas valide",
+    "inviteInvalidBody": "Le lien n'a peut-être pas été copié en entier. Demandez-en un nouveau à votre administrateur de programme.",
+    "requestHeading": "Demander l'accès au programme",
+    "requestSupporting": "Les comptes sont créés par votre administrateur de programme.",
+    "footerPrivacy": "Confidentialité",
+    "footerSupport": "Assistance",
+    "footerBackHome": "Retour à l'accueil",
+    "requestBrandHeadline": "Commencez votre parcours",
+    "requestBrandHeadlineAccent": "de mentorat.",
+    "requestBrandBody": "Les comptes sont créés par l'administrateur de votre programme. Activez le vôtre avec l'invitation reçue, ou demandez-en une à votre administrateur."
   },
   "signup": {
     "title": "Rejoindre le programme",
@@ -1527,5 +1583,768 @@
     "title": "Mode maintenance",
     "body": "Le portail est temporairement indisponible pendant une maintenance planifiée. Merci de revenir dans quelques instants.",
     "signOut": "Se déconnecter"
+  },
+  "landing": {
+    "meta": {
+      "title": "BLAK MOH — L'expérience devient une direction",
+      "description": "Un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré de neuf mois, piloté par des humains."
+    },
+    "nav": {
+      "skip": "Aller au contenu",
+      "home": "BLAK MOH — accueil",
+      "primaryLabel": "Navigation principale",
+      "programme": "Programme",
+      "matching": "Jumelage",
+      "journey": "Parcours",
+      "experience": "Expérience",
+      "faq": "FAQ",
+      "signIn": "Se connecter",
+      "requestAccess": "Demander un accès",
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu",
+      "menuTitle": "Menu",
+      "dashboard": "Accéder au tableau de bord"
+    },
+    "hero": {
+      "micro": "Mentorat bilingue · Assisté par l'IA · Validé par un humain",
+      "line1": "L'expérience devient une direction.",
+      "line2": "L'ambition devient du leadership.",
+      "body": "BLAK MOH est un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré et piloté par des humains.",
+      "ctaPrimary": "Entrer dans le portail",
+      "ctaSecondary": "Découvrir le parcours",
+      "sceneDescription": "Un mentor et un mentoré se tiennent à distance dans l'obscurité, reliés par un flux de lumière qui transporte le savoir de l'un à l'autre.",
+      "mentorLabel": "Mentor",
+      "menteeLabel": "Mentoré",
+      "coreLabel": "Objectif commun",
+      "scrollHint": "Faites défiler pour commencer"
+    },
+    "problem": {
+      "eyebrow": "Pourquoi ce programme existe",
+      "line1": "Une expérience précieuse ne devrait pas disparaître.",
+      "line2": "Les personnes ambitieuses ne devraient pas grandir seules.",
+      "body": "Dans une grande organisation, des décennies de discernement durement acquis vivent dans la tête de quelques personnes — et partent avec elles. Pendant ce temps, celles et ceux qui en auraient le plus besoin avancent seuls, une erreur après l'autre.",
+      "close": "BLAK MOH existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible.",
+      "experienceLabel": "Expérience",
+      "ambitionLabel": "Ambition",
+      "gapLabel": "La distance qui les sépare"
+    },
+    "matching": {
+      "eyebrow": "Jumelage assisté par l'IA",
+      "title": "Des suggestions intelligentes.",
+      "titleAccent": "Des décisions humaines.",
+      "body": "Le moteur de jumelage évalue chaque paire possible selon six critères pondérés et une règle qu'il ne peut jamais enfreindre. Il classe, il explique, puis il s'arrête. Un administrateur valide chaque binôme avant qu'il ne devienne réel.",
+      "hardRuleLabel": "La règle que le moteur ne peut pas enfreindre",
+      "hardRuleTitle": "La langue doit correspondre exactement",
+      "hardRuleBody": "Un mentor anglophone n'est jamais proposé à un mentoré francophone. Ce n'est ni une préférence ni une pondération : la règle est appliquée au cœur du moteur et ne peut être désactivée pour aucune cohorte.",
+      "criteriaLabel": "Critères pondérés",
+      "criteria": {
+        "competency": "Correspondance des compétences",
+        "careerGoal": "Alignement des objectifs de carrière",
+        "experience": "Pertinence de l'expérience",
+        "department": "Pertinence du département",
+        "availability": "Disponibilité",
+        "personality": "Compatibilité des personnalités"
+      },
+      "demoLabel": "Essayez les critères",
+      "demoHint": "Choisissez une langue et un critère pour voir le réseau réagir.",
+      "languageLabel": "Langue du programme",
+      "languageEn": "English",
+      "languageFr": "Français",
+      "steps": {
+        "candidates": "Les profils entrent dans le vivier",
+        "language": "Les paires de langues différentes sont écartées",
+        "score": "Les paires restantes sont évaluées",
+        "shortlist": "Une liste classée est proposée",
+        "approve": "Un administrateur valide le binôme"
+      },
+      "rationaleLabel": "Pourquoi ce binôme",
+      "approvedLabel": "Validé par un administrateur",
+      "pendingLabel": "En attente de validation",
+      "rejectedLabel": "Langue différente — non éligible",
+      "scoreLabel": "Score de compatibilité",
+      "disclaimer": "Démonstration illustrative à partir de profils fictifs. Aucune donnée de participant n'est affichée ici, et rien sur cette page n'est relié au programme réel.",
+      "mentorsLabel": "Mentors",
+      "menteesLabel": "Mentorés",
+      "profiles": {
+        "mentorA": "Responsable des opérations · 15 ans",
+        "mentorB": "Directrice financière · 11 ans",
+        "mentorC": "Ingénierie d'usine · 18 ans",
+        "mentorD": "Responsable chaîne d'approvisionnement · 9 ans",
+        "menteeA": "Vise le leadership opérationnel",
+        "menteeB": "Vise la gestion des parties prenantes",
+        "menteeC": "Vise l'expertise technique"
+      },
+      "rationale": {
+        "competency": "Domaine de compétence commun : leadership opérationnel et gestion des parties prenantes.",
+        "careerGoal": "L'objectif de carrière déclaré du mentoré correspond directement au poste actuel du mentor.",
+        "experience": "Quinze années d'expérience opérationnelle face à un mentoré qui accède à son premier poste de direction.",
+        "department": "Fonctions voisines — assez proches pour être pertinentes, assez éloignées pour éviter un lien hiérarchique.",
+        "availability": "Les deux ont déclaré des disponibilités sur le même créneau hebdomadaire.",
+        "personality": "Styles de travail complémentaires renseignés à l'inscription."
+      },
+      "approveCta": "Simuler la validation par un administrateur"
+    },
+    "journey": {
+      "eyebrow": "Le parcours de neuf mois",
+      "title": "Un seul chemin. Neuf étapes.",
+      "titleAccent": "Chaque étape visible.",
+      "body": "Chaque mentor et chaque mentoré suit le même chemin structuré : personne ne se demande jamais ce qui vient ensuite, ni qui attend qui.",
+      "progressLabel": "Étape {current} sur {total}",
+      "stageLabel": "Étape",
+      "stages": {
+        "profile": {
+          "title": "Profil",
+          "body": "Mentors et mentorés remplissent un profil structuré : compétences, objectifs de carrière, expérience, disponibilités et langue préférée. Les fragments deviennent une personne entière.",
+          "fragment": "Profil · complété"
+        },
+        "training": {
+          "title": "Formation",
+          "body": "Les deux parties suivent la formation du programme avant toute proposition de binôme. Un mentor qui ne l'a pas terminée n'est pas éligible au jumelage.",
+          "fragment": "Formation · présence enregistrée"
+        },
+        "matched": {
+          "title": "Jumelage",
+          "body": "Le moteur propose une liste classée et expliquée. Un administrateur l'examine, la modifie s'il n'est pas d'accord, puis valide le binôme.",
+          "fragment": "Binôme · validé par un administrateur"
+        },
+        "agreement": {
+          "title": "Accord",
+          "body": "Le binôme signe une convention de mentorat et un accord de confidentialité. La relation repose désormais sur une base commune et enregistrée.",
+          "fragment": "Convention de mentorat · signée"
+        },
+        "goals": {
+          "title": "Objectifs",
+          "body": "Le mentoré définit des objectifs SMART avec l'aide du coach IA. Le mentor approuve, ajuste ou commente — l'approbation reste toujours un acte humain.",
+          "fragment": "Objectif · en attente d'approbation"
+        },
+        "sessions": {
+          "title": "Séances",
+          "body": "Les rencontres sont planifiées et les séances consignées : ce qui a été discuté, ce qui a été décidé, ce qui suit. C'est dans la répétition que se joue vraiment le progrès.",
+          "fragment": "Compte rendu · résumé IA rédigé"
+        },
+        "midterm": {
+          "title": "Revue à mi-parcours",
+          "body": "À mi-chemin, les deux parties prennent du recul sur le trajet parcouru : ce qui a avancé, ce qui stagne, ce qui doit changer.",
+          "fragment": "Revue à mi-parcours · ouverte"
+        },
+        "final": {
+          "title": "Revue finale",
+          "body": "Les neuf mois deviennent une synthèse claire : objectifs atteints, séances tenues, compétences développées, preuves consignées.",
+          "fragment": "Revue finale · soumise"
+        },
+        "certificate": {
+          "title": "Certificat",
+          "body": "Le programme se clôt par un certificat d'achèvement — et par un mentoré qui n'a plus besoin d'être guidé.",
+          "fragment": "Certificat · délivré"
+        }
+      }
+    },
+    "tools": {
+      "eyebrow": "Au cœur du programme",
+      "title": "Ce que mentors et mentorés",
+      "titleAccent": "font réellement",
+      "body": "Pas des fonctionnalités sur une diapositive : les outils que les participants ouvrent chaque semaine.",
+      "items": {
+        "goals": {
+          "title": "Définir des objectifs",
+          "body": "Transformez une ambition floue en objectif SMART, avec une mesure, une échéance et des preuves de progression. Votre mentor l'approuve en une seule étape.",
+          "detail": "Objectif · en attente d'approbation"
+        },
+        "sessions": {
+          "title": "Consigner les séances",
+          "body": "Résumez une séance en quelques champs : ce qui a été discuté, décidé, bloqué. Le résumé IA et l'ordre du jour suivant sont rédigés pour vous.",
+          "detail": "Compte rendu · résumé IA rédigé"
+        },
+        "meetings": {
+          "title": "Planifier les rencontres",
+          "body": "Réservez la prochaine conversation, recevez des rappels et arrivez préparé grâce à un ordre du jour issu des actions de la séance précédente.",
+          "detail": "Prochaine rencontre · ordre du jour prêt"
+        },
+        "messages": {
+          "title": "Échanger en privé",
+          "body": "Un fil direct et privé entre vous deux. Traduisez n'importe quel message à la demande, l'original étant toujours conservé à côté.",
+          "detail": "Fil privé · participants uniquement"
+        },
+        "journal": {
+          "title": "Tenir un journal",
+          "body": "Un espace privé pour vos notes et réflexions, qui n'appartiennent qu'à vous — ni à votre binôme, ni à l'équipe du programme.",
+          "detail": "Note privée · visible par vous seul"
+        },
+        "reviews": {
+          "title": "Compléter les revues",
+          "body": "Formulaires de revue à mi-parcours et finale, modifiables par les administrateurs sans toucher au code, qui alimentent les rapports du programme.",
+          "detail": "Revue à mi-parcours · ouverte"
+        }
+      }
+    },
+    "bilingual": {
+      "eyebrow": "Bilingue par conception",
+      "title": "Progressez dans la langue",
+      "titleAccent": "qui vous vient naturellement.",
+      "body": "L'anglais et le français ne sont pas ici une langue principale et sa traduction. Ce sont deux chemins équivalents dans le même programme, vers la même destination.",
+      "enLabel": "English",
+      "frLabel": "Français",
+      "sameDestination": "Le même programme. La même exigence. Le même certificat.",
+      "sampleLabel": "Texte réel de l'interface, dans les deux langues",
+      "sampleEn": "Set SMART development goals, get them approved by your mentor, and track your progress.",
+      "sampleFr": "Définissez des objectifs de développement SMART, faites-les approuver par votre mentor et suivez vos progrès.",
+      "switchHint": "Changez toute la page avec le sélecteur de langue ci-dessus.",
+      "points": {
+        "interface": "Toute l'interface, dans votre langue",
+        "interfaceBody": "Chaque écran, libellé et notification existe en anglais et en français. Votre choix est mémorisé.",
+        "content": "Traduisez tout contenu à la demande",
+        "contentBody": "Objectifs, comptes rendus et messages se traduisent sur place — et l'original reste toujours à côté de la traduction.",
+        "matching": "Jamais jumelé dans une autre langue",
+        "matchingBody": "L'unique règle inviolable du moteur garantit que vous êtes jumelé à quelqu'un à qui vous pouvez réellement parler."
+      }
+    },
+    "privacy": {
+      "eyebrow": "Confidentialité et contrôle humain",
+      "title": "Le programme observe le parcours,",
+      "titleAccent": "jamais la conversation.",
+      "body": "Ici, la confidentialité n'est pas une page de politique : c'est la façon dont le système est construit.",
+      "items": {
+        "approval": {
+          "title": "Jumelage validé par un humain",
+          "body": "L'IA propose et explique. Elle ne valide jamais seule un binôme, n'approuve jamais un objectif et n'envoie jamais une infolettre. Une personne identifiée prend chaque décision qui compte, et chaque dérogation est enregistrée."
+        },
+        "private": {
+          "title": "Espaces privés des participants",
+          "body": "Les messages directs appartiennent aux deux participants. Les réflexions du journal n'appartiennent qu'à une personne. Les administrateurs voient des métadonnées d'activité — la date de la dernière rencontre, la fréquence — jamais les mots échangés."
+        },
+        "roles": {
+          "title": "Accès selon le rôle",
+          "body": "Six rôles, chacun avec une frontière définie, appliquée côté serveur pour chaque action — et non dissimulée dans l'interface en espérant que cela suffise."
+        }
+      },
+      "note": "Toute politique permettant à un administrateur de lire le contenu des messages est désactivée par défaut et serait journalisée si elle était un jour activée."
+    },
+    "principles": {
+      "eyebrow": "Le programme",
+      "title": "Une structure sur laquelle compter",
+      "body": "Les chiffres ci-dessous décrivent la façon dont le programme est construit. Les chiffres de participation sont publiés par l'équipe du programme une fois la cohorte confirmée.",
+      "facts": {
+        "monthsValue": "9",
+        "months": "Mois, du début au certificat",
+        "stagesValue": "9",
+        "stages": "Étapes sur le chemin commun",
+        "languagesValue": "2",
+        "languages": "Langues du programme, à égalité",
+        "criteriaValue": "6",
+        "criteria": "Critères de jumelage pondérés",
+        "rolesValue": "6",
+        "roles": "Rôles aux frontières appliquées",
+        "hardRuleValue": "1",
+        "hardRule": "Règle que le moteur ne peut enfreindre"
+      }
+    },
+    "transformation": {
+      "line1": "L'accompagnement ouvre le parcours.",
+      "line2": "Le leadership en est la destination.",
+      "body": "Neuf mois plus tard, le mentor est toujours là — mais ce n'est plus lui qui mène. Que vous poursuiviez votre programme ou que vous demandiez à rejoindre la prochaine cohorte, tout commence ici.",
+      "signIn": "Se connecter",
+      "requestAccess": "Demander un accès",
+      "learnMore": "En savoir plus sur le programme",
+      "sceneDescription": "Le mentoré avance seul, portant la lumière qui circulait autrefois entre eux, vers un horizon ouvert."
+    },
+    "footer": {
+      "statement": "Un programme de mentorat bilingue, assisté par l'IA, construit autour de l'apprentissage et du bien-être optimal — avec un humain qui valide chaque décision importante.",
+      "navLabel": "Pied de page",
+      "sectionsLabel": "Programme",
+      "accessLabel": "Accès",
+      "about": "À propos du programme",
+      "faq": "FAQ",
+      "support": "Assistance",
+      "signIn": "Se connecter",
+      "requestAccess": "Demander un accès",
+      "languageLabel": "Langue",
+      "copyright": "© {year} BLAK MOH. Programme interne confidentiel.",
+      "confidential": "Les messages directs restent privés entre participants.",
+      "confidentiality": "Confidentialité",
+      "languageHint": "Changer de langue vous laisse sur cette page — rien n'est perdu."
+    }
+  },
+  "publicPages": {
+    "shared": {
+      "home": "Accueil",
+      "breadcrumbLabel": "Fil d'Ariane",
+      "readFaq": "Consulter la FAQ",
+      "signIn": "Se connecter",
+      "requestAccess": "Demander un accès",
+      "contactSupport": "Contacter l'assistance",
+      "aboutProgramme": "À propos du programme",
+      "confidentiality": "Confidentialité"
+    },
+    "about": {
+      "meta": {
+        "title": "À propos du programme — BLAK MOH",
+        "description": "BLAK MOH est un programme de mentorat bilingue de neuf mois : des étapes structurées, un jumelage assisté par l'IA et un humain qui valide chaque décision importante."
+      },
+      "hero": {
+        "eyebrow": "Le programme",
+        "breadcrumb": "À propos du programme",
+        "title": "Un mentorat conçu pour",
+        "titleAccent": "faire avancer les personnes.",
+        "lede": "BLAK MOH est un programme de mentorat bilingue de neuf mois. Il repose sur un parcours structuré que chaque binôme suit ensemble, appuyé par des outils intelligents qui proposent et expliquent — et par des personnes qui décident."
+      },
+      "why": {
+        "eyebrow": "Pourquoi ce programme existe",
+        "title": "L'expérience ne devrait pas",
+        "titleAccent": "partir avec celui qui la détient.",
+        "statement": "Une expérience précieuse ne devrait pas disparaître. Les personnes ambitieuses ne devraient pas grandir seules.",
+        "p1": "Dans une grande organisation, des décennies de discernement durement acquis vivent dans la tête de quelques personnes — et partent avec elles. Pendant ce temps, celles et ceux qui en auraient le plus besoin avancent seuls, une erreur après l'autre.",
+        "p2": "BLAK MOH existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible. Non comme une initiative qui dure un trimestre, mais comme un parcours aux étapes nommées, aux progrès consignés, et qui se termine par un certificat."
+      },
+      "different": {
+        "eyebrow": "Ce qui le distingue",
+        "title": "Un programme avec",
+        "titleAccent": "des rouages réels, pas une politique.",
+        "lede": "Tout ce qui suit est un écran que les participants ouvrent réellement. Rien ici n'est une promesse de feuille de route.",
+        "matching": {
+          "title": "Jumelage assisté par l'IA, validé par un humain",
+          "body": "Le moteur évalue chaque binôme possible selon six critères pondérés — correspondance des compétences, alignement des objectifs de carrière, pertinence de l'expérience, proximité de fonction, disponibilité et compatibilité de personnalité — et selon une règle qu'il ne peut jamais enfreindre : la langue doit correspondre exactement. Il classe les options et explique chacune d'elles. Puis il s'arrête, et un administrateur valide le binôme avant qu'il n'existe.",
+          "detail": "Liste classée · validation d'un administrateur"
+        },
+        "bilingual": {
+          "title": "Participation bilingue",
+          "body": "L'anglais et le français sont deux chemins équivalents dans le même programme. Chaque écran, libellé et notification existe dans les deux langues, votre choix est mémorisé, et personne ne vous demandera jamais d'écrire dans une langue qui n'est pas la vôtre.",
+          "detail": "EN · FR, à égalité"
+        },
+        "goals": {
+          "title": "Coaching d'objectifs SMART",
+          "body": "Le coach transforme une intention vague en un objectif précis et mesurable, avec une échéance et des preuves de progression. Il propose ; vous ajustez ; votre mentor approuve, commente ou renvoie. L'approbation reste toujours un acte humain.",
+          "detail": "Objectif · en attente d'approbation"
+        },
+        "sessions": {
+          "title": "Séances structurées",
+          "body": "Consignez ce qui a été discuté, décidé et bloqué. Un résumé et l'ordre du jour suivant vous sont proposés, à relire avant tout enregistrement."
+        },
+        "private": {
+          "title": "Espaces privés",
+          "body": "Un fil de discussion qui appartient au binôme, et un journal de réflexion qui n'appartient qu'à une seule personne."
+        },
+        "reviews": {
+          "title": "Revues à mi-parcours et finale",
+          "body": "Des formulaires que les administrateurs du programme peuvent modifier sans changement de code, et qui alimentent les rapports du programme."
+        },
+        "support": {
+          "title": "Assistance et intervention",
+          "body": "Une voie privée vers l'équipe du programme lorsqu'un binôme s'essouffle, qu'un objectif bloque ou que quelque chose ne fonctionne pas."
+        }
+      },
+      "journey": {
+        "eyebrow": "Le parcours de neuf mois",
+        "title": "Un chemin. Neuf étapes.",
+        "titleAccent": "Chaque pas visible.",
+        "lede": "Chaque mentor et chaque mentoré suit le même parcours structuré : personne ne se demande ce qui vient ensuite, ni qui attend quoi.",
+        "stageLabel": "Étape {number} sur 9",
+        "progressLabel": "Progression du parcours"
+      },
+      "human": {
+        "eyebrow": "Une intelligence dirigée par l'humain",
+        "title": "L'assistant propose.",
+        "titleAccent": "Une personne décide.",
+        "statement": "L'IA explique les options. Elle n'en choisit jamais une.",
+        "p1": "L'assistant classe les binômes, rédige des résumés de séance, reformule les objectifs au format SMART et prépare des brouillons de revue et d'infolettre. Chacune de ces productions arrive sous forme de suggestion, dans un champ modifiable.",
+        "p2": "Rien de ce qu'un assistant produit n'est inscrit seul au dossier du programme. Une suggestion devient un binôme lorsqu'un administrateur la valide. Un objectif proposé devient un objectif lorsque le mentoré l'accepte et que le mentor l'approuve. Une infolettre part lorsqu'un administrateur l'envoie. Chaque dérogation est enregistrée.",
+        "points": {
+          "suggest": "Les assistants proposent, classent et expliquent",
+          "suggestBody": "Vous voyez toujours pourquoi une chose est proposée, pas seulement ce qui est proposé.",
+          "editable": "Chaque brouillon reste modifiable",
+          "editableBody": "Le résultat de l'IA arrive dans un champ ordinaire. Réécrivez-le, remplacez-le, ou ignorez-le.",
+          "commit": "Seule une personne valide",
+          "commitBody": "Les binômes, les approbations d'objectifs et les envois sont des actions humaines, et chacune est auditée."
+        }
+      },
+      "bilingual": {
+        "eyebrow": "Bilingue par conception",
+        "title": "Progressez dans la langue",
+        "titleAccent": "qui vous vient naturellement.",
+        "lede": "L'anglais et le français ne sont pas ici une langue principale et sa traduction. Ce sont deux chemins équivalents dans le même programme, vers la même destination.",
+        "enLabel": "English",
+        "frLabel": "Français",
+        "sampleLabel": "Texte réel de l'interface, dans les deux langues",
+        "sampleEn": "Set SMART development goals, get them approved by your mentor, and track your progress.",
+        "sampleFr": "Définissez des objectifs de développement SMART, faites-les approuver par votre mentor et suivez vos progrès.",
+        "sameDestination": "Le même programme. La même exigence. Le même certificat.",
+        "switchHint": "Changez tout le site avec le sélecteur de langue, dans la navigation ou dans le pied de page."
+      },
+      "principles": {
+        "eyebrow": "Comment il est construit",
+        "title": "Une structure sur laquelle compter",
+        "lede": "Ces chiffres décrivent la façon dont le programme est construit. Les chiffres de participation sont publiés par l'équipe du programme une fois la cohorte confirmée."
+      },
+      "cta": {
+        "title": "Poursuivez votre parcours,",
+        "titleAccent": "ou demandez à en commencer un.",
+        "body": "Les participants se connectent pour retrouver leurs objectifs, leurs séances et leurs échanges. Pour tous les autres, tout commence par une invitation de l'équipe du programme."
+      }
+    },
+    "faq": {
+      "meta": {
+        "title": "Aide et FAQ — BLAK MOH",
+        "description": "Réponses sur l'accès, le jumelage, les objectifs, les séances, la confidentialité, la langue et l'assistance du programme."
+      },
+      "hero": {
+        "eyebrow": "Aide",
+        "breadcrumb": "FAQ",
+        "title": "Des réponses pour chaque",
+        "titleAccent": "étape du parcours.",
+        "lede": "Des repères clairs sur l'accès, le jumelage, les objectifs, les séances, la confidentialité et l'assistance. Faites une recherche, ou parcourez par catégorie."
+      },
+      "search": {
+        "label": "Rechercher dans la FAQ",
+        "placeholder": "Rechercher une question ou une réponse…",
+        "clear": "Effacer la recherche",
+        "resultsOne": "1 question correspond.",
+        "resultsMany": "{count} questions correspondent.",
+        "resultsNone": "Aucune question ne correspond.",
+        "emptyTitle": "Aucun résultat pour cette recherche",
+        "emptyBody": "Essayez une formulation plus courte, changez de catégorie, ou adressez-vous directement à l'équipe du programme.",
+        "emptyReset": "Effacer la recherche et les filtres",
+        "allCategories": "Toutes les questions",
+        "categoryLabel": "Filtrer par catégorie"
+      },
+      "featured": {
+        "eyebrow": "Commencez ici",
+        "title": "Les questions que l'on nous pose le plus"
+      },
+      "all": {
+        "eyebrow": "Tout le reste",
+        "title": "Parcourir toutes les questions",
+        "lede": "Utilisez les catégories pour réduire la liste. Votre recherche est conservée lorsque vous changez de catégorie."
+      },
+      "categories": {
+        "start": "Premiers pas",
+        "access": "Accès et comptes",
+        "matching": "Jumelage",
+        "goals": "Objectifs",
+        "sessions": "Séances et rencontres",
+        "private": "Messages et journal",
+        "language": "Anglais et français",
+        "privacy": "Confidentialité",
+        "reviews": "Revues et achèvement",
+        "support": "Assistance"
+      },
+      "items": {
+        "what-is": {
+          "q": "Qu'est-ce que BLAK MOH ?",
+          "a": "Un programme de mentorat bilingue de neuf mois. Mentors et mentorés sont jumelés, signent une convention de mentorat et un accord de confidentialité, définissent des objectifs de développement, se rencontrent et consignent leurs séances, complètent une revue à mi-parcours puis une revue finale, et terminent avec un certificat d'achèvement."
+        },
+        "who-takes-part": {
+          "q": "Qui participe ?",
+          "a": "Les mentors et les mentorés forment les binômes. Autour d'eux, le programme compte des formateurs qui animent les sessions de formation, des évaluateurs qui accèdent aux rapports d'ensemble, et des administrateurs qui pilotent la cohorte. Chaque rôle a sa propre frontière, appliquée côté serveur pour chaque action."
+        },
+        "how-long": {
+          "q": "Combien de temps dure le programme ?",
+          "a": "Neuf mois, du profil au certificat, à travers neuf étapes nommées. Chaque binôme suit le même parcours : vous savez toujours à quelle étape vous en êtes et ce qui vient ensuite."
+        },
+        "get-account": {
+          "q": "Comment obtenir un compte ?",
+          "a": "Les comptes sont créés par un administrateur du programme — il n'existe pas d'inscription libre. Votre administrateur vous envoie une invitation, et vous activez le compte en définissant un mot de passe. Si vous n'avez rien reçu, adressez-vous à l'administrateur de votre programme."
+        },
+        "invite-code": {
+          "q": "J'ai un code d'invitation. Où l'utiliser ?",
+          "a": "Allez sur « Demander un accès » et collez le code reçu dans votre courriel d'invitation. Vous êtes conduit directement à la page d'activation, où vous définissez votre nom et votre mot de passe."
+        },
+        "invite-problem": {
+          "q": "Mon lien d'invitation ne fonctionne pas.",
+          "a": "Une invitation peut être invalide, expirée ou déjà utilisée, et la page vous indique laquelle. Si elle a expiré ou si le lien n'a pas été copié en entier, demandez-en un nouveau à votre administrateur. Si elle a déjà été utilisée, votre compte est actif : connectez-vous, ou réinitialisez votre mot de passe."
+        },
+        "forgot-password": {
+          "q": "J'ai oublié mon mot de passe.",
+          "a": "Utilisez le lien de réinitialisation sur la page de connexion. Si un compte existe pour cette adresse, vous recevrez un courriel contenant un lien valable 60 minutes. Par sécurité, la page affiche la même réponse qu'un compte existe ou non."
+        },
+        "sso": {
+          "q": "Puis-je me connecter avec mon compte professionnel ?",
+          "a": "L'authentification unique Microsoft est prise en charge et apparaît sur la page de connexion lorsque votre organisation l'a configurée. La connexion par courriel et mot de passe reste toujours disponible."
+        },
+        "matching-how": {
+          "q": "Comment fonctionne le jumelage ?",
+          "a": "Le moteur note chaque binôme éligible sur 100 selon six critères pondérés : correspondance des compétences, alignement des objectifs de carrière, pertinence de l'expérience, proximité de fonction, disponibilité et compatibilité de personnalité. Il produit une liste classée, avec une explication écrite pour chaque suggestion. Un administrateur l'examine ensuite, peut la modifier, et valide le binôme — le moteur n'en valide jamais un lui-même."
+        },
+        "matching-language": {
+          "q": "Puis-je être jumelé à quelqu'un qui ne parle pas ma langue ?",
+          "a": "Non. La correspondance de langue est une règle stricte inscrite dans le moteur, pas une pondération : un mentor anglophone n'est jamais proposé à un mentoré francophone, ni l'inverse. Elle ne peut être désactivée pour aucune cohorte."
+        },
+        "matching-decline": {
+          "q": "Puis-je refuser un binôme proposé ?",
+          "a": "Oui. Une fois qu'un administrateur a validé un binôme, le mentor et le mentoré sont tous deux invités à répondre. Chacun peut refuser, ce qui renvoie le dossier à l'administrateur, et la décision est enregistrée."
+        },
+        "matching-after": {
+          "q": "Que se passe-t-il une fois jumelé ?",
+          "a": "Vous et votre binôme signez la convention de mentorat et l'accord de confidentialité, un fil de messages privé s'ouvre pour vous deux, et le mentoré commence à définir ses objectifs de développement. Ensuite, le binôme planifie ses rencontres et consigne chaque séance."
+        },
+        "goal-submit": {
+          "q": "Comment soumettre un objectif ?",
+          "a": "Les mentorés créent leurs objectifs depuis la page Objectifs : la compétence à développer, pourquoi elle compte, le niveau actuel et le niveau visé, l'activité d'apprentissage, les dates, la mesure de réussite et les preuves de progression. Vous le soumettez, puis votre mentor l'approuve, le commente ou demande un ajustement."
+        },
+        "goal-coach": {
+          "q": "L'IA écrit-elle mon objectif à ma place ?",
+          "a": "Elle propose une reformulation. Le coach prend une intention approximative et propose une version SMART — spécifique, mesurable, atteignable, orientée résultats et située dans le temps — sous forme de suggestion, dans un champ modifiable. Vous l'acceptez, la modifiez ou l'ignorez, et votre mentor doit de toute façon approuver le résultat."
+        },
+        "session-log": {
+          "q": "Que contient un compte rendu de séance ?",
+          "a": "Ce qui a été discuté, la compétence et l'objectif concernés, ce qui a été décidé, les difficultés soulevées, les ressources nécessaires et le plan d'action suivant. L'assistant peut rédiger un résumé et extraire les actions à partir de vos notes brutes ; vous les relisez avant tout enregistrement."
+        },
+        "meetings": {
+          "q": "Comment les rencontres sont-elles organisées ?",
+          "a": "Les rencontres se planifient dans le portail et apparaissent dans le calendrier des deux participants, avec les actions de la séance précédente disponibles au moment de préparer la suivante."
+        },
+        "messages-private": {
+          "q": "Qui peut voir mes messages directs ?",
+          "a": "Uniquement vous et la personne à qui vous écrivez. Une conversation directe compte exactement deux participants, et les administrateurs n'en font jamais partie : le contenu des messages n'apparaît donc dans aucune vue d'administration. La page Confidentialité expose le tableau complet, y compris ce que les administrateurs peuvent voir."
+        },
+        "journal-private": {
+          "q": "Les entrées du journal sont-elles privées ?",
+          "a": "Oui. Une réflexion appartient à la personne qui l'a écrite. Vous pouvez choisir de partager une entrée avec votre mentor, et cesser de la partager ensuite ; seul votre propre mentor peut voir une entrée partagée, et uniquement tant qu'elle l'est. Les administrateurs ne sont pas destinataires du journal."
+        },
+        "french": {
+          "q": "Puis-je utiliser le portail en français ?",
+          "a": "Oui, entièrement. Toute l'interface existe en anglais et en français, votre choix est mémorisé, et il ne vous sera jamais demandé d'écrire en anglais. Le français est un parcours complet dans le programme, pas une couche de traduction posée sur l'anglais."
+        },
+        "translate": {
+          "q": "Puis-je traduire un contenu rédigé dans l'autre langue ?",
+          "a": "Là où le bouton de traduction apparaît — sur les réflexions du journal, les notes de mentor et les réponses de revue — vous pouvez basculer ce contenu entre l'anglais et le français à la demande. L'original est toujours conservé à côté de la traduction, jamais remplacé."
+        },
+        "admin-visibility": {
+          "q": "Que voient les administrateurs du programme ?",
+          "a": "Les administrateurs pilotent la cohorte : ils voient les profils, les jumelages, les objectifs, la formation, l'état des revues, ainsi que les comptes rendus de séance déposés par les mentors. Ils ne voient ni le contenu des messages directs, ni les entrées du journal. La page Confidentialité détaille chaque cas."
+        },
+        "reviews": {
+          "q": "Que sont les revues à mi-parcours et finale ?",
+          "a": "Deux points d'étape structurés. À mi-chemin, les deux parties examinent ce qui a avancé et ce qui stagne. À la fin, les neuf mois deviennent une synthèse des objectifs atteints, des séances tenues et des compétences développées. Les formulaires sont définis par les administrateurs et peuvent donc évoluer d'une cohorte à l'autre sans changement de code."
+        },
+        "certificate": {
+          "q": "Que se passe-t-il à la fin du programme ?",
+          "a": "Après la revue finale, le programme se clôt par un certificat d'achèvement pour le mentoré, et le dossier du binôme — objectifs, séances, revues — reste intégré aux rapports du programme."
+        },
+        "support-how": {
+          "q": "Comment contacter l'assistance du programme ?",
+          "a": "Si vous êtes participant, connectez-vous et déposez une demande depuis la page Assistance : cette voie est privée et parvient directement à l'équipe du programme. Si vous ne pouvez pas vous connecter, ou si vous n'êtes pas encore participant, la page Assistance publique vous indique la bonne démarche."
+        },
+        "support-anonymous": {
+          "q": "Une demande d'assistance est-elle anonyme ?",
+          "a": "Elle est privée vis-à-vis des autres participants : votre mentor ou votre mentoré ne saura jamais que vous en avez déposé une, ni ce qu'elle contenait. Elle n'est pas anonyme pour l'équipe du programme : les administrateurs voient qui l'a soumise, afin de pouvoir réellement aider."
+        }
+      },
+      "help": {
+        "eyebrow": "Besoin d'aide malgré tout",
+        "title": "Si la réponse n'est pas ici",
+        "lede": "Il existe deux voies, et le choix dépend de votre capacité à vous connecter.",
+        "participantTitle": "Je suis participant",
+        "participantBody": "Connectez-vous et déposez une demande depuis la page Assistance, dans le portail. Elle parvient directement à l'équipe du programme, reste invisible pour votre mentor ou votre mentoré, et la réponse s'affiche au même endroit.",
+        "participantCta": "Se connecter au portail",
+        "publicTitle": "Je ne peux pas me connecter, ou je ne suis pas encore participant",
+        "publicBody": "La page Assistance publique vous oriente au bon endroit : problème d'invitation, réinitialisation de mot de passe, ou question générale sur le programme.",
+        "publicCta": "Aller à l'assistance"
+      },
+      "cta": {
+        "title": "Vous hésitez encore à",
+        "titleAccent": "rejoindre le programme ?",
+        "body": "La page À propos explique le programme de bout en bout, et la page Confidentialité précise exactement qui voit quoi."
+      }
+    },
+    "confidentiality": {
+      "meta": {
+        "title": "Confidentialité — BLAK MOH",
+        "description": "Comment BLAK MOH protège la relation de mentorat : ce qui reste privé, ce que voient les administrateurs, et comment les assistants utilisent les contenus."
+      },
+      "hero": {
+        "eyebrow": "Confidentialité",
+        "breadcrumb": "Confidentialité",
+        "title": "La confiance rend possible",
+        "titleAccent": "un mentorat sincère.",
+        "lede": "Une conversation de mentorat n'a de valeur que si les deux personnes peuvent y être franches. Cette page décrit comment le portail est construit pour protéger cela — y compris, sans détour, ce que les administrateurs peuvent voir."
+      },
+      "intro": {
+        "statement": "Le programme observe le parcours, jamais la conversation.",
+        "p1": "Ici, la confidentialité n'est pas une page de politique ajoutée à un produit. Qui peut lire quoi se décide côté serveur, à chaque requête, selon le rôle que vous occupez et la relation dans laquelle vous êtes.",
+        "p2": "Tout ce qui figure sur cette page décrit le comportement actuel de l'application. Il s'agit d'une page d'information : elle ne remplace ni la convention de mentorat ni l'accord de confidentialité signés par chaque binôme dans le portail, et elle ne constitue pas elle-même un contrat."
+      },
+      "private": {
+        "eyebrow": "Ce qui reste privé",
+        "title": "Les espaces qui appartiennent",
+        "titleAccent": "à ceux qui les occupent.",
+        "messages": {
+          "title": "Messages directs",
+          "body": "Une conversation directe est ouverte pour chaque binôme et compte exactement deux participants. Seuls ces deux-là peuvent la lire. Les administrateurs ne participent jamais à la conversation d'un binôme : le contenu des messages n'apparaît donc dans aucune vue d'administration."
+        },
+        "journal": {
+          "title": "Réflexions du journal",
+          "body": "Une réflexion appartient à la personne qui l'a écrite. Elle est privée par défaut. L'auteur peut partager une entrée précise avec son mentor et cesser de la partager ensuite — et seul le mentor de cet auteur peut la voir, uniquement tant qu'elle est partagée. Il n'existe aucune vue administrateur du journal."
+        },
+        "notes": {
+          "title": "Notes privées du mentor",
+          "body": "Les notes qu'un mentor conserve au sujet d'un mentoré ne sont visibles que par le mentor qui les a écrites. Elles ne sont pas montrées au mentoré, et elles sont exclues des comptes rendus de séance que les administrateurs peuvent lire."
+        }
+      },
+      "visible": {
+        "eyebrow": "Ce que voient les administrateurs",
+        "title": "Dit clairement,",
+        "titleAccent": "car une demi-promesse vaut moins que rien.",
+        "lede": "Les administrateurs pilotent la cohorte. Ce travail exige une visibilité réelle, et prétendre le contraire serait la solution malhonnête.",
+        "items": {
+          "profiles": {
+            "title": "Profils et jumelage",
+            "body": "Détails de profil, compétences, suggestions de jumelage, scores, justifications, validations et dérogations : les administrateurs travaillent directement avec tout cela."
+          },
+          "progress": {
+            "title": "Objectifs, formation et revues",
+            "body": "L'état et le contenu des objectifs, la présence en formation, ainsi que les réponses aux revues de mi-parcours et finale sont visibles par les administrateurs et alimentent les rapports du programme."
+          },
+          "sessions": {
+            "title": "Comptes rendus de séance",
+            "body": "Les administrateurs disposent d'une vue en lecture seule des comptes rendus déposés par les mentors — date, compétence, résumé de la discussion et actions décidées. Les notes privées du mentor en sont exclues."
+          },
+          "activity": {
+            "title": "L'activité, pas le contenu",
+            "body": "Pour la messagerie, les administrateurs voient des métadonnées d'engagement : si un binôme est actif, depuis quand, à quelle fréquence. Pas les messages."
+          }
+        },
+        "note": "Toute politique permettant à un administrateur de lire le contenu des messages est désactivée par défaut dans cette application, et son activation serait un changement enregistré et journalisé — pas un réglage discret."
+      },
+      "support": {
+        "eyebrow": "Demandes d'assistance",
+        "title": "Privées vis-à-vis de votre binôme,",
+        "titleAccent": "visibles pour l'équipe du programme.",
+        "p1": "Lorsqu'un participant dépose une demande d'assistance — un binôme qui s'est tu, un objectif bloqué, un jumelage qui le met mal à l'aise — cette demande n'est jamais montrée à son mentor ou à son mentoré.",
+        "p2": "Elle n'est pas anonyme pour l'équipe du programme. Les administrateurs voient qui l'a soumise et ce qu'elle contient, car une demande qu'ils ne peuvent rattacher à personne est une demande sur laquelle ils ne peuvent pas agir. La réponse qu'ils rédigent est renvoyée à la personne qui a demandé de l'aide."
+      },
+      "ai": {
+        "eyebrow": "Les assistants et vos contenus",
+        "title": "Ce sur quoi les assistants",
+        "titleAccent": "travaillent réellement.",
+        "lede": "Être précis compte ici davantage qu'être rassurant : voici donc une liste, et non une promesse.",
+        "items": {
+          "processed": {
+            "title": "Les contenus que les assistants traitent",
+            "body": "Les notes de séance que vous soumettez pour un résumé, les objectifs envoyés au coach, les réponses de revue, la préparation des rencontres, et tout texte dont vous demandez explicitement la traduction. Tout cela est traité côté serveur ; rien n'est envoyé depuis votre navigateur."
+          },
+          "notProcessed": {
+            "title": "Les contenus qu'aucun assistant ne lit aujourd'hui",
+            "body": "Les messages directs et les réflexions du journal ne sont transmis à aucun assistant par cette application. La seule exception est délibérée et déclenchée par vous : si vous demandez la traduction de votre propre entrée de journal, c'est cette entrée qui est traduite."
+          },
+          "risk": {
+            "title": "Le moniteur d'engagement",
+            "body": "Le moniteur qui signale les binômes à risque fonctionne par règles et n'utilise que des décomptes, des dates et des statuts — délai depuis la dernière séance, objectifs en attente d'approbation, revue non soumise. Il ne reçoit aucun contenu de message, de note ou de journal."
+          }
+        }
+      },
+      "responsibilities": {
+        "eyebrow": "Ce que nous demandons aux participants",
+        "title": "La part que le système",
+        "titleAccent": "ne peut pas garantir.",
+        "lede": "Le contrôle d'accès protège ce qui est stocké. Ce qui se dit entre deux personnes est protégé par ces deux personnes.",
+        "items": {
+          "respect": {
+            "title": "Traitez la conversation comme confidentielle",
+            "body": "Ce que votre mentor ou votre mentoré vous confie reste avec vous, pendant le programme et après."
+          },
+          "consent": {
+            "title": "Demandez avant de partager",
+            "body": "Ne répétez ni ne transmettez une discussion privée, une réflexion partagée ou un compte rendu de séance sans l'accord de l'autre personne."
+          },
+          "escalate": {
+            "title": "Signalez correctement les situations graves",
+            "body": "Si une situation soulève une préoccupation de protection, de conduite ou de sécurité, elle relève de l'équipe du programme et des procédures propres à votre organisation — pas du seul binôme."
+          }
+        },
+        "agreementsTitle": "Les accords que vous signez",
+        "agreementsBody": "Chaque binôme signe une convention de mentorat et un accord de confidentialité dans le portail, au début de la relation. Ces documents signés se trouvent dans votre compte et ne sont accessibles qu'une fois connecté — rien sur cette page publique ne les expose."
+      },
+      "cta": {
+        "title": "Des questions sur",
+        "titleAccent": "le traitement de vos informations ?",
+        "body": "La FAQ répond aux plus courantes. Pour le reste, la page Assistance vous oriente vers l'équipe du programme."
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Assistance — BLAK MOH",
+        "description": "Où obtenir de l'aide sur BLAK MOH : connexion, invitations, questions sur le programme, et la voie privée réservée aux participants."
+      },
+      "hero": {
+        "eyebrow": "Assistance",
+        "breadcrumb": "Assistance",
+        "title": "Vous n'avez pas à parcourir",
+        "titleAccent": "ce programme seul.",
+        "lede": "Choisissez la situation qui correspond à la vôtre. Chaque piste ci-dessous mène à un endroit réel — il n'y a pas de formulaire sur cette page, car l'assistance aux participants se déroule en privé dans le portail."
+      },
+      "routes": {
+        "eyebrow": "Commencez ici",
+        "title": "Par où souhaitez-vous commencer ?",
+        "lede": "Quatre situations couvrent presque tous les cas. Si aucune ne correspond, la FAQ est l'endroit le plus rapide où regarder ensuite.",
+        "signin": {
+          "title": "Je n'arrive pas à me connecter",
+          "body": "Réinitialisez votre mot de passe depuis la page de connexion — le lien envoyé est valable 60 minutes. Si vous n'avez jamais activé votre compte, c'est votre invitation qu'il vous faut, pas une réinitialisation.",
+          "primary": "Réinitialiser le mot de passe",
+          "secondary": "Aller à la connexion"
+        },
+        "invite": {
+          "title": "Mon invitation ne fonctionne pas",
+          "body": "Une invitation peut être invalide, expirée ou déjà utilisée, et la page vous indique laquelle. Un lien expiré ou incomplet exige un nouvel envoi par votre administrateur ; un lien déjà utilisé signifie que votre compte est actif : connectez-vous.",
+          "primary": "Utiliser un code d'invitation",
+          "secondary": "Se connecter"
+        },
+        "participant": {
+          "title": "Je suis participant et j'ai une difficulté",
+          "body": "Un binôme qui s'est tu, un objectif bloqué, un jumelage qui vous met mal à l'aise, ou un besoin linguistique. Connectez-vous et déposez une demande : elle parvient directement à l'équipe du programme et n'est jamais montrée à votre mentor ou à votre mentoré.",
+          "primary": "Se connecter pour déposer une demande",
+          "secondary": "Comment fonctionnent les demandes"
+        },
+        "general": {
+          "title": "J'ai une question générale sur le programme",
+          "body": "Le fonctionnement du jumelage, les neuf étapes, qui voit quoi, le déroulement des objectifs et des revues. L'essentiel est déjà écrit.",
+          "primary": "Consulter la FAQ",
+          "secondary": "À propos du programme"
+        }
+      },
+      "topics": {
+        "eyebrow": "Par sujet",
+        "title": "Les besoins les plus fréquents",
+        "access": {
+          "title": "Accès au compte",
+          "body": "Réinitialisation de mot de passe, authentification unique Microsoft, et activation d'un compte à partir d'une invitation.",
+          "cta": "Aide à la connexion"
+        },
+        "programme": {
+          "title": "Questions sur le programme",
+          "body": "Étapes, calendrier, formation, objectifs, séances, revues et certificat d'achèvement.",
+          "cta": "Consulter la FAQ"
+        },
+        "matching": {
+          "title": "Questions de jumelage",
+          "body": "Comment les binômes sont notés et validés, et comment refuser une proposition.",
+          "cta": "Le jumelage expliqué"
+        },
+        "confidentiality": {
+          "title": "Questions de confidentialité",
+          "body": "Ce qui reste privé, ce que voient les administrateurs, et comment les assistants utilisent les contenus.",
+          "cta": "Lire la page Confidentialité"
+        },
+        "technical": {
+          "title": "Quelque chose ne fonctionne pas",
+          "body": "Si vous pouvez vous connecter, signalez-le depuis la page Assistance du portail : l'équipe disposera du contexte de votre compte.",
+          "cta": "Se connecter pour signaler"
+        }
+      },
+      "channel": {
+        "eyebrow": "Contacter l'équipe du programme",
+        "title": "Si aucune des pistes ci-dessus ne s'applique",
+        "body": "Il n'existe pas de formulaire de contact public pour ce programme. Le portail est un système interne confidentiel, accessible sur invitation, et un formulaire ouvert à tout Internet recueillerait précisément le type d'informations qu'il ne devrait pas recueillir. Adressez-vous à l'administrateur de votre programme via l'adresse publiée par votre organisation, ou via le courriel d'invitation que vous avez reçu.",
+        "placeholderTitle": "Contenu à fournir par le propriétaire",
+        "placeholderBody": "Aucune adresse d'assistance n'a été confirmée pour cette version. L'adresse utilisée ailleurs dans le portail correspond à un compte de démonstration et n'est pas une boîte surveillée ; elle figure parmi les points ouverts du rapport d'implémentation."
+      },
+      "urgent": {
+        "title": "Ce portail n'est pas un canal d'urgence",
+        "body": "Les demandes d'assistance sont lues par l'équipe du programme pendant les heures ouvrées. En cas d'urgence, ou si la sécurité immédiate d'une personne est en jeu, utilisez les procédures d'urgence et d'escalade de votre organisation plutôt que le portail."
+      },
+      "cta": {
+        "title": "La plupart des réponses",
+        "titleAccent": "sont déjà écrites.",
+        "body": "La FAQ couvre l'accès, le jumelage, les objectifs, les séances, la langue et la confidentialité. Les participants peuvent poser toute autre question en privé après connexion."
+      }
+    }
   }
 }

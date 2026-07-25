@@ -1,7 +1,6 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
 import { Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getCurrentUser } from '@/lib/auth/rbac';
@@ -27,6 +26,4 @@ export async function setLocale(locale: AppLocale): Promise<void> {
       data: { locale: locale === 'fr' ? Language.FR : Language.EN },
     });
   }
-
-  revalidatePath('/', 'layout');
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Public_Sans } from 'next/font/google';
+import { Public_Sans, Instrument_Serif } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Analytics } from '@vercel/analytics/next';
@@ -19,6 +19,19 @@ const publicSans = Public_Sans({
   display: 'swap',
 });
 
+// The public landing page's editorial display face (LANDING_PAGE_MASTER_SPEC.md
+// §3). Two families total across the product: Public Sans for everything, and
+// this serif used sparingly for emotional statements on the marketing home.
+// Nothing in the authenticated portal references `font-serif`, so adding the
+// variable here is inert for the app shell. Also self-hosted by next/font.
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.AUTH_URL ?? 'http://localhost:3000'),
   title: 'BLAK MOH',
@@ -32,7 +45,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={publicSans.variable} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${publicSans.variable} ${instrumentSerif.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background font-sans text-body text-foreground antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
@@ -40,7 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Vercel Web Analytics — first-party script (/_vercel/insights/*),
             same-origin beacon, so the existing CSP ('self') already allows it.
             Inert outside Vercel; no PII collected (no cookies, anonymized). */}
-        <Analytics />
+        {process.env.VERCEL === '1' ? <Analytics /> : null}
       </body>
     </html>
   );
