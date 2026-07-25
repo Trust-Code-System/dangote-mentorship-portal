@@ -346,6 +346,18 @@
   }
 }
 
+/* Hide the viewport (and nested) scrollbars on the cinematic landing — the
+ * branded green bar reads as chrome on the black canvas. Page still scrolls
+ * with wheel/trackpad/keys/touch; the portal keeps its themed scrollbars. */
+html:has(.landing-root) {
+  scrollbar-width: none;
+}
+html:has(.landing-root)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 .landing-root [id] {
   scroll-margin-top: 6.5rem;
 }
@@ -353,21 +365,13 @@
 .landing-root {
   background-color: rgb(var(--blak-black));
   color: rgb(var(--blak-text));
-  /* Dark themed scrollbar so the black page doesn't get the portal's green
-   * light-mode bar. */
-  scrollbar-color: rgb(var(--blak-green) / 0.5) rgb(var(--blak-forest));
+  scrollbar-width: none;
 }
 
-.landing-root ::-webkit-scrollbar-track {
-  background-color: rgb(var(--blak-forest));
-}
-
-.landing-root ::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--blak-green) / 0.45);
-}
-
-.landing-root ::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(var(--blak-green) / 0.75);
+.landing-root ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 /* Consistent, high-visibility focus ring on the dark canvas (WCAG 2.2 AA:
