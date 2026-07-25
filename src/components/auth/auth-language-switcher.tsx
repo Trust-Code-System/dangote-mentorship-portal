@@ -52,7 +52,9 @@ export function AuthLanguageSwitcher({
       aria-label={ta('languageLabel')}
       className={cn(
         'inline-flex items-center rounded-full p-1',
-        onDark ? 'border border-blak-border/15 bg-blak-black/50' : 'border border-auth-border bg-auth-field',
+        onDark
+          ? 'border border-blak-border/[0.05] bg-blak-black/30'
+          : 'border border-auth-border bg-auth-field',
         pending && 'opacity-70',
         className,
       )}

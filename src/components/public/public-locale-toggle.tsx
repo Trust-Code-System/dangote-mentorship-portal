@@ -45,7 +45,8 @@ export function PublicLocaleToggle({ className }: { className?: string }) {
       role="group"
       aria-label={t('switch')}
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full border border-blak-border/12 bg-blak-black/40 p-0.5',
+        // Hairline ivory at ~5% — enough to hold the pill on black, not a white ring.
+        'inline-flex items-center gap-0.5 rounded-full border border-blak-border/[0.05] bg-blak-black/30 p-0.5',
         pending && 'opacity-70',
         className,
       )}
