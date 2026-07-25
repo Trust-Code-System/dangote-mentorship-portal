@@ -363,23 +363,29 @@ export function AppShell({
   }, [loadBadges, pathname]);
 
   // Load recent notification bodies only when the dropdown opens (not on every nav).
+  // Depend only on notifOpen — including recentStatus caused a stuck skeleton:
+  // set('loading') re-ran the effect, cancelled the in-flight fetch, then bailed
+  // on the loading guard so the result was never applied.
   React.useEffect(() => {
-    if (!notifOpen || recentStatus === 'loading' || recentStatus === 'ready') return;
+    if (!notifOpen) return;
+
     let cancelled = false;
-    setRecentStatus('loading');
+    setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
+
     void fetchRecentNotifications(6).then((result) => {
       if (cancelled) return;
       if (result.ok) {
         setRecent(result.data.items);
         setRecentStatus('ready');
       } else {
-        setRecentStatus('error');
+        setRecentStatus((prev) => (prev === 'ready' ? prev : 'error'));
       }
     });
+
     return () => {
       cancelled = true;
     };
-  }, [notifOpen, recentStatus]);
+  }, [notifOpen]);
 
   const navSections = withBadges(sections, unread, unreadMessages);
   const allItems = navSections.flatMap((s) => s.items);
