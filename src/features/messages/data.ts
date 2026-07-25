@@ -29,7 +29,10 @@ export interface Thread {
   id: string;
   otherName: string | null;
   messages: ThreadMessage[];
+  nextCursor: string | null;
 }
+
+const MESSAGE_PAGE_SIZE = 50;
 
 /** Provision a DIRECT conversation for each of the user's accepted pairings. */
 export async function ensureDirectConversations(userId: string): Promise<void> {
@@ -78,32 +81,33 @@ export async function listConversations(userId: string): Promise<ConversationSum
             include: { user: { select: { name: true } } },
           },
           messages: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' }, take: 1 },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  deletedAt: null,
+                  senderId: { not: userId },
+                  reads: { none: { userId } },
+                },
+              },
+            },
+          },
         },
       },
     },
   });
 
-  const summaries = await Promise.all(
-    parts.map(async (p) => {
-      const c = p.conversation;
-      const last = c.messages[0] ?? null;
-      const unread = await prisma.message.count({
-        where: {
-          conversationId: c.id,
-          deletedAt: null,
-          senderId: { not: userId },
-          reads: { none: { userId } },
-        },
-      });
-      return {
-        id: c.id,
-        otherName: c.participants[0]?.user.name ?? null,
-        lastMessage: last?.bodyOriginal ?? null,
-        lastAt: last?.createdAt ?? c.updatedAt,
-        unread,
-      };
-    }),
-  );
+  const summaries = parts.map((p) => {
+    const c = p.conversation;
+    const last = c.messages[0] ?? null;
+    return {
+      id: c.id,
+      otherName: c.participants[0]?.user.name ?? null,
+      lastMessage: last?.bodyOriginal ?? null,
+      lastAt: last?.createdAt ?? c.updatedAt,
+      unread: c._count.messages,
+    };
+  });
 
   summaries.sort((a, b) => (b.lastAt?.getTime() ?? 0) - (a.lastAt?.getTime() ?? 0));
   return summaries;
@@ -125,7 +129,11 @@ export async function countUnreadMessages(userId: string): Promise<number> {
 }
 
 /** A conversation the user participates in, or null (also covers authz). */
-export async function getThread(conversationId: string, userId: string): Promise<Thread | null> {
+export async function getThread(
+  conversationId: string,
+  userId: string,
+  cursor?: string,
+): Promise<Thread | null> {
   const convo = await prisma.conversation.findFirst({
     where: { id: conversationId, deletedAt: null, participants: { some: { userId } } },
     include: {
@@ -135,22 +143,29 @@ export async function getThread(conversationId: string, userId: string): Promise
       },
       messages: {
         where: { deletedAt: null },
-        orderBy: { createdAt: 'asc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: MESSAGE_PAGE_SIZE + 1,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
         include: { sender: { select: { name: true } } },
       },
     },
   });
   if (!convo) return null;
+  const hasMore = convo.messages.length > MESSAGE_PAGE_SIZE;
+  const page = convo.messages.slice(0, MESSAGE_PAGE_SIZE);
   return {
     id: convo.id,
     otherName: convo.participants[0]?.user.name ?? null,
-    messages: convo.messages.map((m) => ({
-      id: m.id,
-      mine: m.senderId === userId,
-      senderName: m.sender.name,
-      body: m.bodyOriginal,
-      createdAt: m.createdAt,
-    })),
+    messages: page
+      .map((m) => ({
+        id: m.id,
+        mine: m.senderId === userId,
+        senderName: m.sender.name,
+        body: m.bodyOriginal,
+        createdAt: m.createdAt,
+      }))
+      .reverse(),
+    nextCursor: hasMore ? (page.at(-1)?.id ?? null) : null,
   };
 }
 

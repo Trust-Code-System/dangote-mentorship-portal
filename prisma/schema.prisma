@@ -461,17 +461,17 @@ model AuditLog {
 }
 
 model Notification {
-  id       String    @id @default(cuid())
-  userId   String    @map("user_id")
-  cohortId String?   @map("cohort_id")
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  cohortId     String?   @map("cohort_id")
   // `type` is a free string backed by the NOTIFICATION_TYPES union in
   // lib/notifications (experience-layer.md §1.10) — kept as a column rather than a
   // DB enum so new types ship across milestones without a migration each time.
-  type     String
-  title    String
-  body     String?
-  link     String?
-  readAt   DateTime? @map("read_at")
+  type         String
+  title        String
+  body         String?
+  link         String?
+  readAt       DateTime? @map("read_at")
   // Email channel state (§1.10): time-critical types email immediately; the rest
   // wait in a daily digest. `emailPending` means "still owed an email"; once sent
   // (immediately or via the digest) `emailedAt` is stamped and pending cleared.
@@ -487,6 +487,7 @@ model Notification {
 
   @@index([userId])
   @@index([emailPending])
+  @@index([emailPending, emailedAt, createdAt])
   @@map("notifications")
 }
 
@@ -992,8 +993,8 @@ model Meeting {
 
   // AI meeting preparation cache (experience-layer.md §1.5). Generated on demand
   // and cached per meeting; regenerating overwrites it.
-  prepJson         Json?     @map("prep_json")
-  prepGeneratedAt  DateTime? @map("prep_generated_at")
+  prepJson        Json?     @map("prep_json")
+  prepGeneratedAt DateTime? @map("prep_generated_at")
 
   cohort           Cohort       @relation(fields: [cohortId], references: [id])
   organizer        User         @relation("MeetingOrganizer", fields: [organizerId], references: [id])
@@ -1429,6 +1430,7 @@ model ConversationParticipant {
   deletedAt DateTime? @map("deleted_at")
 
   @@unique([conversationId, userId])
+  @@index([userId, deletedAt])
   @@map("conversation_participants")
 }
 
@@ -1452,6 +1454,7 @@ model Message {
   deletedAt DateTime? @map("deleted_at")
 
   @@index([conversationId])
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -1469,6 +1472,7 @@ model MessageRead {
   deletedAt DateTime? @map("deleted_at")
 
   @@unique([messageId, userId])
+  @@index([userId, messageId])
   @@map("message_reads")
 }
 

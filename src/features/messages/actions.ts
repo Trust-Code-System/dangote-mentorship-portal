@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
 import { notifyMany } from '@/lib/notifications/notify';
 import { ok, fail, mapActionError, type ActionResult } from '@/lib/actions/result';
+import { getThread } from './data';
 
 // Send a direct message (CLAUDE.md §10). Authorizes that the sender is a
 // participant of the conversation; content stays private to participants.
@@ -72,6 +73,36 @@ export async function sendMessage(input: {
     revalidatePath('/messages');
     revalidatePath(`/messages/${conversationId}`);
     return ok({ id: message.id });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+const olderMessagesSchema = z.object({
+  conversationId: z.string().cuid(),
+  cursor: z.string().cuid(),
+});
+
+export async function loadOlderMessages(input: { conversationId: string; cursor: string }): Promise<
+  ActionResult<{
+    messages: Array<Omit<import('./data').ThreadMessage, 'createdAt'> & { createdAt: string }>;
+    nextCursor: string | null;
+  }>
+> {
+  try {
+    const user = await requireUser();
+    const { conversationId, cursor } = olderMessagesSchema.parse(input);
+    const thread = await getThread(conversationId, user.id, cursor);
+    if (!thread) {
+      return fail({ code: 'FORBIDDEN', message: 'You are not part of this conversation.' });
+    }
+    return ok({
+      messages: thread.messages.map((message) => ({
+        ...message,
+        createdAt: message.createdAt.toISOString(),
+      })),
+      nextCursor: thread.nextCursor,
+    });
   } catch (error) {
     return mapActionError(error);
   }

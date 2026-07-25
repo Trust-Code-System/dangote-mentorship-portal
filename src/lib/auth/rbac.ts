@@ -1,6 +1,9 @@
+import { cache } from 'react';
 import { RoleName } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 import { auth } from './auth';
 import { type AdminCohortScope, cohortFilterFor, scopeAllows } from './scope';
+import { ADMIN_ROLES } from './roles';
 
 // Authorization errors. Server actions translate these into typed results
 // (CLAUDE.md §3: every mutation authenticates → authorizes → validates …).
@@ -29,18 +32,52 @@ export interface SessionUser {
   locale: string;
 }
 
+const loadActiveUser = cache(async (userId: string): Promise<SessionUser | null> => {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, isActive: true, deletedAt: null },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      locale: true,
+      userRoles: {
+        where: { deletedAt: null },
+        select: { cohortId: true, role: { select: { name: true } } },
+      },
+    },
+  });
+  if (!user) return null;
+
+  const roles = Array.from(new Set(user.userRoles.map((grant) => grant.role.name)));
+  const adminGrants = user.userRoles.filter((grant) => ADMIN_ROLES.includes(grant.role.name));
+  const adminCohortScope: AdminCohortScope = adminGrants.some((grant) => grant.cohortId === null)
+    ? 'ALL'
+    : Array.from(
+        new Set(
+          adminGrants
+            .map((grant) => grant.cohortId)
+            .filter((cohortId): cohortId is string => cohortId !== null),
+        ),
+      );
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    roles,
+    adminCohortScope,
+    locale: user.locale,
+  };
+});
+
 /** Returns the current session user, or null if unauthenticated. */
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await auth();
   if (!session?.user?.id) return null;
-  return {
-    id: session.user.id,
-    email: session.user.email ?? '',
-    name: session.user.name,
-    roles: session.user.roles ?? [],
-    adminCohortScope: session.user.adminCohortScope ?? 'ALL',
-    locale: session.user.locale ?? 'EN',
-  };
+  // JWTs are an authentication credential, not the live authorization source.
+  // Re-read active status and grants so disabling a user or changing a role
+  // takes effect immediately instead of waiting for the 12-hour token to expire.
+  return loadActiveUser(session.user.id);
 }
 
 /** Asserts the request is authenticated and returns the user. */

@@ -16,9 +16,7 @@ test('super admin signs in and lands on the admin dashboard', async ({ page }) =
 
   // Admin role → /admin (lib/auth/roles.ts defaultDashboardPath).
   await page.waitForURL('**/admin');
-  await expect(
-    page.getByRole('heading', { name: 'Enterprise Health Dashboard' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Enterprise Health Dashboard' })).toBeVisible();
 
   // The admin sidebar exposes the M0 management areas.
   const sidebar = page.getByRole('complementary');
@@ -30,4 +28,18 @@ test('unauthenticated visitors are redirected to login', async ({ page }) => {
   await page.goto('/dashboard');
   await page.waitForURL('**/login**');
   await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+});
+
+test('readiness probe confirms the database is reachable', async ({ request }) => {
+  const response = await request.get('/api/health');
+  expect(response.status()).toBe(200);
+  await expect(response.json()).resolves.toMatchObject({ status: 'ok', db: 'up' });
+});
+
+test('public responses include the required security headers', async ({ request }) => {
+  const response = await request.get('/login');
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-security-policy']).toContain("default-src 'self'");
+  expect(response.headers()['x-content-type-options']).toBe('nosniff');
+  expect(response.headers()['x-frame-options']).toBe('DENY');
 });
