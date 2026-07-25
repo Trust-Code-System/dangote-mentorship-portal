@@ -62,7 +62,9 @@
     "navManage": "Manage",
     "navPeople": "People",
     "enterprisePortal": "Enterprise Portal",
-    "navPlatform": "Platform"
+    "navPlatform": "Platform",
+    "updating": "Updating",
+    "navigating": "Loading page"
   },
   "home": {
     "eyebrow": "BLAK MOH 2026",

@@ -85,6 +85,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     collapse: tShell('collapse'),
     expand: tShell('expand'),
     more: tShell('more'),
+    updating: tShell('updating'),
+    navigating: tShell('navigating'),
   };
 
   return (

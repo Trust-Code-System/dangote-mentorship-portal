@@ -294,6 +294,12 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **Sidebar clicks get immediate pending/active feedback** plus a thin top progress cue; shell stays mounted; destination-shaped `loading.tsx` skeletons for key routes.
 - **Slimmed auth layouts:** dropped per-navigation recent-notification list + duplicate avatar query; unread badges hydrate client-side (layouts no longer await badge DB counts); `experimental.staleTimes.dynamic: 30` for snappier client navigations; recent bodies load when the dropdown opens; Insights Recharts dynamically imported. Features/routes removed: **0**. Docs: `docs/internal-portal-performance/`.
 
+## Perf — sidebar Active/Pending/Inactive + router-cache SWR
+
+- **Fixed double-active sidebar:** pending destinations use a distinct subtle style + spinner; full active chrome stays on the committed route only when idle (`data-nav-state`, unit-tested).
+- **Intent prefetch** (`prefetch={false}` + `router.prefetch` on hover/focus); **staleTimes** dynamic 60s / static 300s; quiet “Updating” indicator on tab focus revalidation (no TanStack/SWR dependency).
+- **More route `loading.tsx` skeletons** (programmes, cohorts, imports, forms, invites, admin lists, notifications, support, pair, agreements). Features/routes removed: **0**. Report: `NAVIGATION_CACHE_REFINEMENT_REPORT.md`.
+
 ## Fix — locale switcher refreshes UI after language change
 
 - **Restored `revalidatePath('/', 'layout')` in `setLocale`.** A merge conflict resolution dropped the layout revalidation that applies the `NEXT_LOCALE` cookie to the RSC tree. Without it, clicking Français set the cookie but left `<html lang="en">` and English copy in place under `next start` (CI E2E). Cookie write alone does not refresh production RSC caches.

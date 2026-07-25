@@ -1,73 +1,73 @@
 {
-  "capturedAt": "2026-07-25T17:46:49.495Z",
+  "capturedAt": "2026-07-25T17:43:51.909Z",
   "mode": "production",
   "project": "chromium",
   "timings": [
     {
       "route": "matching",
       "href": "/admin/matching",
-      "urlChangeMs": 94,
-      "contentMs": 4082,
-      "sidebarActiveMs": 66,
+      "urlChangeMs": 144,
+      "contentMs": 6106,
+      "sidebarActiveMs": 94,
       "failedRequests": 0
     },
     {
       "route": "insights",
       "href": "/admin/insights",
-      "urlChangeMs": 67,
-      "contentMs": 1973,
-      "sidebarActiveMs": 43,
+      "urlChangeMs": 149,
+      "contentMs": 3659,
+      "sidebarActiveMs": 99,
       "failedRequests": 0
     },
     {
       "route": "programmes",
       "href": "/admin/programmes",
-      "urlChangeMs": 189,
-      "contentMs": 2139,
-      "sidebarActiveMs": 160,
+      "urlChangeMs": 141,
+      "contentMs": 3080,
+      "sidebarActiveMs": 105,
       "failedRequests": 0
     },
     {
       "route": "cohorts",
       "href": "/admin/cohorts",
-      "urlChangeMs": 78,
-      "contentMs": 3018,
-      "sidebarActiveMs": 48,
+      "urlChangeMs": 132,
+      "contentMs": 3549,
+      "sidebarActiveMs": 69,
       "failedRequests": 0
     },
     {
       "route": "mentors",
       "href": "/admin/mentors",
-      "urlChangeMs": 78,
-      "contentMs": 932,
+      "urlChangeMs": 98,
+      "contentMs": 3514,
       "sidebarActiveMs": 57,
       "failedRequests": 0
     },
     {
       "route": "mentees",
       "href": "/admin/mentees",
-      "urlChangeMs": 78,
-      "contentMs": 938,
-      "sidebarActiveMs": 56,
+      "urlChangeMs": 127,
+      "contentMs": 3058,
+      "sidebarActiveMs": 92,
       "failedRequests": 0
     },
     {
       "route": "invites",
       "href": "/admin/invites",
-      "urlChangeMs": 78,
-      "contentMs": 2488,
-      "sidebarActiveMs": 48,
+      "urlChangeMs": 170,
+      "contentMs": 3605,
+      "sidebarActiveMs": 88,
       "failedRequests": 0
     },
     {
       "route": "notifications",
       "href": "/notifications",
-      "urlChangeMs": 106,
-      "contentMs": 1991,
-      "sidebarActiveMs": 78,
+      "urlChangeMs": 151,
+      "contentMs": 3042,
+      "sidebarActiveMs": 80,
       "failedRequests": 0
     }
   ],
-  "medianContentMs": 2065,
-  "medianSidebarActiveMs": 57
+  "medianContentMs": 3532,
+  "medianSidebarActiveMs": 90
 }

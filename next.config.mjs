@@ -66,11 +66,12 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
     // Client router cache for dynamic segments (default dynamic=0 forces a full
-    // RSC refetch on every sidebar click). 30s keeps navigations snappy while
-    // badges refresh client-side and auth still runs on hard loads / refresh.
+    // RSC refetch on every sidebar click). AppShell revalidates repeat visits in
+    // the background (stale-while-revalidate). Private data stays session-scoped
+    // in memory — never localStorage. Auth still runs on hard loads / refresh.
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: 60,
+      static: 300,
     },
   },
   async headers() {

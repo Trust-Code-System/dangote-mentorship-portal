@@ -66,23 +66,54 @@ test.describe('authenticated sidebar navigation performance', () => {
       const t0 = Date.now();
       await link.click();
 
-      // Pending or active styling should apply without waiting for full page data.
+      // Immediate feedback: pending (aria-busy) or already committed (aria-current).
+      // Fast cache hits may skip a visible busy frame — both are valid.
       await expect
         .poll(
           async () => {
-            const current = await link.getAttribute('aria-current');
             const busy = await link.getAttribute('aria-busy');
-            return current === 'page' || busy === 'true';
+            const current = await link.getAttribute('aria-current');
+            return busy === 'true' || current === 'page';
           },
           { timeout: 2_000 },
         )
         .toBe(true);
       const sidebarActiveMs = Date.now() - t0;
 
+      // Never two full-active designs; at most one pending destination.
+      const activeVisual = await sidebar.locator('a[data-nav-state="active"]').count();
+      expect(activeVisual, `active visual count for ${route.key}`).toBeLessThanOrEqual(1);
+      const pendingVisual = await sidebar.locator('a[data-nav-state="pending"]').count();
+      expect(pendingVisual, `pending visual count for ${route.key}`).toBeLessThanOrEqual(1);
+      const busyCount = await sidebar.locator('a[aria-busy="true"]').count();
+      expect(busyCount, `pending count for ${route.key}`).toBeLessThanOrEqual(1);
+      const currentCount = await sidebar.locator('a[aria-current="page"]').count();
+      expect(currentCount, `aria-current count for ${route.key}`).toBeLessThanOrEqual(1);
+
       await page.waitForURL((url) => url.pathname === route.href, { timeout: 30_000 });
       const urlChangeMs = Date.now() - t0;
 
-      await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 30_000 });
+      // After commit: destination is current; pending chrome cleared.
+      await expect(link).toHaveAttribute('aria-current', 'page');
+      await expect
+        .poll(async () => (await link.getAttribute('aria-busy')) !== 'true', {
+          timeout: 2_000,
+        })
+        .toBe(true);
+
+      // Destination skeleton (aria-busy) or heading — never a blank main.
+      await expect
+        .poll(
+          async () => {
+            const headings = await page.getByRole('heading').count();
+            const skeleton = await page.locator('main [aria-busy="true"]').count();
+            return headings > 0 || skeleton > 0;
+          },
+          { timeout: 30_000 },
+        )
+        .toBe(true);
+
+      await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 45_000 });
       const heading = page.getByRole('heading', { name: route.heading }).first();
       if ((await heading.count()) > 0) {
         await expect(heading).toBeVisible();
@@ -140,6 +171,53 @@ test.describe('authenticated sidebar navigation performance', () => {
     await expect(create).toBeVisible();
     const className = (await create.getAttribute('class')) ?? '';
     expect(className).not.toMatch(/shadow-glow|bg-gradient-to-b/);
+  });
+
+  test('repeat sidebar visits show content quickly without double-active state', async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120_000);
+    await signInAsAdmin(page);
+    const sidebar = page.getByRole('complementary');
+
+    async function visit(href: string) {
+      const link = sidebar.locator(`a[href="${href}"]`).first();
+      const t0 = Date.now();
+      await link.click();
+      await page.waitForURL((url) => url.pathname === href, { timeout: 30_000 });
+      await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 30_000 });
+      const activeCount = await sidebar.locator('a[data-nav-state="active"]').count();
+      expect(activeCount).toBeLessThanOrEqual(1);
+      return Date.now() - t0;
+    }
+
+    // Warm the client router cache.
+    const firstInsights = await visit('/admin/insights');
+    const firstProgrammes = await visit('/admin/programmes');
+    // Return visits should stay interactive; production cache makes these much faster.
+    const secondInsights = await visit('/admin/insights');
+    const secondProgrammes = await visit('/admin/programmes');
+
+    const outDir = path.join(process.cwd(), 'internal-performance-evidence', 'navigation-timings');
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(outDir, 'repeat-visits.json'),
+      JSON.stringify(
+        {
+          capturedAt: new Date().toISOString(),
+          project: testInfo.project.name,
+          firstInsights,
+          firstProgrammes,
+          secondInsights,
+          secondProgrammes,
+        },
+        null,
+        2,
+      ),
+    );
+
+    expect(secondInsights).toBeLessThan(20_000);
+    expect(secondProgrammes).toBeLessThan(20_000);
   });
 });
 

@@ -156,3 +156,22 @@ export function DashboardLoadingSkeleton() {
     </div>
   );
 }
+
+/** Chart-card layout for Insights and similar analytics pages. */
+export function InsightsLoadingSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true">
+      <PageHeaderSkeleton />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full" />
+        ))}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-72 w-full" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+      <Skeleton className="h-64 w-full" />
+    </div>
+  );
+}

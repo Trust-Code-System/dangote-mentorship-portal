@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -40,11 +40,21 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { BrandMark } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
+import { NavSpinner } from '@/components/shell/nav-spinner';
+import {
+  isNavItemCommitted,
+  resolveNavItemVisualState,
+} from '@/components/shell/nav-item-state';
 import {
   fetchRecentNotifications,
   fetchShellBadges,
 } from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
+
+/** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
+const PENDING_NAV_TIMEOUT_MS = 12_000;
+/** Avoid flicker for very fast background refreshes. */
+const REFRESH_INDICATOR_MIN_MS = 150;
 
 // AppShell (§19 §3) — the authenticated chrome shared by the participant and
 // admin areas: a collapsible left sidebar (icons + grouped nav), a slim top bar
@@ -139,6 +149,10 @@ export interface AppShellLabels {
   collapse: string;
   expand: string;
   more: string;
+  /** Quiet header cue while cached RSC is revalidated in the background. */
+  updating: string;
+  /** Screen-reader label for the sidebar pending spinner. */
+  navigating: string;
 }
 
 export interface NotifItem {
@@ -165,13 +179,6 @@ export interface AppShellProps {
   loadBadges?: boolean;
   labels: AppShellLabels;
   children: React.ReactNode;
-}
-
-function isActive(pathname: string, href: string, exact?: boolean): boolean {
-  if (href === pathname) return true;
-  if (exact) return false;
-  // Avoid '/'-style false positives; match nested routes only on a segment edge.
-  return href !== '/' && pathname.startsWith(href + '/');
 }
 
 function withBadges(
@@ -202,11 +209,13 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
-  // Optimistic sidebar highlight — set on click, cleared when the URL commits.
+  // Pending destination only — never shares the full active chrome with the committed route.
   const [pendingHref, setPendingHref] = React.useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [recent, setRecent] = React.useState<NotifItem[]>([]);
   const [recentStatus, setRecentStatus] = React.useState<'idle' | 'loading' | 'ready' | 'error'>(
     'idle',
@@ -214,15 +223,90 @@ export function AppShell({
   const [unread, setUnread] = React.useState(unreadProp);
   const [unreadMessages, setUnreadMessages] = React.useState(0);
 
-  // Close overlays and clear pending nav when the route commits.
-  // Reset the dropdown cache so the next open reflects fresh unread bodies.
+  const prefetchedRef = React.useRef(new Set<string>());
+  const visitedRef = React.useRef(new Set<string>());
+  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshGenRef = React.useRef(0);
+
+  function clearPendingTimer() {
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
+  }
+
+  function armPendingTimeout() {
+    clearPendingTimer();
+    pendingTimerRef.current = setTimeout(() => {
+      setPendingHref(null);
+      pendingTimerRef.current = null;
+    }, PENDING_NAV_TIMEOUT_MS);
+  }
+
+  // Close overlays and clear pending when the URL commits. Repeat visits reuse
+  // the Next.js client router cache (staleTimes) for instant content; we do NOT
+  // call router.refresh() on every navigation — in Next 16 that eagerly
+  // re-prefetches in-viewport Links and defeats neighbouring cache hits.
   React.useEffect(() => {
     setNotifOpen(false);
     setMobileOpen(false);
     setPendingHref(null);
+    clearPendingTimer();
     setRecent([]);
     setRecentStatus('idle');
+    visitedRef.current.add(pathname);
   }, [pathname]);
+
+  // Quiet background revalidation when the tab regains focus on a previously
+  // visited route. Mutations already revalidatePath + router.refresh() locally.
+  React.useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    function softRefreshCurrentRoute() {
+      if (!visitedRef.current.has(pathname)) return;
+      const gen = ++refreshGenRef.current;
+      let shownAt = 0;
+
+      const showTimer = setTimeout(() => {
+        if (refreshGenRef.current !== gen) return;
+        shownAt = Date.now();
+        setIsRefreshing(true);
+      }, REFRESH_INDICATOR_MIN_MS);
+      timers.push(showTimer);
+
+      void Promise.resolve(router.refresh()).finally(() => {
+        if (refreshGenRef.current !== gen) return;
+        clearTimeout(showTimer);
+        if (!shownAt) {
+          setIsRefreshing(false);
+          return;
+        }
+        const remain = Math.max(0, REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt));
+        timers.push(
+          setTimeout(() => {
+            if (refreshGenRef.current === gen) setIsRefreshing(false);
+          }, remain),
+        );
+      });
+    }
+
+    function onFocus() {
+      softRefreshCurrentRoute();
+    }
+    function onVisibility() {
+      if (document.visibilityState === 'visible') softRefreshCurrentRoute();
+    }
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      refreshGenRef.current += 1;
+      for (const id of timers) clearTimeout(id);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+      setIsRefreshing(false);
+    };
+  }, [pathname, router]);
 
   // Persist the desktop collapse preference so it doesn't reset on navigation.
   React.useEffect(() => {
@@ -232,6 +316,8 @@ export function AppShell({
   React.useEffect(() => {
     window.localStorage.setItem('shell:collapsed', collapsed ? '1' : '0');
   }, [collapsed]);
+
+  React.useEffect(() => () => clearPendingTimer(), []);
 
   // Badge hydration — runs after paint and on focus; never blocks sidebar clicks.
   React.useEffect(() => {
@@ -281,15 +367,31 @@ export function AppShell({
   const primary = allItems.filter((i) => i.primary).slice(0, 4);
   const navigating = pendingHref !== null;
 
+  function prefetchHref(href: string) {
+    if (prefetchedRef.current.has(href) || href === pathname) return;
+    prefetchedRef.current.add(href);
+    try {
+      router.prefetch(href);
+    } catch {
+      // Prefetch is best-effort; navigation still works without it.
+      prefetchedRef.current.delete(href);
+    }
+  }
+
   function onNavClick(href: string, event: React.MouseEvent<HTMLAnchorElement>) {
     // Same destination already pending — ignore repeat clicks without blocking others.
     if (pendingHref === href) {
       event.preventDefault();
       return;
     }
-    // Already on this exact route — no pending chrome.
-    if (href === pathname) return;
+    // Already on this exact route — no duplicate pending chrome.
+    if (href === pathname) {
+      event.preventDefault();
+      return;
+    }
     setPendingHref(href);
+    armPendingTimeout();
+    prefetchHref(href);
   }
 
   return (
@@ -380,38 +482,59 @@ export function AppShell({
               {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
-                const active = isActive(pathname, item.href, item.exact);
-                const pending = pendingHref === item.href;
-                const highlighted = active || pending;
+                const visual = resolveNavItemVisualState({
+                  pathname,
+                  href: item.href,
+                  exact: item.exact,
+                  pendingHref,
+                });
+                const committed = isNavItemCommitted(pathname, item.href, item.exact);
+                const active = visual === 'active';
+                const pending = visual === 'pending';
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={false}
                     title={collapsed ? item.label : undefined}
-                    aria-current={active ? 'page' : undefined}
+                    aria-current={committed ? 'page' : undefined}
                     aria-busy={pending || undefined}
+                    data-nav-state={visual}
                     onClick={(e) => onNavClick(item.href, e)}
+                    onPointerEnter={() => prefetchHref(item.href)}
+                    onFocus={() => prefetchHref(item.href)}
                     className={cn(
                       'group flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
                       collapsed && 'lg:justify-center lg:px-0',
-                      highlighted
-                        ? 'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong'
-                        : 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
-                      pending && !active && 'opacity-90',
+                      active &&
+                        'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong',
+                      pending &&
+                        'border border-green/40 bg-green-soft/25 font-medium text-green-strong/90',
+                      !active && !pending && 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                      pending && 'opacity-90',
                     )}
                   >
                     <Icon
                       className={cn(
                         'size-4 shrink-0',
-                        highlighted ? 'text-green-strong' : 'text-ink-3 group-hover:text-green-light',
+                        active || pending
+                          ? 'text-green-strong'
+                          : 'text-ink-3 group-hover:text-green-light',
                       )}
                     />
-                    {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                    {!collapsed && item.badge ? (
+                    {!collapsed && (
+                      <span className={cn('flex-1 truncate', pending && 'opacity-80')}>
+                        {item.label}
+                      </span>
+                    )}
+                    {!collapsed && pending ? (
+                      <NavSpinner className="size-3.5" label={labels.navigating} />
+                    ) : null}
+                    {!collapsed && !pending && item.badge ? (
                       <span
                         className={cn(
                           'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-micro text-white',
-                          highlighted ? 'bg-green-strong' : 'bg-green',
+                          active ? 'bg-green-strong' : 'bg-green',
                         )}
                       >
                         {item.badge}
@@ -604,8 +727,18 @@ export function AppShell({
           </div>
         </header>
 
-        {/* Content */}
-        <main className="mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+        {/* Content — shell stays mounted; only this region swaps / refreshes. */}
+        <main className="relative mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+          {isRefreshing ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="pointer-events-none absolute right-4 top-5 z-10 flex items-center gap-1.5 text-micro text-ink-3 sm:right-5"
+            >
+              <NavSpinner className="size-3.5" />
+              <span>{labels.updating}</span>
+            </div>
+          ) : null}
           {children}
         </main>
       </div>
@@ -614,23 +747,43 @@ export function AppShell({
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-bg lg:hidden">
         {primary.map((item) => {
           const Icon = ICONS[item.icon];
-          const active = isActive(pathname, item.href, item.exact);
-          const pending = pendingHref === item.href;
-          const highlighted = active || pending;
+          const visual = resolveNavItemVisualState({
+            pathname,
+            href: item.href,
+            exact: item.exact,
+            pendingHref,
+          });
+          const committed = isNavItemCommitted(pathname, item.href, item.exact);
+          const active = visual === 'active';
+          const pending = visual === 'pending';
           return (
             <Link
               key={item.href}
               href={item.href}
-              aria-current={active ? 'page' : undefined}
+              prefetch={false}
+              aria-current={committed ? 'page' : undefined}
               aria-busy={pending || undefined}
+              data-nav-state={visual}
               onClick={(e) => onNavClick(item.href, e)}
+              onPointerEnter={() => prefetchHref(item.href)}
+              onFocus={() => prefetchHref(item.href)}
               className={cn(
                 'flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 text-micro transition-colors duration-150',
-                highlighted ? 'text-green-strong' : 'text-ink-3',
+                active && 'font-semibold text-green-strong',
+                pending && 'text-green-strong/85',
+                !active && !pending && 'text-ink-3',
               )}
             >
-              <Icon className="size-5" />
-              <span className="truncate">{item.label}</span>
+              <span className="relative">
+                <Icon className="size-5" />
+                {pending ? (
+                  <NavSpinner
+                    className="absolute -right-2 -top-1 size-3"
+                    label={labels.navigating}
+                  />
+                ) : null}
+              </span>
+              <span className={cn('truncate', pending && 'opacity-80')}>{item.label}</span>
             </Link>
           );
         })}

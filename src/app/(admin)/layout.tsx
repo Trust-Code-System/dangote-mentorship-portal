@@ -49,6 +49,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     collapse: tShell('collapse'),
     expand: tShell('expand'),
     more: tShell('more'),
+    updating: tShell('updating'),
+    navigating: tShell('navigating'),
   };
 
   return (
