@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { ConversationType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getMentorPairings, getMenteePairing } from '@/lib/pairings';
@@ -114,7 +115,8 @@ export async function listConversations(userId: string): Promise<ConversationSum
 }
 
 /** Total unread messages across all of the user's conversations (nav badge). */
-export async function countUnreadMessages(userId: string): Promise<number> {
+/** Request-scoped memo — shell badge + messages page share one count per pass. */
+export const countUnreadMessages = cache(async (userId: string): Promise<number> => {
   return prisma.message.count({
     where: {
       deletedAt: null,
@@ -126,7 +128,7 @@ export async function countUnreadMessages(userId: string): Promise<number> {
       },
     },
   });
-}
+});
 
 /** A conversation the user participates in, or null (also covers authz). */
 export async function getThread(

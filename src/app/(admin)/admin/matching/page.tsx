@@ -77,19 +77,21 @@ export default async function MatchingPage() {
   const featured = ranked[0];
   const queue = ranked.slice(1);
 
+  // Toast templates keep `{mentor}` / `{mentee}` placeholders for client-side
+  // `.replace()` — use `t.raw` so next-intl does not require values at render.
   const overrideLabels = {
     mentor: t('mentor'),
     overrideSubmit: t('overrideSubmit'),
     assigning: t('assigning'),
     doneTitle: t('overrideDoneTitle'),
-    done: t('overrideDone'),
+    done: t.raw('overrideDone') as string,
     errorTitle: t('overrideErrorTitle'),
   };
   const approveLabels = {
     approve: t('approve'),
     approving: t('approving'),
     doneTitle: t('approveDoneTitle'),
-    done: t('approveDone'),
+    done: t.raw('approveDone') as string,
     errorTitle: t('approveErrorTitle'),
   };
   const mentorOpts = mentorOptions.map((m) => ({
@@ -113,7 +115,7 @@ export default async function MatchingPage() {
             run: t('run'),
             running: t('running'),
             doneTitle: t('runDoneTitle'),
-            done: t('runDone'),
+            done: t.raw('runDone') as string,
             allMatched: t('runAllMatched'),
             errorTitle: t('runErrorTitle'),
           }}

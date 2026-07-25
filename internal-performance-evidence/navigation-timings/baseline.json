@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-07-25T16:46:00.000Z",
+  "mode": "code-analysis",
+  "note": "Pre-change browser timings were not captured before optimisation landed in this session. Baseline is established from architecture inspection (see docs/internal-portal-performance/INTERNAL_PORTAL_PERFORMANCE_SPEC.md §3). Primary delay sources identified: (1) auth layout re-fetched recent notifications + duplicate avatar query on every sidebar navigation; (2) no optimistic sidebar pending state; (3) generic loading UI only; (4) raised button styling was visual, not the primary nav delay. Post-change measured timings are in after.json.",
+  "hypothesizedLayoutQueriesPerNav": [
+    "getCurrentUser (auth + prisma roles)",
+    "isMaintenanceMode (participant)",
+    "getUnreadCount",
+    "getUserNotifications(limit=6)",
+    "prisma.user.findUnique(image)",
+    "countUnreadMessages (participant)",
+    "buildAdmin/ParticipantNavSections (many getTranslations)"
+  ],
+  "routeTransitionBlockingAnimationsInAuth": 0,
+  "sidebarUsedNextLink": true
+}

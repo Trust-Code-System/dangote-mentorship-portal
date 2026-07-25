@@ -73,7 +73,7 @@ export async function MenteeSummary({ data }: { data: MenteeDashboard }) {
             <Link
               href="/pair"
               aria-label={t('openPair')}
-              className="rounded-lg bg-green p-2 text-white transition-transform hover:scale-105"
+              className="rounded-lg border border-green-strong bg-green p-2 text-white transition-colors duration-150 hover:bg-green-strong"
             >
               <Video className="size-5" />
             </Link>

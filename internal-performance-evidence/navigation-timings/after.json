@@ -1,0 +1,73 @@
+{
+  "capturedAt": "2026-07-25T16:59:47.172Z",
+  "mode": "dev",
+  "project": "chromium",
+  "timings": [
+    {
+      "route": "matching",
+      "href": "/admin/matching",
+      "urlChangeMs": 676,
+      "contentMs": 9433,
+      "sidebarActiveMs": 203,
+      "failedRequests": 0
+    },
+    {
+      "route": "insights",
+      "href": "/admin/insights",
+      "urlChangeMs": 662,
+      "contentMs": 2618,
+      "sidebarActiveMs": 166,
+      "failedRequests": 0
+    },
+    {
+      "route": "programmes",
+      "href": "/admin/programmes",
+      "urlChangeMs": 3798,
+      "contentMs": 3925,
+      "sidebarActiveMs": 356,
+      "failedRequests": 0
+    },
+    {
+      "route": "cohorts",
+      "href": "/admin/cohorts",
+      "urlChangeMs": 3861,
+      "contentMs": 4022,
+      "sidebarActiveMs": 101,
+      "failedRequests": 0
+    },
+    {
+      "route": "mentors",
+      "href": "/admin/mentors",
+      "urlChangeMs": 632,
+      "contentMs": 2715,
+      "sidebarActiveMs": 194,
+      "failedRequests": 0
+    },
+    {
+      "route": "mentees",
+      "href": "/admin/mentees",
+      "urlChangeMs": 555,
+      "contentMs": 3097,
+      "sidebarActiveMs": 129,
+      "failedRequests": 0
+    },
+    {
+      "route": "invites",
+      "href": "/admin/invites",
+      "urlChangeMs": 4327,
+      "contentMs": 4525,
+      "sidebarActiveMs": 115,
+      "failedRequests": 0
+    },
+    {
+      "route": "notifications",
+      "href": "/notifications",
+      "urlChangeMs": 555,
+      "contentMs": 4517,
+      "sidebarActiveMs": 165,
+      "failedRequests": 0
+    }
+  ],
+  "medianContentMs": 3974,
+  "medianSidebarActiveMs": 166
+}

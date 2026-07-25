@@ -65,6 +65,13 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '5mb',
     },
+    // Client router cache for dynamic segments (default dynamic=0 forces a full
+    // RSC refetch on every sidebar click). 30s keeps navigations snappy while
+    // badges refresh client-side and auth still runs on hard loads / refresh.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

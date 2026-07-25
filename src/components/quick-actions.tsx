@@ -67,8 +67,8 @@ export function QuickActions({ items }: { items: QuickActionItem[] }) {
         aria-haspopup="menu"
         aria-label={t('title')}
         className={cn(
-          'flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground shadow-lg transition-transform hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          open && 'rotate-45',
+          'flex h-14 w-14 items-center justify-center rounded-full border border-green-strong bg-green text-2xl text-white transition-colors duration-150 hover:bg-green-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2 motion-reduce:transition-none',
+          open && 'bg-green-strong',
         )}
       >
         <span aria-hidden>+</span>

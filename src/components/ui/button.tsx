@@ -3,23 +3,32 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-// Button (§19 §4): primary green / secondary outline / ghost / destructive.
-// 44px min touch target, visible green focus ring, sentence case, reduced-motion
-// safe (color transition only). Radius 8px (rounded-md → control radius).
+// Flat enterprise buttons for the authenticated portal (internal performance
+// pass). Solid fills, thin borders, 150ms colour transitions — no gradient,
+// glow, multi-layer shadow, scale, or bounce. 44px default touch target and
+// visible green focus ring retained (§19 §4, a11y).
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  [
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium',
+    'transition-colors duration-150 motion-reduce:transition-none',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+    // Disabled: readable ink on muted surface — do not rely on opacity alone.
+    'disabled:pointer-events-none disabled:cursor-not-allowed disabled:border disabled:border-border disabled:bg-surface-2 disabled:text-ink-3 disabled:shadow-none disabled:opacity-100',
+    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  ].join(' '),
   {
     variants: {
       variant: {
-        // Primary: a subtle top-light gradient + green glow gives the raised,
-        // slightly-3D feel; both gradient stops clear AA against white text.
         default:
-          'bg-gradient-to-b from-green to-green-strong text-white shadow-glow hover:from-green-strong hover:to-green-strong hover:shadow-elevation active:translate-y-px',
-        secondary: 'border border-border bg-surface text-ink shadow-elevation hover:bg-surface-2',
-        outline: 'border border-border bg-surface text-ink hover:bg-surface-2',
-        ghost: 'text-ink hover:bg-surface-2',
-        destructive: 'bg-risk text-white shadow-elevation hover:bg-risk/90 active:translate-y-px',
-        link: 'text-green underline-offset-4 hover:underline',
+          'border border-green-strong bg-green text-white hover:bg-green-strong hover:border-green-strong active:translate-y-px',
+        secondary:
+          'border border-border bg-surface text-ink hover:bg-surface-2 hover:text-green-strong',
+        outline:
+          'border border-border bg-surface text-ink hover:bg-surface-2',
+        ghost: 'border border-transparent text-ink hover:bg-green-soft/60 hover:text-green-strong',
+        destructive:
+          'border border-risk bg-risk text-white hover:bg-risk/90 active:translate-y-px',
+        link: 'border border-transparent text-green underline-offset-4 hover:underline disabled:border-transparent disabled:bg-transparent',
       },
       size: {
         default: 'h-11 px-5 text-body', // 44px touch target (§4)

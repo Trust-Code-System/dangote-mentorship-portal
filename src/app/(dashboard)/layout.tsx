@@ -2,11 +2,8 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { RoleName } from '@prisma/client';
 import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
-import { prisma } from '@/lib/db/prisma';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
-import { getUnreadCount, getUserNotifications } from '@/lib/notifications/data';
-import { countUnreadMessages } from '@/features/messages/data';
 import { AppShell, type AppShellLabels } from '@/components/shell/app-shell';
 import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/sections';
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
@@ -51,35 +48,28 @@ function roleLabelOf(role: RoleName): string {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  // Defense in depth: middleware already gates this group, but never trust the
-  // edge alone (CLAUDE.md §3).
+  // Defense in depth: proxy already gates this group, but never trust the
+  // edge alone (CLAUDE.md §3). Auth + maintenance stay on the critical path;
+  // unread badges load in the client shell so navigations are not blocked on
+  // notification/message counts.
   const user = await getCurrentUser();
   if (!user) redirect('/login');
 
-  // Maintenance mode (admin-toggled) locks the authenticated participant area;
-  // admins keep access so they can work during the window (CLAUDE.md §4).
   if (!hasAnyRole(user, ADMIN_ROLES) && (await isMaintenanceMode())) {
     redirect('/maintenance');
   }
 
   const isAdmin = hasAnyRole(user, ADMIN_ROLES);
-  const [tNav, tShell, tCommon, unread, recentRows, account, unreadMessages] = await Promise.all([
+  const [tNav, tShell, tCommon] = await Promise.all([
     getTranslations('nav'),
     getTranslations('shell'),
     getTranslations('common'),
-    getUnreadCount(user.id),
-    getUserNotifications(user.id, 6),
-    prisma.user.findUnique({ where: { id: user.id }, select: { image: true } }),
-    // Admins are never DM participants (§10), so they have no message badge.
-    isAdmin ? Promise.resolve(0) : countUnreadMessages(user.id),
   ]);
 
-  // Admins reach the shared Notifications / Support / Help / Profile pages (which
-  // live in this group) too — give them their admin nav so they don't lose it on
-  // the way in. Participants get the mentor/mentee nav.
+  // Badges start at 0; AppShell hydrates real counts via fetchShellBadges().
   const sections = isAdmin
-    ? await buildAdminNavSections(unread, user.roles)
-    : await buildParticipantNavSections(user.roles, unread, unreadMessages);
+    ? await buildAdminNavSections(0, user.roles)
+    : await buildParticipantNavSections(user.roles, 0, 0);
 
   const labels: AppShellLabels = {
     brand: tCommon('appShortName'),
@@ -97,24 +87,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     more: tShell('more'),
   };
 
-  const recent = recentRows.map((n) => ({
-    id: n.id,
-    title: n.title,
-    body: n.body,
-    link: n.link,
-    read: n.readAt !== null,
-  }));
-
   return (
     <AppShell
       sections={sections}
-      unread={unread}
-      recent={recent}
+      unread={0}
+      loadBadges
       user={{
         name: user.name ?? user.email,
         roleLabel: user.roles.map(roleLabelOf).join(' · '),
         initials: initialsOf(user.name, user.email),
-        imageUrl: account?.image ? `/api/avatar/${user.id}` : null,
+        imageUrl: user.image ? `/api/avatar/${user.id}` : null,
       }}
       labels={labels}
     >

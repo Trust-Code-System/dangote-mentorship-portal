@@ -83,7 +83,7 @@ export function AtlasCopilot({
           aria-label={labels.open}
           onClick={() => setOpen(true)}
           className={cn(
-            'fixed right-6 z-40 flex size-14 items-center justify-center rounded-full bg-gradient-to-b from-green-light to-green text-white shadow-glow transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40 motion-reduce:transition-none',
+            'fixed right-6 z-40 flex size-14 items-center justify-center rounded-full border border-green-strong bg-green text-white transition-colors duration-150 hover:bg-green-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/40 motion-reduce:transition-none',
             raised ? 'bottom-24' : 'bottom-6',
           )}
         >
@@ -96,10 +96,10 @@ export function AtlasCopilot({
         <div
           role="dialog"
           aria-label={labels.title}
-          className="fixed inset-x-4 bottom-4 z-50 flex h-[32rem] max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-elevation-lg sm:inset-x-auto sm:right-6 sm:w-[24rem]"
+          className="fixed inset-x-4 bottom-4 z-50 flex h-[32rem] max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-surface sm:inset-x-auto sm:right-6 sm:w-[24rem]"
         >
           {/* Header */}
-          <div className="flex items-center gap-3 border-b border-border bg-gradient-to-b from-green-light to-green px-4 py-3 text-white">
+          <div className="flex items-center gap-3 border-b border-border bg-green px-4 py-3 text-white">
             <span className="flex size-8 items-center justify-center rounded-full bg-white/20">
               <Sparkles className="size-4" />
             </span>

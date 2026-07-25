@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { prisma } from '@/lib/db/prisma';
 
 // Maintenance mode is a single global feature flag (cohortId = null, per
@@ -8,10 +9,10 @@ import { prisma } from '@/lib/db/prisma';
 export const MAINTENANCE_FLAG_KEY = 'maintenance_mode';
 
 /** Reads the global maintenance flag. Defaults to off when the row is absent. */
-export async function isMaintenanceMode(): Promise<boolean> {
+export const isMaintenanceMode = cache(async (): Promise<boolean> => {
   const flag = await prisma.featureFlag.findFirst({
     where: { key: MAINTENANCE_FLAG_KEY, cohortId: null, deletedAt: null },
     select: { enabled: true },
   });
   return flag?.enabled ?? false;
-}
+});

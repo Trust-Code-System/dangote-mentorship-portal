@@ -27,6 +27,8 @@ export interface SessionUser {
   id: string;
   email: string;
   name?: string | null;
+  /** Storage key for avatar; used by shell so layouts need no second user query. */
+  image: string | null;
   roles: RoleName[];
   adminCohortScope: AdminCohortScope;
   locale: string;
@@ -39,6 +41,7 @@ const loadActiveUser = cache(async (userId: string): Promise<SessionUser | null>
       id: true,
       email: true,
       name: true,
+      image: true,
       locale: true,
       userRoles: {
         where: { deletedAt: null },
@@ -64,6 +67,7 @@ const loadActiveUser = cache(async (userId: string): Promise<SessionUser | null>
     id: user.id,
     email: user.email,
     name: user.name,
+    image: user.image,
     roles,
     adminCohortScope,
     locale: user.locale,

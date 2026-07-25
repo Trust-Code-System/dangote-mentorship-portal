@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import type { Notification } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { DEFAULT_PREFS } from './types';
@@ -16,11 +17,12 @@ export async function getUserNotifications(
   });
 }
 
-export async function getUnreadCount(userId: string): Promise<number> {
+/** Request-scoped memo so layout + page don't double-count in one RSC pass. */
+export const getUnreadCount = cache(async (userId: string): Promise<number> => {
   return prisma.notification.count({
     where: { userId, deletedAt: null, readAt: null },
   });
-}
+});
 
 export interface NotificationPrefsView {
   emailEnabled: boolean;

@@ -40,6 +40,10 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { BrandMark } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
+import {
+  fetchRecentNotifications,
+  fetchShellBadges,
+} from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
 
 // AppShell (§19 §3) — the authenticated chrome shared by the participant and
@@ -155,8 +159,10 @@ export interface AppShellUser {
 export interface AppShellProps {
   sections: NavSection[];
   user: AppShellUser;
-  unread: number;
-  recent: NotifItem[];
+  /** Initial unread notification count (layouts pass 0; client hydrates). */
+  unread?: number;
+  /** When true, fetch notification/message badges after mount (non-blocking). */
+  loadBadges?: boolean;
   labels: AppShellLabels;
   children: React.ReactNode;
 }
@@ -168,15 +174,54 @@ function isActive(pathname: string, href: string, exact?: boolean): boolean {
   return href !== '/' && pathname.startsWith(href + '/');
 }
 
-export function AppShell({ sections, user, unread, recent, labels, children }: AppShellProps) {
+function withBadges(
+  sections: NavSection[],
+  unreadNotifications: number,
+  unreadMessages: number,
+): NavSection[] {
+  return sections.map((section) => ({
+    ...section,
+    items: section.items.map((item) => {
+      if (item.href === '/notifications') {
+        return { ...item, badge: unreadNotifications || undefined };
+      }
+      if (item.href === '/messages' || item.href.startsWith('/messages/')) {
+        return { ...item, badge: unreadMessages || undefined };
+      }
+      return item;
+    }),
+  }));
+}
+
+export function AppShell({
+  sections,
+  user,
+  unread: unreadProp = 0,
+  loadBadges = false,
+  labels,
+  children,
+}: AppShellProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
+  // Optimistic sidebar highlight — set on click, cleared when the URL commits.
+  const [pendingHref, setPendingHref] = React.useState<string | null>(null);
+  const [recent, setRecent] = React.useState<NotifItem[]>([]);
+  const [recentStatus, setRecentStatus] = React.useState<'idle' | 'loading' | 'ready' | 'error'>(
+    'idle',
+  );
+  const [unread, setUnread] = React.useState(unreadProp);
+  const [unreadMessages, setUnreadMessages] = React.useState(0);
 
-  // Close the notification dropdown on route change.
+  // Close overlays and clear pending nav when the route commits.
+  // Reset the dropdown cache so the next open reflects fresh unread bodies.
   React.useEffect(() => {
     setNotifOpen(false);
+    setMobileOpen(false);
+    setPendingHref(null);
+    setRecent([]);
+    setRecentStatus('idle');
   }, [pathname]);
 
   // Persist the desktop collapse preference so it doesn't reset on navigation.
@@ -188,21 +233,88 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
     window.localStorage.setItem('shell:collapsed', collapsed ? '1' : '0');
   }, [collapsed]);
 
-  // Close the mobile drawer on route change.
+  // Badge hydration — runs after paint and on focus; never blocks sidebar clicks.
   React.useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+    if (!loadBadges) return;
+    let cancelled = false;
 
-  const allItems = sections.flatMap((s) => s.items);
+    function refreshBadges() {
+      void fetchShellBadges().then((result) => {
+        if (cancelled || !result.ok) return;
+        setUnread(result.data.unreadNotifications);
+        setUnreadMessages(result.data.unreadMessages);
+      });
+    }
+
+    refreshBadges();
+    function onFocus() {
+      refreshBadges();
+    }
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadBadges, pathname]);
+
+  // Load recent notification bodies only when the dropdown opens (not on every nav).
+  React.useEffect(() => {
+    if (!notifOpen || recentStatus === 'loading' || recentStatus === 'ready') return;
+    let cancelled = false;
+    setRecentStatus('loading');
+    void fetchRecentNotifications(6).then((result) => {
+      if (cancelled) return;
+      if (result.ok) {
+        setRecent(result.data.items);
+        setRecentStatus('ready');
+      } else {
+        setRecentStatus('error');
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [notifOpen, recentStatus]);
+
+  const navSections = withBadges(sections, unread, unreadMessages);
+  const allItems = navSections.flatMap((s) => s.items);
   const primary = allItems.filter((i) => i.primary).slice(0, 4);
+  const navigating = pendingHref !== null;
+
+  function onNavClick(href: string, event: React.MouseEvent<HTMLAnchorElement>) {
+    // Same destination already pending — ignore repeat clicks without blocking others.
+    if (pendingHref === href) {
+      event.preventDefault();
+      return;
+    }
+    // Already on this exact route — no pending chrome.
+    if (href === pathname) return;
+    setPendingHref(href);
+  }
 
   return (
     <div className="min-h-screen bg-bg">
+      {/* Thin top progress — visible only while a sidebar/tab nav is pending. */}
+      <div
+        aria-hidden={!navigating}
+        className={cn(
+          'pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden bg-transparent',
+          navigating ? 'opacity-100' : 'opacity-0',
+        )}
+      >
+        <div
+          className={cn(
+            'h-full w-1/3 bg-green',
+            navigating && 'animate-pulse motion-reduce:animate-none',
+          )}
+        />
+      </div>
+
       {/* ── Mobile backdrop ── */}
       {mobileOpen && (
         <div
           aria-hidden
-          className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-ink/30 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -263,30 +375,35 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
 
         {/* Nav */}
         <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-2">
-          {sections.map((section, si) => (
+          {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
               {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
                 const active = isActive(pathname, item.href, item.exact);
+                const pending = pendingHref === item.href;
+                const highlighted = active || pending;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     title={collapsed ? item.label : undefined}
                     aria-current={active ? 'page' : undefined}
+                    aria-busy={pending || undefined}
+                    onClick={(e) => onNavClick(item.href, e)}
                     className={cn(
-                      'group flex items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
+                      'group flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
                       collapsed && 'lg:justify-center lg:px-0',
-                      active
+                      highlighted
                         ? 'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong'
                         : 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                      pending && !active && 'opacity-90',
                     )}
                   >
                     <Icon
                       className={cn(
                         'size-4 shrink-0',
-                        active ? 'text-green-strong' : 'text-ink-3 group-hover:text-green-light',
+                        highlighted ? 'text-green-strong' : 'text-ink-3 group-hover:text-green-light',
                       )}
                     />
                     {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
@@ -294,7 +411,7 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                       <span
                         className={cn(
                           'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-micro text-white',
-                          active ? 'bg-green-strong' : 'bg-green',
+                          highlighted ? 'bg-green-strong' : 'bg-green',
                         )}
                       >
                         {item.badge}
@@ -396,13 +513,23 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                     className="fixed inset-0 z-40"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface shadow-elevation-lg">
+                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface">
                     <div className="border-b border-border px-4 py-3">
                       <p className="text-small font-semibold text-ink">
                         {labels.notificationsTitle}
                       </p>
                     </div>
-                    {recent.length === 0 ? (
+                    {recentStatus === 'loading' || recentStatus === 'idle' ? (
+                      <div className="space-y-3 px-4 py-4" aria-busy="true">
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                      </div>
+                    ) : recentStatus === 'error' ? (
+                      <p className="px-4 py-6 text-center text-small text-ink-3">
+                        {labels.noNotifications}
+                      </p>
+                    ) : recent.length === 0 ? (
                       <p className="px-4 py-6 text-center text-small text-ink-3">
                         {labels.noNotifications}
                       </p>
@@ -450,7 +577,10 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                     )}
                     <Link
                       href="/notifications"
-                      onClick={() => setNotifOpen(false)}
+                      onClick={(e) => {
+                        setNotifOpen(false);
+                        onNavClick('/notifications', e);
+                      }}
                       className="block border-t border-border px-4 py-3 text-center text-small font-medium text-green-strong hover:bg-surface-2"
                     >
                       {labels.seeAll}
@@ -485,14 +615,18 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
         {primary.map((item) => {
           const Icon = ICONS[item.icon];
           const active = isActive(pathname, item.href, item.exact);
+          const pending = pendingHref === item.href;
+          const highlighted = active || pending;
           return (
             <Link
               key={item.href}
               href={item.href}
               aria-current={active ? 'page' : undefined}
+              aria-busy={pending || undefined}
+              onClick={(e) => onNavClick(item.href, e)}
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 text-micro',
-                active ? 'text-green-strong' : 'text-ink-3',
+                'flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 text-micro transition-colors duration-150',
+                highlighted ? 'text-green-strong' : 'text-ink-3',
               )}
             >
               <Icon className="size-5" />

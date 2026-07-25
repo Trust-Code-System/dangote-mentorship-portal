@@ -288,6 +288,12 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 
 - **The public homepage `/` was rebuilt** as a twelve-part dark editorial narrative with a custom React Three Fiber hero, moving out of `(public)` into a new `(landing)` route group with its own chrome — `/about`, `/faq` and `/design` keep the existing light `SiteHeader`/`SiteFooter` and the authenticated portal is untouched. Greens and gold are sampled pixel-exact from the supplied logo artwork (`#14B21F`, `#119A19`, `#CD9933`); Instrument Serif joins Public Sans as the second and last family. New `landing` namespace in EN/FR, key-parity enforced by unit test. Fabricated participation figures ("120+ mentors", "300+ mentees") were removed pending owner confirmation and a test now blocks their return; the page states only repo-verifiable structure (9 months, 9 stages, 2 languages, 6 criteria, 6 roles, 1 hard rule). Lighthouse: accessibility 100/100 desktop+mobile, performance 81 desktop / 70 mobile, CLS 0.0006, desktop LCP 1.18s. Mobile LCP is over budget because the app-wide Sentry browser SDK (139.6 KiB) dominates the mobile critical path — flagged as an owner decision, not changed here. See `LANDING_PAGE_IMPLEMENTATION_REPORT.md`.
 
+## Perf — authenticated portal flat UI + faster sidebar navigation
+
+- **Flattened internal buttons** (solid green, thin border, 150ms colour transitions; no glow/gradient/3D shadows) across `Button`, FAB, Quick Actions, Atlas launcher.
+- **Sidebar clicks get immediate pending/active feedback** plus a thin top progress cue; shell stays mounted; destination-shaped `loading.tsx` skeletons for key routes.
+- **Slimmed auth layouts:** dropped per-navigation recent-notification list + duplicate avatar query; unread badges hydrate client-side (layouts no longer await badge DB counts); `experimental.staleTimes.dynamic: 30` for snappier client navigations; recent bodies load when the dropdown opens; Insights Recharts dynamically imported. Features/routes removed: **0**. Docs: `docs/internal-portal-performance/`.
+
 ## Fix — locale switcher refreshes UI after language change
 
 - **Restored `revalidatePath('/', 'layout')` in `setLocale`.** A merge conflict resolution dropped the layout revalidation that applies the `NEXT_LOCALE` cookie to the RSC tree. Without it, clicking Français set the cookie but left `<html lang="en">` and English copy in place under `next start` (CI E2E). Cookie write alone does not refresh production RSC caches.
