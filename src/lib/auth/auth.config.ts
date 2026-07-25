@@ -13,10 +13,25 @@ import type { AdminCohortScope } from './scope';
 // Prisma client into the edge bundle; the canonical list lives in roles.ts.
 const ADMIN_ROLE_NAMES = new Set(['SUPER_ADMIN']);
 
+// The public Knowledge Library (PUBLIC_PAGES_ROUTE_MAP.md §5).
+//
+// `/contact` is the PUBLIC support page. The private participant
+// support-request workflow is `/support`, which is deliberately NOT listed here
+// and must stay gated — that route collision is the whole reason the public
+// page is `/contact` rather than `/support`.
+//
 // `/design` is the Design System component preview (§19) — a dev/demo gallery.
 // It is public ONLY outside production (production-readiness-report.md B3); in
 // production it requires a session like any other authenticated route.
-const PUBLIC_PREFIXES = ['/about', '/faq', '/programme', '/mentor-guide', '/mentee-guide'];
+const PUBLIC_PREFIXES = [
+  '/about',
+  '/faq',
+  '/confidentiality',
+  '/contact',
+  '/programme',
+  '/mentor-guide',
+  '/mentee-guide',
+];
 if (process.env.NODE_ENV !== 'production') {
   PUBLIC_PREFIXES.push('/design');
 }

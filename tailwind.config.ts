@@ -57,12 +57,42 @@ const config: Config = {
         accent: { DEFAULT: withAlpha('--accent'), foreground: withAlpha('--accent-foreground') },
         popover: { DEFAULT: withAlpha('--popover'), foreground: withAlpha('--popover-foreground') },
         card: { DEFAULT: withAlpha('--card'), foreground: withAlpha('--card-foreground') },
+
+        // ── BLAK MOH cinematic landing palette (additive; landing route only) ──
+        // Greens and gold sampled pixel-exact from the supplied logo artwork.
+        blak: {
+          black: withAlpha('--blak-black'),
+          forest: withAlpha('--blak-forest'),
+          'forest-2': withAlpha('--blak-forest-2'),
+          green: withAlpha('--blak-green'),
+          'green-deep': withAlpha('--blak-green-deep'),
+          'green-soft': withAlpha('--blak-green-soft'),
+          gold: withAlpha('--blak-gold'),
+          'gold-soft': withAlpha('--blak-gold-soft'),
+          ivory: withAlpha('--blak-ivory'),
+          text: withAlpha('--blak-text'),
+          'text-2': withAlpha('--blak-text-2'),
+          border: withAlpha('--blak-border'),
+          glass: withAlpha('--blak-glass'),
+        },
+
+        // ── Warm ivory authentication surface (auth routes only) ──
+        auth: {
+          surface: withAlpha('--auth-surface'),
+          field: withAlpha('--auth-field'),
+          border: withAlpha('--auth-border'),
+          ink: withAlpha('--auth-ink'),
+          'ink-2': withAlpha('--auth-ink-2'),
+        },
       },
       fontFamily: {
         // One grotesque for everything (Atlas-style): Inter for both headings
         // (heavy weights) and body/UI. Self-hosted via next/font (app/layout.tsx).
         display: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        // Editorial serif — the landing page's second (and last) family. Used
+        // sparingly for emotional statements only, never for UI or body copy.
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
       },
       fontSize: {
         // Type scale (§2) — [size, lineHeight]. Headings run heavy (Atlas-style):
@@ -74,6 +104,27 @@ const config: Config = {
         body: ['0.9375rem', { lineHeight: '1.5rem' }], // 15/24
         small: ['0.8125rem', { lineHeight: '1.25rem' }], // 13/20
         micro: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.04em', fontWeight: '600' }], // 11/16
+
+        // ── Editorial display sizes, landing page only. Fluid via clamp so
+        // 320px → 1920px needs no per-breakpoint overrides and 200% zoom holds.
+        'blak-hero': [
+          'clamp(2.5rem, 6.2vw, 5.25rem)',
+          { lineHeight: '1.02', letterSpacing: '-0.03em' },
+        ],
+        'blak-statement': [
+          'clamp(1.875rem, 4vw, 3.5rem)',
+          { lineHeight: '1.12', letterSpacing: '-0.02em' },
+        ],
+        'blak-section': [
+          'clamp(1.75rem, 3vw, 2.75rem)',
+          { lineHeight: '1.15', letterSpacing: '-0.02em' },
+        ],
+        // Landing body copy never drops below 16px (spec §6).
+        'blak-body': ['clamp(1rem, 1.1vw, 1.125rem)', { lineHeight: '1.65' }],
+        'blak-label': [
+          '0.75rem',
+          { lineHeight: '1rem', letterSpacing: '0.14em', fontWeight: '600' },
+        ],
       },
       borderRadius: {
         lg: 'var(--radius)', // 16px cards
