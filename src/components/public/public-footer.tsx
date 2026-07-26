@@ -30,6 +30,9 @@ export async function PublicFooter() {
   const year = new Date().getFullYear();
 
   const programme = [
+    { href: '/programme', label: t('programmeGuide') },
+    { href: '/mentor-guide', label: t('mentorGuide') },
+    { href: '/mentee-guide', label: t('menteeGuide') },
     { href: '/about', label: t('about') },
     { href: '/faq', label: t('faq') },
     { href: '/confidentiality', label: t('confidentiality') },

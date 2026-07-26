@@ -419,6 +419,7 @@
     "title": "Importer des données",
     "upload": "Téléverser un fichier",
     "uploadHint": "CSV ou Excel (.xlsx) — y compris les exports Google Sheets/Forms.",
+    "uploadFailed": "Le téléversement a été interrompu. Veuillez réessayer.",
     "file": "Fichier",
     "targetRole": "Ces lignes concernent",
     "mentors": "Mentors",
@@ -457,7 +458,27 @@
     "stepMapping": "Mappage",
     "stepValidation": "Validation",
     "stepReview": "Revue",
-    "stepCommit": "Validation finale"
+    "stepCommit": "Validation finale",
+    "breadcrumb": "Administration / Gestion des utilisateurs / Importation groupée",
+    "reviewSubtitle": "Examinez, validez et enregistrez les nouveaux dossiers de mentors et de mentorés.",
+    "exportCsv": "Exporter en CSV",
+    "systemHealth": "État du système",
+    "reviewNeeded": "Vérification requise",
+    "optimized": "Optimisé",
+    "importedRecords": "Dossiers importés",
+    "fullName": "Nom complet",
+    "role": "Rôle",
+    "mentorRole": "Mentor",
+    "menteeRole": "Mentoré",
+    "assistant": "Assistant IA",
+    "validationSummary": "{count, plural, =0 {Aucun dossier ne requiert d'attention avant validation.} one {La validation a identifié # dossier à examiner avant validation.} other {La validation a identifié # dossiers à examiner avant validation.}}",
+    "criticalInsight": "Point prioritaire",
+    "resolveBlocking": "Corrigez d'abord les adresses électroniques et champs obligatoires bloquants.",
+    "readyForReview": "Tous les dossiers sont prêts pour la vérification finale.",
+    "systemStatus": "État du système",
+    "validationComplete": "Validation terminée",
+    "generateAuditReport": "Générer le rapport d'audit complet",
+    "rowStatus": { "VALID": "Valide", "FLAGGED": "À vérifier", "FIXED": "Corrigé", "ACCEPTED": "Accepté", "REJECTED": "Rejeté" }
   },
   "matching": {
     "title": "Moteur de jumelage",
@@ -522,7 +543,12 @@
     "confidence": "Confiance du jumelage",
     "optimalPair": "Paire optimale",
     "aiRationale": "Justification de l’IA",
-    "queue": "File d’attente ({count} jumelages)"
+    "queue": "File d’attente ({count} jumelages)",
+    "cohortStrength": "Solidité de la cohorte",
+    "compatibilitySignals": "Signaux réels de compatibilité pour cette recommandation.",
+    "overallConfidence": "Confiance globale",
+    "languageCompatibility": "Compatibilité linguistique",
+    "rankedUsingRules": "Classement fondé sur les règles de jumelage configurées et les données des profils."
   },
   "profile": {
     "title": "Mon profil",
@@ -767,11 +793,56 @@
     "forbidden": "Vous devez avoir un jumelage actif avant de pouvoir signer."
   },
   "certificate": {
-    "title": "Certificat de réussite",
+    "title": "Certificat d’achèvement",
     "download": "Télécharger / Imprimer",
-    "earnedNote": "Félicitations — votre certificat est prêt. Téléchargez-le ou imprimez-le ci-dessous.",
-    "previewNote": "Un aperçu de votre certificat. Il devient officiel une fois la formation terminée, un objectif approuvé et vos évaluations effectuées.",
-    "noPairing": "Votre certificat se débloque une fois que vous et votre partenaire avez accepté votre jumelage."
+    "downloadPdf": "Télécharger le PDF",
+    "printPreview": "Imprimer l’aperçu",
+    "earnedNote": "Félicitations — votre certificat officiel est prêt en PDF haute résolution adapté à l’impression.",
+    "previewNote": "Cet aperçu devient officiel après la formation, l’approbation d’un objectif et la soumission des deux revues du programme.",
+    "noPairing": "Votre certificat se débloque une fois que vous et votre partenaire avez accepté votre jumelage.",
+    "statusIssued": "Certificat officiel",
+    "statusPreview": "Aperçu",
+    "statusLocked": "Verrouillé",
+    "viewFrench": "Voir en français",
+    "viewEnglish": "Voir en anglais",
+    "emptyTitle": "Aucun certificat n’est encore disponible",
+    "emptyBody": "Un jumelage de mentorat accepté est nécessaire avant de créer un aperçu du certificat.",
+    "requirementsTitle": "Conditions d’achèvement",
+    "requirements": {
+      "training": "Terminer la formation du programme",
+      "goal": "Faire approuver au moins un objectif",
+      "midterm": "Soumettre la revue de mi-parcours",
+      "final": "Soumettre la revue finale"
+    },
+    "documentDetails": "Détails du certificat",
+    "programme": "Programme",
+    "cohort": "Cohorte",
+    "language": "Langue",
+    "english": "Anglais",
+    "french": "Français"
+  },
+  "adminCertificates": {
+    "navLabel": "Certificats",
+    "eyebrow": "Reconnaissance du programme",
+    "title": "Gestion des certificats",
+    "subtitle": "Prévisualisez et générez des certificats en français ou en anglais à partir des données réelles d’achèvement du programme.",
+    "participant": "Participant",
+    "selectParticipant": "Sélectionner un participant",
+    "language": "Langue du certificat",
+    "mentor": "Mentor",
+    "mentee": "Mentoré(e)",
+    "generate": "Générer l’aperçu",
+    "regenerate": "Régénérer",
+    "downloadPdf": "Télécharger le PDF",
+    "downloadPreview": "Télécharger l’aperçu marqué",
+    "eligible": "Admissible · prêt",
+    "ineligible": "Incomplet · aperçu uniquement",
+    "ineligibleWarning": "Cette personne n’a pas rempli toutes les conditions du programme. Le document reste clairement marqué comme aperçu et ne peut pas être délivré comme certificat officiel.",
+    "regeneratedStatus": "L’aperçu a été régénéré à partir des données les plus récentes du programme.",
+    "emptyTitle": "Aucun participant jumelé",
+    "emptyBody": "Les certificats deviennent disponibles après l’acceptation du jumelage par le mentor et le mentoré.",
+    "selectTitle": "Sélectionnez une personne pour commencer",
+    "selectBody": "Le programme, la cohorte, le rôle, la langue, l’état d’achèvement et l’identifiant du certificat apparaîtront ici."
   },
   "goals": {
     "title": "Objectifs",
@@ -928,9 +999,18 @@
     "threadEmpty": "Aucun message — dites bonjour.",
     "back": "Retour aux conversations",
     "loadOlder": "Charger les messages précédents",
+    "sendFailed": "Message non envoyé. Votre texte est conservé pour réessayer.",
+    "retry": "Réessayer",
     "participantSubtitle": "Binôme de mentorat",
     "viewPair": "Ouvrir l’espace du binôme",
-    "viewGoals": "Objectifs partagés"
+    "viewGoals": "Objectifs partagés",
+    "conversationListTitle": "Discussions",
+    "mentorshipFocus": "Axes du mentorat",
+    "strategy": "Stratégie",
+    "leadership": "Leadership",
+    "sharedAssets": "Ressources partagées",
+    "agreementDocument": "Convention de mentorat",
+    "sessionNotes": "Comptes rendus de séance"
   },
   "meetings": {
     "title": "Rencontres",
@@ -1580,7 +1660,19 @@
     "enableButton": "Activer le mode maintenance",
     "disableButton": "Désactiver le mode maintenance",
     "confirmEnable": "Cela bloquera immédiatement tous les mentors, mentorés, formateurs et évaluateurs. Les administrateurs conservent l’accès. Continuer ?",
-    "confirmEnableButton": "Oui, activer"
+    "confirmEnableButton": "Oui, activer",
+    "integrationsTitle": "État des intégrations Microsoft",
+    "integrationsDescription": "Seul l'état de configuration est affiché. Les secrets ne sont jamais révélés.",
+    "missingVariables": "Variables d'environnement manquantes",
+    "integrationStatus": { "configured": "Configuré", "partial": "Incomplet", "disabled": "Désactivé" },
+    "integration": {
+      "entra": "Authentification Microsoft Entra",
+      "entraDescription": "Connexion facultative avec le compte professionnel. La connexion par mot de passe reste disponible si elle est désactivée.",
+      "graphMail": "Courriel Microsoft Graph",
+      "graphMailDescription": "Envoi des réinitialisations de mot de passe, invitations et notifications.",
+      "graphCalendar": "Calendrier Microsoft Graph",
+      "graphCalendarDescription": "Création et annulation d'événements Outlook pour les réunions planifiées."
+    }
   },
   "maintenance": {
     "title": "Mode maintenance",
@@ -1855,6 +1947,9 @@
       "navLabel": "Pied de page",
       "sectionsLabel": "Programme",
       "accessLabel": "Accès",
+      "programmeGuide": "Guide du programme",
+      "mentorGuide": "Guide du mentor",
+      "menteeGuide": "Guide du mentoré",
       "about": "À propos du programme",
       "faq": "FAQ",
       "support": "Assistance",
@@ -2347,6 +2442,47 @@
         "title": "La plupart des réponses",
         "titleAccent": "sont déjà écrites.",
         "body": "La FAQ couvre l'accès, le jumelage, les objectifs, les séances, la langue et la confidentialité. Les participants peuvent poser toute autre question en privé après connexion."
+      }
+    },
+    "guides": {
+      "programme": {
+        "meta": { "title": "Guide du programme — BLAK MOH", "description": "Une vue pratique du parcours de mentorat BLAK MOH sur neuf mois." },
+        "hero": { "eyebrow": "Guide du programme", "breadcrumb": "Guide du programme", "title": "Un programme.", "titleAccent": "Neuf étapes visibles.", "lede": "BLAK MOH accompagne chaque binôme du profil et de la formation jusqu'au jumelage, aux objectifs, aux séances, aux revues et à l'achèvement." },
+        "steps": {
+          "eyebrow": "Le parcours", "title": "Comment fonctionne le programme", "lede": "Chaque étape ouvre la suivante, tout en laissant les personnes concernées décider.",
+          "one": { "title": "Se préparer et se former", "body": "Les participants complètent leur profil et la formation du programme avant toute proposition de binôme." },
+          "two": { "title": "Examiner et accepter le jumelage", "body": "Le moteur classe les binômes compatibles sur la langue ; un administrateur valide, puis les deux participants répondent." },
+          "three": { "title": "Fixer des objectifs et se rencontrer", "body": "Le binôme signe les accords, définit des objectifs approuvés, planifie les réunions et consigne les séances." },
+          "four": { "title": "Faire le bilan et achever", "body": "Les revues de mi-parcours et finale retracent les progrès avant la délivrance du certificat aux participants admissibles." }
+        },
+        "privacy": { "eyebrow": "Confidentialité", "title": "Les progrès sont visibles ; les échanges privés ne le sont pas.", "body": "Les administrateurs pilotent la cohorte sans lire les messages directs ni les journaux privés.", "detail": "La page Confidentialité explique ce que chaque participant, mentor et administrateur peut voir." },
+        "cta": { "title": "Prêt à poursuivre", "titleAccent": "votre parcours ?", "body": "Connectez-vous pour voir votre étape actuelle, ou consultez la FAQ pour plus de détails." }
+      },
+      "mentor": {
+        "meta": { "title": "Guide du mentor — BLAK MOH", "description": "Conseils pratiques pour les mentors participant à BLAK MOH." },
+        "hero": { "eyebrow": "Guide du mentor", "breadcrumb": "Guide du mentor", "title": "Transmettre l'expérience.", "titleAccent": "Construire l'autonomie.", "lede": "Les mentors guident un parcours structuré de neuf mois ; chaque validation d'objectif, compte rendu de séance et décision reste humaine." },
+        "steps": {
+          "eyebrow": "Votre rôle", "title": "Ce que font les mentors", "lede": "Le portail rend la prochaine action visible sans remplacer la relation.",
+          "one": { "title": "Terminer la formation et examiner le jumelage", "body": "Suivez la formation requise, lisez la justification du jumelage et acceptez ou refusez le binôme proposé." },
+          "two": { "title": "Définir votre manière de travailler", "body": "Signez avec votre mentoré les accords de mentorat et de confidentialité avant de commencer." },
+          "three": { "title": "Examiner les objectifs et tenir les séances", "body": "Validez, commentez ou renvoyez les objectifs, puis planifiez les réunions et consignez les actions convenues." },
+          "four": { "title": "Soutenir les revues et l'achèvement", "body": "Complétez les revues de mi-parcours et finale et aidez le mentoré à démontrer ses progrès." }
+        },
+        "privacy": { "eyebrow": "Votre espace privé", "title": "Les messages directs et notes privées restent bien délimités.", "body": "Seuls les participants à la conversation lisent les messages directs, et les notes privées du mentor ne sont montrées ni au mentoré ni aux administrateurs.", "detail": "Les comptes rendus de séance et la progression des objectifs restent visibles lorsque le suivi du programme l'exige." },
+        "cta": { "title": "La prochaine étape du mentoré", "titleAccent": "commence par une action claire.", "body": "Connectez-vous pour consulter votre tableau de bord, les objectifs, les réunions et les messages." }
+      },
+      "mentee": {
+        "meta": { "title": "Guide du mentoré — BLAK MOH", "description": "Conseils pratiques pour les mentorés participant à BLAK MOH." },
+        "hero": { "eyebrow": "Guide du mentoré", "breadcrumb": "Guide du mentoré", "title": "Porter l'objectif.", "titleAccent": "S'appuyer sur les conseils.", "lede": "Les mentorés façonnent leur objectif de développement, apportent le travail à chaque séance et conservent les preuves de progression." },
+        "steps": {
+          "eyebrow": "Votre rôle", "title": "Ce que font les mentorés", "lede": "Le programme apporte la structure ; vous restez responsable de la direction et du travail.",
+          "one": { "title": "Compléter votre profil et la formation", "body": "Tenez à jour votre expérience, vos objectifs, votre langue et vos disponibilités, puis terminez la formation." },
+          "two": { "title": "Examiner le jumelage et signer", "body": "Acceptez ou refusez le mentor proposé, puis signez les deux accords requis lorsque le binôme est accepté." },
+          "three": { "title": "Créer des objectifs et apporter des preuves", "body": "Rédigez des objectifs SMART, soumettez-les au mentor et joignez des preuves au fil de la progression." },
+          "four": { "title": "Réfléchir et achever", "body": "Consignez vos réflexions, complétez les deux revues et remplissez toutes les conditions du certificat." }
+        },
+        "privacy": { "eyebrow": "Votre espace privé", "title": "Vous choisissez ce qui quitte votre journal.", "body": "Les entrées du journal sont privées par défaut et peuvent être partagées individuellement avec votre mentor.", "detail": "Les messages directs restent entre les deux participants ; les administrateurs voient l'activité du programme, pas le contenu des messages." },
+        "cta": { "title": "Transformer la prochaine action", "titleAccent": "en progrès visible.", "body": "Connectez-vous pour voir votre étape actuelle, vos objectifs, vos réunions et vos messages." }
       }
     }
   }

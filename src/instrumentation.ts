@@ -9,6 +9,8 @@ export async function register(): Promise<void> {
   assertProductionEnvironment();
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { integrationDiagnosticLines } = await import('./lib/integrations/health');
+    for (const line of integrationDiagnosticLines()) console.info(line);
     await import('./sentry.server.config');
   }
   if (process.env.NEXT_RUNTIME === 'edge') {

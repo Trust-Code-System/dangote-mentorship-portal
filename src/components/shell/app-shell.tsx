@@ -53,6 +53,30 @@ import { cn } from '@/lib/utils';
 
 /** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
 const PENDING_NAV_TIMEOUT_MS = 12_000;
+
+function ShellAvatar({
+  imageUrl,
+  initials,
+}: {
+  imageUrl: string | null | undefined;
+  initials: string;
+}) {
+  const [failedUrl, setFailedUrl] = React.useState<string | null>(null);
+
+  if (!imageUrl || failedUrl === imageUrl) return <>{initials}</>;
+
+  return (
+    // The private avatar route can return 404 when a stored object was removed.
+    // Keep navigation usable and visually complete in that recoverable state.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={imageUrl}
+      alt=""
+      className="size-full object-cover"
+      onError={() => setFailedUrl(imageUrl)}
+    />
+  );
+}
 /** Avoid flicker for very fast background refreshes. */
 const REFRESH_INDICATOR_MIN_MS = 150;
 /** Survives AppShell remount when crossing (admin) ↔ (dashboard) layouts. */
@@ -219,15 +243,17 @@ export function AppShell({
   const [pendingHref, setPendingHref] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [recent, setRecent] = React.useState<NotifItem[]>([]);
-  const [recentStatus, setRecentStatus] = React.useState<'idle' | 'loading' | 'ready' | 'error'>(
-    'idle',
-  );
+  const [recentStatus, setRecentStatus] = React.useState<
+    'idle' | 'loading' | 'ready' | 'error'
+  >('idle');
   const [unread, setUnread] = React.useState(unreadProp);
   const [unreadMessages, setUnreadMessages] = React.useState(0);
 
   const prefetchedRef = React.useRef(new Set<string>());
   const visitedRef = React.useRef(new Set<string>());
-  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const refreshGenRef = React.useRef(0);
   const sidebarNavRef = React.useRef<HTMLElement>(null);
 
@@ -267,13 +293,20 @@ export function AppShell({
   // call router.refresh() on every navigation — in Next 16 that eagerly
   // re-prefetches in-viewport Links and defeats neighbouring cache hits.
   React.useEffect(() => {
-    setNotifOpen(false);
-    setMobileOpen(false);
-    setPendingHref(null);
-    clearPendingTimer();
-    setRecent([]);
-    setRecentStatus('idle');
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setNotifOpen(false);
+      setMobileOpen(false);
+      setPendingHref(null);
+      clearPendingTimer();
+      setRecent([]);
+      setRecentStatus('idle');
+    });
     visitedRef.current.add(pathname);
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
 
   // Quiet background revalidation when the tab regains focus on a previously
@@ -300,7 +333,10 @@ export function AppShell({
           setIsRefreshing(false);
           return;
         }
-        const remain = Math.max(0, REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt));
+        const remain = Math.max(
+          0,
+          REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt),
+        );
         timers.push(
           setTimeout(() => {
             if (refreshGenRef.current === gen) setIsRefreshing(false);
@@ -330,7 +366,7 @@ export function AppShell({
   // Persist the desktop collapse preference so it doesn't reset on navigation.
   React.useEffect(() => {
     const saved = window.localStorage.getItem('shell:collapsed');
-    if (saved) setCollapsed(saved === '1');
+    if (saved) queueMicrotask(() => setCollapsed(saved === '1'));
   }, []);
   React.useEffect(() => {
     window.localStorage.setItem('shell:collapsed', collapsed ? '1' : '0');
@@ -370,9 +406,12 @@ export function AppShell({
     if (!notifOpen) return;
 
     let cancelled = false;
-    setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
-
-    void fetchRecentNotifications(6).then((result) => {
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
+      return fetchRecentNotifications(6);
+    }).then((result) => {
+      if (!result) return;
       if (cancelled) return;
       if (result.ok) {
         setRecent(result.data.items);
@@ -403,7 +442,10 @@ export function AppShell({
     }
   }
 
-  function onNavClick(href: string, event: React.MouseEvent<HTMLAnchorElement>) {
+  function onNavClick(
+    href: string,
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
     // Same destination already pending — ignore repeat clicks without blocking others.
     if (pendingHref === href) {
       event.preventDefault();
@@ -471,7 +513,9 @@ export function AppShell({
                   name={labels.brand}
                   className="block max-w-[7.5rem] whitespace-normal font-display text-[0.72rem] font-bold leading-tight text-ink"
                 />
-                <span className="mt-0.5 block text-[0.58rem] text-ink-3">{labels.subtitle}</span>
+                <span className="mt-0.5 block text-[0.58rem] text-ink-3">
+                  {labels.subtitle}
+                </span>
               </span>
             )}
           </Link>
@@ -486,7 +530,11 @@ export function AppShell({
               collapsed ? 'lg:mx-auto' : 'ml-auto',
             )}
           >
-            {collapsed ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
+            {collapsed ? (
+              <ChevronRight className="size-5" />
+            ) : (
+              <ChevronLeft className="size-5" />
+            )}
           </button>
 
           {/* Mobile drawer close */}
@@ -517,7 +565,9 @@ export function AppShell({
         >
           {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
-              {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
+              {section.label && !collapsed && (
+                <p className="sr-only">{section.label}</p>
+              )}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
                 const visual = resolveNavItemVisualState({
@@ -526,7 +576,11 @@ export function AppShell({
                   exact: item.exact,
                   pendingHref,
                 });
-                const committed = isNavItemCommitted(pathname, item.href, item.exact);
+                const committed = isNavItemCommitted(
+                  pathname,
+                  item.href,
+                  item.exact,
+                );
                 const active = visual === 'active';
                 const pending = visual === 'pending';
                 return (
@@ -548,7 +602,9 @@ export function AppShell({
                         'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong',
                       pending &&
                         'border border-green/40 bg-green-soft/25 font-medium text-green-strong/90',
-                      !active && !pending && 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                      !active &&
+                        !pending &&
+                        'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
                       pending && 'opacity-90',
                     )}
                   >
@@ -561,12 +617,20 @@ export function AppShell({
                       )}
                     />
                     {!collapsed && (
-                      <span className={cn('flex-1 truncate', pending && 'opacity-80')}>
+                      <span
+                        className={cn(
+                          'flex-1 truncate',
+                          pending && 'opacity-80',
+                        )}
+                      >
                         {item.label}
                       </span>
                     )}
                     {!collapsed && pending ? (
-                      <NavSpinner className="size-3.5" label={labels.navigating} />
+                      <NavSpinner
+                        className="size-3.5"
+                        label={labels.navigating}
+                      />
                     ) : null}
                     {!collapsed && !pending && item.badge ? (
                       <span
@@ -598,22 +662,22 @@ export function AppShell({
               className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-green-soft text-micro font-bold text-green-strong"
               title={user.name}
             >
-              {user.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                user.initials
-              )}
+              <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
             {!collapsed && (
               <Link href="/profile" className="min-w-0 flex-1 leading-tight">
-                <span className="block truncate text-small font-bold text-ink">{user.name}</span>
+                <span className="block truncate text-small font-bold text-ink">
+                  {user.name}
+                </span>
                 <span className="block truncate text-micro uppercase tracking-wider text-ink-3">
                   {user.roleLabel}
                 </span>
               </Link>
             )}
-            <form action={signOutAction} className={cn(collapsed && 'lg:hidden')}>
+            <form
+              action={signOutAction}
+              className={cn(collapsed && 'lg:hidden')}
+            >
               <button
                 type="submit"
                 aria-label={labels.signOut}
@@ -646,7 +710,9 @@ export function AppShell({
           </button>
 
           {/* Global search — pages (client-side) + RBAC-scoped records (admins). */}
-          <GlobalSearch navItems={allItems.map((i) => ({ label: i.label, href: i.href }))} />
+          <GlobalSearch
+            navItems={allItems.map((i) => ({ label: i.label, href: i.href }))}
+          />
 
           <div className="ml-auto flex items-center gap-2">
             <LocaleSwitcher />
@@ -710,7 +776,9 @@ export function AppShell({
                                   {n.title}
                                 </p>
                                 {n.body && (
-                                  <p className="line-clamp-2 text-micro text-ink-2">{n.body}</p>
+                                  <p className="line-clamp-2 text-micro text-ink-2">
+                                    {n.body}
+                                  </p>
                                 )}
                               </div>
                             </div>
@@ -718,7 +786,10 @@ export function AppShell({
                           return (
                             <li
                               key={n.id}
-                              className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}
+                              className={cn(
+                                'px-4 py-3',
+                                !n.read && 'bg-green-soft/40',
+                              )}
                             >
                               {n.link ? (
                                 <Link
@@ -755,12 +826,7 @@ export function AppShell({
               aria-label={user.name}
               className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full border border-border bg-green-soft text-small font-bold text-green-strong transition-colors hover:border-green-light"
             >
-              {user.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                user.initials
-              )}
+              <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
           </div>
         </header>
@@ -821,7 +887,9 @@ export function AppShell({
                   />
                 ) : null}
               </span>
-              <span className={cn('truncate', pending && 'opacity-80')}>{item.label}</span>
+              <span className={cn('truncate', pending && 'opacity-80')}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

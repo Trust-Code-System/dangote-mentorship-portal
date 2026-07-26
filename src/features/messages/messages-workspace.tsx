@@ -6,6 +6,7 @@ import {
   listConversations,
   getThread,
   markConversationRead,
+  realtimeChannelName,
 } from '@/features/messages/data';
 import { ConversationList } from '@/features/messages/conversation-list';
 import { MessageThread } from '@/features/messages/message-thread';
@@ -37,7 +38,8 @@ export async function MessagesWorkspace({
   let conversations = await listConversations(userId);
 
   const activeId =
-    conversationId ?? (conversations.length > 0 ? (conversations[0]?.id ?? null) : null);
+    conversationId ??
+    (conversations.length > 0 ? (conversations[0]?.id ?? null) : null);
 
   if (!activeId) {
     return (
@@ -45,7 +47,11 @@ export async function MessagesWorkspace({
         <ConversationList
           items={conversations}
           activeId={null}
-          labels={{ title: t('title'), empty: t('empty'), emptyHint: t('emptyHint') }}
+          labels={{
+            title: t('title'),
+            empty: t('empty'),
+            emptyHint: t('emptyHint'),
+          }}
         />
         <div className="hidden items-center justify-center rounded-2xl border border-border bg-surface text-body text-ink-3 lg:flex">
           {t('selectConversation')}
@@ -62,7 +68,11 @@ export async function MessagesWorkspace({
         <ConversationList
           items={conversations}
           activeId={null}
-          labels={{ title: t('title'), empty: t('empty'), emptyHint: t('emptyHint') }}
+          labels={{
+            title: t('title'),
+            empty: t('empty'),
+            emptyHint: t('emptyHint'),
+          }}
         />
         <div className="flex items-center justify-center rounded-2xl border border-border bg-surface p-8 text-center text-body text-ink-3">
           {t('selectConversation')}
@@ -80,7 +90,11 @@ export async function MessagesWorkspace({
         <ConversationList
           items={conversations}
           activeId={activeId}
-          labels={{ title: 'Discussions', empty: t('empty'), emptyHint: t('emptyHint') }}
+          labels={{
+            title: t('conversationListTitle'),
+            empty: t('empty'),
+            emptyHint: t('emptyHint'),
+          }}
         />
       </div>
       <MessageThread
@@ -95,7 +109,10 @@ export async function MessagesWorkspace({
           empty: t('threadEmpty'),
           back: t('back'),
           loadOlder: t('loadOlder'),
+          sendFailed: t('sendFailed'),
+          retry: t('retry'),
         }}
+        realtimeChannel={realtimeChannelName(activeId)}
       />
 
       <aside className="hidden h-full border-l border-border bg-surface p-5 text-center xl:block">
@@ -123,31 +140,33 @@ export async function MessagesWorkspace({
         </div>
         <div className="mt-6 border-t border-border pt-5 text-left">
           <p className="text-micro font-bold uppercase tracking-wider text-ink-3">
-            Mentorship focus
+            {t('mentorshipFocus')}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">
-              Strategy
+              {t('strategy')}
             </span>
             <span className="rounded-full bg-green-soft px-2 py-1 text-micro text-green-strong">
-              Leadership
+              {t('leadership')}
             </span>
           </div>
         </div>
         <div className="mt-6 border-t border-border pt-5 text-left">
-          <p className="text-micro font-bold uppercase tracking-wider text-ink-3">Shared assets</p>
+          <p className="text-micro font-bold uppercase tracking-wider text-ink-3">
+            {t('sharedAssets')}
+          </p>
           <div className="mt-3 space-y-2">
             <Link
               href="/agreements"
               className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"
             >
-              <FileText className="size-4 text-info" /> Agreement.pdf
+              <FileText className="size-4 text-info" /> {t('agreementDocument')}
             </Link>
             <Link
               href="/sessions"
               className="flex items-center gap-2 rounded-md bg-surface-2 p-2 text-micro text-ink-2"
             >
-              <Video className="size-4 text-green-light" /> Session notes
+              <Video className="size-4 text-green-light" /> {t('sessionNotes')}
             </Link>
           </div>
         </div>

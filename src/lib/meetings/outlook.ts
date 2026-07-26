@@ -1,5 +1,5 @@
 import 'server-only';
-import { GRAPH_BASE, getGraphToken, readGraphConfig } from '@/lib/graph/client';
+import { GRAPH_BASE, getGraphToken, readGraphCalendarConfig } from '@/lib/graph/client';
 import type { MeetingDraft, MeetingProvider, MeetingProviderResult } from './types';
 
 // Microsoft Outlook calendar provider via Graph (experience-layer.md §1.12). At
@@ -8,7 +8,7 @@ import type { MeetingDraft, MeetingProvider, MeetingProviderResult } from './typ
 // the shared app-only Graph credentials (Calendars.ReadWrite application
 // permission required). Zoom join links remain an M5 concern.
 export function createOutlookMeetingProvider(): MeetingProvider {
-  const config = readGraphConfig();
+  const config = readGraphCalendarConfig();
 
   return {
     id: 'microsoft-graph-calendar',
@@ -17,6 +17,7 @@ export function createOutlookMeetingProvider(): MeetingProvider {
     async createEvent(draft: MeetingDraft): Promise<MeetingProviderResult> {
       const token = await getGraphToken(config);
       const event = {
+        transactionId: draft.idempotencyKey,
         subject: draft.title,
         ...(draft.description
           ? { body: { contentType: 'Text', content: draft.description } }
@@ -30,14 +31,17 @@ export function createOutlookMeetingProvider(): MeetingProvider {
         })),
       };
 
-      const response = await fetch(
+      const request = () => fetch(
         `${GRAPH_BASE}/users/${encodeURIComponent(draft.organizerEmail)}/events`,
         {
           method: 'POST',
           headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
           body: JSON.stringify(event),
+          signal: AbortSignal.timeout(15_000),
         },
       );
+      let response = await request();
+      if (response.status === 429 || response.status === 503) response = await request();
       if (!response.ok) {
         throw new Error(`Graph create event failed: HTTP ${response.status}`);
       }

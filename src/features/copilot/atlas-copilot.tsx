@@ -30,17 +30,12 @@ export function AtlasCopilot({
   labels: AtlasLabels;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [messages, setMessages] = React.useState<AtlasMessage[]>([]);
+  const [messages, setMessages] = React.useState<AtlasMessage[]>([
+    { role: 'assistant', content: labels.greeting },
+  ]);
   const [input, setInput] = React.useState('');
   const [pending, setPending] = React.useState(false);
   const listRef = React.useRef<HTMLDivElement>(null);
-
-  // Seed the greeting the first time the panel is opened.
-  React.useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([{ role: 'assistant', content: labels.greeting }]);
-    }
-  }, [open, messages.length, labels.greeting]);
 
   // Keep the latest message in view.
   React.useEffect(() => {

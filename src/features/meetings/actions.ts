@@ -107,6 +107,7 @@ export async function scheduleMeeting(formData: FormData): Promise<ActionResult<
           prisma.user.findUnique({ where: { id: data.counterpartId }, select: { email: true } }),
         ]);
         const result = await provider.createEvent({
+          idempotencyKey: meeting.id,
           title: data.title,
           description: data.description || undefined,
           startsAt,

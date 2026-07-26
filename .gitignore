@@ -51,3 +51,4 @@ yarn-error.log*
 
 # Stitch redesign — throwaway live verification screenshots (keep the design refs)
 stitch-designs/_live-*.png
+.gstack/

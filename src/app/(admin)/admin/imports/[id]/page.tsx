@@ -49,12 +49,12 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
     <section className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-micro text-ink-3">Admin / User management / Batch data import</p>
-          <h1 className="mt-1 font-display text-h1 font-bold text-ink">Data Import &amp; Validation</h1>
-          <p className="text-small text-ink-2">Review, validate, and commit newly uploaded mentor and mentee records.</p>
+          <p className="text-micro text-ink-3">{t('breadcrumb')}</p>
+          <h1 className="mt-1 font-display text-h1 font-bold text-ink">{t('reviewTitle')}</h1>
+          <p className="text-small text-ink-2">{t('reviewSubtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">Export CSV</Button>
+          <Button size="sm" variant="outline">{t('exportCsv')}</Button>
           {committed ? <Badge>{t('committed')}</Badge> : (
             <form action={commitImportForm}><input type="hidden" name="importId" value={imported.id} /><Button size="sm" type="submit">{t('commit')}</Button></form>
           )}
@@ -65,16 +65,16 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
         <StatTile label={t('totalRows')} value={total} />
         <StatTile label={t('valid')} value={valid} tone="ok" />
         <StatTile label={t('flaggedCount')} value={flagged} tone={flagged ? 'risk' : 'default'} />
-        <StatTile label="System health" value={flagged ? 'Review needed' : 'Optimized'} tone={flagged ? 'info' : 'ok'} valueClassName="text-h3" />
+        <StatTile label={t('systemHealth')} value={flagged ? t('reviewNeeded') : t('optimized')} tone={flagged ? 'info' : 'ok'} valueClassName="text-h3" />
       </div>
 
       <WorkflowProgress committed={committed} labels={[t('stepUpload'), t('stepMapping'), t('stepValidation'), t('stepReview'), t('stepCommit')]} />
 
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_270px]">
         <section className="overflow-hidden rounded-lg border border-border bg-surface shadow-elevation">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4"><h2 className="text-h3">Imported records</h2><span className="text-micro text-ink-3">{imported.fileName}</span></div>
+          <div className="flex items-center justify-between border-b border-border px-5 py-4"><h2 className="text-h3">{t('importedRecords')}</h2><span className="text-micro text-ink-3">{imported.fileName}</span></div>
           <Table>
-            <TableHeader><TableRow><TableHead>Status</TableHead><TableHead>Full name</TableHead><TableHead>Role</TableHead><TableHead>Email</TableHead><TableHead /></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>{t('statusLabel')}</TableHead><TableHead>{t('fullName')}</TableHead><TableHead>{t('role')}</TableHead><TableHead>{t('email')}</TableHead><TableHead /></TableRow></TableHeader>
             <TableBody>
               {imported.rows.map((row) => {
                 const findings = (row.validation ?? []) as unknown as Finding[];
@@ -84,13 +84,13 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
                   <TableRow key={row.id}>
                     <TableCell><span className={cn('inline-flex size-7 items-center justify-center rounded-full', blocked ? 'bg-risk/10 text-risk' : findings.length ? 'bg-warn/10 text-warn' : 'bg-green-soft text-green-strong')}>{blocked ? <AlertTriangle className="size-3.5" /> : <Check className="size-3.5" />}</span></TableCell>
                     <TableCell className="font-medium">{clean.fullName || '—'}</TableCell>
-                    <TableCell><Badge variant="neutral">{imported.targetRole}</Badge></TableCell>
+                    <TableCell><Badge variant="neutral">{t(imported.targetRole === 'MENTOR' ? 'mentorRole' : 'menteeRole')}</Badge></TableCell>
                     <TableCell className="text-small text-ink-2">{clean.email || '—'}</TableCell>
                     <TableCell>
                       {!committed ? <div className="flex justify-end gap-1">
                         <form action={setImportRowStatusForm}><input type="hidden" name="rowId" value={row.id} /><input type="hidden" name="status" value={ImportRowStatus.ACCEPTED} /><Button type="submit" size="sm" variant="ghost" disabled={blocked}>{t('accept')}</Button></form>
                         <form action={setImportRowStatusForm}><input type="hidden" name="rowId" value={row.id} /><input type="hidden" name="status" value={ImportRowStatus.REJECTED} /><Button type="submit" size="sm" variant="ghost">{t('reject')}</Button></form>
-                      </div> : <Badge variant="neutral">{row.status}</Badge>}
+                      </div> : <Badge variant="neutral">{t(`rowStatus.${row.status}`)}</Badge>}
                     </TableCell>
                   </TableRow>
                 );
@@ -100,13 +100,13 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
         </section>
 
         <aside className="rounded-lg border border-info/20 bg-info/[0.07] p-5 shadow-elevation">
-          <p className="flex items-center gap-2 text-small font-bold text-info"><Sparkles className="size-4" /> AI assistant</p>
-          <p className="mt-3 text-small text-ink-2">Validation identified {flagged} record{flagged === 1 ? '' : 's'} requiring attention before commit.</p>
+          <p className="flex items-center gap-2 text-small font-bold text-info"><Sparkles className="size-4" /> {t('assistant')}</p>
+          <p className="mt-3 text-small text-ink-2">{t('validationSummary', { count: flagged })}</p>
           <div className="mt-4 space-y-3">
-            <div className="rounded-md bg-surface p-3"><p className="text-micro font-bold uppercase text-ink-3">Critical insight</p><p className="mt-1 text-small text-ink-2">{flagged ? 'Resolve blocking email and required-field errors first.' : 'All records are ready for final review.'}</p></div>
-            <div className="rounded-md bg-surface p-3"><p className="text-micro font-bold uppercase text-ink-3">System status</p><p className="mt-1 flex items-center gap-2 text-small text-green-strong"><ShieldCheck className="size-4" /> Validation complete</p></div>
+            <div className="rounded-md bg-surface p-3"><p className="text-micro font-bold uppercase text-ink-3">{t('criticalInsight')}</p><p className="mt-1 text-small text-ink-2">{flagged ? t('resolveBlocking') : t('readyForReview')}</p></div>
+            <div className="rounded-md bg-surface p-3"><p className="text-micro font-bold uppercase text-ink-3">{t('systemStatus')}</p><p className="mt-1 flex items-center gap-2 text-small text-green-strong"><ShieldCheck className="size-4" /> {t('validationComplete')}</p></div>
           </div>
-          <Button variant="outline" className="mt-4 w-full border-info/30 text-info">Generate full audit report</Button>
+          <Button variant="outline" className="mt-4 w-full border-info/30 text-info">{t('generateAuditReport')}</Button>
         </aside>
       </div>
     </section>

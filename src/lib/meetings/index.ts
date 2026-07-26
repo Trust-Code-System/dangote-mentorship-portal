@@ -1,5 +1,5 @@
 import 'server-only';
-import { isGraphConfigured } from '@/lib/graph/client';
+import { getIntegrationHealth } from '@/lib/integrations/health';
 import { createNoopMeetingProvider } from './noop';
 import { createOutlookMeetingProvider } from './outlook';
 import type { MeetingProvider } from './types';
@@ -14,6 +14,8 @@ let cached: MeetingProvider | null = null;
 // works dark. Zoom slots in here in M5 behind the same interface.
 export function getMeetingProvider(): MeetingProvider {
   if (cached) return cached;
-  cached = isGraphConfigured() ? createOutlookMeetingProvider() : createNoopMeetingProvider();
+  cached = getIntegrationHealth().graphCalendar.configured
+    ? createOutlookMeetingProvider()
+    : createNoopMeetingProvider();
   return cached;
 }

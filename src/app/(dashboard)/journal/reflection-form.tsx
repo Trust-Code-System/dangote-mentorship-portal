@@ -59,11 +59,17 @@ export function ReflectionForm({
   });
 
   useEffect(() => {
-    if (state?.ok) {
-      void clear();
+    if (!state?.ok) return;
+    void clear();
+    router.refresh();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
       setValues({ title: '', body: '', sessionLogId: '', bodyLang: defaultLang });
-      router.refresh();
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

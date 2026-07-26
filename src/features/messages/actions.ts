@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/auth/rbac';
 import { notifyMany } from '@/lib/notifications/notify';
 import { ok, fail, mapActionError, type ActionResult } from '@/lib/actions/result';
 import { getThread } from './data';
+import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
 
 // Send a direct message (CLAUDE.md §10). Authorizes that the sender is a
 // participant of the conversation; content stays private to participants.
@@ -25,6 +26,14 @@ export async function sendMessage(input: {
   try {
     const user = await requireUser();
     const { conversationId, body } = sendSchema.parse(input);
+
+    const [burst, minute] = await Promise.all([
+      checkRateLimit(`message:${user.id}:burst`, 8, 10_000),
+      checkRateLimit(`message:${user.id}:minute`, 30, 60_000),
+    ]);
+    if (!burst.ok || !minute.ok) {
+      return fail({ code: 'CONFLICT', message: 'You are sending messages too quickly. Please wait and retry.' });
+    }
 
     // Authorization: only a participant may post. Load the conversation with its
     // participants so we can both authorize and notify the recipients afterwards.

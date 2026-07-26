@@ -26,7 +26,9 @@ export function OnboardingTour({ role }: { role: 'mentee' | 'mentor' }) {
   // Only decide visibility on the client (localStorage isn't available on the server).
   useEffect(() => {
     try {
-      if (!localStorage.getItem(tourStorageKey(role))) setVisible(true);
+      if (!localStorage.getItem(tourStorageKey(role))) {
+        queueMicrotask(() => setVisible(true));
+      }
     } catch {
       // Private mode / storage disabled — simply don't show the tour.
     }

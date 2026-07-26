@@ -21,8 +21,8 @@ export function useInView<T extends HTMLElement>(amount = 0.2) {
     // No IntersectionObserver (very old browser): show the content rather than
     // leaving it hidden forever.
     if (typeof IntersectionObserver === 'undefined') {
-      setInView(true);
-      return;
+      const handle = window.requestAnimationFrame(() => setInView(true));
+      return () => window.cancelAnimationFrame(handle);
     }
 
     const observer = new IntersectionObserver(

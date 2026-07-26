@@ -39,19 +39,19 @@ test.describe('authentication experience', () => {
     await expect(page.getByLabel('Corporate email')).toBeVisible();
     await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
 
-    await expect(page.getByRole('link', { name: 'Forgot your password?' })).toHaveAttribute(
-      'href',
-      '/forgot-password',
-    );
-    await expect(page.getByRole('link', { name: 'Request access' })).toHaveAttribute(
-      'href',
-      '/signup',
-    );
+    await expect(
+      page.getByRole('link', { name: 'Forgot your password?' }),
+    ).toHaveAttribute('href', '/forgot-password');
+    await expect(
+      page.getByRole('link', { name: 'Request access' }),
+    ).toHaveAttribute('href', '/signup');
 
     expect(errors).toEqual([]);
   });
 
-  test('every footer destination is reachable while signed out', async ({ page }) => {
+  test('every footer destination is reachable while signed out', async ({
+    page,
+  }) => {
     await page.goto('/login');
 
     // Support must not point at the authenticated /support workflow: signed-out
@@ -59,13 +59,23 @@ test.describe('authentication experience', () => {
     const support = page.getByRole('link', { name: 'Support' });
     await expect(support).toHaveAttribute('href', '/contact');
 
-    for (const path of ['/contact', '/faq', '/', '/signup', '/forgot-password']) {
+    for (const path of [
+      '/contact',
+      '/faq',
+      '/',
+      '/signup',
+      '/forgot-password',
+    ]) {
       const response = await page.request.get(path);
-      expect(response.status(), `${path} should be reachable`).toBeLessThan(400);
+      expect(response.status(), `${path} should be reachable`).toBeLessThan(
+        400,
+      );
     }
   });
 
-  test('the password visibility toggle is keyboard operable and labelled', async ({ page }) => {
+  test('the password visibility toggle is keyboard operable and labelled', async ({
+    page,
+  }) => {
     await page.goto('/login');
 
     const password = page.getByLabel('Password', { exact: true });
@@ -76,7 +86,9 @@ test.describe('authentication experience', () => {
     await page.keyboard.press('Enter');
 
     await expect(password).toHaveAttribute('type', 'text');
-    await expect(page.getByRole('button', { name: 'Hide password' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Hide password' }),
+    ).toBeVisible();
   });
 
   test('the language switcher translates the page without clearing a typed email', async ({
@@ -92,7 +104,9 @@ test.describe('authentication experience', () => {
 
     // Switching language is a cookie write in a transition, not a navigation —
     // a half-completed form must survive it.
-    await expect(page.getByLabel('E-mail professionnel')).toHaveValue('someone@blakmoh.com');
+    await expect(page.getByLabel('E-mail professionnel')).toHaveValue(
+      'someone@blakmoh.com',
+    );
   });
 
   test('a failed sign-in keeps the email, clears the password, and stays generic', async ({
@@ -104,18 +118,26 @@ test.describe('authentication experience', () => {
     await page.getByLabel('Password', { exact: true }).fill('not-the-password');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    const alert = page.getByRole('alert').filter({ hasText: 'Invalid email or password' });
+    const alert = page
+      .getByRole('alert')
+      .filter({ hasText: 'Invalid email or password' });
     await expect(alert).toBeVisible({ timeout: 30_000 });
 
     // Never confirm or deny that the address exists.
-    await expect(alert).not.toContainText(/no account|not found|does not exist|unknown user/i);
+    await expect(alert).not.toContainText(
+      /no account|not found|does not exist|unknown user/i,
+    );
 
     // The email survives so it need not be retyped; the password does not.
-    await expect(page.getByLabel('Corporate email')).toHaveValue('qa-nonexistent@blakmoh.com');
+    await expect(page.getByLabel('Corporate email')).toHaveValue(
+      'qa-nonexistent@blakmoh.com',
+    );
     await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   });
 
-  test('password reset stays enumeration-safe for an unknown address', async ({ page }) => {
+  test('password reset stays enumeration-safe for an unknown address', async ({
+    page,
+  }) => {
     await page.goto('/forgot-password');
 
     await page.getByLabel('Corporate email').fill('qa-nonexistent@blakmoh.com');
@@ -127,30 +149,44 @@ test.describe('authentication experience', () => {
     await expect(status).toContainText(/if an account exists/i);
   });
 
-  test('an unusable reset link explains itself and offers a way forward', async ({ page }) => {
+  test('an unusable reset link explains itself and offers a way forward', async ({
+    page,
+  }) => {
     await page.goto('/reset-password/not-a-real-token');
 
-    await expect(page.getByRole('alert').filter({ hasText: 'This reset link is not' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Request a new link' })).toHaveAttribute(
-      'href',
-      '/forgot-password',
-    );
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'This reset link is not' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Request a new link' }),
+    ).toHaveAttribute('href', '/forgot-password');
   });
 
   test('an unusable invitation explains itself', async ({ page }) => {
     await page.goto('/invite/not-a-real-token');
 
-    await expect(page.getByRole('alert')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Request access' })).toBeVisible();
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'This invitation is not' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Request access' }),
+    ).toBeVisible();
   });
 
   test('no auth page overflows horizontally at 320px', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
 
-    for (const path of ['/login', '/forgot-password', '/signup', '/invite/not-a-real-token']) {
+    for (const path of [
+      '/login',
+      '/forgot-password',
+      '/signup',
+      '/invite/not-a-real-token',
+    ]) {
       await page.goto(path);
       const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
       );
       expect(overflow, `${path} overflows`).toBeLessThanOrEqual(0);
     }

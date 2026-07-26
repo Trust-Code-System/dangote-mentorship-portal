@@ -41,6 +41,16 @@ function startsWith(bytes: Uint8Array, signature: Signature): boolean {
  * rejected those) and for content whose bytes don't match the claimed type.
  */
 export function verifyFileSignature(bytes: Uint8Array, declaredMime: string): boolean {
+  if (declaredMime === 'image/webp') {
+    return (
+      bytes.length >= 12 &&
+      startsWith(bytes, [0x52, 0x49, 0x46, 0x46]) &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    );
+  }
   const expected = SIGNATURES[declaredMime];
   if (!expected) return false;
   if (expected === 'skip') return true;

@@ -13,21 +13,35 @@ export async function buildAdminNavSections(
   unread: number,
   roles: RoleName[] = [],
 ): Promise<NavSection[]> {
-  const [t, tImports, tMatching, tPeople, tInvites, tSupport, tForms, tLists, tInsights, tSettings, tNav, tShell] =
-    await Promise.all([
-      getTranslations('admin'),
-      getTranslations('imports'),
-      getTranslations('matching'),
-      getTranslations('people'),
-      getTranslations('invites'),
-      getTranslations('support'),
-      getTranslations('forms'),
-      getTranslations('adminLists'),
-      getTranslations('insights'),
-      getTranslations('settings'),
-      getTranslations('nav'),
-      getTranslations('shell'),
-    ]);
+  const [
+    t,
+    tImports,
+    tMatching,
+    tPeople,
+    tInvites,
+    tSupport,
+    tForms,
+    tLists,
+    tInsights,
+    tSettings,
+    tCertificates,
+    tNav,
+    tShell,
+  ] = await Promise.all([
+    getTranslations('admin'),
+    getTranslations('imports'),
+    getTranslations('matching'),
+    getTranslations('people'),
+    getTranslations('invites'),
+    getTranslations('support'),
+    getTranslations('forms'),
+    getTranslations('adminLists'),
+    getTranslations('insights'),
+    getTranslations('settings'),
+    getTranslations('adminCertificates'),
+    getTranslations('nav'),
+    getTranslations('shell'),
+  ]);
 
   // Platform settings are Super-Admin only (CLAUDE.md §4); hide the link from
   // Programme Admins, who would only be bounced off the page.
@@ -48,6 +62,7 @@ export async function buildAdminNavSections(
         { href: '/admin/sessions', label: tLists('navSessions'), icon: 'sessions' },
         { href: '/admin/meetings', label: tLists('navMeetings'), icon: 'meetings' },
         { href: '/admin/training', label: tLists('navTraining'), icon: 'training' },
+        { href: '/admin/certificates', label: tCertificates('navLabel'), icon: 'certificate' },
       ],
     },
     {
@@ -62,14 +77,21 @@ export async function buildAdminNavSections(
       ? [
           {
             label: tShell('navPlatform'),
-            items: [{ href: '/admin/settings', label: tSettings('title'), icon: 'settings' as const }],
+            items: [
+              { href: '/admin/settings', label: tSettings('title'), icon: 'settings' as const },
+            ],
           },
         ]
       : []),
     {
       label: tShell('navHelp'),
       items: [
-        { href: '/notifications', label: tNav('notifications'), icon: 'notifications', badge: unread || undefined },
+        {
+          href: '/notifications',
+          label: tNav('notifications'),
+          icon: 'notifications',
+          badge: unread || undefined,
+        },
         { href: '/admin/support', label: tSupport('queueTitle'), icon: 'support' },
       ],
     },
@@ -89,7 +111,12 @@ export async function buildParticipantNavSections(
         { href: '/pair', label: tNav('pair'), icon: 'pair', primary: true },
         { href: '/goals', label: tNav('goals'), icon: 'goals', primary: true },
         { href: '/sessions', label: tNav('sessions'), icon: 'sessions', primary: true },
-        { href: '/messages', label: tNav('messages'), icon: 'messages', badge: unreadMessages || undefined },
+        {
+          href: '/messages',
+          label: tNav('messages'),
+          icon: 'messages',
+          badge: unreadMessages || undefined,
+        },
         { href: '/meetings', label: tNav('meetings'), icon: 'meetings' },
         { href: '/calendar', label: tNav('calendar'), icon: 'calendar' },
         { href: '/journal', label: tNav('journal'), icon: 'journal' },
@@ -101,7 +128,13 @@ export async function buildParticipantNavSections(
     {
       label: tShell('navMain'),
       items: [
-        { href: defaultDashboardPath(roles), label: tNav('dashboard'), icon: 'dashboard', primary: true, exact: true },
+        {
+          href: defaultDashboardPath(roles),
+          label: tNav('dashboard'),
+          icon: 'dashboard',
+          primary: true,
+          exact: true,
+        },
         ...pairItems,
       ],
     },
@@ -120,7 +153,12 @@ export async function buildParticipantNavSections(
     {
       label: tShell('navHelp'),
       items: [
-        { href: '/notifications', label: tNav('notifications'), icon: 'notifications', badge: unread || undefined },
+        {
+          href: '/notifications',
+          label: tNav('notifications'),
+          icon: 'notifications',
+          badge: unread || undefined,
+        },
         { href: '/support', label: tNav('support'), icon: 'support' },
         { href: '/help', label: tNav('help'), icon: 'help' },
       ],

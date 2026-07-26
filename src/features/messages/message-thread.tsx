@@ -10,7 +10,6 @@ import { loadOlderMessages, sendMessage } from './actions';
 import { cn } from '@/lib/utils';
 import type { ThreadMessage } from './data';
 
-const CHANNEL_PREFIX = 'conversation:';
 const NEW_MESSAGE_EVENT = 'message';
 
 export interface ThreadLabels {
@@ -19,6 +18,8 @@ export interface ThreadLabels {
   empty: string;
   back: string;
   loadOlder: string;
+  sendFailed: string;
+  retry: string;
 }
 
 // Client thread: renders the message history and a composer. Sends via the
@@ -30,12 +31,14 @@ export function MessageThread({
   initialMessages,
   initialNextCursor,
   labels,
+  realtimeChannel,
 }: {
   conversationId: string;
   otherName: string | null;
   initialMessages: ThreadMessage[];
   initialNextCursor: string | null;
   labels: ThreadLabels;
+  realtimeChannel: string | null;
 }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<ThreadMessage[]>(initialMessages);
@@ -43,6 +46,7 @@ export function MessageThread({
   const [pending, setPending] = React.useState(false);
   const [nextCursor, setNextCursor] = React.useState(initialNextCursor);
   const [loadingOlder, setLoadingOlder] = React.useState(false);
+  const [sendError, setSendError] = React.useState<string | null>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const channelRef = React.useRef<RealtimeChannel | null>(null);
 
@@ -53,14 +57,18 @@ export function MessageThread({
   // when Supabase isn't configured.
   React.useEffect(() => {
     const supabase = getSupabaseBrowser();
-    if (!supabase) return;
+    if (!supabase || !realtimeChannel) return;
 
     let channel: RealtimeChannel | null = null;
     try {
-      channel = supabase.channel(`${CHANNEL_PREFIX}${conversationId}`, {
+      channel = supabase.channel(realtimeChannel, {
         config: { broadcast: { self: false } },
       });
-      channel.on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh()).subscribe();
+      channel
+        .on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh())
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') router.refresh();
+        });
       channelRef.current = channel;
     } catch {
       // Realtime is best-effort — never crash the thread if the channel fails.
@@ -72,7 +80,21 @@ export function MessageThread({
       if (channel) void supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [conversationId, router]);
+  }, [realtimeChannel, router]);
+
+  React.useEffect(() => {
+    const reconcile = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) router.refresh();
+    };
+    const timer = window.setInterval(reconcile, 15_000);
+    window.addEventListener('online', reconcile);
+    document.addEventListener('visibilitychange', reconcile);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('online', reconcile);
+      document.removeEventListener('visibilitychange', reconcile);
+    };
+  }, [router]);
 
   React.useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -82,6 +104,7 @@ export function MessageThread({
     const body = input.trim();
     if (!body || pending) return;
     setPending(true);
+    setSendError(null);
     // Optimistic append.
     const optimistic: ThreadMessage = {
       id: `tmp-${Date.now()}`,
@@ -98,6 +121,7 @@ export function MessageThread({
         // Roll back the optimistic message on failure.
         setMessages((m) => m.filter((x) => x.id !== optimistic.id));
         setInput(body);
+        setSendError(res.error.message || labels.sendFailed);
       } else {
         // Nudge the peer to re-fetch (content stays server-gated), then refresh.
         void channelRef.current?.send({
@@ -187,6 +211,14 @@ export function MessageThread({
 
       {/* Composer */}
       <div className="border-t border-border p-3">
+        {sendError ? (
+          <div className="mb-2 flex items-center justify-between gap-3 rounded-md bg-risk/10 px-3 py-2 text-small text-risk">
+            <p role="alert">{sendError}</p>
+            <button type="button" className="shrink-0 font-semibold underline" onClick={() => void submit()}>
+              {labels.retry}
+            </button>
+          </div>
+        ) : null}
         <div className="flex items-end gap-2">
           <textarea
             value={input}
