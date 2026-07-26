@@ -4,6 +4,7 @@ import { getIntegrationHealth, integrationDiagnosticLines } from '@/lib/integrat
 describe('integration health', () => {
   it('keeps Entra, Graph mail, and Graph calendar independently configurable', () => {
     const health = getIntegrationHealth({
+      MICROSOFT_INTEGRATIONS_ENABLED: 'true',
       AUTH_MICROSOFT_ENTRA_ID_ID: 'entra-client',
       AUTH_MICROSOFT_ENTRA_ID_SECRET: 'entra-secret',
       AUTH_MICROSOFT_ENTRA_ID_TENANT_ID: 'entra-tenant',
@@ -20,6 +21,7 @@ describe('integration health', () => {
 
   it('reports partial configuration by variable name without exposing values', () => {
     const env = {
+      MICROSOFT_INTEGRATIONS_ENABLED: 'true',
       GRAPH_CALENDAR_CLIENT_ID: 'sensitive-client-value',
     };
     const health = getIntegrationHealth(env);
@@ -36,6 +38,7 @@ describe('integration health', () => {
 
   it('accepts the documented legacy Graph mail variables as a fallback', () => {
     const health = getIntegrationHealth({
+      MICROSOFT_INTEGRATIONS_ENABLED: 'true',
       MAIL_GRAPH_TENANT_ID: 'tenant',
       MAIL_GRAPH_CLIENT_ID: 'client',
       MAIL_GRAPH_CLIENT_SECRET: 'secret',
@@ -47,10 +50,26 @@ describe('integration health', () => {
   });
 
   it('prompts with the current Graph names when neither naming scheme is present', () => {
-    const health = getIntegrationHealth({});
+    const health = getIntegrationHealth({ MICROSOFT_INTEGRATIONS_ENABLED: 'true' });
 
     expect(health.graphMail.missing).toContain('GRAPH_MAIL_TENANT_ID');
     expect(health.graphCalendar.missing).toContain('GRAPH_CALENDAR_TENANT_ID');
     expect(health.graphMail.missing).not.toContain('MAIL_GRAPH_TENANT_ID');
+  });
+
+  it('fails closed while the owner keeps Microsoft integrations disabled', () => {
+    const health = getIntegrationHealth({
+      AUTH_MICROSOFT_ENTRA_ID_ID: 'entra-client',
+      AUTH_MICROSOFT_ENTRA_ID_SECRET: 'entra-secret',
+      AUTH_MICROSOFT_ENTRA_ID_TENANT_ID: 'entra-tenant',
+      GRAPH_MAIL_TENANT_ID: 'mail-tenant',
+      GRAPH_MAIL_CLIENT_ID: 'mail-client',
+      GRAPH_MAIL_CLIENT_SECRET: 'mail-secret',
+      GRAPH_MAIL_SENDER: 'sender@example.test',
+    });
+
+    expect(health.entra.mode).toBe('disabled');
+    expect(health.graphMail.mode).toBe('disabled');
+    expect(health.graphCalendar.mode).toBe('disabled');
   });
 });

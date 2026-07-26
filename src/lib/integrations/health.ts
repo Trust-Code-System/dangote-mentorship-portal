@@ -8,6 +8,10 @@ export interface IntegrationHealthItem {
 
 type Environment = Readonly<Record<string, string | undefined>>;
 
+function microsoftIntegrationsEnabled(env: Environment): boolean {
+  return env.MICROSOFT_INTEGRATIONS_ENABLED === 'true';
+}
+
 function groupHealth(env: Environment, names: string[]): IntegrationHealthItem {
   const present = names.filter((name) => Boolean(env[name]?.trim()));
   const missing = names.filter((name) => !env[name]?.trim());
@@ -26,6 +30,15 @@ function graphHealth(env: Environment, names: string[], legacyNames: string[]) {
 }
 
 export function getIntegrationHealth(env: Environment = process.env) {
+  if (!microsoftIntegrationsEnabled(env)) {
+    const disabled = { configured: false, mode: 'disabled' as const, missing: [] };
+    return {
+      entra: { ...disabled },
+      graphMail: { ...disabled },
+      graphCalendar: { ...disabled },
+    };
+  }
+
   return {
     entra: groupHealth(env, [
       'AUTH_MICROSOFT_ENTRA_ID_ID',

@@ -31,6 +31,8 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 
 ### 3. Configure Microsoft Graph mail
 
+- **Current status:** intentionally disabled by owner on 2026-07-26. `MICROSOFT_INTEGRATIONS_ENABLED=false` is configured in Vercel production and preview and takes effect with this deployment; credentials alone cannot activate Graph mail, Graph calendar, or Entra SSO.
+
 - **Exact action:** create or select a dedicated Entra app registration for server-side mail, create a client secret/certificate, grant Microsoft Graph **Application** permission `Mail.Send`, grant tenant-wide admin consent, and scope the application to the approved sender mailbox with Exchange Online Application RBAC (or an application access policy where still used).
 - **Why:** password reset, invitation, and notification email cannot be production-complete while mail is disabled.
 - **Where:** Microsoft Entra admin center → App registrations → API permissions / Certificates & secrets; Exchange admin center or Exchange Online PowerShell for mailbox scoping; Vercel project environment settings for values.
@@ -45,6 +47,8 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 
 ### 4. Configure Microsoft Graph calendar if Outlook synchronization is in production scope
 
+- **Current status:** intentionally disabled by owner on 2026-07-26; keep it disabled until a separate tenant approval.
+
 - **Exact action:** create or select a separate Graph calendar app registration, grant Microsoft Graph **Application** permission `Calendars.ReadWrite`, grant admin consent, and scope mailbox access.
 - **Why:** meeting creation currently degrades safely when calendar integration is disabled; real Outlook events require tenant authority.
 - **Where:** Microsoft Entra admin center, Exchange Online application scoping, and Vercel environment settings.
@@ -57,6 +61,8 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 - **Reference:** [Microsoft Graph create event permissions](https://learn.microsoft.com/graph/api/user-post-events).
 
 ### 5. Configure Microsoft Entra single sign-on if enterprise SSO is required
+
+- **Current status:** intentionally disabled by owner on 2026-07-26; password sign-in remains the supported method.
 
 - **Exact action:** create or select an Entra web app registration, configure the web redirect URIs, issue a credential, and approve the organisation's sign-in policy.
 - **Why:** the application intentionally omits a partially configured provider so password sign-in stays available; enterprise SSO cannot be verified without tenant values.
@@ -99,15 +105,12 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 - **If omitted:** the implemented certificate remains technically functional with its current non-fabricated programme identity, but cannot be represented as legally approved.
 - **Verification:** owner signs off both EN/FR generated PDFs and a long-name sample.
 
-### 9. Decide the remediation path for production dependency advisories
+### 9. Production dependency advisories — remediated
 
-- **Exact action:** approve a tested Next.js upgrade that clears the three current production dependency advisories, or record a time-bounded risk acceptance and monitoring owner.
-- **Why:** the repaired GitHub Security workflow now creates and runs its jobs. Its production dependency audit correctly fails on three high-severity advisories through Next.js' bundled PostCSS/Sharp dependency chain. The only `npm audit fix --force` proposal is an unsafe downgrade to Next.js 9.3.3, so it was not applied.
-- **Where:** GitHub Security workflow and a dedicated dependency-upgrade branch.
-- **Payment:** no direct infrastructure cost expected.
-- **Administrator access:** repository maintainer/owner approval required for the upgrade or risk acceptance.
-- **If omitted:** `main` remains visibly red in the Security workflow even though the workflow itself is now functioning correctly.
-- **Verification:** the Security workflow passes `npm audit --omit=dev --audit-level=high` after a tested, supported dependency update.
+- **Status:** remediated on 2026-07-26. No owner decision or risk acceptance is required.
+- **Action completed:** upgraded Next.js, `eslint-config-next`, and `@next/env` to 16.2.12 and pinned the patched PostCSS 8.5.23 and Sharp 0.35.0 dependency paths with supported npm overrides.
+- **Why:** the repaired GitHub Security workflow now creates and runs its jobs; the prior three high-severity production advisories were in Next.js' bundled PostCSS/Sharp dependency chain.
+- **Verification:** `npm audit --omit=dev --audit-level=high` reports **0 vulnerabilities**. The Security workflow is expected to pass after this change reaches `main`.
 
 ## Recommended but not blocking
 

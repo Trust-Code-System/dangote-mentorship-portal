@@ -65,8 +65,8 @@ Status legend: `[ ]` not started · `[~]` in progress · `[x]` completed · `[!]
 - [x] Fix Recharts negative-size initialization and the first-remediation narrow-card overflow regression.
 - [x] Rerun typecheck, lint, full unit suite, production build, public/admin/mobile/viewport browser tests and safe local load.
 - [!] Reconcile the Vercel production database target and verify `20260726120000_harden_direct_conversations`; run authenticated messaging/upload/load validation in isolated staging after the owner confirms its $0.01344/hour Supabase branch charge.
-- [!] Configure and consent Entra/Graph; AI provider keys, models, billing limits, and quotas were owner-confirmed as validated on 2026-07-26.
-- [!] Resolve the three production dependency advisories reported by the now-functioning GitHub Security workflow, or record a time-bounded owner risk acceptance.
+- [x] Explicitly disable Entra/Graph at owner direction with `MICROSOFT_INTEGRATIONS_ENABLED=false`; password sign-in remains supported. AI provider keys, models, billing limits, and quotas were owner-confirmed as validated on 2026-07-26.
+- [x] Upgrade Next.js and pin patched PostCSS/Sharp dependencies; `npm audit --omit=dev --audit-level=high` reports 0 production vulnerabilities.
 - [x] Produce post-remediation and owner-action handoff reports.
 
 ## Required deliverables
