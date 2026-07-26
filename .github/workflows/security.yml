@@ -24,12 +24,15 @@ jobs:
   snyk:
     name: Snyk (optional — runs when SNYK_TOKEN is set)
     runs-on: ubuntu-latest
+    # GitHub does not permit the secrets context directly in an `if`
+    # expression. Expose the optional token only to this job, then test the
+    # environment variable so the workflow remains valid when Snyk is unset.
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - uses: actions/checkout@v7
       - name: Run Snyk
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.SNYK_TOKEN != '' }}
         uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
