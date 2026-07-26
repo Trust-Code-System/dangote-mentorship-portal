@@ -8,7 +8,7 @@
 
 ## Executive outcome
 
-Every concern from the full-platform audit was reopened against the original reports, test matrix, defect log, route inventory, evidence, and current source. Every safe code-level repair has been implemented. The remaining work requires owner-controlled database migration, Microsoft/provider credentials and consent, isolated staging infrastructure, production telemetry, or legal approval; those items are separated in `OWNER_ACTIONS_REQUIRED.md`.
+Every concern from the full-platform audit was reopened against the original reports, test matrix, defect log, route inventory, evidence, and current source. Every safe code-level repair has been implemented. Microsoft integrations are now explicitly disabled at owner direction; the remaining work requires owner-controlled database migration, isolated staging infrastructure, production telemetry, or legal approval and is separated in `OWNER_ACTIONS_REQUIRED.md`.
 
 The remediation preserves mentor, mentee, administrator, and Super Admin workflows; authentication and authorization; English and French; certificates; matching; messages; goals; meetings; sessions; reviews; support; imports; notifications; and AI features.
 
@@ -16,7 +16,7 @@ The remediation preserves mentor, mentee, administrator, and Super Admin workflo
 
 | Concern | Root cause | Remediation | Current status |
 |---|---|---|---|
-| Microsoft Graph and Entra absent | Production tenant values/consent were unavailable; integrations shared legacy naming | Independent Entra, Graph mail, and Graph calendar configuration/health, sanitized diagnostics, timeouts, calendar idempotency, admin readiness UI, exact owner checklist | Code complete; tenant configuration blocked on owner |
+| Microsoft Graph and Entra absent | Production tenant values/consent were unavailable; integrations shared legacy naming | Independent Entra, Graph mail, and Graph calendar configuration/health, sanitized diagnostics, timeouts, calendar idempotency, admin readiness UI, exact owner checklist, and a fail-closed feature flag | Explicitly disabled at owner direction; password sign-in remains supported |
 | Three public 404 routes | Paths were declared public but no App Router pages existed | Added bilingual `/programme`, `/mentor-guide`, `/mentee-guide`, metadata, responsive layout, nav/footer links, direct/refresh/EN/FR browser checks | Fixed |
 | Oversized server-action uploads | File bytes crossed Vercel functions despite 5/10 MB application limits and unlimited imports | Authenticated one-time signed uploads to private Supabase Storage, confirm-by-reference, byte/signature validation, collision-safe scoped paths, DB write after success, 20 MB import cap, safe legacy fallback | Code fixed; staging boundary upload and lifecycle validation owner-gated |
 | Residual admin localization | Matching and import-detail presentation copy bypassed message catalogues | Moved residual headings, labels, status values, insights, plurals, actions, and integration-health copy into reviewed EN/FR resources | Fixed |
@@ -173,11 +173,9 @@ The repository Prettier check is not a release gate here: `prettier-plugin-tailw
 
 Only owner/infrastructure items remain:
 
-- apply the direct-conversation migration before deployment;
-- configure/consent Microsoft Graph mail and, if required, calendar and Entra SSO;
+- reconcile the Vercel production database target and verify the direct-conversation migration on that exact database;
 - confirm private storage limits/lifecycle policy;
 - provision isolated staging and authorize authenticated/Realtime/upload/load testing;
-- validate AI keys/models/quotas;
 - approve certificate legal identity;
 - obtain formal accessibility certification if required.
 
