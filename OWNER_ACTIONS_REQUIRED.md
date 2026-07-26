@@ -7,16 +7,16 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 
 ## Required before production completion
 
-### 1. Apply the direct-conversation migration through the deployment pipeline
+### 1. Verify the direct-conversation migration on the deployment database
 
-- **Exact action:** review and apply `prisma/migrations/20260726120000_harden_direct_conversations/migration.sql` before deploying the remediated application.
-- **Why:** the application now uses a unique `direct_key` to prevent duplicate conversations during concurrent first access. The configured hosted database does not yet contain this migration.
-- **Where:** the controlled staging deployment first; production only after staging validation. Use the normal `prisma migrate deploy` release step.
-- **Value/decision needed:** approve migration `20260726120000_harden_direct_conversations`.
+- **Exact action:** confirm which Supabase project is referenced by Vercel production `DATABASE_URL` and `DIRECT_URL`, then run `npx prisma migrate status` against that target and verify migration `20260726120000_harden_direct_conversations` in `_prisma_migrations`.
+- **Why:** the migration was successfully deployed through Prisma to the workspace-configured database, and the owner also ran the corresponding SQL in Supabase. The dashboard screenshot and workspace configuration referenced different project IDs, so the production deployment target still needs an explicit, secret-free reconciliation.
+- **Where:** Vercel project environment settings and the selected Supabase project's database/migration history.
+- **Value/decision needed:** identify the intended production database target; do not paste connection strings into chat or this document.
 - **Payment:** no expected incremental cost.
 - **Administrator access:** database/deployment administrator required.
-- **If omitted:** the new messages code can fail when it queries `direct_key`; do not deploy code before this migration.
-- **Verification:** `npx prisma migrate status` reports no pending migration; open Messages as both sides of one pair repeatedly and confirm only one conversation exists.
+- **If omitted:** an environment can still lack `direct_key`, causing the new messaging code to fail there.
+- **Verification:** migration status reports no pending migration, `conversations.direct_key` has its unique index, and repeatedly opening Messages for one pair creates only one conversation.
 
 ### 2. Confirm Supabase upload limits and lifecycle policy
 
@@ -72,25 +72,21 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 
 ### 6. Provision isolated staging and run the gated validation
 
-- **Exact action:** create a staging Vercel project and staging Supabase project/database/storage configuration, seed synthetic users, apply all migrations, and authorize read/write load tests only against staging.
+- **Status:** blocked only pending cost confirmation.
+- **Exact action:** create a Supabase development branch named `blak-moh-staging` from Dangote Mentorship, configure it as the data/Storage/Realtime target of a separate Vercel staging project, seed synthetic users, apply all migrations, and authorize read/write load tests only against staging.
 - **Why:** authenticated dashboards, message sends, Realtime reconnect/multiple tabs, login bursts, large direct uploads, Graph callbacks, and true database saturation were deliberately not stressed against the hosted environment.
 - **Where:** Vercel, Supabase, Microsoft tenant test configuration, and the repository load/Playwright scripts.
-- **Value/decision needed:** staging URLs, plan/compute tier, test-user credentials, test window, maximum VUs, stop thresholds, and named observer for Supabase/Vercel telemetry.
-- **Payment:** likely; separate Vercel/Supabase projects and representative compute may incur cost.
+- **Value/decision needed:** explicit confirmation of the ongoing Supabase branch charge, staging URLs, test-user credentials, test window, maximum VUs, stop thresholds, and named observer for Supabase/Vercel telemetry.
+- **Payment:** **$0.01344/hour** for the Supabase branch, approximately **$9.81/month** (730 hours) or **$117.73/year** while it remains active. This is incremental to the primary Supabase plan. A separate Vercel staging project has no separate base charge when it lives in the same paid Vercel team, but Vercel usage can add overages.
 - **Administrator access:** Vercel and Supabase administrators; Microsoft administrator for test integrations.
 - **If omitted:** production capacity remains unqualified. The conservative current local result is 10 public VUs within thresholds; 25 breached p95 on the remediation rerun.
 - **Verification:** record p50/p95/p99, errors, DB pool/CPU/RAM, Realtime clients, storage failures, provider quotas, and recovery after stop; update `CAPACITY_AND_LOAD_TEST_REPORT.md`.
 
-### 7. Validate AI provider credentials and quotas
+### 7. AI provider credentials, models, limits, and quotas — owner-confirmed
 
-- **Exact action:** confirm the configured Anthropic/OpenAI keys, models, account quotas, regional access, and billing in staging.
-- **Why:** code now has per-process concurrency control and a 20-second provider timeout, but historical live evidence included Anthropic 401 and OpenAI 429.
-- **Where:** provider consoles and Vercel environment settings.
-- **Value/decision needed:** valid `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`, approved models, spending/usage limits, and alert thresholds.
-- **Payment:** provider usage is paid beyond any free credit.
-- **Administrator access:** provider account/billing administrator.
-- **If omitted:** all AI features continue to degrade to manual workflows, but provider-backed suggestions remain unverified.
-- **Verification:** run each advisory AI surface in staging, observe no secret/prompt logging, confirm timeout/fallback behavior, and monitor 401/429 rates.
+- **Status:** owner confirmed validation on 2026-07-26.
+- **Follow-up:** retain provider-side monthly spend caps and 401/429 alerts; repeat the validation from isolated staging after it is provisioned.
+- **Payment:** usage remains variable; see `CLIENT_COST_ESTIMATE.md` for the token-cost model.
 
 ### 8. Approve certificate legal identity
 
@@ -103,9 +99,19 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 - **If omitted:** the implemented certificate remains technically functional with its current non-fabricated programme identity, but cannot be represented as legally approved.
 - **Verification:** owner signs off both EN/FR generated PDFs and a long-name sample.
 
+### 9. Decide the remediation path for production dependency advisories
+
+- **Exact action:** approve a tested Next.js upgrade that clears the three current production dependency advisories, or record a time-bounded risk acceptance and monitoring owner.
+- **Why:** the repaired GitHub Security workflow now creates and runs its jobs. Its production dependency audit correctly fails on three high-severity advisories through Next.js' bundled PostCSS/Sharp dependency chain. The only `npm audit fix --force` proposal is an unsafe downgrade to Next.js 9.3.3, so it was not applied.
+- **Where:** GitHub Security workflow and a dedicated dependency-upgrade branch.
+- **Payment:** no direct infrastructure cost expected.
+- **Administrator access:** repository maintainer/owner approval required for the upgrade or risk acceptance.
+- **If omitted:** `main` remains visibly red in the Security workflow even though the workflow itself is now functioning correctly.
+- **Verification:** the Security workflow passes `npm audit --omit=dev --audit-level=high` after a tested, supported dependency update.
+
 ## Recommended but not blocking
 
-### 9. Configure production observability and capacity alerts
+### 10. Configure production observability and capacity alerts
 
 - **Action:** alert at 70% of usable DB connections, Realtime quota, storage quota, AI/provider rate limits, function duration, and error budget; capture Core Web Vitals.
 - **Where:** Supabase reports, Vercel/Sentry/Analytics, and provider dashboards.
@@ -113,7 +119,7 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 - **If omitted:** failures are detected later and capacity estimates remain harder to refine.
 - **Verification:** trigger each alert safely in staging and document the on-call owner.
 
-### 10. Review Vercel and Supabase plans before expanding beyond the pilot
+### 11. Review Vercel and Supabase plans before expanding beyond the pilot
 
 - **Action:** record Vercel Fluid Compute/memory/spend settings and Supabase compute, pooler-client, Realtime, storage, backup, and egress limits.
 - **Why:** connection and provider telemetry—not registered-account count—set the real active-user envelope.
@@ -121,7 +127,7 @@ No credentials belong in this document. Enter secrets only in the appropriate Mi
 - **If omitted:** keep the conservative pilot limit and do not advertise a higher capacity.
 - **Verification:** attach plan screenshots/exports without secrets to the capacity evidence and rerun staging load.
 
-### 11. Schedule periodic recovery and accessibility certification
+### 12. Schedule periodic recovery and accessibility certification
 
 - **Action:** add a release-candidate exercise for offline/reconnect, multiple tabs, 200% zoom, keyboard-only navigation, screen reader checks, contrast, and an axe/pa11y scan.
 - **Where:** isolated staging and the organisation's accessibility QA process.
