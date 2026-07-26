@@ -1,12 +1,18 @@
 'use client';
 
-import { useActionState, useEffect, useId, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { uploadGoalEvidenceForm, type GoalActionState } from '@/features/goals/actions';
+import {
+  confirmGoalEvidenceUpload,
+  prepareGoalEvidenceUpload,
+  uploadGoalEvidence,
+  type GoalActionState,
+} from '@/features/goals/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { uploadFileToSignedTarget } from '@/lib/storage/browser-upload';
 
 // Upload evidence of goal progress (experience-layer.md §1.7). Files are stored
 // via the storage seam and served only through the authorized download route.
@@ -17,21 +23,55 @@ export function EvidenceUpload({ goalId }: { goalId: string }) {
   const noteId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
-  const [state, action, pending] = useActionState<GoalActionState, FormData>(
-    uploadGoalEvidenceForm,
-    null,
-  );
+  const [state, setState] = useState<GoalActionState>(null);
+  const [pending, setPending] = useState(false);
 
-  useEffect(() => {
-    if (state?.ok) {
-      formRef.current?.reset();
-      router.refresh();
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const file = formData.get('file');
+    const note = String(formData.get('note') ?? '');
+    if (!(file instanceof File) || file.size === 0) return;
+    setPending(true);
+    setState(null);
+    try {
+      const prepared = await prepareGoalEvidenceUpload({
+        goalId,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        note,
+      });
+      if (!prepared.ok) return setState(prepared);
+      let result: GoalActionState;
+      if (prepared.data.mode === 'server') {
+        result = await uploadGoalEvidence(formData);
+      } else {
+        const target = prepared.data;
+        await uploadFileToSignedTarget({ ...target, file });
+        result = await confirmGoalEvidenceUpload({
+          goalId,
+          path: target.path,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          note,
+        });
+      }
+      setState(result);
+      if (result?.ok) {
+        formRef.current?.reset();
+        router.refresh();
+      }
+    } catch (error) {
+      setState({ ok: false, error: { code: 'UNKNOWN', message: error instanceof Error ? error.message : 'Upload failed.' } });
+    } finally {
+      setPending(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }
 
   return (
-    <form ref={formRef} action={action} className="space-y-2 border-t pt-3">
+    <form ref={formRef} onSubmit={(event) => void submit(event)} className="space-y-2 border-t pt-3">
       <input type="hidden" name="goalId" value={goalId} />
       <div className="space-y-1">
         <Label htmlFor={fileId}>{t('evidenceFile')}</Label>

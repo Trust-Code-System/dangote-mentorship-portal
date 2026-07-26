@@ -26,10 +26,6 @@ const productionEnvSchema = z.object({
   NEXT_PUBLIC_SENTRY_DSN: z.string().url(),
   UPSTASH_REDIS_REST_URL: z.string().url(),
   UPSTASH_REDIS_REST_TOKEN: nonPlaceholder,
-  MAIL_GRAPH_TENANT_ID: nonPlaceholder,
-  MAIL_GRAPH_CLIENT_ID: nonPlaceholder,
-  MAIL_GRAPH_CLIENT_SECRET: nonPlaceholder,
-  MAIL_GRAPH_SENDER: z.string().email(),
 });
 
 export function assertProductionEnvironment(env: NodeJS.ProcessEnv = process.env): void {

@@ -419,6 +419,7 @@
     "title": "Import data",
     "upload": "Upload a sheet",
     "uploadHint": "CSV or Excel (.xlsx) — including Google Sheets/Forms exports.",
+    "uploadFailed": "The upload was interrupted. Please try again.",
     "file": "File",
     "targetRole": "These rows are",
     "mentors": "Mentors",
@@ -457,7 +458,27 @@
     "stepMapping": "Mapping",
     "stepValidation": "Validation",
     "stepReview": "Review",
-    "stepCommit": "Commit"
+    "stepCommit": "Commit",
+    "breadcrumb": "Admin / User management / Batch data import",
+    "reviewSubtitle": "Review, validate and commit newly uploaded mentor and mentee records.",
+    "exportCsv": "Export CSV",
+    "systemHealth": "System health",
+    "reviewNeeded": "Review needed",
+    "optimized": "Optimized",
+    "importedRecords": "Imported records",
+    "fullName": "Full name",
+    "role": "Role",
+    "mentorRole": "Mentor",
+    "menteeRole": "Mentee",
+    "assistant": "AI assistant",
+    "validationSummary": "{count, plural, =0 {No records require attention before commit.} one {Validation identified # record requiring attention before commit.} other {Validation identified # records requiring attention before commit.}}",
+    "criticalInsight": "Critical insight",
+    "resolveBlocking": "Resolve blocking email and required-field errors first.",
+    "readyForReview": "All records are ready for final review.",
+    "systemStatus": "System status",
+    "validationComplete": "Validation complete",
+    "generateAuditReport": "Generate full audit report",
+    "rowStatus": { "VALID": "Valid", "FLAGGED": "Flagged", "FIXED": "Fixed", "ACCEPTED": "Accepted", "REJECTED": "Rejected" }
   },
   "matching": {
     "title": "Matching engine",
@@ -522,7 +543,12 @@
     "confidence": "Match confidence",
     "optimalPair": "Optimal pair",
     "aiRationale": "AI rationale",
-    "queue": "Queue ({count} matches)"
+    "queue": "Queue ({count} matches)",
+    "cohortStrength": "Cohort strength",
+    "compatibilitySignals": "Real compatibility signals for this recommendation.",
+    "overallConfidence": "Overall confidence",
+    "languageCompatibility": "Language compatibility",
+    "rankedUsingRules": "Ranked using the configured matching rules and profile data."
   },
   "profile": {
     "title": "My profile",
@@ -769,9 +795,54 @@
   "certificate": {
     "title": "Completion Certificate",
     "download": "Download / Print",
-    "earnedNote": "Congratulations — your certificate is ready. Download or print it below.",
-    "previewNote": "A preview of your certificate. It becomes official once you complete training, an approved goal, and your reviews.",
-    "noPairing": "Your certificate unlocks once you and your partner have accepted your match."
+    "downloadPdf": "Download PDF",
+    "printPreview": "Print preview",
+    "earnedNote": "Congratulations — your official certificate is ready in a print-safe, high-resolution PDF.",
+    "previewNote": "This preview becomes official after training, an approved goal, and both programme reviews are complete.",
+    "noPairing": "Your certificate unlocks once you and your partner have accepted your match.",
+    "statusIssued": "Official certificate",
+    "statusPreview": "Preview",
+    "statusLocked": "Locked",
+    "viewFrench": "View in French",
+    "viewEnglish": "View in English",
+    "emptyTitle": "No certificate is available yet",
+    "emptyBody": "An accepted mentorship match is required before a certificate preview can be created.",
+    "requirementsTitle": "Completion requirements",
+    "requirements": {
+      "training": "Complete programme training",
+      "goal": "Have at least one approved goal",
+      "midterm": "Submit the mid-term review",
+      "final": "Submit the final review"
+    },
+    "documentDetails": "Certificate details",
+    "programme": "Programme",
+    "cohort": "Cohort",
+    "language": "Language",
+    "english": "English",
+    "french": "French"
+  },
+  "adminCertificates": {
+    "navLabel": "Certificates",
+    "eyebrow": "Programme recognition",
+    "title": "Certificate management",
+    "subtitle": "Preview and generate owner-scoped English or French certificates from real programme completion data.",
+    "participant": "Participant",
+    "selectParticipant": "Select a participant",
+    "language": "Certificate language",
+    "mentor": "Mentor",
+    "mentee": "Mentee",
+    "generate": "Generate preview",
+    "regenerate": "Regenerate",
+    "downloadPdf": "Download PDF",
+    "downloadPreview": "Download marked preview",
+    "eligible": "Eligible · ready",
+    "ineligible": "Incomplete · preview only",
+    "ineligibleWarning": "This participant has not completed every programme requirement. The output remains visibly marked as a preview and cannot be issued as an official certificate.",
+    "regeneratedStatus": "The preview has been regenerated from the latest programme records.",
+    "emptyTitle": "No accepted participants",
+    "emptyBody": "Certificates become available after a mentor and mentee accept their match.",
+    "selectTitle": "Select a participant to begin",
+    "selectBody": "Programme, cohort, role, language, completion status and certificate identity will appear here."
   },
   "goals": {
     "title": "Goals",
@@ -928,9 +999,18 @@
     "threadEmpty": "No messages yet — say hello.",
     "back": "Back to conversations",
     "loadOlder": "Load older messages",
+    "sendFailed": "Message not sent. Your text is still here so you can retry.",
+    "retry": "Retry",
     "participantSubtitle": "Mentorship pair",
     "viewPair": "Open pair workspace",
-    "viewGoals": "Shared goals"
+    "viewGoals": "Shared goals",
+    "conversationListTitle": "Discussions",
+    "mentorshipFocus": "Mentorship focus",
+    "strategy": "Strategy",
+    "leadership": "Leadership",
+    "sharedAssets": "Shared assets",
+    "agreementDocument": "Mentoring agreement",
+    "sessionNotes": "Session notes"
   },
   "meetings": {
     "title": "Meetings",
@@ -1580,7 +1660,19 @@
     "enableButton": "Turn on maintenance mode",
     "disableButton": "Turn off maintenance mode",
     "confirmEnable": "This will immediately lock out all mentors, mentees, trainers and reviewers. Admins keep access. Continue?",
-    "confirmEnableButton": "Yes, turn it on"
+    "confirmEnableButton": "Yes, turn it on",
+    "integrationsTitle": "Microsoft integration readiness",
+    "integrationsDescription": "Configuration health only. Secrets are never displayed.",
+    "missingVariables": "Missing environment variables",
+    "integrationStatus": { "configured": "Configured", "partial": "Incomplete", "disabled": "Disabled" },
+    "integration": {
+      "entra": "Microsoft Entra SSO",
+      "entraDescription": "Optional work-account sign-in. Password sign-in remains available when disabled.",
+      "graphMail": "Microsoft Graph mail",
+      "graphMailDescription": "Password resets, invitations and notification email delivery.",
+      "graphCalendar": "Microsoft Graph calendar",
+      "graphCalendarDescription": "Outlook event creation and cancellation for scheduled meetings."
+    }
   },
   "maintenance": {
     "title": "Maintenance mode",
@@ -1855,6 +1947,9 @@
       "navLabel": "Footer",
       "sectionsLabel": "Programme",
       "accessLabel": "Access",
+      "programmeGuide": "Programme guide",
+      "mentorGuide": "Mentor guide",
+      "menteeGuide": "Mentee guide",
       "about": "About the programme",
       "faq": "FAQ",
       "support": "Support",
@@ -2347,6 +2442,47 @@
         "title": "Most answers are",
         "titleAccent": "already written down.",
         "body": "The FAQ covers access, matching, goals, sessions, language and privacy. Participants can raise anything else privately after signing in."
+      }
+    },
+    "guides": {
+      "programme": {
+        "meta": { "title": "Programme guide — BLAK MOH", "description": "A practical overview of the nine-month BLAK MOH mentorship journey." },
+        "hero": { "eyebrow": "Programme guide", "breadcrumb": "Programme guide", "title": "One programme.", "titleAccent": "Nine visible stages.", "lede": "BLAK MOH takes each pair from profile and training through matching, goals, sessions, reviews and completion." },
+        "steps": {
+          "eyebrow": "The journey", "title": "How the programme works", "lede": "Each stage unlocks the next while keeping the people involved in control.",
+          "one": { "title": "Prepare and train", "body": "Participants complete their profiles and programme training before a pairing is proposed." },
+          "two": { "title": "Review and accept the match", "body": "The engine ranks language-compatible pairings; an administrator approves and both participants respond." },
+          "three": { "title": "Set goals and meet", "body": "The pair signs the agreements, sets approved development goals, schedules meetings and records sessions." },
+          "four": { "title": "Review and complete", "body": "Mid-term and final reviews capture progress before eligible participants receive a completion certificate." }
+        },
+        "privacy": { "eyebrow": "Confidentiality", "title": "Progress is visible; private conversation is not.", "body": "Programme administrators can run the cohort without reading direct messages or private journals.", "detail": "The confidentiality page explains what each participant, mentor and administrator can see." },
+        "cta": { "title": "Ready to continue", "titleAccent": "your programme journey?", "body": "Sign in to see your current stage, or use the FAQ for detailed guidance." }
+      },
+      "mentor": {
+        "meta": { "title": "Mentor guide — BLAK MOH", "description": "Practical guidance for mentors taking part in BLAK MOH." },
+        "hero": { "eyebrow": "Mentor guide", "breadcrumb": "Mentor guide", "title": "Bring experience.", "titleAccent": "Build independence.", "lede": "Mentors guide a structured nine-month journey while every goal approval, session record and decision remains human-led." },
+        "steps": {
+          "eyebrow": "Your role", "title": "What mentors do", "lede": "The portal keeps the next action visible without replacing the relationship.",
+          "one": { "title": "Complete training and review the match", "body": "Finish the required training, read the match rationale and accept or decline the proposed pairing." },
+          "two": { "title": "Agree how you will work", "body": "Sign the mentoring and confidentiality agreements with your mentee before starting the working relationship." },
+          "three": { "title": "Review goals and hold sessions", "body": "Approve, comment on or return goals, then schedule meetings and record agreed actions after each session." },
+          "four": { "title": "Support reviews and completion", "body": "Complete the mid-term and final reviews and help the mentee evidence progress toward programme completion." }
+        },
+        "privacy": { "eyebrow": "Your private space", "title": "Direct messages and mentor notes stay scoped.", "body": "Only conversation participants can read direct messages, and mentor private notes are not shown to mentees or administrators.", "detail": "Session reports and goal progress remain visible where programme oversight requires them." },
+        "cta": { "title": "Your mentee's next step", "titleAccent": "starts with a clear action.", "body": "Sign in to review your dashboard, goals, meetings and messages." }
+      },
+      "mentee": {
+        "meta": { "title": "Mentee guide — BLAK MOH", "description": "Practical guidance for mentees taking part in BLAK MOH." },
+        "hero": { "eyebrow": "Mentee guide", "breadcrumb": "Mentee guide", "title": "Own the goal.", "titleAccent": "Use the guidance.", "lede": "Mentees shape the development goal, bring the work to each session and keep evidence of progress throughout the programme." },
+        "steps": {
+          "eyebrow": "Your role", "title": "What mentees do", "lede": "The programme provides structure; you remain responsible for the direction and the work.",
+          "one": { "title": "Complete your profile and training", "body": "Keep your experience, goals, language and availability accurate, then complete programme training." },
+          "two": { "title": "Review the match and sign", "body": "Accept or decline the proposed mentor, then sign both required agreements when the pairing is accepted." },
+          "three": { "title": "Create goals and bring evidence", "body": "Draft SMART development goals, submit them for mentor approval and attach evidence as the work progresses." },
+          "four": { "title": "Reflect and complete", "body": "Record reflections, complete both programme reviews and meet every completion requirement for the certificate." }
+        },
+        "privacy": { "eyebrow": "Your private space", "title": "You choose what leaves your journal.", "body": "Journal entries are private by default and can be shared individually with your mentor.", "detail": "Direct messages stay between the two conversation participants; administrators see programme activity, not message content." },
+        "cta": { "title": "Turn the next action", "titleAccent": "into visible progress.", "body": "Sign in to see your current stage, goals, meetings and messages." }
       }
     }
   }

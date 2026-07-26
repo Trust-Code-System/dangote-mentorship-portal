@@ -38,11 +38,17 @@ export function InviteCreateForm({
   const [cohortId, setCohortId] = useState(NO_COHORT);
 
   useEffect(() => {
-    if (state?.ok) {
-      formRef.current?.reset();
+    if (!state?.ok) return;
+    formRef.current?.reset();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
       setCohortId(NO_COHORT);
       setCopied(false);
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [state]);
 
   // The raw token exists only in this response — build the link client-side.

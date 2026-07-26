@@ -1,4 +1,5 @@
 import 'server-only';
+import { createHmac } from 'node:crypto';
 import { cache } from 'react';
 import { ConversationType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -40,20 +41,38 @@ async function findDirectConversation(
   otherId: string,
   cohortId: string,
 ): Promise<{ id: string } | null> {
+  const directKey = directConversationKey(cohortId, userId, otherId);
   // "exactly these two" = every participant is in {me, other} AND both present.
   return prisma.conversation.findFirst({
     where: {
       type: ConversationType.DIRECT,
       cohortId,
       deletedAt: null,
-      participants: { every: { userId: { in: [userId, otherId] } } },
-      AND: [
-        { participants: { some: { userId } } },
-        { participants: { some: { userId: otherId } } },
+      OR: [
+        { directKey },
+        {
+          directKey: null,
+          participants: { every: { userId: { in: [userId, otherId] } } },
+          AND: [
+            { participants: { some: { userId } } },
+            { participants: { some: { userId: otherId } } },
+          ],
+        },
       ],
     },
     select: { id: true },
   });
+}
+
+export function directConversationKey(cohortId: string, firstUserId: string, secondUserId: string): string {
+  return `${cohortId}:${[firstUserId, secondUserId].sort().join(':')}`;
+}
+
+export function realtimeChannelName(conversationId: string): string | null {
+  const secret = process.env.REALTIME_CHANNEL_SECRET ?? process.env.AUTH_SECRET;
+  if (!secret) return null;
+  const opaqueId = createHmac('sha256', secret).update(conversationId).digest('base64url');
+  return `conversation:${opaqueId}`;
 }
 
 /** Provision a DIRECT conversation for each of the user's accepted pairings. */
@@ -65,25 +84,29 @@ export async function ensureDirectConversations(userId: string): Promise<void> {
   const asMentee = await getMenteePairing(userId);
   if (asMentee) pairs.push({ cohortId: asMentee.cohortId, otherId: asMentee.mentorId });
 
-  for (const { cohortId, otherId } of pairs) {
-    const existing = await findDirectConversation(userId, otherId, cohortId);
-    if (existing) continue;
-
-    // Prefetch + click (or double RSC) can race two creates. Treat create
-    // failures as benign when the peer request already inserted the row.
-    try {
-      await prisma.conversation.create({
-        data: {
+  await Promise.all(
+    pairs.map(async ({ cohortId, otherId }) => {
+      const directKey = directConversationKey(cohortId, userId, otherId);
+      const existing = await findDirectConversation(userId, otherId, cohortId);
+      if (existing) {
+        await prisma.conversation.updateMany({
+          where: { id: existing.id, directKey: null },
+          data: { directKey },
+        });
+        return;
+      }
+      await prisma.conversation.upsert({
+        where: { directKey },
+        update: {},
+        create: {
+          directKey,
           cohortId,
           type: ConversationType.DIRECT,
           participants: { create: [{ userId }, { userId: otherId }] },
         },
       });
-    } catch (error) {
-      const raced = await findDirectConversation(userId, otherId, cohortId);
-      if (!raced) throw error;
-    }
-  }
+    }),
+  );
 }
 
 export async function listConversations(userId: string): Promise<ConversationSummary[]> {

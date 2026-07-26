@@ -215,15 +215,15 @@ export default async function MatchingPage() {
             </div>
           </article>
           <aside className="rounded-lg border border-border bg-surface p-5 shadow-elevation">
-            <h2 className="text-h3 text-ink">Cohort strength</h2>
-            <p className="mt-1 text-micro text-ink-3">Real compatibility signals for this recommendation.</p>
+            <h2 className="text-h3 text-ink">{t('cohortStrength')}</h2>
+            <p className="mt-1 text-micro text-ink-3">{t('compatibilitySignals')}</p>
             <div className="mt-5 space-y-5">
-              <StrengthBar label="Overall confidence" value={Math.round(featured.score)} />
-              <StrengthBar label="Language compatibility" value={100} />
+              <StrengthBar label={t('overallConfidence')} value={Math.round(featured.score)} />
+              <StrengthBar label={t('languageCompatibility')} value={100} />
             </div>
             <div className="mt-5 rounded-md bg-surface-2 p-3 text-small text-ink-2">
-              <p className="font-semibold text-ink">Cohort 2026</p>
-              <p className="mt-1">Ranked using the configured matching rules and profile data.</p>
+              <p className="font-semibold text-ink">{cohort.name}</p>
+              <p className="mt-1">{t('rankedUsingRules')}</p>
             </div>
           </aside>
           </div>

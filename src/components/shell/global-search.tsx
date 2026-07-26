@@ -31,13 +31,9 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
   }, [q, navItems]);
 
   React.useEffect(() => {
-    if (q.length < 2) {
-      setHits([]);
-      setPending(false);
-      return;
-    }
-    setPending(true);
+    if (q.length < 2) return;
     const id = setTimeout(async () => {
+      setPending(true);
       try {
         const res = await searchPortal({ query: q });
         setHits(res.ok ? res.data.hits : []);
@@ -48,12 +44,15 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
     return () => clearTimeout(id);
   }, [q]);
 
+  const visibleHits = q.length >= 2 ? hits : [];
+  const visiblyPending = q.length >= 2 && pending;
+
   function close() {
     setOpen(false);
   }
 
   const showDropdown = open && q.length >= 1;
-  const hasResults = pageHits.length > 0 || hits.length > 0;
+  const hasResults = pageHits.length > 0 || visibleHits.length > 0;
 
   return (
     <div className="relative hidden max-w-md flex-1 sm:block">
@@ -72,7 +71,7 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
         <>
           <div aria-hidden className="fixed inset-0 z-40" onClick={close} />
           <div className="absolute left-0 right-0 z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-xl border border-border bg-surface py-2 shadow-elevation-lg">
-            {pending && (
+            {visiblyPending && (
               <div className="flex items-center gap-2 px-4 py-2 text-small text-ink-3">
                 <Loader2 className="size-4 animate-spin" />
                 {t('searching')}
@@ -87,9 +86,9 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
               </Group>
             )}
 
-            {hits.length > 0 && (
+            {visibleHits.length > 0 && (
               <Group label={t('records')}>
-                {hits.map((h, i) => (
+                {visibleHits.map((h, i) => (
                   <ResultLink
                     key={`${h.kind}-${h.href}-${i}`}
                     href={h.href}
@@ -102,7 +101,7 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
               </Group>
             )}
 
-            {!pending && !hasResults && q.length >= 2 && (
+            {!visiblyPending && !hasResults && q.length >= 2 && (
               <p className="px-4 py-3 text-small text-ink-3">{t('noResults')}</p>
             )}
           </div>

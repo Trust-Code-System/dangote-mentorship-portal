@@ -37,11 +37,17 @@ export function MentorNoteForm({ menteeId, defaultLang }: { menteeId: string; de
   );
 
   useEffect(() => {
-    if (state?.ok) {
+    if (!state?.ok) return;
+    router.refresh();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
       setBody('');
       setKind(NO_KIND);
-      router.refresh();
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

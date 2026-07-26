@@ -17,6 +17,9 @@ type SectionId = (typeof SECTIONS)[number];
 
 /** The Knowledge Library, in footer order. Used on every non-landing public page. */
 const LIBRARY = [
+  { href: '/programme', key: 'programmeGuide' },
+  { href: '/mentor-guide', key: 'mentorGuide' },
+  { href: '/mentee-guide', key: 'menteeGuide' },
   { href: '/about', key: 'about' },
   { href: '/faq', key: 'faq' },
   { href: '/confidentiality', key: 'confidentiality' },
@@ -99,9 +102,6 @@ export function PublicNav() {
       window.removeEventListener('keydown', onKey);
     };
   }, [menuOpen]);
-
-  // Route changes must not leave the sheet open behind the new page.
-  useEffect(() => setMenuOpen(false), [pathname]);
 
   const links: { id: string; href: string; label: string; current: boolean }[] = onLanding
     ? [

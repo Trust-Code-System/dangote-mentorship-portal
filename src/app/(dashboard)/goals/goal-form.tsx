@@ -126,11 +126,17 @@ export function GoalForm({
   // On a successful save, clear the draft and refresh server data so the new or
   // updated goal appears in the list.
   useEffect(() => {
-    if (state?.ok) {
-      if (enableDraft) void clear();
-      router.refresh();
-      if (mode === 'create') setValues({ ...EMPTY });
-    }
+    if (!state?.ok) return;
+    if (enableDraft) void clear();
+    router.refresh();
+    if (mode !== 'create') return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setValues({ ...EMPTY });
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

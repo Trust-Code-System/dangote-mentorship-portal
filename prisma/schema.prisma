@@ -1404,6 +1404,7 @@ model Conversation {
   cohortId String           @map("cohort_id")
   type     ConversationType @default(DIRECT)
   title    String?
+  directKey String?         @unique @map("direct_key")
 
   cohort       Cohort                    @relation(fields: [cohortId], references: [id])
   participants ConversationParticipant[]

@@ -1,6 +1,7 @@
 import 'server-only';
 import type { MailTransport, SendEmailInput } from './types';
-import { GRAPH_BASE, getGraphToken, isGraphConfigured, readGraphConfig } from '@/lib/graph/client';
+import { GRAPH_BASE, getGraphToken, readGraphMailConfig } from '@/lib/graph/client';
+import { getIntegrationHealth } from '@/lib/integrations/health';
 
 // Microsoft Graph mail transport (CLAUDE.md §2). Outbound mail goes through Graph
 // using app-only auth (shared lib/graph/client) against a dedicated sender
@@ -10,11 +11,11 @@ import { GRAPH_BASE, getGraphToken, isGraphConfigured, readGraphConfig } from '@
 
 /** Mail uses the shared Graph app credentials. */
 export function isGraphMailConfigured(): boolean {
-  return isGraphConfigured();
+  return getIntegrationHealth().graphMail.configured;
 }
 
 export function createGraphMailTransport(): MailTransport {
-  const config = readGraphConfig();
+  const config = readGraphMailConfig();
 
   return {
     id: 'microsoft-graph',
@@ -37,11 +38,12 @@ export function createGraphMailTransport(): MailTransport {
             'content-type': 'application/json',
           },
           body: JSON.stringify({ message, saveToSentItems: false }),
+          signal: AbortSignal.timeout(15_000),
         },
       );
       // sendMail returns 202 Accepted on success.
       if (!response.ok) {
-        throw new Error(`Graph sendMail failed: HTTP ${response.status}`);
+        throw new Error(`Graph mail delivery failed (HTTP ${response.status}).`);
       }
     },
   };

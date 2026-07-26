@@ -12,26 +12,26 @@ export interface GraphConfig {
   tenantId: string;
   clientId: string;
   clientSecret: string;
-  /** UPN/email of the default sender mailbox, e.g. mentorship@dangote.com. */
+}
+
+export interface GraphMailConfig extends GraphConfig {
   sender: string;
 }
 
-/** True when the Graph app credentials are present. */
-export function isGraphConfigured(): boolean {
-  return Boolean(
-    process.env.MAIL_GRAPH_TENANT_ID &&
-      process.env.MAIL_GRAPH_CLIENT_ID &&
-      process.env.MAIL_GRAPH_CLIENT_SECRET &&
-      process.env.MAIL_GRAPH_SENDER,
-  );
+export function readGraphMailConfig(): GraphMailConfig {
+  return {
+    tenantId: (process.env.GRAPH_MAIL_TENANT_ID ?? process.env.MAIL_GRAPH_TENANT_ID) as string,
+    clientId: (process.env.GRAPH_MAIL_CLIENT_ID ?? process.env.MAIL_GRAPH_CLIENT_ID) as string,
+    clientSecret: (process.env.GRAPH_MAIL_CLIENT_SECRET ?? process.env.MAIL_GRAPH_CLIENT_SECRET) as string,
+    sender: (process.env.GRAPH_MAIL_SENDER ?? process.env.MAIL_GRAPH_SENDER) as string,
+  };
 }
 
-export function readGraphConfig(): GraphConfig {
+export function readGraphCalendarConfig(): GraphConfig {
   return {
-    tenantId: process.env.MAIL_GRAPH_TENANT_ID as string,
-    clientId: process.env.MAIL_GRAPH_CLIENT_ID as string,
-    clientSecret: process.env.MAIL_GRAPH_CLIENT_SECRET as string,
-    sender: process.env.MAIL_GRAPH_SENDER as string,
+    tenantId: (process.env.GRAPH_CALENDAR_TENANT_ID ?? process.env.MAIL_GRAPH_TENANT_ID) as string,
+    clientId: (process.env.GRAPH_CALENDAR_CLIENT_ID ?? process.env.MAIL_GRAPH_CLIENT_ID) as string,
+    clientSecret: (process.env.GRAPH_CALENDAR_CLIENT_SECRET ?? process.env.MAIL_GRAPH_CLIENT_SECRET) as string,
   };
 }
 
@@ -41,10 +41,12 @@ interface TokenResponse {
 }
 
 // Cache the app token across calls; refresh a minute before it actually expires.
-let tokenCache: { token: string; expiresAt: number } | null = null;
+const tokenCache = new Map<string, { token: string; expiresAt: number }>();
 
 export async function getGraphToken(config: GraphConfig): Promise<string> {
-  if (tokenCache && Date.now() < tokenCache.expiresAt) return tokenCache.token;
+  const cacheKey = `${config.tenantId}:${config.clientId}`;
+  const cached = tokenCache.get(cacheKey);
+  if (cached && Date.now() < cached.expiresAt) return cached.token;
 
   const body = new URLSearchParams({
     client_id: config.clientId,
@@ -57,6 +59,7 @@ export async function getGraphToken(config: GraphConfig): Promise<string> {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body,
+    signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
     // Status only — never log the secret or response body (CLAUDE.md §14).
@@ -64,14 +67,14 @@ export async function getGraphToken(config: GraphConfig): Promise<string> {
   }
 
   const data = (await response.json()) as TokenResponse;
-  tokenCache = {
+  tokenCache.set(cacheKey, {
     token: data.access_token,
     expiresAt: Date.now() + Math.max(0, data.expires_in - 60) * 1000,
-  };
+  });
   return data.access_token;
 }
 
 /** Test-only: reset the cached app token between cases. */
 export function resetGraphTokenCache(): void {
-  tokenCache = null;
+  tokenCache.clear();
 }

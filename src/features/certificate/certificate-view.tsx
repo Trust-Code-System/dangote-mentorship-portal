@@ -1,194 +1,437 @@
-import type { CertificateData } from './data';
-
-// The visual certificate. Self-contained inline styles so it prints faithfully
-// (independent of the app's Tailwind/print cascade). Bilingual copy inline (like
-// the agreement templates). Fixed 297×210 (A4 landscape) proportions; the print
-// stylesheet in the page fills the sheet and hides the rest of the app.
+import type { CertificateData, CertificateLanguage } from './data';
 
 const COPY = {
   EN: {
-    kicker: 'Enterprise Mentorship',
-    titleEarned: 'Certificate of Completion',
-    titlePreview: 'Certificate of Participation',
-    presentedTo: 'This is proudly presented to',
-    menteeBody: (p: string) =>
-      `for successfully completing the 9-month ${p}, demonstrating growth, commitment, and measurable progress toward their development goals.`,
-    mentorBody: (p: string) =>
-      `in recognition of dedicated service as a mentor in the ${p}, guiding the next generation of leaders with wisdom and generosity.`,
-    cohortLabel: 'Cohort',
-    pairedMentee: 'Mentored by',
-    pairedMentor: 'Mentor to',
-    issued: 'Issued',
-    certId: 'Certificate ID',
-    dirLead: 'Programme Director',
-    dirAdmin: 'Programme Administrator',
-    sealTop: 'CERTIFIED',
-    sealBottom: 'BLAK MOH',
-    preview: 'SAMPLE · PREVIEW',
+    eyebrow: 'BLAK MOH Mentorship Programme',
+    title: 'Certificate of Completion',
+    previewTitle: 'Certificate Preview',
+    presentedTo: 'This certificate is proudly presented to',
+    roleMentee: 'Mentee',
+    roleMentor: 'Mentor',
+    menteeBody: (programme: string, cohort: string) =>
+      `for successfully completing ${programme} (${cohort}) and demonstrating commitment to growth, leadership and measurable development.`,
+    mentorBody: (programme: string, cohort: string) =>
+      `in recognition of dedicated service as a mentor in ${programme} (${cohort}), guiding emerging leaders with commitment, wisdom and generosity.`,
+    completionDate: 'Completion date',
+    certificateId: 'Certificate ID',
+    programmeDirector: 'Programme Director',
+    coordinator: 'Authorized Coordinator',
+    preview: 'PREVIEW · NOT YET ISSUED',
+    official: 'Official programme certificate',
   },
   FR: {
-    kicker: 'Mentorat d’Entreprise',
-    titleEarned: 'Certificat de Réussite',
-    titlePreview: 'Certificat de Participation',
-    presentedTo: 'Est fièrement décerné à',
-    menteeBody: (p: string) =>
-      `pour avoir mené à bien le ${p} de 9 mois, faisant preuve de progression, d’engagement et de progrès mesurables vers ses objectifs de développement.`,
-    mentorBody: (p: string) =>
-      `en reconnaissance de son dévouement en tant que mentor du ${p}, guidant la prochaine génération de leaders avec sagesse et générosité.`,
-    cohortLabel: 'Cohorte',
-    pairedMentee: 'Encadré par',
-    pairedMentor: 'Mentor de',
-    issued: 'Délivré le',
-    certId: 'N° du certificat',
-    dirLead: 'Directeur du Programme',
-    dirAdmin: 'Administrateur du Programme',
-    sealTop: 'CERTIFIÉ',
-    sealBottom: 'BLAK MOH',
-    preview: 'ÉCHANTILLON · APERÇU',
+    eyebrow: 'Programme de mentorat BLAK MOH',
+    title: 'Certificat d’achèvement',
+    previewTitle: 'Aperçu du certificat',
+    presentedTo: 'Ce certificat est fièrement décerné à',
+    roleMentee: 'Mentoré(e)',
+    roleMentor: 'Mentor',
+    menteeBody: (programme: string, cohort: string) =>
+      `pour avoir achevé avec succès ${programme} (${cohort}) et fait preuve d’engagement envers sa croissance, son leadership et son développement mesurable.`,
+    mentorBody: (programme: string, cohort: string) =>
+      `en reconnaissance de son engagement comme mentor dans le cadre de ${programme} (${cohort}) et de son accompagnement généreux et éclairé des leaders émergents.`,
+    completionDate: 'Date d’achèvement',
+    certificateId: 'Numéro du certificat',
+    programmeDirector: 'Direction du programme',
+    coordinator: 'Coordination autorisée',
+    preview: 'APERÇU · NON ENCORE DÉLIVRÉ',
+    official: 'Certificat officiel du programme',
   },
 } as const;
 
-const INK = '#16281d';
-const GREEN = '#1F7338';
-const GREEN_DEEP = '#123f22';
-const GOLD = '#B8860B';
-const CREAM = '#FBFAF4';
+const COLOURS = {
+  ink: '#17261D',
+  forest: '#123F22',
+  green: '#1F7338',
+  gold: '#A8782E',
+  goldSoft: '#D9C18E',
+  ivory: '#FCFAF3',
+  muted: '#5C695F',
+};
 
-export function CertificateView({ data, lang }: { data: CertificateData; lang: 'EN' | 'FR' }) {
+function formatCertificateDate(
+  value: string,
+  lang: CertificateLanguage,
+): string {
+  return new Intl.DateTimeFormat(lang === 'FR' ? 'fr-FR' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function recipientSize(name: string): string {
+  if (name.length > 46) return '2.75cqw';
+  if (name.length > 32) return '3.2cqw';
+  return '3.75cqw';
+}
+
+export function CertificateView({
+  data,
+  lang,
+}: {
+  data: CertificateData;
+  lang: CertificateLanguage;
+}) {
   const t = COPY[lang];
-  const title = data.earned ? t.titleEarned : t.titlePreview;
-  const body = data.role === 'mentee' ? t.menteeBody(data.programmeName) : t.mentorBody(data.programmeName);
-  const pairedLabel = data.role === 'mentee' ? t.pairedMentee : t.pairedMentor;
+  const roleLabel = data.role === 'mentee' ? t.roleMentee : t.roleMentor;
+  const body =
+    data.role === 'mentee'
+      ? t.menteeBody(data.programmeName, data.cohortName)
+      : t.mentorBody(data.programmeName, data.cohortName);
 
   return (
-    <div
+    <article
       id="certificate"
+      aria-label={`${data.earned ? t.title : t.previewTitle}: ${data.recipientName}`}
       style={{
         position: 'relative',
         width: '100%',
-        maxWidth: 1000,
+        maxWidth: 1120,
         aspectRatio: '297 / 210',
         margin: '0 auto',
-        background: `radial-gradient(circle at 50% 0%, #ffffff 0%, ${CREAM} 70%)`,
-        color: INK,
-        boxShadow: '0 20px 60px -20px rgba(18,63,34,0.35)',
         overflow: 'hidden',
-        fontFamily: 'Georgia, "Times New Roman", serif',
         containerType: 'inline-size',
+        color: COLOURS.ink,
+        backgroundColor: COLOURS.ivory,
+        backgroundImage:
+          'radial-gradient(circle at 50% -20%, rgba(31,115,56,.11), transparent 46%), linear-gradient(135deg, rgba(168,120,46,.045) 0 1px, transparent 1px 18px)',
+        boxShadow: '0 26px 70px -32px rgba(18,63,34,.55)',
+        fontFamily: 'Georgia, Cambria, "Times New Roman", serif',
       }}
     >
-      {/* Outer + inner decorative frame */}
-      <div style={{ position: 'absolute', inset: '2.2%', border: `3px solid ${GREEN}`, borderRadius: 6 }} />
-      <div style={{ position: 'absolute', inset: '3.4%', border: `1px solid ${GOLD}`, borderRadius: 4 }} />
-      {/* Corner flourishes */}
-      {[
-        { top: '2.2%', left: '2.2%' },
-        { top: '2.2%', right: '2.2%' },
-        { bottom: '2.2%', left: '2.2%' },
-        { bottom: '2.2%', right: '2.2%' },
-      ].map((pos, i) => (
-        <div
-          key={i}
-          style={{ position: 'absolute', width: 26, height: 26, background: GOLD, opacity: 0.9, ...pos, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}
-        />
-      ))}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '2.1%',
+          border: `2px solid ${COLOURS.forest}`,
+          boxShadow: `inset 0 0 0 4px ${COLOURS.ivory}, inset 0 0 0 5px ${COLOURS.goldSoft}`,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '3.4%',
+          border: `1px solid ${COLOURS.gold}`,
+          opacity: 0.72,
+        }}
+      />
 
-      {data.earned ? null : (
+      {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(
+        (corner) => {
+          const top = corner.startsWith('top') ? '2.1%' : undefined;
+          const bottom = corner.startsWith('bottom') ? '2.1%' : undefined;
+          const left = corner.endsWith('left') ? '2.1%' : undefined;
+          const right = corner.endsWith('right') ? '2.1%' : undefined;
+          const rotate =
+            corner === 'top-right'
+              ? 90
+              : corner === 'bottom-right'
+                ? 180
+                : corner === 'bottom-left'
+                  ? 270
+                  : 0;
+          return (
+            <div
+              key={corner}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top,
+                bottom,
+                left,
+                right,
+                width: '7.4cqw',
+                height: '7.4cqw',
+                transform: `rotate(${rotate}deg)`,
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: '78%',
+                  height: 2,
+                  background: COLOURS.gold,
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: 2,
+                  height: '78%',
+                  background: COLOURS.green,
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '12%',
+                  top: '12%',
+                  width: '40%',
+                  height: 1,
+                  background: COLOURS.goldSoft,
+                  transform: 'rotate(45deg)',
+                  transformOrigin: 'left center',
+                }}
+              />
+            </div>
+          );
+        },
+      )}
+
+      {!data.earned ? (
         <div
+          aria-hidden="true"
           style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%) rotate(-24deg)',
-            fontSize: '5.5cqw', fontWeight: 700, letterSpacing: '0.15em', color: 'rgba(184,134,11,0.13)',
-            whiteSpace: 'nowrap', pointerEvents: 'none', fontFamily: 'Arial, sans-serif',
+            position: 'absolute',
+            left: '50%',
+            top: '51%',
+            transform: 'translate(-50%, -50%) rotate(-21deg)',
+            zIndex: 1,
+            whiteSpace: 'nowrap',
+            color: 'rgba(168,120,46,.14)',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontSize: '4.4cqw',
+            fontWeight: 800,
+            letterSpacing: '.12em',
           }}
         >
           {t.preview}
         </div>
-      )}
+      ) : null}
 
-      <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', textAlign: 'center', padding: '6.5% 9% 5.5%' }}>
-        {/* Header — official BLAK MOH lockup (mark + wordmark + tagline) */}
-        <div>
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'grid',
+          gridTemplateRows: 'auto auto auto 1fr auto auto',
+          alignItems: 'center',
+          justifyItems: 'center',
+          height: '100%',
+          padding: '5.2% 9.2% 4.3%',
+          textAlign: 'center',
+        }}
+      >
+        <header>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/blak-moh-original.png"
             alt="BLAK MOH"
             style={{
-              height: '9.5cqw',
-              width: 'auto',
-              maxWidth: '42%',
-              margin: '0 auto',
               display: 'block',
+              width: 'auto',
+              height: '7.6cqw',
+              maxWidth: '39%',
+              margin: '0 auto',
               objectFit: 'contain',
-              // Original lockup ships on white; multiply knocks the white out on cream paper.
               mixBlendMode: 'multiply',
             }}
           />
-          <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.95cqw', letterSpacing: '0.35em', textTransform: 'uppercase', color: GOLD, marginTop: '0.8cqw' }}>
-            {t.kicker}
+          <p
+            style={{
+              margin: '.55cqw 0 0',
+              color: COLOURS.gold,
+              fontFamily: 'Arial, Helvetica, sans-serif',
+              fontSize: '.82cqw',
+              fontWeight: 700,
+              letterSpacing: '.29em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {t.eyebrow}
+          </p>
+        </header>
+
+        <div style={{ marginTop: '.35cqw' }}>
+          <h2
+            style={{
+              margin: 0,
+              color: COLOURS.forest,
+              fontSize: '3.05cqw',
+              fontWeight: 700,
+              letterSpacing: '.015em',
+              lineHeight: 1.04,
+            }}
+          >
+            {data.earned ? t.title : t.previewTitle}
+          </h2>
+          <div
+            aria-hidden="true"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '.75cqw',
+              marginTop: '.78cqw',
+            }}
+          >
+            <span
+              style={{
+                width: '5.5cqw',
+                height: 1,
+                background: COLOURS.goldSoft,
+              }}
+            />
+            <span
+              style={{
+                width: '.6cqw',
+                height: '.6cqw',
+                border: `1px solid ${COLOURS.gold}`,
+                transform: 'rotate(45deg)',
+              }}
+            />
+            <span
+              style={{
+                width: '5.5cqw',
+                height: 1,
+                background: COLOURS.goldSoft,
+              }}
+            />
           </div>
         </div>
 
-        {/* Title */}
-        <div>
-          <div style={{ fontSize: '2.9cqw', fontWeight: 700, color: GREEN_DEEP, letterSpacing: '0.01em' }}>{title}</div>
-          <div style={{ width: 90, height: 3, background: GOLD, margin: '10px auto 0' }} />
-        </div>
-
-        {/* Recipient */}
-        <div>
-          <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.95cqw', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#6b7a70' }}>
+        <div style={{ marginTop: '.55cqw', width: '100%' }}>
+          <p
+            style={{
+              margin: 0,
+              color: COLOURS.muted,
+              fontFamily: 'Arial, Helvetica, sans-serif',
+              fontSize: '.88cqw',
+              fontWeight: 700,
+              letterSpacing: '.15em',
+              textTransform: 'uppercase',
+            }}
+          >
             {t.presentedTo}
-          </div>
-          <div style={{ fontSize: '4.2cqw', fontWeight: 700, color: INK, margin: '4px 0 2px', fontStyle: 'italic' }}>
+          </p>
+          <p
+            style={{
+              margin: '.28cqw auto .2cqw',
+              maxWidth: '88%',
+              color: COLOURS.ink,
+              fontSize: recipientSize(data.recipientName),
+              fontWeight: 700,
+              lineHeight: 1.04,
+              overflowWrap: 'anywhere',
+            }}
+          >
             {data.recipientName}
-          </div>
-          <div style={{ width: 260, maxWidth: '60%', height: 1, background: GOLD, margin: '2px auto 0' }} />
+          </p>
+          <p
+            style={{
+              margin: 0,
+              color: COLOURS.green,
+              fontFamily: 'Arial, Helvetica, sans-serif',
+              fontSize: '.88cqw',
+              fontWeight: 800,
+              letterSpacing: '.12em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {roleLabel}
+          </p>
         </div>
 
-        {/* Body */}
-        <p style={{ fontSize: '1.35cqw', lineHeight: 1.5, maxWidth: '80%', color: '#33453a', margin: 0 }}>
+        <p
+          style={{
+            alignSelf: 'center',
+            maxWidth: '82%',
+            margin: '.7cqw 0 .55cqw',
+            color: '#35463A',
+            fontSize: '1.22cqw',
+            lineHeight: 1.48,
+          }}
+        >
           {body}
         </p>
 
-        {/* Meta row */}
-        <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.95cqw', color: '#4a5a50', display: 'flex', gap: '2.5%', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span><b>{t.cohortLabel}:</b> {data.cohortName}</span>
-          {data.counterpartName ? <span><b>{pairedLabel}:</b> {data.counterpartName}</span> : null}
-          <span><b>{t.issued}:</b> {data.issuedDate}</span>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
+            alignItems: 'end',
+            width: '100%',
+            gap: '4.4cqw',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+          }}
+        >
+          <SignatureLine label={t.programmeDirector} />
+          <div
+            aria-label={t.official}
+            style={{
+              display: 'grid',
+              placeItems: 'center',
+              width: '6.4cqw',
+              height: '6.4cqw',
+              border: `1px solid ${COLOURS.goldSoft}`,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,.48)',
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/blak-moh-mark.png"
+              alt=""
+              style={{
+                width: '66%',
+                height: '66%',
+                objectFit: 'contain',
+                mixBlendMode: 'multiply',
+              }}
+            />
+          </div>
+          <SignatureLine label={t.coordinator} />
         </div>
 
-        {/* Signatures + seal */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', width: '100%', fontFamily: 'Arial, sans-serif' }}>
-          <Signature label={t.dirLead} />
-          <Seal top={t.sealTop} bottom={t.sealBottom} year={data.issuedDate.slice(0, 4)} />
-          <Signature label={t.dirAdmin} />
-        </div>
-
-        <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '0.75cqw', color: '#8a988f', letterSpacing: '0.05em' }}>
-          {COPY[lang].certId}: {data.certificateId}
-        </div>
+        <footer
+          style={{
+            display: 'flex',
+            width: '100%',
+            justifyContent: 'space-between',
+            gap: '2cqw',
+            marginTop: '.7cqw',
+            color: COLOURS.muted,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontSize: '.7cqw',
+            letterSpacing: '.055em',
+          }}
+        >
+          <span>
+            <strong>{t.completionDate}:</strong>{' '}
+            {formatCertificateDate(data.issuedDate, lang)}
+          </span>
+          <span>
+            <strong>{t.certificateId}:</strong> {data.certificateId}
+          </span>
+        </footer>
       </div>
-    </div>
+    </article>
   );
 }
 
-function Signature({ label }: { label: string }) {
+function SignatureLine({ label }: { label: string }) {
   return (
-    <div style={{ width: '30%', textAlign: 'center' }}>
-      <div style={{ height: 1, background: INK, opacity: 0.4 }} />
-      <div style={{ fontSize: '0.85cqw', color: '#4a5a50', marginTop: 5, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</div>
-    </div>
-  );
-}
-
-function Seal({ top, bottom, year }: { top: string; bottom: string; year: string }) {
-  return (
-    <div style={{ position: 'relative', width: '9cqw', height: '9cqw', maxWidth: 120, maxHeight: 120, flexShrink: 0 }}>
-      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: `conic-gradient(${GREEN}, ${GREEN_DEEP}, ${GREEN})`, boxShadow: '0 4px 14px -4px rgba(18,63,34,0.5)' }} />
-      <div style={{ position: 'absolute', inset: '10%', borderRadius: '50%', border: `1.5px solid ${GOLD}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', textAlign: 'center' }}>
-        <div style={{ fontSize: '0.8cqw', letterSpacing: '0.16em' }}>{top}</div>
-        <div style={{ fontSize: '1.15cqw', fontWeight: 800, letterSpacing: '0.04em', color: '#f6e7bf' }}>{bottom}</div>
-        <div style={{ fontSize: '0.75cqw', letterSpacing: '0.1em' }}>{year}</div>
+    <div style={{ minWidth: 0 }}>
+      <div style={{ height: 1, background: COLOURS.ink, opacity: 0.42 }} />
+      <div
+        style={{
+          marginTop: '.45cqw',
+          color: COLOURS.muted,
+          fontSize: '.72cqw',
+          fontWeight: 700,
+          letterSpacing: '.07em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {label}
       </div>
     </div>
   );

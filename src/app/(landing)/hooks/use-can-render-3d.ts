@@ -25,6 +25,9 @@ export function useCanRender3D(): RenderTier {
   // real WebGL context, so it has to happen after mount and its single state
   // write is the point of the hook.
   useEffect(() => {
+    let cancelled = false;
+    const handle = window.requestAnimationFrame(() => {
+      if (cancelled) return;
     // Small viewports never get WebGL: the fallback composition reads better at
     // that size and the battery/thermal cost is not worth it.
     if (window.matchMedia('(max-width: 767px)').matches) {
@@ -65,6 +68,11 @@ export function useCanRender3D(): RenderTier {
 
     const isTablet = window.matchMedia('(max-width: 1023px)').matches;
     setTier(isTablet ? 'medium' : 'high');
+    });
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(handle);
+    };
   }, []);
 
   return tier;

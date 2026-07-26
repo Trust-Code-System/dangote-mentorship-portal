@@ -1,5 +1,6 @@
 'use server';
 
+import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -16,7 +17,9 @@ import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
-import { parseSheetBuffer } from './parse';
+import { getStorageProvider } from '@/lib/storage';
+import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
+import { detectSourceType, parseSheetBuffer } from './parse';
 import {
   cleanRow,
   hasBlockingErrors,
@@ -33,6 +36,37 @@ const uploadSchema = z.object({
   targetRole: z.enum([RoleName.MENTOR, RoleName.MENTEE]),
 });
 
+const MAX_IMPORT_BYTES = 20 * 1024 * 1024;
+const importUploadSchema = uploadSchema.extend({
+  name: z.string().trim().min(1).max(200),
+  size: z.number().int().positive().max(MAX_IMPORT_BYTES),
+});
+
+function importExtension(name: string): string | null {
+  const lower = name.toLowerCase();
+  return ['.csv', '.xlsx', '.xls', '.xlsm'].find((ext) => lower.endsWith(ext)) ?? null;
+}
+
+function importKey(actorId: string, cohortId: string, ext: string): string {
+  return `imports/${cohortId}/${actorId}/${randomUUID()}${ext}`;
+}
+
+function validImportSignature(bytes: Uint8Array, ext: string): boolean {
+  if (ext === '.csv') {
+    return bytes.byteLength > 0 && !bytes.subarray(0, Math.min(bytes.length, 4096)).includes(0);
+  }
+  if (ext === '.xls') {
+    const ole = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1];
+    return ole.every((byte, index) => bytes[index] === byte);
+  }
+  return (
+    bytes.length >= 4 &&
+    bytes[0] === 0x50 &&
+    bytes[1] === 0x4b &&
+    [0x03, 0x05, 0x07].includes(bytes[2] ?? -1)
+  );
+}
+
 async function existingCohortEmails(cohortId: string, role: RoleName): Promise<Set<string>> {
   if (role === RoleName.MENTOR) {
     const profiles = await prisma.mentorProfile.findMany({
@@ -46,6 +80,122 @@ async function existingCohortEmails(cohortId: string, role: RoleName): Promise<S
     select: { email: true },
   });
   return new Set(profiles.map((p) => p.email.toLowerCase()));
+}
+
+async function createValidatedImport(input: {
+  actorId: string;
+  cohortId: string;
+  targetRole: RoleName;
+  fileName: string;
+  bytes: Uint8Array;
+}): Promise<ActionResult<{ id: string }>> {
+  const parsed = parseSheetBuffer(
+    input.bytes.buffer.slice(
+      input.bytes.byteOffset,
+      input.bytes.byteOffset + input.bytes.byteLength,
+    ) as ArrayBuffer,
+    input.fileName,
+  );
+  if (parsed.rows.length === 0) {
+    return fail({ code: 'VALIDATION', message: 'The file contains no data rows.' });
+  }
+  const existing = await existingCohortEmails(input.cohortId, input.targetRole);
+  const validated = validateRows(parsed.rows, {
+    targetRole: input.targetRole === RoleName.MENTOR ? 'MENTOR' : 'MENTEE',
+    existingEmails: existing,
+  });
+  const errorCount = validated.filter((v) => v.findings.length > 0).length;
+  const imported = await prisma.import.create({
+    data: {
+      cohortId: input.cohortId,
+      uploadedById: input.actorId,
+      fileName: input.fileName.slice(0, 200),
+      sourceType: parsed.sourceType,
+      status: ImportStatus.VALIDATED,
+      targetRole: input.targetRole,
+      rowCount: parsed.rows.length,
+      errorCount,
+      rows: {
+        create: validated.map((v, idx) => ({
+          rowNumber: idx + 1,
+          raw: parsed.rows[idx] as Prisma.InputJsonValue,
+          status: v.findings.length === 0 ? ImportRowStatus.VALID : ImportRowStatus.FLAGGED,
+          validation: v.findings as unknown as Prisma.InputJsonValue,
+        })),
+      },
+    },
+  });
+  await writeAuditLog({
+    actorId: input.actorId,
+    cohortId: input.cohortId,
+    action: 'import.uploaded',
+    entityType: 'Import',
+    entityId: imported.id,
+    metadata: {
+      fileName: input.fileName.slice(0, 200),
+      rows: parsed.rows.length,
+      flagged: errorCount,
+      targetRole: input.targetRole,
+    },
+  });
+  return ok({ id: imported.id });
+}
+
+export async function prepareImportUpload(input: {
+  cohortId: string;
+  targetRole: RoleName;
+  name: string;
+  size: number;
+}): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
+  try {
+    const actor = await requireRole(ADMIN);
+    const data = importUploadSchema.parse(input);
+    const ext = importExtension(data.name);
+    if (!ext || !detectSourceType(data.name)) {
+      return fail({ code: 'VALIDATION', message: 'Upload a CSV or supported Excel file.' });
+    }
+    const cohort = await prisma.cohort.findFirst({ where: { id: data.cohortId, deletedAt: null }, select: { id: true } });
+    if (!cohort) return fail({ code: 'NOT_FOUND', message: 'Cohort not found.' });
+    if (!canUseDirectUploads()) return ok({ mode: 'server' });
+    const target = await createSignedUploadTarget(importKey(actor.id, cohort.id, ext));
+    return ok({ mode: 'direct', ...target });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+export async function confirmImportUpload(input: {
+  cohortId: string;
+  targetRole: RoleName;
+  path: string;
+  name: string;
+  size: number;
+}): Promise<ActionResult<{ id: string }>> {
+  try {
+    const actor = await requireRole(ADMIN);
+    const data = importUploadSchema.parse(input);
+    const ext = importExtension(data.name);
+    const expectedPrefix = `imports/${data.cohortId}/${actor.id}/`;
+    if (!ext || !input.path.startsWith(expectedPrefix) || !input.path.endsWith(ext)) {
+      return fail({ code: 'FORBIDDEN', message: 'The upload target is not valid for this import.' });
+    }
+    const bytes = await getStorageProvider().get(input.path);
+    if (bytes.byteLength !== data.size || !validImportSignature(bytes, ext)) {
+      await removeStoredObject(input.path);
+      return fail({ code: 'VALIDATION', message: "File contents don't match the selected format." });
+    }
+    const result = await createValidatedImport({
+      actorId: actor.id,
+      cohortId: data.cohortId,
+      targetRole: data.targetRole,
+      fileName: data.name,
+      bytes,
+    });
+    if (result.ok) await removeStoredObject(input.path);
+    return result;
+  } catch (error) {
+    return mapActionError(error);
+  }
 }
 
 /** Upload a mentor/mentee sheet, validate every row, and open the review screen. */
@@ -63,50 +213,23 @@ export async function uploadImport(formData: FormData): Promise<ActionResult<{ i
       return fail({ code: 'VALIDATION', message: 'Choose a .csv or .xlsx file to upload.' });
     }
 
-    const { sourceType, rows } = parseSheetBuffer(await file.arrayBuffer(), file.name);
-    if (rows.length === 0) {
-      return fail({ code: 'VALIDATION', message: 'The file contains no data rows.' });
+    if (file.size > MAX_IMPORT_BYTES) {
+      return fail({ code: 'VALIDATION', message: 'Import is too large (max 20 MB).' });
     }
-
-    const existing = await existingCohortEmails(cohortId, targetRole);
-    const validated = validateRows(rows, {
-      targetRole: targetRole === RoleName.MENTOR ? 'MENTOR' : 'MENTEE',
-      existingEmails: existing,
-    });
-
-    const errorCount = validated.filter((v) => v.findings.length > 0).length;
-
-    const imported = await prisma.import.create({
-      data: {
-        cohortId,
-        uploadedById: actor.id,
-        fileName: file.name,
-        sourceType,
-        status: ImportStatus.VALIDATED,
-        targetRole,
-        rowCount: rows.length,
-        errorCount,
-        rows: {
-          create: validated.map((v, idx) => ({
-            rowNumber: idx + 1,
-            raw: rows[idx] as Prisma.InputJsonValue,
-            status: v.findings.length === 0 ? ImportRowStatus.VALID : ImportRowStatus.FLAGGED,
-            validation: v.findings as unknown as Prisma.InputJsonValue,
-          })),
-        },
-      },
-    });
-
-    await writeAuditLog({
+    const ext = importExtension(file.name);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (!ext || !validImportSignature(bytes, ext)) {
+      return fail({ code: 'VALIDATION', message: "File contents don't match the selected format." });
+    }
+    const result = await createValidatedImport({
       actorId: actor.id,
       cohortId,
-      action: 'import.uploaded',
-      entityType: 'Import',
-      entityId: imported.id,
-      metadata: { fileName: file.name, rows: rows.length, flagged: errorCount, targetRole },
+      targetRole,
+      fileName: file.name,
+      bytes,
     });
-
-    importId = imported.id;
+    if (!result.ok) return result;
+    importId = result.data.id;
   } catch (error) {
     return mapActionError(error);
   }

@@ -1,6 +1,7 @@
 import 'server-only';
 import type { AiAdapter, CompleteOptions } from './types';
 import { adapterFromComplete } from './assistant';
+import { AI_REQUEST_TIMEOUT_MS, withAiCapacity } from './capacity';
 
 // OpenAI Chat Completions implementation — used as a fallback provider when
 // Anthropic is unavailable (CLAUDE.md §2: provider-agnostic adapter, swappable
@@ -23,8 +24,9 @@ export function createOpenAiAdapter(apiKey: string, model?: string): AiAdapter {
     if (options.system) messages.push({ role: 'system', content: options.system });
     messages.push({ role: 'user', content: options.prompt });
 
-    const response = await fetch(API_URL, {
+    const response = await withAiCapacity(() => fetch(API_URL, {
       method: 'POST',
+      signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
       headers: {
         'content-type': 'application/json',
         authorization: `Bearer ${apiKey}`,
@@ -35,7 +37,7 @@ export function createOpenAiAdapter(apiKey: string, model?: string): AiAdapter {
         temperature: options.temperature ?? 0.2,
         messages,
       }),
-    });
+    }));
 
     if (!response.ok) {
       // Surface status only — never log prompt content (may contain PII, §14).

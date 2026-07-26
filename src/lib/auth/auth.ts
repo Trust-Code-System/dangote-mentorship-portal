@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth';
+import { AuthError } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
@@ -53,6 +54,15 @@ async function loadRoleGrants(userId: string): Promise<RoleGrants> {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
+  logger: {
+    error(error) {
+      if (error instanceof AuthError && error.type === 'CredentialsSignin') {
+        console.info('[auth] Credentials rejected.');
+        return;
+      }
+      console.error('[auth] Unexpected authentication error.', error);
+    },
+  },
   // Allow Entra ID SSO accounts to link to an existing email/password user
   // record that an admin created ahead of time (CLAUDE.md §2).
   providers: [
