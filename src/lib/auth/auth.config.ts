@@ -43,6 +43,11 @@ function isPublicPath(pathname: string): boolean {
   // Password recovery is public (the token is the credential).
   if (pathname === '/forgot-password' || pathname.startsWith('/reset-password')) return true;
   if (pathname.startsWith('/api/auth')) return true;
+  // The generated Open Graph card for the public landing page, which Next
+  // serves at /opengraph-image-<hash>. A social unfurler fetches it with no
+  // session, so gating it turns every shared link's preview into a login
+  // redirect. It is static brand art and carries no participant data.
+  if (pathname.startsWith('/opengraph-image')) return true;
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
