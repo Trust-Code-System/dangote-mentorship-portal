@@ -21,6 +21,8 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
   const [open, setOpen] = React.useState(false);
   const [hits, setHits] = React.useState<SearchHit[]>([]);
   const [pending, setPending] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const q = query.trim();
 
@@ -51,16 +53,42 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
     setOpen(false);
   }
 
-  const showDropdown = open && q.length >= 1;
+  // The panel opens on focus, so WCAG 2.2 SC 1.4.13 requires a way to dismiss it
+  // without moving focus. Escape alone isn't enough: returning focus to the input
+  // re-fires onFocus and the panel springs straight back open, so the dismissal
+  // is latched until the query changes.
+  function dismiss() {
+    setDismissed(true);
+    setOpen(false);
+    inputRef.current?.focus();
+  }
+
+  const showDropdown = open && !dismissed && q.length >= 1;
   const hasResults = pageHits.length > 0 || visibleHits.length > 0;
 
   return (
-    <div className="relative hidden max-w-md flex-1 sm:block">
+    <div
+      className="relative hidden max-w-md flex-1 sm:block"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && showDropdown) {
+          e.stopPropagation();
+          dismiss();
+        }
+      }}
+    >
       <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
       <input
+        ref={inputRef}
         type="search"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          // Typing is an explicit request for results, so it both releases the
+          // Escape latch and re-opens: after Escape the input still holds focus,
+          // so onFocus will not fire again to do it.
+          setDismissed(false);
+          setOpen(true);
+        }}
         onFocus={() => setOpen(true)}
         placeholder={t('placeholder')}
         aria-label={t('placeholder')}
