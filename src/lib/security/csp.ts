@@ -8,12 +8,23 @@
  *
  * Two variants, and the difference is deliberate:
  *
- * - **With a nonce** — `'self' 'nonce-…' 'strict-dynamic'`. Next stamps the
- *   nonce onto its own inline bootstrap and Flight-payload scripts (it reads it
- *   off the request's own CSP header), `'strict-dynamic'` lets those trusted
- *   scripts pull in the chunk graph, and anything injected without the nonce is
- *   refused. `'self'` is only there as the CSP2 fallback for browsers that do
- *   not understand `'strict-dynamic'`; CSP3 browsers ignore it.
+ * - **With a nonce** — `'self' 'nonce-…'`. Next stamps the nonce onto the inline
+ *   bootstrap and Flight-payload scripts it emits (it reads the nonce off the
+ *   request's own CSP header), so an inline script injected by an attacker has
+ *   no nonce and is refused. That is the hole this closes. Same-origin
+ *   `<script src>` is allowed by `'self'`.
+ *
+ *   Deliberately **no `'strict-dynamic'`**, though it is the stricter policy on
+ *   paper. `'strict-dynamic'` makes browsers ignore `'self'`, so *every* script
+ *   element has to carry the nonce — and Turbopack, which is what Vercel builds
+ *   with, emits one async chunk without one. (`npm run build` pins `--webpack`
+ *   locally and in CI, which nonces all 20 script tags, so this only ever
+ *   appeared in production; reproduced locally with `npx next build`.) Under
+ *   `'strict-dynamic'` that chunk was blocked on every page load. Dropping it
+ *   keeps the real protection and costs only the narrower guarantee that an
+ *   injected *same-origin* `<script src>` would also be refused — which needs
+ *   an attacker-controlled same-origin JS URL to exploit, and uploads are
+ *   served from Supabase, a different origin that `script-src` does not allow.
  *
  * - **Without a nonce** — the previous `'unsafe-inline'` policy. This is the
  *   fail-safe path, not an oversight: if the nonce cannot be threaded into the
@@ -41,7 +52,7 @@ const devScriptSrc = process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval
 
 export function buildContentSecurityPolicy(nonce?: string): string {
   const scriptSrc = nonce
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${devScriptSrc}`
+    ? `script-src 'self' 'nonce-${nonce}'${devScriptSrc}`
     : `script-src 'self' 'unsafe-inline'${devScriptSrc}`;
 
   return [

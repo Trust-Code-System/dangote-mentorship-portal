@@ -26,13 +26,26 @@ afterEach(() => {
 });
 
 describe('buildContentSecurityPolicy', () => {
-  it('uses the nonce and strict-dynamic, and never unsafe-inline, on script-src', async () => {
+  it('uses the nonce and never unsafe-inline on script-src', async () => {
     const build = await loadCsp('production');
     const scriptSrc = directive(build('abc123=='), 'script-src');
 
     expect(scriptSrc).toContain("'nonce-abc123=='");
-    expect(scriptSrc).toContain("'strict-dynamic'");
     expect(scriptSrc).not.toContain("'unsafe-inline'");
+  });
+
+  it('never adds strict-dynamic, which would block Turbopack’s un-nonced chunk', async () => {
+    // 'strict-dynamic' makes browsers ignore 'self', so every script element
+    // must carry the nonce. Turbopack — Vercel's bundler — emits one async
+    // chunk without one, and it was blocked on every production page load.
+    const build = await loadCsp('production');
+    expect(build('abc123==')).not.toContain("'strict-dynamic'");
+    expect(build()).not.toContain("'strict-dynamic'");
+  });
+
+  it('still allows same-origin script elements via self', async () => {
+    const build = await loadCsp('production');
+    expect(directive(build('abc123=='), 'script-src')).toContain("'self'");
   });
 
   it('falls back to the previous unsafe-inline policy when no nonce is available', async () => {
@@ -42,7 +55,6 @@ describe('buildContentSecurityPolicy', () => {
     // Deliberate: a nonce-less strict policy would block Next's own inline
     // scripts and take the app down. See src/proxy.ts.
     expect(scriptSrc).toContain("'unsafe-inline'");
-    expect(scriptSrc).not.toContain("'strict-dynamic'");
   });
 
   it('never ships unsafe-eval in production', async () => {
