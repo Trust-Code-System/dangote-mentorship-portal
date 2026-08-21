@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/lib/auth/rbac';
+import { assertCohortAccess, requireRole, type SessionUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
@@ -17,12 +17,16 @@ import {
 // reads the active definitions. Every mutation: authn → authz → Zod → write →
 // audit → typed result (CLAUDE.md §3).
 
-async function assertCohort(cohortId: string): Promise<ActionResult<never> | null> {
+async function assertCohort(
+  actor: SessionUser,
+  cohortId: string,
+): Promise<ActionResult<never> | null> {
   const cohort = await prisma.cohort.findFirst({
     where: { id: cohortId, deletedAt: null },
     select: { id: true },
   });
   if (!cohort) return fail({ code: 'NOT_FOUND', message: 'Cohort not found.' });
+  assertCohortAccess(actor, cohortId);
   return null;
 }
 
@@ -40,7 +44,7 @@ export async function createFormDefinition(
       isActive: formData.get('isActive') ?? 'true',
     });
 
-    const cohortError = await assertCohort(data.cohortId);
+    const cohortError = await assertCohort(actor, data.cohortId);
     if (cohortError) return cohortError;
 
     const definition = await prisma.formDefinition.create({
@@ -86,9 +90,11 @@ export async function updateFormDefinition(
 
     const existing = await prisma.formDefinition.findFirst({
       where: { id: data.id, deletedAt: null },
-      select: { id: true },
+      select: { id: true, cohortId: true },
     });
     if (!existing) return fail({ code: 'NOT_FOUND', message: 'Form not found.' });
+    // Check against the form's real cohort, not the client-submitted one.
+    assertCohortAccess(actor, existing.cohortId);
 
     await prisma.formDefinition.update({
       where: { id: data.id },
@@ -129,6 +135,7 @@ export async function toggleFormDefinitionActive(
       select: { id: true, isActive: true, cohortId: true },
     });
     if (!existing) return fail({ code: 'NOT_FOUND', message: 'Form not found.' });
+    assertCohortAccess(actor, existing.cohortId);
 
     const next = !existing.isActive;
     await prisma.formDefinition.update({ where: { id }, data: { isActive: next } });
@@ -159,6 +166,7 @@ export async function archiveFormDefinition(
       select: { id: true, cohortId: true },
     });
     if (!existing) return fail({ code: 'NOT_FOUND', message: 'Form not found.' });
+    assertCohortAccess(actor, existing.cohortId);
 
     // Soft-delete only (CLAUDE.md §3): never hard-delete; existing responses keep
     // their definition reference.

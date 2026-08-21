@@ -14,7 +14,7 @@ import {
   TrainingStatus,
 } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole } from '@/lib/auth/rbac';
+import { assertCohortAccess, requireRole } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 import { getStorageProvider } from '@/lib/storage';
@@ -156,6 +156,7 @@ export async function prepareImportUpload(input: {
     }
     const cohort = await prisma.cohort.findFirst({ where: { id: data.cohortId, deletedAt: null }, select: { id: true } });
     if (!cohort) return fail({ code: 'NOT_FOUND', message: 'Cohort not found.' });
+    assertCohortAccess(actor, data.cohortId);
     if (!canUseDirectUploads()) return ok({ mode: 'server' });
     const target = await createSignedUploadTarget(importKey(actor.id, cohort.id, ext));
     return ok({ mode: 'direct', ...target });
@@ -174,6 +175,7 @@ export async function confirmImportUpload(input: {
   try {
     const actor = await requireRole(ADMIN);
     const data = importUploadSchema.parse(input);
+    assertCohortAccess(actor, data.cohortId);
     const ext = importExtension(data.name);
     const expectedPrefix = `imports/${data.cohortId}/${actor.id}/`;
     if (!ext || !input.path.startsWith(expectedPrefix) || !input.path.endsWith(ext)) {
@@ -207,6 +209,7 @@ export async function uploadImport(formData: FormData): Promise<ActionResult<{ i
       cohortId: formData.get('cohortId'),
       targetRole: formData.get('targetRole'),
     });
+    assertCohortAccess(actor, cohortId);
 
     const file = formData.get('file');
     if (!(file instanceof File) || file.size === 0) {
@@ -272,6 +275,7 @@ export async function fixImportRow(formData: FormData): Promise<ActionResult<{ i
       where: { id: data.rowId },
       include: { import: true },
     });
+    assertCohortAccess(actor, row.import.cohortId);
 
     // Overwrite with canonical headers; cleanRow maps them back.
     const raw = {
@@ -336,6 +340,7 @@ export async function setImportRowStatus(formData: FormData): Promise<ActionResu
       where: { id: rowId },
       include: { import: true },
     });
+    assertCohortAccess(actor, row.import.cohortId);
 
     // Rows with blocking errors cannot be accepted — they must be fixed first.
     if (status === ImportRowStatus.ACCEPTED) {
@@ -384,6 +389,7 @@ export async function commitImport(formData: FormData): Promise<ActionResult<{ c
       where: { id: importId },
       include: { rows: { orderBy: { rowNumber: 'asc' } } },
     });
+    assertCohortAccess(actor, imported.cohortId);
 
     if (imported.status === ImportStatus.COMMITTED) {
       return fail({ code: 'CONFLICT', message: 'This import has already been committed.' });

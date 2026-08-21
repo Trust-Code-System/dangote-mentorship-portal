@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { MatchStatus, MatchingStatus, Prisma, RoleName } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole, requireUser } from '@/lib/auth/rbac';
+import { assertCohortAccess, requireRole, requireUser } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify, notifyMany } from '@/lib/notifications/notify';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
@@ -47,6 +47,7 @@ export async function runMatching(
   try {
     const actor = await requireRole(ADMIN);
     const { cohortId } = runSchema.parse({ cohortId: formData.get('cohortId') });
+    assertCohortAccess(actor, cohortId);
 
     const [criteria, mentors, mentees] = await Promise.all([
       loadCriteria(cohortId),
@@ -147,6 +148,7 @@ export async function approveMatch(formData: FormData): Promise<ActionResult<{ i
     const { matchId } = matchIdSchema.parse({ matchId: formData.get('matchId') });
 
     const match = await prisma.match.findUniqueOrThrow({ where: { id: matchId } });
+    assertCohortAccess(actor, match.cohortId);
     if (match.status !== MatchStatus.SUGGESTED) {
       return fail({ code: 'CONFLICT', message: 'Only suggested matches can be approved.' });
     }
@@ -211,6 +213,7 @@ export async function overrideMatch(formData: FormData): Promise<ActionResult<{ 
       menteeId: formData.get('menteeId'),
       mentorId: formData.get('mentorId'),
     });
+    assertCohortAccess(actor, cohortId);
 
     const [mentors, mentees, criteria] = await Promise.all([
       loadMentorsForMatching(cohortId),

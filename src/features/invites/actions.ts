@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { InviteStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { requireRole, hasAnyRole } from '@/lib/auth/rbac';
+import { requireRole, hasAnyRole, canAccessCohort } from '@/lib/auth/rbac';
 import { RoleName, ADMIN_ROLES } from '@/lib/auth/roles';
 import { generateInviteToken, inviteExpiry } from '@/lib/auth/invite';
 import { writeAuditLog } from '@/lib/audit/audit';
@@ -32,6 +32,19 @@ export async function createInvite(
       return fail({
         code: 'FORBIDDEN',
         message: 'Only a Super Admin can invite administrators.',
+      });
+    }
+
+    // A cohort-scoped admin may only invite within a cohort they administer —
+    // never a different cohort, and never a global (cohort-less) grant, which
+    // would hand the invitee reach the inviting admin doesn't have themselves.
+    if (
+      actor.adminCohortScope !== 'ALL' &&
+      (!data.cohortId || !canAccessCohort(actor, data.cohortId))
+    ) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'You may only invite within a cohort you administer.',
       });
     }
 
