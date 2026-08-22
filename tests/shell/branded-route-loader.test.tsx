@@ -65,3 +65,43 @@ describe('BrandedRouteLoader', () => {
     expect(container.querySelectorAll('.h-56').length).toBe(0);
   });
 });
+
+describe('BrandedRouteLoader tone', () => {
+  /** Render into a fresh root so this does not fight the shared beforeEach. */
+  async function renderWith(props: Record<string, unknown>) {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const r = createRoot(el);
+    await act(async () => {
+      r.render(<BrandedRouteLoader {...props} />);
+    });
+    return { el, r };
+  }
+
+  it('uses the portal surface for the track by default', async () => {
+    const { el, r } = await renderWith({});
+    expect(el.querySelector('.bg-surface-2')).not.toBeNull();
+    expect(el.querySelector('.bg-blak-ivory\\/10')).toBeNull();
+    await act(async () => r.unmount());
+    el.remove();
+  });
+
+  it('switches the track to the blak scale on dark surfaces', async () => {
+    // The Knowledge Library and auth frame run --blak-*; a --surface-* track is
+    // invisible there.
+    const { el, r } = await renderWith({ tone: 'dark' });
+    expect(el.querySelector('.bg-blak-ivory\\/10')).not.toBeNull();
+    expect(el.querySelector('.bg-surface-2')).toBeNull();
+    await act(async () => r.unmount());
+    el.remove();
+  });
+
+  it('lets a route adjust its own spacing without losing the centring', async () => {
+    const { el, r } = await renderWith({ className: 'min-h-[22rem]' });
+    const status = el.querySelector('[role="status"]');
+    expect(status?.className).toContain('min-h-[22rem]');
+    expect(status?.className).toContain('items-center');
+    await act(async () => r.unmount());
+    el.remove();
+  });
+});
