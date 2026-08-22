@@ -1,18 +1,9 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { BrandedRouteLoader } from '@/components/shell/branded-route-loader';
 
+// One loading state across the app: the brand mark, not a grey approximation of
+// the page that is about to arrive. See BrandedRouteLoader for why. (This also
+// drops a hardcoded English `aria-label` — the loader's status text is
+// translated, per CLAUDE.md §16.)
 export default function AdminCertificatesLoading() {
-  return (
-    <section
-      className="space-y-6"
-      aria-busy="true"
-      aria-label="Loading certificates"
-    >
-      <div className="space-y-2">
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-5 w-full max-w-xl" />
-      </div>
-      <Skeleton className="h-36 w-full rounded-xl" />
-      <Skeleton className="aspect-[297/210] w-full rounded-xl" />
-    </section>
-  );
+  return <BrandedRouteLoader />;
 }
