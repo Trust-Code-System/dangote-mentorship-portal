@@ -2624,6 +2624,7 @@
     "scheduleEnabled": "Prepare a newsletter automatically",
     "scheduleDays": "Days",
     "scheduleHour": "From (hour)",
+    "scheduleHourHint": "The draft is prepared at the first scheduled run at or after this hour. If the scheduler only runs once a day, a later hour means the draft appears the next morning instead — it is never skipped.",
     "scheduleTimezone": "Timezone",
     "scheduleAutoDraft": "Let AI write the first draft",
     "scheduleAutoDraftHint": "The draft is written from real portal activity — goals approved, sessions logged, dates coming up. You review and edit it before it goes anywhere.",

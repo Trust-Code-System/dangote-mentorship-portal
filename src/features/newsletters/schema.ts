@@ -165,28 +165,67 @@ export interface DraftDueInput {
 /**
  * Should the schedule prepare a draft right now?
  *
- * True only when the schedule is on, today is one of its days, the send hour
- * has arrived in the schedule's own timezone, and no draft was already prepared
- * for today. The last condition makes the cron idempotent: running it hourly,
- * or twice by accident, still produces exactly one draft per scheduled day.
+ * The rule is "one draft per scheduled day, never two", expressed against the
+ * most recent scheduled day whose send hour has already passed:
+ *
+ *   - never drafted before → due only if that occurrence is TODAY. A schedule
+ *     that has just been switched on does not back-fill last week.
+ *   - drafted before → due if the latest occurrence is newer than the last
+ *     draft. This catches up a missed day, which matters because the scheduler
+ *     may only run once a day: without it, a schedule whose send hour falls
+ *     after the daily run would never produce a draft at all.
+ *
+ * Idempotent either way — drafting stamps `lastDraftedFor` at that occurrence's
+ * day, so a second run the same day (or an hourly cron) does nothing.
  */
 export function isDraftDue(input: DraftDueInput): boolean {
   if (!input.enabled) return false;
   if (input.sendDays.length === 0) return false;
 
-  const weekday = isoWeekdayIn(input.now, input.timezone);
-  if (!input.sendDays.includes(weekday)) return false;
+  const occurrence = latestDueOccurrence(input);
+  if (occurrence === null) return false;
 
-  if (hourIn(input.now, input.timezone) < input.sendHour) return false;
+  const today = localDateKey(input.now, input.timezone);
 
-  if (input.lastDraftedFor) {
-    const already =
-      localDateKey(input.lastDraftedFor, input.timezone) ===
-      localDateKey(input.now, input.timezone);
-    if (already) return false;
+  // A brand-new schedule only acts on today, so switching it on cannot
+  // immediately produce a draft dated to a day nobody was expecting one.
+  if (!input.lastDraftedFor) return occurrence === today;
+
+  // yyyy-mm-dd keys compare correctly as strings.
+  return occurrence > localDateKey(input.lastDraftedFor, input.timezone);
+}
+
+/** How far back to look for a missed scheduled day. */
+const CATCH_UP_DAYS = 8;
+
+/**
+ * Local date (`yyyy-mm-dd`) of the most recent scheduled day whose send hour has
+ * passed, or null if there is none within the catch-up window.
+ *
+ * Works in local date keys rather than instants so no timezone arithmetic is
+ * needed beyond `Intl` — which keeps this pure and testable, and correct across
+ * DST without a date library.
+ */
+export function latestDueOccurrence(
+  input: Omit<DraftDueInput, 'enabled' | 'lastDraftedFor'>,
+): string | null {
+  const todayKey = localDateKey(input.now, input.timezone);
+
+  for (let daysBack = 0; daysBack < CATCH_UP_DAYS; daysBack += 1) {
+    const candidate = new Date(input.now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+    const weekday = isoWeekdayIn(candidate, input.timezone);
+    if (!input.sendDays.includes(weekday)) continue;
+
+    const candidateKey = localDateKey(candidate, input.timezone);
+    // Today counts only once its send hour has arrived; an earlier day is
+    // wholly in the past, so its hour necessarily has.
+    if (candidateKey === todayKey && hourIn(input.now, input.timezone) < input.sendHour) {
+      continue;
+    }
+    return candidateKey;
   }
 
-  return true;
+  return null;
 }
 
 /** Weekday label for the schedule UI. */

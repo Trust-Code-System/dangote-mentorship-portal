@@ -2624,6 +2624,7 @@
     "scheduleEnabled": "Préparer une infolettre automatiquement",
     "scheduleDays": "Jours",
     "scheduleHour": "À partir de (heure)",
+    "scheduleHourHint": "Le projet est préparé au premier passage prévu à partir de cette heure. Si le planificateur ne s'exécute qu'une fois par jour, une heure plus tardive signifie que le projet apparaît le lendemain matin — il n'est jamais ignoré.",
     "scheduleTimezone": "Fuseau horaire",
     "scheduleAutoDraft": "Laisser l'IA rédiger le premier jet",
     "scheduleAutoDraftHint": "Le projet est rédigé à partir de l'activité réelle du portail : objectifs approuvés, séances consignées, dates à venir. Vous le relisez et le modifiez avant tout envoi.",

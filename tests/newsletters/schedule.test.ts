@@ -4,6 +4,7 @@ import {
   hourIn,
   isDraftDue,
   isoWeekdayIn,
+  latestDueOccurrence,
   localDateKey,
   parseNewsletterBody,
   sendableSections,
@@ -123,6 +124,85 @@ describe('isDraftDue', () => {
     expect(
       isDraftDue({ ...base, sendHour: 0, now: new Date('2026-09-07T00:30:00Z') }),
     ).toBe(true);
+  });
+
+  // The scheduler may only run once a day (Vercel's Hobby plan allows nothing
+  // more frequent), so a send hour that falls after the daily run must still
+  // produce a draft — the next run catches it up rather than losing it.
+  it('catches up a missed scheduled day on the next run', () => {
+    expect(
+      isDraftDue({
+        ...base,
+        // 14:00 Lagos, later than a 10:00 Lagos daily run.
+        sendHour: 14,
+        lastDraftedFor: new Date('2026-09-03T09:00:00Z'), // the previous Thursday
+        now: new Date('2026-09-08T09:00:00Z'), // Tuesday 10:00 Lagos
+      }),
+    ).toBe(true);
+  });
+
+  it('catches a missed day up only once', () => {
+    expect(
+      isDraftDue({
+        ...base,
+        sendHour: 14,
+        // Monday's issue was already caught up on the Tuesday.
+        lastDraftedFor: new Date('2026-09-08T09:00:00Z'),
+        now: new Date('2026-09-09T09:00:00Z'), // Wednesday
+      }),
+    ).toBe(false);
+  });
+
+  it('does not back-fill a past day for a schedule just switched on', () => {
+    expect(
+      isDraftDue({
+        ...base,
+        lastDraftedFor: null,
+        // Tuesday: Monday's occurrence has passed, but this schedule has never
+        // drafted, so it waits for its next real day instead of back-filling.
+        now: new Date('2026-09-08T09:00:00Z'),
+      }),
+    ).toBe(false);
+  });
+
+  it('does not look back further than a week for a missed day', () => {
+    expect(
+      isDraftDue({
+        ...base,
+        // Last drafted well over a week ago; the most recent occurrence inside
+        // the catch-up window is still newer, so exactly one draft is produced.
+        lastDraftedFor: new Date('2026-08-01T09:00:00Z'),
+        now: new Date('2026-09-08T09:00:00Z'),
+      }),
+    ).toBe(true);
+  });
+});
+
+describe('latestDueOccurrence', () => {
+  const base = { sendDays: [1, 4], sendHour: 9, timezone: 'Africa/Lagos' };
+
+  it('returns today once the send hour has arrived', () => {
+    expect(latestDueOccurrence({ ...base, now: new Date('2026-09-07T08:00:00Z') })).toBe(
+      '2026-09-07',
+    );
+  });
+
+  it('falls back to the previous scheduled day before the send hour', () => {
+    // Monday 08:59 Lagos, before 09:00 — the last due occurrence is Thursday.
+    expect(latestDueOccurrence({ ...base, now: new Date('2026-09-07T07:59:00Z') })).toBe(
+      '2026-09-03',
+    );
+  });
+
+  it('returns the most recent scheduled day on an unscheduled day', () => {
+    // Wednesday → Monday.
+    expect(latestDueOccurrence({ ...base, now: new Date('2026-09-09T09:00:00Z') })).toBe(
+      '2026-09-07',
+    );
+  });
+
+  it('returns null when no day is scheduled', () => {
+    expect(latestDueOccurrence({ ...base, sendDays: [], now: new Date() })).toBeNull();
   });
 });
 

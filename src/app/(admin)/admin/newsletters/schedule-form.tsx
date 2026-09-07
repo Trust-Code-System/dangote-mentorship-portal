@@ -95,8 +95,12 @@ export function ScheduleForm({
                 max={23}
                 defaultValue={sendHour}
                 className="w-24"
+                aria-describedby="sendHour-hint"
                 required
               />
+              <p id="sendHour-hint" className="max-w-md text-small text-ink-3">
+                {t('scheduleHourHint')}
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="timezone">{t('scheduleTimezone')}</Label>
