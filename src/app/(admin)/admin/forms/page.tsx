@@ -87,7 +87,7 @@ export default async function FormsPage() {
 }
 
 /** i18n key for a form's review type. Exhaustive so a new type can't slip through. */
-function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' {
+function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' | 'monthly' {
   switch (type) {
     case ReviewType.MIDTERM:
       return 'midterm';
@@ -95,10 +95,12 @@ function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' {
       return 'final';
     case ReviewType.QUARTERLY:
       return 'quarterly';
+    case ReviewType.MONTHLY:
+      return 'monthly';
   }
 }
 
-function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' {
+function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' | 'ok' {
   switch (type) {
     case ReviewType.MIDTERM:
       return 'info';
@@ -106,6 +108,8 @@ function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' {
       return 'default';
     case ReviewType.QUARTERLY:
       return 'warn';
+    case ReviewType.MONTHLY:
+      return 'ok';
   }
 }
 

@@ -82,7 +82,7 @@ function serialize(fields: EditableField[]): string {
       type: f.type,
       required: f.required,
       ...(f.type === 'rating' ? { max: f.max } : {}),
-      ...(f.type === 'single_select'
+      ...(f.type === 'single_select' || f.type === 'multi_select'
         ? { options: f.options.map((o) => ({ value: o.value.trim(), labelEn: o.labelEn.trim(), labelFr: o.labelFr.trim() })) }
         : {}),
     })),
@@ -119,6 +119,7 @@ export function FormDefinitionEditor({
       long_text: t('typeLongText'),
       rating: t('typeRating'),
       single_select: t('typeSelect'),
+      multi_select: t('typeMultiSelect'),
       boolean: t('typeBoolean'),
     }),
     [t],
@@ -190,6 +191,7 @@ export function FormDefinitionEditor({
               <SelectItem value={ReviewType.MIDTERM}>{t('midterm')}</SelectItem>
               <SelectItem value={ReviewType.FINAL}>{t('final')}</SelectItem>
               <SelectItem value={ReviewType.QUARTERLY}>{t('quarterly')}</SelectItem>
+              <SelectItem value={ReviewType.MONTHLY}>{t('monthly')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -353,7 +355,7 @@ export function FormDefinitionEditor({
               </label>
             </div>
 
-            {field.type === 'single_select' ? (
+            {field.type === 'single_select' || field.type === 'multi_select' ? (
               <div className="space-y-2 rounded-md border border-border bg-bg p-3">
                 <p className="text-small text-ink-2">{t('options')}</p>
                 {field.options.map((opt, oi) => (

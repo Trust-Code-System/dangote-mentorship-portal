@@ -57,7 +57,7 @@ export async function ReviewScreen({ type }: { type: ReviewType }) {
           lang={lang}
           cohortId={assignment.participant.cohortId}
           // A live draft (mid-edit) wins over a prior submission's answers.
-          draft={await getDraft<Record<string, string>>(
+          draft={await getDraft<Record<string, string | string[]>>(
             user.id,
             reviewDraftKey(type, assignment.form.id),
           )}
@@ -84,7 +84,7 @@ function ReviewBody({
   fields: FormField[];
   lang: 'EN' | 'FR';
   cohortId: string;
-  draft: Record<string, string> | null;
+  draft: Record<string, string | string[]> | null;
   submitted: SubmittedReview | null;
 }) {
   // Prefer a live draft; else pre-fill from the last submission so an update
@@ -132,12 +132,13 @@ async function SubmittedBanner({
   );
 }
 
-/** Coerce stored answers (string | number | boolean | null) into the string map
- *  the form fields expect. */
-function stringifyAnswers(answers: ReviewAnswers): Record<string, string> {
-  const out: Record<string, string> = {};
+/** Coerce stored answers into the shape the form fields expect. Multi-select
+ *  answers stay as lists; everything else becomes a string. */
+function stringifyAnswers(answers: ReviewAnswers): Record<string, string | string[]> {
+  const out: Record<string, string | string[]> = {};
   for (const [k, v] of Object.entries(answers)) {
-    out[k] = v == null ? '' : String(v);
+    if (Array.isArray(v)) out[k] = v;
+    else out[k] = v == null ? '' : String(v);
   }
   return out;
 }

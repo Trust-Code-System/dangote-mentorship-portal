@@ -145,6 +145,10 @@ enum ReviewType {
   // responses are additionally tied to an AssessmentWindow so completion can
   // gate portal access (see features/assessments).
   QUARTERLY
+  // The mentee's monthly meeting form: their own account of the month's
+  // session(s). Same recurring-window machinery as QUARTERLY, but its windows
+  // carry gatesAccess = false — missing it produces reminders, never a lockout.
+  MONTHLY
 }
 
 enum ReviewStatus {
@@ -1206,22 +1210,32 @@ model FinalReview {
 // A mentee must have a SUBMITTED FormResponse tied to the window by
 // `dueAt + graceDays`, or the portal locks for them until they submit.
 model AssessmentWindow {
-  id        String   @id @default(cuid())
-  cohortId  String   @map("cohort_id")
-  // 1-based occurrence within the cohort (1 = first quarter).
-  sequence  Int
+  id          String     @id @default(cuid())
+  cohortId    String     @map("cohort_id")
+  // Which recurring mentee form this window is an occurrence of. QUARTERLY is
+  // the mandatory assessment; MONTHLY is the monthly meeting form. Both share
+  // this table because the cadence, completion tracking and reminder machinery
+  // are identical — only `gatesAccess` differs.
+  formType    ReviewType @default(QUARTERLY) @map("form_type")
+  // Whether missing this window blocks the portal. True for the quarterly
+  // assessment; false for the monthly meeting form, which is chased with
+  // reminders instead. features/assessments/gate.ts only ever sees gating
+  // windows, so a non-gating form can never lock anyone out.
+  gatesAccess Boolean    @default(true) @map("gates_access")
+  // 1-based occurrence within the cohort, per formType.
+  sequence    Int
   // Admin-facing name, e.g. "Quarter 1 assessment". Bilingual copy for the
   // participant comes from the linked FormDefinition's own EN/FR labels.
-  label     String
+  label       String
   // Mentees can start submitting from here.
-  opensAt   DateTime @map("opens_at")
-  dueAt     DateTime @map("due_at")
+  opensAt     DateTime   @map("opens_at")
+  dueAt       DateTime   @map("due_at")
   // Days after `dueAt` before access is blocked. Copied from the cohort at
   // generation time so changing the cohort default never silently locks people
   // who were already inside a grace window.
-  graceDays Int      @default(7) @map("grace_days")
+  graceDays   Int        @default(7) @map("grace_days")
   // Deactivating a window removes it from the gate entirely.
-  isActive  Boolean  @default(true) @map("is_active")
+  isActive    Boolean    @default(true) @map("is_active")
 
   cohort    Cohort         @relation(fields: [cohortId], references: [id])
   responses FormResponse[]
@@ -1230,8 +1244,8 @@ model AssessmentWindow {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  @@unique([cohortId, sequence])
-  @@index([cohortId, dueAt])
+  @@unique([cohortId, formType, sequence])
+  @@index([cohortId, formType, dueAt])
   @@map("assessment_windows")
 }
 

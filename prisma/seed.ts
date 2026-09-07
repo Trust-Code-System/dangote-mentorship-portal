@@ -38,8 +38,10 @@ import {
 import bcrypt from 'bcryptjs';
 import { generateInviteToken, inviteExpiry } from '../src/lib/auth/invite';
 import {
+  defaultMonthlyWindowLabel,
   defaultWindowLabel,
   planAssessmentWindows,
+  planMonthlyWindows,
 } from '../src/features/assessments/schedule';
 
 const prisma = new PrismaClient();
@@ -734,11 +736,35 @@ async function main() {
     });
   }
 
-  // --- The mandatory quarterly assessment: form + schedule ----------------
-  // Mentees must submit one of these every 3 months or the portal locks for
-  // them (features/assessments). Mentee-specific question set, bilingual.
+  // --- The mandatory quarterly assessment: forms + schedule ---------------
+  // Transcribed from the programme's mid-point assessment documents. There are
+  // TWO question sets — mentors and mentees are asked different things — and
+  // both sides are held to it: missing it past the grace window blocks the
+  // portal for either role (features/assessments/participants.ts).
+  //
+  // Full name / date / batch are not asked: the response is already tied to the
+  // signed-in participant and their cohort.
+  const MENTEE_FREQUENCY_OPTIONS = [
+    { value: 'weekly', labelEn: 'Weekly', labelFr: 'Chaque semaine' },
+    { value: 'biweekly', labelEn: 'Biweekly', labelFr: 'Toutes les deux semaines' },
+    { value: 'monthly', labelEn: 'Monthly', labelFr: 'Chaque mois' },
+    { value: 'less_often', labelEn: 'Less frequently', labelFr: 'Moins souvent' },
+  ];
+
+  const PROGRESS_OPTIONS = [
+    { value: 'significant', labelEn: 'Significant progress', labelFr: 'Progrès importants' },
+    { value: 'some', labelEn: 'Some progress', labelFr: 'Quelques progrès' },
+    { value: 'limited', labelEn: 'Limited progress', labelFr: 'Progrès limités' },
+    { value: 'none', labelEn: 'No progress', labelFr: 'Aucun progrès' },
+  ];
+
   const existingQuarterlyForm = await prisma.formDefinition.findFirst({
-    where: { cohortId: cohort.id, type: ReviewType.QUARTERLY, deletedAt: null },
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTEE,
+      deletedAt: null,
+    },
   });
   if (!existingQuarterlyForm) {
     await prisma.formDefinition.create({
@@ -746,58 +772,288 @@ async function main() {
         cohortId: cohort.id,
         type: ReviewType.QUARTERLY,
         roleName: RoleName.MENTEE,
-        title: 'Quarterly mentee assessment',
+        title: 'Quarterly assessment — mentee',
         isActive: true,
         schema: {
           fields: [
             {
-              id: 'sessions_held',
-              labelEn: 'How many mentoring sessions did you hold this quarter?',
-              labelFr: 'Combien de séances de mentorat avez-vous tenues ce trimestre ?',
+              id: 'meet_frequency',
+              labelEn: 'How often do you meet or interact with your mentor?',
+              labelFr: 'À quelle fréquence rencontrez-vous ou échangez-vous avec votre mentor ?',
+              type: 'single_select',
+              required: true,
+              options: MENTEE_FREQUENCY_OPTIONS,
+            },
+            {
+              id: 'relationship_quality',
+              labelEn: 'How would you rate your relationship with your mentor?',
+              labelFr: 'Comment évaluez-vous votre relation avec votre mentor ?',
               type: 'single_select',
               required: true,
               options: [
-                { value: 'none', labelEn: 'None', labelFr: 'Aucune' },
-                { value: 'one', labelEn: 'One', labelFr: 'Une' },
-                { value: 'two_three', labelEn: 'Two or three', labelFr: 'Deux ou trois' },
-                { value: 'four_plus', labelEn: 'Four or more', labelFr: 'Quatre ou plus' },
+                { value: 'very_supportive', labelEn: 'Very supportive', labelFr: 'Très soutenante' },
+                { value: 'supportive', labelEn: 'Supportive', labelFr: 'Soutenante' },
+                { value: 'neutral', labelEn: 'Neutral', labelFr: 'Neutre' },
+                { value: 'unsupportive', labelEn: 'Unsupportive', labelFr: 'Peu soutenante' },
+              ],
+            },
+            {
+              id: 'goal_clarity',
+              labelEn: "How clear are the goals you're working on with your mentor?",
+              labelFr: 'Les objectifs que vous poursuivez avec votre mentor sont-ils clairs ?',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'very_clear', labelEn: 'Very clear', labelFr: 'Très clairs' },
+                { value: 'clear', labelEn: 'Clear', labelFr: 'Clairs' },
+                { value: 'somewhat_clear', labelEn: 'Somewhat clear', labelFr: 'Plutôt clairs' },
+                { value: 'not_clear', labelEn: 'Not clear', labelFr: 'Pas clairs' },
               ],
             },
             {
               id: 'goal_progress',
-              labelEn: 'How far have you progressed against your current goals?',
-              labelFr: 'Où en êtes-vous par rapport à vos objectifs actuels ?',
-              type: 'rating',
+              labelEn: 'Have you made progress on your mentorship goals so far?',
+              labelFr: 'Avez-vous progressé vers vos objectifs de mentorat jusqu’ici ?',
+              type: 'single_select',
               required: true,
-              max: 5,
+              options: PROGRESS_OPTIONS,
             },
             {
-              id: 'competency_gained',
-              labelEn: 'Which competency did you strengthen most this quarter?',
-              labelFr: 'Quelle compétence avez-vous le plus renforcée ce trimestre ?',
-              type: 'short_text',
-              required: true,
-            },
-            {
-              id: 'applied_at_work',
-              labelEn: 'Give one example of applying what you learned at work.',
-              labelFr: 'Donnez un exemple concret d’application de vos acquis au travail.',
+              id: 'what_helped_most',
+              labelEn: 'What has helped you the most in this mentorship process?',
+              labelFr: 'Qu’est-ce qui vous a le plus aidé dans ce processus de mentorat ?',
               type: 'long_text',
               required: true,
             },
             {
-              id: 'blockers',
-              labelEn: 'What is getting in the way of your development?',
-              labelFr: 'Qu’est-ce qui freine votre développement ?',
+              id: 'difficulties',
+              labelEn: 'What has made achieving your goals difficult? Tick all that apply.',
+              labelFr:
+                'Qu’est-ce qui a rendu difficile l’atteinte de vos objectifs ? Cochez tout ce qui s’applique.',
+              type: 'multi_select',
+              required: false,
+              options: [
+                { value: 'time', labelEn: 'Time constraints', labelFr: 'Manque de temps' },
+                {
+                  value: 'communication',
+                  labelEn: 'Lack of communication',
+                  labelFr: 'Manque de communication',
+                },
+                {
+                  value: 'expectations',
+                  labelEn: 'Unclear expectations',
+                  labelFr: 'Attentes floues',
+                },
+                { value: 'other', labelEn: 'Something else', labelFr: 'Autre chose' },
+              ],
+            },
+            {
+              id: 'difficulties_other',
+              labelEn: 'If you ticked "something else" above, please say what',
+              labelFr: 'Si vous avez coché « autre chose » ci-dessus, précisez',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'support_needed',
+              labelEn:
+                'What kind of support do you need to move forward more effectively? Tick all that apply.',
+              labelFr:
+                'De quel type de soutien avez-vous besoin pour avancer plus efficacement ? Cochez tout ce qui s’applique.',
+              type: 'multi_select',
+              required: true,
+              options: [
+                {
+                  value: 'mentor_engagement',
+                  labelEn: 'More engagement with my mentor',
+                  labelFr: 'Plus d’échanges avec mon mentor',
+                },
+                { value: 'goal_refinement', labelEn: 'Goal refinement', labelFr: 'Affiner les objectifs' },
+                {
+                  value: 'coordinator_checkins',
+                  labelEn: 'More programme coordinator check-ins',
+                  labelFr: 'Plus de points avec la coordination du programme',
+                },
+                {
+                  value: 'peer_support',
+                  labelEn: 'Peer support or resources',
+                  labelFr: 'Soutien des pairs ou ressources',
+                },
+                { value: 'other', labelEn: 'Something else', labelFr: 'Autre chose' },
+              ],
+            },
+            {
+              id: 'support_needed_other',
+              labelEn: 'If you ticked "something else" above, please say what',
+              labelFr: 'Si vous avez coché « autre chose » ci-dessus, précisez',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'improvement_suggestions',
+              labelEn:
+                'What could improve the mentoring experience for the rest of the programme?',
+              labelFr:
+                'Qu’est-ce qui pourrait améliorer l’expérience de mentorat pour le reste du programme ?',
+              type: 'long_text',
+              required: false,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  const existingMentorQuarterlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTOR,
+      deletedAt: null,
+    },
+  });
+  if (!existingMentorQuarterlyForm) {
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: ReviewType.QUARTERLY,
+        roleName: RoleName.MENTOR,
+        title: 'Quarterly assessment — mentor',
+        isActive: true,
+        schema: {
+          fields: [
+            {
+              id: 'meeting_number',
+              labelEn: 'Meeting number',
+              labelFr: 'Numéro de la rencontre',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'meeting_duration',
+              labelEn: 'Typical duration of your meetings',
+              labelFr: 'Durée habituelle de vos rencontres',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'meet_frequency',
+              labelEn: 'How often have you met with your mentee so far?',
+              labelFr: 'À quelle fréquence avez-vous rencontré votre mentoré jusqu’ici ?',
+              type: 'single_select',
+              required: true,
+              options: MENTEE_FREQUENCY_OPTIONS,
+            },
+            {
+              id: 'interaction_quality',
+              labelEn: 'How would you describe the quality of your interactions with your mentee?',
+              labelFr: 'Comment décririez-vous la qualité de vos échanges avec votre mentoré ?',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'excellent', labelEn: 'Excellent', labelFr: 'Excellente' },
+                { value: 'good', labelEn: 'Good', labelFr: 'Bonne' },
+                { value: 'fair', labelEn: 'Fair', labelFr: 'Passable' },
+                { value: 'poor', labelEn: 'Poor', labelFr: 'Faible' },
+              ],
+            },
+            {
+              id: 'mentee_engagement',
+              labelEn: 'How engaged is your mentee in the process?',
+              labelFr: 'Dans quelle mesure votre mentoré s’investit-il dans le processus ?',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'highly', labelEn: 'Highly engaged', labelFr: 'Très investi' },
+                { value: 'moderately', labelEn: 'Moderately engaged', labelFr: 'Moyennement investi' },
+                { value: 'minimally', labelEn: 'Minimally engaged', labelFr: 'Peu investi' },
+                { value: 'not', labelEn: 'Not engaged', labelFr: 'Pas investi' },
+              ],
+            },
+            {
+              id: 'goals_focused',
+              labelEn: 'What goals have you and your mentee focused on?',
+              labelFr: 'Sur quels objectifs vous êtes-vous concentrés avec votre mentoré ?',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'mentee_progress',
+              labelEn: 'What progress (if any) has your mentee made toward those goals?',
+              labelFr: 'Quels progrès votre mentoré a-t-il réalisés vers ces objectifs, le cas échéant ?',
+              type: 'single_select',
+              required: true,
+              options: PROGRESS_OPTIONS,
+            },
+            {
+              id: 'progress_drivers',
+              labelEn: 'In your view, what has contributed most to the progress or lack thereof?',
+              labelFr: 'Selon vous, qu’est-ce qui explique le plus ces progrès ou leur absence ?',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'had_challenges',
+              labelEn: 'Have you encountered any challenges as a mentor in this programme?',
+              labelFr: 'Avez-vous rencontré des difficultés en tant que mentor dans ce programme ?',
+              type: 'boolean',
+              required: true,
+            },
+            {
+              id: 'challenges_detail',
+              labelEn: 'If yes, please describe briefly',
+              labelFr: 'Si oui, décrivez brièvement',
               type: 'long_text',
               required: false,
             },
             {
-              id: 'relationship_working',
-              labelEn: 'Is the mentoring relationship working for you?',
-              labelFr: 'La relation de mentorat vous convient-elle ?',
-              type: 'boolean',
-              required: true,
+              id: 'support_wanted',
+              labelEn:
+                'What additional support or resources would enhance your mentoring experience? Tick all that apply.',
+              labelFr:
+                'Quel soutien ou quelles ressources supplémentaires amélioreraient votre expérience de mentor ? Cochez tout ce qui s’applique.',
+              type: 'multi_select',
+              required: false,
+              options: [
+                { value: 'peer_support', labelEn: 'Peer support', labelFr: 'Soutien des pairs' },
+                {
+                  value: 'templates',
+                  labelEn: 'More structured templates',
+                  labelFr: 'Des modèles plus structurés',
+                },
+                {
+                  value: 'coordinator_guidance',
+                  labelEn: 'Guidance from programme coordinators',
+                  labelFr: 'Accompagnement de la coordination du programme',
+                },
+                {
+                  value: 'skill_materials',
+                  labelEn: 'Skill-building materials',
+                  labelFr: 'Supports de développement de compétences',
+                },
+                { value: 'other', labelEn: 'Something else', labelFr: 'Autre chose' },
+              ],
+            },
+            {
+              id: 'support_wanted_other',
+              labelEn: 'If you ticked "something else" above, please say what',
+              labelFr: 'Si vous avez coché « autre chose » ci-dessus, précisez',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'programme_suggestions',
+              labelEn: 'What changes, if any, would you recommend to improve the programme?',
+              labelFr: 'Quels changements recommanderiez-vous, le cas échéant, pour améliorer le programme ?',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'additional_comments',
+              labelEn: 'Additional comments',
+              labelFr: 'Commentaires supplémentaires',
+              type: 'long_text',
+              required: false,
             },
           ],
         },
@@ -809,7 +1065,7 @@ async function main() {
   // planner is pure and shared with the admin "generate schedule" action, so
   // the demo cohort and a real cohort get an identical cadence.
   const existingWindows = await prisma.assessmentWindow.findMany({
-    where: { cohortId: cohort.id, deletedAt: null },
+    where: { cohortId: cohort.id, formType: ReviewType.QUARTERLY, deletedAt: null },
     select: { sequence: true },
   });
   if (cohort.startDate) {
@@ -824,6 +1080,8 @@ async function main() {
       await prisma.assessmentWindow.createMany({
         data: plans.map((plan) => ({
           cohortId: cohort.id,
+          formType: ReviewType.QUARTERLY,
+          gatesAccess: true,
           sequence: plan.sequence,
           label: defaultWindowLabel(plan),
           opensAt: plan.opensAt,
@@ -834,32 +1092,61 @@ async function main() {
     }
   }
 
-  // Past-due windows are pre-submitted for almost every mentee, so seeding the
-  // schedule doesn't lock the whole demo cohort out of the portal. Two mentees
-  // are deliberately left outstanding so the admin completion table (and the
-  // lockout itself) is demoable on real data.
-  const quarterlyForm = await prisma.formDefinition.findFirst({
+  // Past-due windows are pre-submitted for almost everyone, so seeding the
+  // schedule doesn't lock the whole demo cohort out of the portal. A couple of
+  // mentees and one mentor are deliberately left outstanding so the admin
+  // completion table — and the lockout itself — are demoable on real data.
+  const quarterlyMenteeForm = await prisma.formDefinition.findFirst({
     where: {
       cohortId: cohort.id,
       type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTEE,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const quarterlyMentorForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTOR,
       isActive: true,
       deletedAt: null,
     },
     select: { id: true },
   });
   const pastWindows = await prisma.assessmentWindow.findMany({
-    where: { cohortId: cohort.id, isActive: true, deletedAt: null, dueAt: { lte: new Date() } },
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.QUARTERLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
     select: { id: true },
   });
-  if (quarterlyForm && pastWindows.length > 0) {
-    const menteeGrants = await prisma.userRole.findMany({
-      where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
-      orderBy: { createdAt: 'asc' },
-      select: { userId: true },
-    });
+
+  if (quarterlyMenteeForm && quarterlyMentorForm && pastWindows.length > 0) {
+    const [menteeGrants, mentorGrants] = await Promise.all([
+      prisma.userRole.findMany({
+        where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+        orderBy: { createdAt: 'asc' },
+        select: { userId: true },
+      }),
+      prisma.userRole.findMany({
+        where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTOR },
+        orderBy: { createdAt: 'asc' },
+        select: { userId: true },
+      }),
+    ]);
+
     const menteeIds = Array.from(new Set(menteeGrants.map((g) => g.userId)));
-    // Leave the last two outstanding: one in grace / one locked out.
-    const compliant = menteeIds.slice(0, Math.max(0, menteeIds.length - 2));
+    const mentorIds = Array.from(new Set(mentorGrants.map((g) => g.userId)));
+    // Leave the last two mentees and the last mentor outstanding: one of each
+    // in grace, one locked out.
+    const compliantMentees = menteeIds.slice(0, Math.max(0, menteeIds.length - 2));
+    const compliantMentors = mentorIds.slice(0, Math.max(0, mentorIds.length - 1));
 
     for (const window of pastWindows) {
       const already = await prisma.formResponse.findMany({
@@ -867,23 +1154,297 @@ async function main() {
         select: { respondentId: true },
       });
       const done = new Set(already.map((r) => r.respondentId));
-      const todo = compliant.filter((id) => !done.has(id));
+
+      const menteeTodo = compliantMentees.filter((id) => !done.has(id));
+      if (menteeTodo.length > 0) {
+        await prisma.formResponse.createMany({
+          data: menteeTodo.map((userId, idx) => ({
+            formId: quarterlyMenteeForm.id,
+            respondentId: userId,
+            assessmentWindowId: window.id,
+            status: ReviewStatus.SUBMITTED,
+            submittedAt: new Date(),
+            answers: {
+              meet_frequency: ['biweekly', 'monthly', 'weekly'][idx % 3],
+              relationship_quality: idx % 5 === 0 ? 'supportive' : 'very_supportive',
+              goal_clarity: idx % 4 === 0 ? 'somewhat_clear' : 'clear',
+              goal_progress: ['significant', 'some', 'some', 'limited'][idx % 4],
+              what_helped_most:
+                'Having someone senior talk through a real decision with me before I made it.',
+              // A multi_select answer is stored as a list of option values.
+              difficulties: idx % 3 === 0 ? ['time'] : ['time', 'expectations'],
+              difficulties_other: null,
+              support_needed:
+                idx % 2 === 0
+                  ? ['mentor_engagement', 'goal_refinement']
+                  : ['peer_support'],
+              support_needed_other: null,
+              improvement_suggestions:
+                idx % 6 === 0 ? 'A shared calendar would make scheduling easier.' : null,
+            },
+          })),
+        });
+      }
+
+      const mentorTodo = compliantMentors.filter((id) => !done.has(id));
+      if (mentorTodo.length > 0) {
+        await prisma.formResponse.createMany({
+          data: mentorTodo.map((userId, idx) => ({
+            formId: quarterlyMentorForm.id,
+            respondentId: userId,
+            assessmentWindowId: window.id,
+            status: ReviewStatus.SUBMITTED,
+            submittedAt: new Date(),
+            answers: {
+              meeting_number: String(idx + 2),
+              meeting_duration: '60 minutes',
+              meet_frequency: idx % 2 === 0 ? 'biweekly' : 'monthly',
+              interaction_quality: ['excellent', 'good', 'good', 'fair'][idx % 4],
+              mentee_engagement: ['highly', 'moderately', 'highly', 'minimally'][idx % 4],
+              goals_focused:
+                'Stakeholder management, and preparing to present to the operations board.',
+              mentee_progress: ['significant', 'some', 'some', 'limited'][idx % 4],
+              progress_drivers:
+                'Consistent meetings and a willingness to try things between sessions.',
+              had_challenges: idx % 3 === 0,
+              challenges_detail:
+                idx % 3 === 0 ? 'Hard to find a slot that works across shift patterns.' : null,
+              support_wanted: idx % 2 === 0 ? ['templates', 'peer_support'] : ['skill_materials'],
+              support_wanted_other: null,
+              programme_suggestions:
+                idx % 5 === 0 ? 'A short refresher for mentors at the halfway point.' : null,
+              additional_comments: null,
+            },
+          })),
+        });
+      }
+    }
+  }
+
+  // --- The monthly meeting form (mentees only, never gates access) ---------
+  // Transcribed from the programme's "Monthly Meeting Form" document. Name,
+  // email and batch are deliberately NOT asked: the response is already tied to
+  // the signed-in mentee and their cohort, so re-typing them monthly would only
+  // add friction and a chance to mistype.
+  const existingMonthlyForm = await prisma.formDefinition.findFirst({
+    where: { cohortId: cohort.id, type: ReviewType.MONTHLY, deletedAt: null },
+  });
+  if (!existingMonthlyForm) {
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: ReviewType.MONTHLY,
+        roleName: RoleName.MENTEE,
+        title: 'Monthly meeting form',
+        isActive: true,
+        schema: {
+          fields: [
+            {
+              id: 'meeting_number',
+              labelEn: 'Meeting number',
+              labelFr: 'Numéro de la rencontre',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'meeting_duration',
+              labelEn: 'Duration of the meeting',
+              labelFr: 'Durée de la rencontre',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'main_topics',
+              labelEn:
+                'Main topics or themes discussed (e.g. leadership challenges, communication skills)',
+              labelFr:
+                'Principaux sujets ou thèmes abordés (p. ex. enjeux de leadership, communication)',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'issues_raised',
+              labelEn: 'Personal or professional issues raised (if any)',
+              labelFr: 'Questions personnelles ou professionnelles soulevées (le cas échéant)',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'key_insights',
+              labelEn: 'Key insights or takeaways from this session',
+              labelFr: 'Principaux enseignements tirés de cette séance',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'goal_progress',
+              labelEn: 'Progress on previously set goals or actions',
+              labelFr: 'Progrès sur les objectifs ou actions définis précédemment',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'significant', labelEn: 'Significant', labelFr: 'Important' },
+                { value: 'moderate', labelEn: 'Moderate', labelFr: 'Modéré' },
+                { value: 'limited', labelEn: 'Limited', labelFr: 'Limité' },
+                { value: 'none', labelEn: 'No progress', labelFr: 'Aucun progrès' },
+              ],
+            },
+            {
+              id: 'progress_comment',
+              labelEn: 'Comment on that progress',
+              labelFr: 'Commentaire sur ces progrès',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'action_1',
+              labelEn: 'New goal or action agreed — 1',
+              labelFr: 'Nouvel objectif ou action convenu — 1',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'action_2',
+              labelEn: 'New goal or action agreed — 2',
+              labelFr: 'Nouvel objectif ou action convenu — 2',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'action_3',
+              labelEn: 'New goal or action agreed — 3',
+              labelFr: 'Nouvel objectif ou action convenu — 3',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'resources_required',
+              labelEn: 'Resources or support required (if any)',
+              labelFr: 'Ressources ou soutien nécessaires (le cas échéant)',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'additional_comments',
+              labelEn:
+                'Additional comments — notes, observations, or requests for programme support',
+              labelFr:
+                'Commentaires supplémentaires — notes, observations ou demandes de soutien au programme',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'terms_agreed',
+              labelEn: 'I agree with the Terms of Use and Privacy Policy',
+              labelFr: "J'accepte les conditions d'utilisation et la politique de confidentialité",
+              type: 'boolean',
+              required: true,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // One monthly window per calendar month of the cohort. gatesAccess is false:
+  // a missed monthly form produces reminders, never a lockout.
+  const existingMonthlyWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, formType: ReviewType.MONTHLY, deletedAt: null },
+    select: { sequence: true },
+  });
+  if (cohort.startDate) {
+    const takenMonths = new Set(existingMonthlyWindows.map((w) => w.sequence));
+    const monthlyPlans = planMonthlyWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+    }).filter((plan) => !takenMonths.has(plan.sequence));
+
+    if (monthlyPlans.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: monthlyPlans.map((plan) => ({
+          cohortId: cohort.id,
+          formType: ReviewType.MONTHLY,
+          gatesAccess: false,
+          sequence: plan.sequence,
+          label: defaultMonthlyWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: 0,
+        })),
+      });
+    }
+  }
+
+  // Fill in the months that have already closed for most mentees, and leave the
+  // month in progress largely outstanding — so the admin's completion view and
+  // the reminder/newsletter path are both demoable on realistic data.
+  const monthlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const closedMonths = await prisma.assessmentWindow.findMany({
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
+    orderBy: { sequence: 'asc' },
+    select: { id: true },
+  });
+  if (monthlyForm && closedMonths.length > 0) {
+    const monthlyGrants = await prisma.userRole.findMany({
+      where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+      orderBy: { createdAt: 'asc' },
+      select: { userId: true },
+    });
+    const monthlyMenteeIds = Array.from(new Set(monthlyGrants.map((g) => g.userId)));
+
+    for (const [index, month] of closedMonths.entries()) {
+      const already = await prisma.formResponse.findMany({
+        where: { assessmentWindowId: month.id, deletedAt: null },
+        select: { respondentId: true },
+      });
+      const done = new Set(already.map((r) => r.respondentId));
+      // Compliance tails off over the months, which is what real programmes see
+      // and what makes the reminder feature worth demonstrating.
+      const share = Math.max(0.5, 1 - index * 0.08);
+      const todo = monthlyMenteeIds
+        .slice(0, Math.floor(monthlyMenteeIds.length * share))
+        .filter((id) => !done.has(id));
       if (todo.length === 0) continue;
 
       await prisma.formResponse.createMany({
-        data: todo.map((userId, idx) => ({
-          formId: quarterlyForm.id,
+        data: todo.map((userId, i) => ({
+          formId: monthlyForm.id,
           respondentId: userId,
-          assessmentWindowId: window.id,
+          assessmentWindowId: month.id,
           status: ReviewStatus.SUBMITTED,
           submittedAt: new Date(),
           answers: {
-            sessions_held: idx % 3 === 0 ? 'four_plus' : 'two_three',
-            goal_progress: 3 + (idx % 3),
-            competency_gained: 'Stakeholder management',
-            applied_at_work: 'Led the weekly production review for my unit.',
-            blockers: idx % 5 === 0 ? 'Hard to find time with shift work.' : null,
-            relationship_working: true,
+            meeting_number: String(index + 1),
+            meeting_duration: i % 2 === 0 ? '60 minutes' : '45 minutes',
+            main_topics:
+              i % 3 === 0
+                ? 'Stakeholder management and handling pushback from senior colleagues.'
+                : 'Communication under pressure and delegating to a new team.',
+            issues_raised: i % 4 === 0 ? 'Balancing shift work with study time.' : null,
+            key_insights:
+              'Preparing a one-page brief before a difficult conversation changes how it goes.',
+            goal_progress: ['significant', 'moderate', 'moderate', 'limited'][i % 4],
+            progress_comment: i % 5 === 0 ? 'Slower than planned, but moving.' : null,
+            action_1: 'Lead the next production review meeting.',
+            action_2: i % 2 === 0 ? 'Draft a stakeholder map for my unit.' : null,
+            action_3: null,
+            resources_required: i % 6 === 0 ? 'Access to the leadership reading list.' : null,
+            additional_comments: null,
+            terms_agreed: true,
           },
         })),
       });

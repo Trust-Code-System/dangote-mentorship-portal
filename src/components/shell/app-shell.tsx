@@ -29,6 +29,7 @@ import {
   BarChart3,
   Settings,
   CalendarClock,
+  CalendarCheck,
   FileText,
   Newspaper,
   Menu,
@@ -119,6 +120,7 @@ export type IconKey =
   | 'insights'
   | 'settings'
   | 'assessment'
+  | 'monthly'
   | 'reports'
   | 'newsletters';
 
@@ -150,6 +152,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   insights: BarChart3,
   settings: Settings,
   assessment: CalendarClock,
+  monthly: CalendarCheck,
   reports: FileText,
   newsletters: Newspaper,
 };

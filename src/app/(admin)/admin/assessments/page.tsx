@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getFormatter, getTranslations } from 'next-intl/server';
-import { CohortStatus } from '@prisma/client';
+import { CohortStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { adminCohortFilter, requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { GenerateMonthlyForm } from './generate-monthly-form';
 import { GenerateWindowsForm } from './generate-windows-form';
 import { WindowEditor } from './window-editor';
 
@@ -28,10 +29,16 @@ import { WindowEditor } from './window-editor';
 export default async function AdminAssessmentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ window?: string }>;
+  searchParams: Promise<{ window?: string; type?: string }>;
 }) {
   const user = await requireRole(ADMIN_ROLES);
   const [t, format] = await Promise.all([getTranslations('assessments'), getFormatter()]);
+
+  const { window: selectedWindowId, type } = await searchParams;
+  // Two recurring mentee forms share this screen: the mandatory quarterly
+  // assessment (gates the portal) and the monthly meeting form (reminders only).
+  const formType = type === ReviewType.MONTHLY ? ReviewType.MONTHLY : ReviewType.QUARTERLY;
+  const isMonthly = formType === ReviewType.MONTHLY;
 
   // Same convention as the other admin screens: act on the active cohort,
   // confined to the cohorts this admin may see.
@@ -50,7 +57,7 @@ export default async function AdminAssessmentsPage({
     );
   }
 
-  const overview = await getAssessmentOverview(cohort.id);
+  const overview = await getAssessmentOverview(cohort.id, formType);
   if (!overview) {
     return (
       <section className="space-y-6">
@@ -60,7 +67,6 @@ export default async function AdminAssessmentsPage({
     );
   }
 
-  const { window: selectedWindowId } = await searchParams;
   const activeWindows = overview.windows.filter((w) => w.isActive);
   // Default the completion table to the window that matters right now: the
   // latest one already open, else the next one due. `hasOpened` is computed in
@@ -78,16 +84,43 @@ export default async function AdminAssessmentsPage({
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="font-display text-display text-ink">{t('adminTitle')}</h1>
+        <h1 className="font-display text-display text-ink">
+          {isMonthly ? t('adminMonthlyTitle') : t('adminTitle')}
+        </h1>
         <p className="text-small text-ink-2">
-          {t('adminSubtitle', { cohort: overview.cohortName })}
+          {isMonthly
+            ? t('adminMonthlySubtitle', { cohort: overview.cohortName })
+            : t('adminSubtitle', { cohort: overview.cohortName })}
         </p>
       </div>
+
+      <nav aria-label={t('formTypeSwitcher')} className="flex flex-wrap gap-2">
+        {[
+          { type: ReviewType.QUARTERLY, label: t('tabQuarterly') },
+          { type: ReviewType.MONTHLY, label: t('tabMonthly') },
+        ].map((tab) => {
+          const selected = tab.type === formType;
+          return (
+            <Link
+              key={tab.type}
+              href={`/admin/assessments?type=${tab.type}`}
+              aria-current={selected ? 'page' : undefined}
+              className={
+                selected
+                  ? 'rounded-md border border-green bg-green-soft px-3 py-1.5 text-small font-semibold text-green-strong'
+                  : 'rounded-md border border-border px-3 py-1.5 text-small text-ink-2 hover:border-green'
+              }
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {!overview.formPublished ? (
         <div className="rounded-md border border-warn/40 bg-warn/10 px-4 py-3 text-small" role="alert">
           <p className="font-semibold text-ink">{t('noFormTitle')}</p>
-          <p className="text-ink-2">{t('noFormBody')}</p>
+          <p className="text-ink-2">{isMonthly ? t('noFormBodyMonthly') : t('noFormBody')}</p>
           <Button asChild variant="outline" className="mt-2">
             <Link href="/admin/forms/new">{t('createForm')}</Link>
           </Button>
@@ -97,16 +130,32 @@ export default async function AdminAssessmentsPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label={t('statMentees')} value={String(overview.menteeCount)} />
         <StatTile label={t('statSubmitted')} value={`${submitted}/${completion.length}`} />
-        <StatTile label={t('statGrace')} value={String(inGrace)} />
-        <StatTile label={t('statLocked')} value={String(locked)} />
+        {isMonthly ? (
+          <StatTile
+            label={t('statOutstanding')}
+            value={String(completion.length - submitted)}
+          />
+        ) : (
+          <>
+            <StatTile label={t('statGrace')} value={String(inGrace)} />
+            <StatTile label={t('statLocked')} value={String(locked)} />
+          </>
+        )}
       </div>
 
-      <GenerateWindowsForm
-        cohortId={overview.cohortId}
-        intervalMonths={overview.intervalMonths}
-        graceDays={overview.graceDays}
-        hasStartDate={overview.startDate !== null}
-      />
+      {isMonthly ? (
+        <GenerateMonthlyForm
+          cohortId={overview.cohortId}
+          hasStartDate={overview.startDate !== null}
+        />
+      ) : (
+        <GenerateWindowsForm
+          cohortId={overview.cohortId}
+          intervalMonths={overview.intervalMonths}
+          graceDays={overview.graceDays}
+          hasStartDate={overview.startDate !== null}
+        />
+      )}
 
       {overview.windows.length === 0 ? (
         <EmptyState title={t('noWindowsTitle')} description={t('noWindowsBody')} />
@@ -133,6 +182,7 @@ export default async function AdminAssessmentsPage({
                   total: overview.menteeCount,
                 })}
                 isFocused={focus?.id === w.id}
+                formType={formType}
               />
             ))}
           </CardContent>

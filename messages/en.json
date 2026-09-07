@@ -1547,6 +1547,16 @@
         "title": "Your assessment is overdue",
         "body": "{label} was due on {date}. Portal access is blocked from {lockDate} until you submit it."
       },
+      "monthly_form_due": {
+        "label": "Monthly form",
+        "title": "Your monthly meeting form is open",
+        "body": "{label} is due by {date}. It takes a few minutes and keeps your programme record complete."
+      },
+      "monthly_form_overdue": {
+        "label": "Monthly form",
+        "title": "Your monthly meeting form is still outstanding",
+        "body": "{label} was due on {date}. Nothing is blocked, but your record is incomplete until you submit it."
+      },
       "newsletter_draft_ready": {
         "label": "Newsletter draft",
         "title": "A newsletter draft is ready to review",
@@ -1556,6 +1566,7 @@
     "emptyHint": "No pending items right now."
   },
   "forms": {
+    "monthly": "Monthly meeting form",
     "quarterly": "Quarterly assessment",
     "title": "Forms builder",
     "subtitle": "Review forms for {cohort}",
@@ -1603,6 +1614,7 @@
     "typeLongText": "Long text",
     "typeRating": "Rating",
     "typeSelect": "Multiple choice",
+    "typeMultiSelect": "Multiple choice (tick several)",
     "typeBoolean": "Yes / No",
     "questionCount": "{count} questions",
     "responseCount": "{count} responses"
@@ -2503,6 +2515,16 @@
     }
   },
   "assessments": {
+    "adminMonthlyTitle": "Monthly meeting forms",
+    "adminMonthlySubtitle": "Mentees' own record of each month's session for {cohort}. Missing one never blocks the portal — it produces reminders and shows up in the newsletter.",
+    "formTypeSwitcher": "Choose which recurring form to manage",
+    "tabQuarterly": "Quarterly assessment",
+    "tabMonthly": "Monthly meeting form",
+    "monthlyCadenceTitle": "Monthly schedule",
+    "monthlyCadenceHelp": "Creates one form per calendar month the cohort runs in, open from the 1st and due on the last day. Existing months keep any edits you have made.",
+    "generateMonthly": "Generate monthly forms",
+    "statOutstanding": "Not yet submitted",
+    "noFormBodyMonthly": "Create a form of type \"Monthly meeting form\" for mentees, or nobody will be able to submit.",
     "title": "Quarterly assessment",
     "subtitle": "Every three months you complete a short assessment. It keeps your development on record and unlocks the rest of the portal.",
     "submit": "Submit assessment",
@@ -2690,5 +2712,26 @@
     "sending": "Sending…",
     "sendResult": "Sent to {sent}. Failed: {failed}.",
     "backToDraft": "Back to draft"
+  },
+  "monthlyForm": {
+    "title": "Monthly meeting form",
+    "subtitle": "Your own record of this month's mentoring session — what you discussed, what came out of it, and what you agreed to do next.",
+    "navLabel": "Monthly form",
+    "submit": "Submit this month's form",
+    "saved": "Saved",
+    "dueOn": "For the month ending {date}",
+    "completedOn": "Submitted {date}",
+    "outstanding": "Not submitted",
+    "historyTitle": "Your monthly forms",
+    "colAssessment": "Month",
+    "colDue": "Month ending",
+    "colStatus": "Status",
+    "notEligibleTitle": "No monthly form for you right now",
+    "notEligibleBody": "The monthly meeting form is completed by mentees enrolled in a cohort. If you think this is wrong, contact your programme administrator.",
+    "notPublishedTitle": "The monthly form is not ready yet",
+    "notPublishedBody": "Your programme administrator has not published this cohort's monthly form. You will be notified when it opens.",
+    "noneDueTitle": "You are up to date",
+    "noneDueBody": "There is no monthly form waiting for you. We will remind you when the next one opens.",
+    "lockedExplainer": ""
   }
 }

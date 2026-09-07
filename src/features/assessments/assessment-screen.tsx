@@ -9,21 +9,34 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getAssessmentAssignment, getWindowSubmission } from './data';
+import type { RecurringFormType } from './participants';
 import { assessmentDraftKey } from './schema';
 
-// The mentee's quarterly assessment page. This is the one screen a locked-out
-// mentee can still reach, so it has to explain the situation and let them fix
-// it in one place: what is due, why access is blocked, the form itself, and a
-// record of the assessments they have already completed.
-export async function AssessmentScreen() {
+/**
+ * Shared screen for both recurring mentee forms.
+ *
+ * QUARTERLY is the one screen a locked-out mentee can still reach, so it has to
+ * explain the situation and let them fix it in one place. MONTHLY is the same
+ * layout without the lock: what is due, the form, and the record so far. The
+ * copy differs (separate i18n namespaces), the mechanics do not.
+ */
+export async function AssessmentScreen({
+  formType = ReviewType.QUARTERLY,
+}: {
+  formType?: RecurringFormType;
+} = {}) {
   const user = await requireUser();
-  const [t, format] = await Promise.all([getTranslations('assessments'), getFormatter()]);
+  const isMonthly = formType === ReviewType.MONTHLY;
+  const [t, format] = await Promise.all([
+    getTranslations(isMonthly ? 'monthlyForm' : 'assessments'),
+    getFormatter(),
+  ]);
   // Render questions in the ACTIVE UI locale, not the saved account locale
   // (same rule as the review screen).
   const activeLocale = await getLocale();
   const lang = activeLocale.toLowerCase().startsWith('fr') ? 'FR' : 'EN';
 
-  const assignment = await getAssessmentAssignment(user);
+  const assignment = await getAssessmentAssignment(user, formType);
 
   if (!assignment) {
     return (
@@ -37,12 +50,15 @@ export async function AssessmentScreen() {
     );
   }
 
-  const { gate, form, history } = assignment;
-  const target = gate.window;
+  const { gate, current, form, history } = assignment;
+  // The monthly form has no gate, so its outstanding window comes from the
+  // assignment rather than from the gate.
+  const target = current;
+  const locked = !isMonthly && gate.state === 'LOCKED';
 
   return (
     <Screen title={t('title')} subtitle={t('subtitle')}>
-      {gate.state === 'LOCKED' ? (
+      {locked ? (
         <div
           className="flex items-start gap-3 rounded-md border border-risk/40 bg-risk/10 px-4 py-3 text-small text-risk"
           role="alert"
@@ -76,7 +92,7 @@ export async function AssessmentScreen() {
             <p className="text-small text-ink-2">{form.title}</p>
             <ReviewForm
               formId={form.id}
-              type={ReviewType.QUARTERLY}
+              type={formType}
               fields={form.schema.fields}
               lang={lang}
               cohortId={assignment.cohortId}
@@ -159,8 +175,8 @@ async function initialAnswersFor(
   userId: string,
   windowId: string,
   formId: string,
-): Promise<Record<string, string> | undefined> {
-  const draft = await getDraft<Record<string, string>>(
+): Promise<Record<string, string | string[]> | undefined> {
+  const draft = await getDraft<Record<string, string | string[]>>(
     userId,
     assessmentDraftKey(windowId, formId),
   );
@@ -169,9 +185,12 @@ async function initialAnswersFor(
   const submitted = await getWindowSubmission(userId, windowId);
   if (!submitted) return undefined;
 
-  const out: Record<string, string> = {};
+  const out: Record<string, string | string[]> = {};
   for (const [key, value] of Object.entries(submitted.answers)) {
-    out[key] = value == null ? '' : String(value);
+    // Multi-select answers must stay lists — stringifying them would lose the
+    // ticks when someone re-opens a submitted form to update it.
+    if (Array.isArray(value)) out[key] = value.filter((v): v is string => typeof v === 'string');
+    else out[key] = value == null ? '' : String(value);
   }
   return out;
 }

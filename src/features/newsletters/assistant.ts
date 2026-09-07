@@ -30,6 +30,14 @@ export function digestLines(digest: NewsletterDigest): string[] {
     `Pairs that logged a session in period: ${digest.activePairs} of ${digest.totalPairs}`,
   ];
 
+  // The monthly form is chased through the newsletter rather than by locking
+  // anyone out, so it is stated explicitly and the prompt is told to include it.
+  if (digest.monthlyForm) {
+    lines.push(
+      `Monthly meeting form "${digest.monthlyForm.label}" is open, due ${formatDate(digest.monthlyForm.dueAt)} — ${digest.monthlyForm.submitted} of ${digest.monthlyForm.total} mentees have submitted it`,
+    );
+  }
+
   for (const assessment of digest.upcomingAssessments) {
     lines.push(
       `Upcoming assessment "${assessment.label}" due ${formatDate(assessment.dueAt)} — ${assessment.submitted} of ${assessment.total} mentees have submitted`,
@@ -56,6 +64,7 @@ export function buildDraftPrompt(digest: NewsletterDigest): {
     '- highlights: 2 to 4 lines, ONE per line, no bullet characters.',
     '- numbers: one "Label: value" pair per line, at most five lines, taken verbatim from the facts.',
     '- dates: one upcoming date per line, formatted "What — when". Omit the section if there are no dates in the facts.',
+    'If the facts mention an open monthly meeting form, you MUST include its deadline in the dates section and ask people to complete it in the call to action — it is the main way mentees are reminded about it.',
     '- callToAction: one or two sentences telling participants what to do next.',
     'Do NOT write a spotlight section: a real story has to come from a person, not from you.',
     'Also write a subject line in each language: under 70 characters, specific, no colon-prefixed labels.',

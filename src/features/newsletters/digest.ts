@@ -6,6 +6,7 @@ import {
   GoalStatus,
   MeetingStatus,
   ReviewStatus,
+  ReviewType,
   RoleName,
 } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -29,8 +30,14 @@ export interface NewsletterDigest {
   actionsOpen: number;
   activePairs: number;
   totalPairs: number;
-  /** Assessment windows whose due date falls in the next 21 days. */
+  /** Gating assessment windows whose due date falls in the next 21 days. */
   upcomingAssessments: { label: string; dueAt: Date; submitted: number; total: number }[];
+  /**
+   * The monthly meeting form currently open, if any. Reminders are the ONLY
+   * enforcement for this form and the newsletter is its main reminder channel,
+   * so it is a first-class part of the digest rather than a footnote.
+   */
+  monthlyForm: { label: string; dueAt: Date; submitted: number; total: number } | null;
   upcomingClinics: { title: string; scheduledAt: Date | null }[];
 }
 
@@ -112,6 +119,7 @@ export async function buildNewsletterDigest(
     prisma.assessmentWindow.findMany({
       where: {
         cohortId,
+        formType: ReviewType.QUARTERLY,
         isActive: true,
         deletedAt: null,
         dueAt: { gte: subDays(now, 1), lte: soon },
@@ -140,6 +148,30 @@ export async function buildNewsletterDigest(
     }),
   ]);
 
+  // The monthly window open right now (opened, not yet past due).
+  const monthlyWindow = await prisma.assessmentWindow.findFirst({
+    where: {
+      cohortId,
+      formType: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+      opensAt: { lte: now },
+      dueAt: { gte: now },
+    },
+    orderBy: { dueAt: 'asc' },
+    select: { id: true, label: true, dueAt: true },
+  });
+
+  const monthlySubmitted = monthlyWindow
+    ? await prisma.formResponse.count({
+        where: {
+          assessmentWindowId: monthlyWindow.id,
+          status: ReviewStatus.SUBMITTED,
+          deletedAt: null,
+        },
+      })
+    : 0;
+
   const submissions =
     windows.length > 0
       ? await prisma.formResponse.groupBy({
@@ -165,6 +197,14 @@ export async function buildNewsletterDigest(
     actionsOpen,
     activePairs,
     totalPairs,
+    monthlyForm: monthlyWindow
+      ? {
+          label: monthlyWindow.label,
+          dueAt: monthlyWindow.dueAt,
+          submitted: monthlySubmitted,
+          total: menteeCount,
+        }
+      : null,
     upcomingAssessments: windows.map((w) => ({
       label: w.label,
       dueAt: w.dueAt,

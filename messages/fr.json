@@ -1547,6 +1547,16 @@
         "title": "Votre évaluation est en retard",
         "body": "{label} était à rendre le {date}. L’accès au portail sera bloqué à partir du {lockDate} jusqu’à son envoi."
       },
+      "monthly_form_due": {
+        "label": "Formulaire mensuel",
+        "title": "Votre formulaire de rencontre mensuel est ouvert",
+        "body": "{label} est à rendre avant le {date}. Cela prend quelques minutes et complète votre dossier de programme."
+      },
+      "monthly_form_overdue": {
+        "label": "Formulaire mensuel",
+        "title": "Votre formulaire de rencontre mensuel est toujours en attente",
+        "body": "{label} était à rendre le {date}. Rien n’est bloqué, mais votre dossier reste incomplet jusqu’à son envoi."
+      },
       "newsletter_draft_ready": {
         "label": "Projet d’infolettre",
         "title": "Un projet d’infolettre est prêt à relire",
@@ -1556,6 +1566,7 @@
     "emptyHint": "Aucun élément en attente pour le moment."
   },
   "forms": {
+    "monthly": "Formulaire de rencontre mensuel",
     "quarterly": "Évaluation trimestrielle",
     "title": "Générateur de formulaires",
     "subtitle": "Formulaires d'évaluation pour {cohort}",
@@ -1603,6 +1614,7 @@
     "typeLongText": "Texte long",
     "typeRating": "Note",
     "typeSelect": "Choix multiple",
+    "typeMultiSelect": "Choix multiples (plusieurs réponses)",
     "typeBoolean": "Oui / Non",
     "questionCount": "{count} questions",
     "responseCount": "{count} réponses"
@@ -2503,6 +2515,16 @@
     }
   },
   "assessments": {
+    "adminMonthlyTitle": "Formulaires de rencontre mensuels",
+    "adminMonthlySubtitle": "Compte rendu des mentorés pour la séance de chaque mois, cohorte {cohort}. En manquer un ne bloque jamais le portail : cela déclenche des rappels et apparaît dans l'infolettre.",
+    "formTypeSwitcher": "Choisir le formulaire récurrent à gérer",
+    "tabQuarterly": "Évaluation trimestrielle",
+    "tabMonthly": "Formulaire mensuel",
+    "monthlyCadenceTitle": "Calendrier mensuel",
+    "monthlyCadenceHelp": "Crée un formulaire par mois civil de la cohorte, ouvert dès le 1er et à rendre le dernier jour. Les mois existants conservent vos modifications.",
+    "generateMonthly": "Générer les formulaires mensuels",
+    "statOutstanding": "Non encore envoyés",
+    "noFormBodyMonthly": "Créez un formulaire de type « Formulaire de rencontre mensuel » pour les mentorés, sans quoi personne ne pourra répondre.",
     "title": "Évaluation trimestrielle",
     "subtitle": "Tous les trois mois, vous remplissez une courte évaluation. Elle consigne votre progression et débloque le reste du portail.",
     "submit": "Envoyer l'évaluation",
@@ -2690,5 +2712,26 @@
     "sending": "Envoi…",
     "sendResult": "Envoyée à {sent}. Échecs : {failed}.",
     "backToDraft": "Revenir au projet"
+  },
+  "monthlyForm": {
+    "title": "Formulaire de rencontre mensuel",
+    "subtitle": "Votre propre compte rendu de la séance de mentorat du mois : ce dont vous avez discuté, ce qui en est ressorti et ce que vous avez convenu de faire ensuite.",
+    "navLabel": "Formulaire mensuel",
+    "submit": "Envoyer le formulaire du mois",
+    "saved": "Enregistré",
+    "dueOn": "Pour le mois se terminant le {date}",
+    "completedOn": "Envoyé le {date}",
+    "outstanding": "Non envoyé",
+    "historyTitle": "Vos formulaires mensuels",
+    "colAssessment": "Mois",
+    "colDue": "Fin du mois",
+    "colStatus": "Statut",
+    "notEligibleTitle": "Aucun formulaire mensuel pour vous actuellement",
+    "notEligibleBody": "Le formulaire de rencontre mensuel est rempli par les mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
+    "notPublishedTitle": "Le formulaire mensuel n'est pas encore prêt",
+    "notPublishedBody": "Votre administrateur de programme n'a pas encore publié le formulaire mensuel de cette cohorte. Vous serez averti dès son ouverture.",
+    "noneDueTitle": "Vous êtes à jour",
+    "noneDueBody": "Aucun formulaire mensuel ne vous attend. Nous vous le rappellerons à l'ouverture du prochain.",
+    "lockedExplainer": ""
   }
 }
