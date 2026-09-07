@@ -112,11 +112,12 @@ export async function buildParticipantNavSections(
   unread: number,
   unreadMessages = 0,
 ): Promise<NavSection[]> {
-  const [tNav, tShell, tAssessments, tReports] = await Promise.all([
+  const [tNav, tShell, tAssessments, tReports, tMonthly] = await Promise.all([
     getTranslations('nav'),
     getTranslations('shell'),
     getTranslations('assessments'),
     getTranslations('reports'),
+    getTranslations('monthlyForm'),
   ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
   const isMentee = roles.includes(RoleName.MENTEE);
@@ -161,6 +162,11 @@ export async function buildParticipantNavSections(
               // Mentees only: the mandatory every-3-months assessment.
               ...(isMentee
                 ? [
+                    {
+                      href: '/monthly-form',
+                      label: tMonthly('navLabel'),
+                      icon: 'monthly' as const,
+                    },
                     {
                       href: '/assessment',
                       label: tAssessments('navLabel'),

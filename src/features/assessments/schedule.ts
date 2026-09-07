@@ -78,3 +78,96 @@ export function planAssessmentWindows(input: PlanAssessmentWindowsInput): Assess
 export function defaultWindowLabel(plan: AssessmentWindowPlan): string {
   return `Month ${plan.monthOffset} assessment`;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Monthly meeting form cadence
+//
+// Different anchor from the quarterly assessment on purpose: this one runs on
+// CALENDAR months, so "this month's form" means the same thing to everyone
+// regardless of when their cohort started. Each window opens on the 1st and is
+// due on the last day of that month.
+// ──────────────────────────────────────────────────────────────────────────
+
+export interface MonthlyWindowPlan {
+  sequence: number;
+  /** First day of the month, 00:00 UTC. */
+  opensAt: Date;
+  /** Last day of the month, 23:59:59.999 UTC. */
+  dueAt: Date;
+  /** 0-indexed month, as Date.getUTCMonth(). */
+  month: number;
+  year: number;
+}
+
+export interface PlanMonthlyWindowsInput {
+  /** Cohort start; the first form covers the month this falls in. */
+  startDate: Date;
+  /** Cohort end; the last form covers the month this falls in. */
+  endDate?: Date | null;
+  /** Months to plan when the cohort has no end date. */
+  fallbackMonths?: number;
+}
+
+/** Safety cap for a cohort with no end date. */
+export const MAX_PLANNED_MONTHS = 24;
+
+/**
+ * One window per calendar month the cohort runs in, inclusive of both the
+ * starting and ending month — a cohort running 15 Jan to 30 Sep gets nine
+ * forms, January through September.
+ *
+ * Built from UTC month arithmetic rather than `addMonths` so a month-end start
+ * date cannot skew the sequence (31 Jan + 1 month is not 28 Feb here; the
+ * planner walks months, not days).
+ */
+export function planMonthlyWindows(input: PlanMonthlyWindowsInput): MonthlyWindowPlan[] {
+  const startYear = input.startDate.getUTCFullYear();
+  const startMonth = input.startDate.getUTCMonth();
+
+  const monthCount = input.endDate
+    ? (input.endDate.getUTCFullYear() - startYear) * 12 +
+      (input.endDate.getUTCMonth() - startMonth) +
+      1
+    : (input.fallbackMonths ?? 12);
+
+  const limit = Math.min(Math.max(0, monthCount), MAX_PLANNED_MONTHS);
+  const plans: MonthlyWindowPlan[] = [];
+
+  for (let index = 0; index < limit; index += 1) {
+    // Month overflow is handled by Date.UTC itself: month 12 rolls to January.
+    const opensAt = new Date(Date.UTC(startYear, startMonth + index, 1, 0, 0, 0, 0));
+    // Day 0 of the NEXT month is the last day of this one, so this is correct
+    // for 28/29/30/31-day months without a leap-year special case.
+    const dueAt = new Date(Date.UTC(startYear, startMonth + index + 1, 0, 23, 59, 59, 999));
+
+    plans.push({
+      sequence: index + 1,
+      opensAt,
+      dueAt,
+      month: opensAt.getUTCMonth(),
+      year: opensAt.getUTCFullYear(),
+    });
+  }
+
+  return plans;
+}
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/** Admin-facing label, e.g. "March 2026 meeting form". */
+export function defaultMonthlyWindowLabel(plan: MonthlyWindowPlan): string {
+  return `${MONTH_NAMES[plan.month]} ${plan.year} meeting form`;
+}

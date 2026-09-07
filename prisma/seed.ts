@@ -38,8 +38,10 @@ import {
 import bcrypt from 'bcryptjs';
 import { generateInviteToken, inviteExpiry } from '../src/lib/auth/invite';
 import {
+  defaultMonthlyWindowLabel,
   defaultWindowLabel,
   planAssessmentWindows,
+  planMonthlyWindows,
 } from '../src/features/assessments/schedule';
 
 const prisma = new PrismaClient();
@@ -809,7 +811,7 @@ async function main() {
   // planner is pure and shared with the admin "generate schedule" action, so
   // the demo cohort and a real cohort get an identical cadence.
   const existingWindows = await prisma.assessmentWindow.findMany({
-    where: { cohortId: cohort.id, deletedAt: null },
+    where: { cohortId: cohort.id, formType: ReviewType.QUARTERLY, deletedAt: null },
     select: { sequence: true },
   });
   if (cohort.startDate) {
@@ -824,6 +826,8 @@ async function main() {
       await prisma.assessmentWindow.createMany({
         data: plans.map((plan) => ({
           cohortId: cohort.id,
+          formType: ReviewType.QUARTERLY,
+          gatesAccess: true,
           sequence: plan.sequence,
           label: defaultWindowLabel(plan),
           opensAt: plan.opensAt,
@@ -848,7 +852,13 @@ async function main() {
     select: { id: true },
   });
   const pastWindows = await prisma.assessmentWindow.findMany({
-    where: { cohortId: cohort.id, isActive: true, deletedAt: null, dueAt: { lte: new Date() } },
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.QUARTERLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
     select: { id: true },
   });
   if (quarterlyForm && pastWindows.length > 0) {
@@ -884,6 +894,236 @@ async function main() {
             applied_at_work: 'Led the weekly production review for my unit.',
             blockers: idx % 5 === 0 ? 'Hard to find time with shift work.' : null,
             relationship_working: true,
+          },
+        })),
+      });
+    }
+  }
+
+  // --- The monthly meeting form (mentees only, never gates access) ---------
+  // Transcribed from the programme's "Monthly Meeting Form" document. Name,
+  // email and batch are deliberately NOT asked: the response is already tied to
+  // the signed-in mentee and their cohort, so re-typing them monthly would only
+  // add friction and a chance to mistype.
+  const existingMonthlyForm = await prisma.formDefinition.findFirst({
+    where: { cohortId: cohort.id, type: ReviewType.MONTHLY, deletedAt: null },
+  });
+  if (!existingMonthlyForm) {
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: ReviewType.MONTHLY,
+        roleName: RoleName.MENTEE,
+        title: 'Monthly meeting form',
+        isActive: true,
+        schema: {
+          fields: [
+            {
+              id: 'meeting_number',
+              labelEn: 'Meeting number',
+              labelFr: 'Numéro de la rencontre',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'meeting_duration',
+              labelEn: 'Duration of the meeting',
+              labelFr: 'Durée de la rencontre',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'main_topics',
+              labelEn:
+                'Main topics or themes discussed (e.g. leadership challenges, communication skills)',
+              labelFr:
+                'Principaux sujets ou thèmes abordés (p. ex. enjeux de leadership, communication)',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'issues_raised',
+              labelEn: 'Personal or professional issues raised (if any)',
+              labelFr: 'Questions personnelles ou professionnelles soulevées (le cas échéant)',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'key_insights',
+              labelEn: 'Key insights or takeaways from this session',
+              labelFr: 'Principaux enseignements tirés de cette séance',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'goal_progress',
+              labelEn: 'Progress on previously set goals or actions',
+              labelFr: 'Progrès sur les objectifs ou actions définis précédemment',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'significant', labelEn: 'Significant', labelFr: 'Important' },
+                { value: 'moderate', labelEn: 'Moderate', labelFr: 'Modéré' },
+                { value: 'limited', labelEn: 'Limited', labelFr: 'Limité' },
+                { value: 'none', labelEn: 'No progress', labelFr: 'Aucun progrès' },
+              ],
+            },
+            {
+              id: 'progress_comment',
+              labelEn: 'Comment on that progress',
+              labelFr: 'Commentaire sur ces progrès',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'action_1',
+              labelEn: 'New goal or action agreed — 1',
+              labelFr: 'Nouvel objectif ou action convenu — 1',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'action_2',
+              labelEn: 'New goal or action agreed — 2',
+              labelFr: 'Nouvel objectif ou action convenu — 2',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'action_3',
+              labelEn: 'New goal or action agreed — 3',
+              labelFr: 'Nouvel objectif ou action convenu — 3',
+              type: 'short_text',
+              required: false,
+            },
+            {
+              id: 'resources_required',
+              labelEn: 'Resources or support required (if any)',
+              labelFr: 'Ressources ou soutien nécessaires (le cas échéant)',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'additional_comments',
+              labelEn:
+                'Additional comments — notes, observations, or requests for programme support',
+              labelFr:
+                'Commentaires supplémentaires — notes, observations ou demandes de soutien au programme',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'terms_agreed',
+              labelEn: 'I agree with the Terms of Use and Privacy Policy',
+              labelFr: "J'accepte les conditions d'utilisation et la politique de confidentialité",
+              type: 'boolean',
+              required: true,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // One monthly window per calendar month of the cohort. gatesAccess is false:
+  // a missed monthly form produces reminders, never a lockout.
+  const existingMonthlyWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, formType: ReviewType.MONTHLY, deletedAt: null },
+    select: { sequence: true },
+  });
+  if (cohort.startDate) {
+    const takenMonths = new Set(existingMonthlyWindows.map((w) => w.sequence));
+    const monthlyPlans = planMonthlyWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+    }).filter((plan) => !takenMonths.has(plan.sequence));
+
+    if (monthlyPlans.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: monthlyPlans.map((plan) => ({
+          cohortId: cohort.id,
+          formType: ReviewType.MONTHLY,
+          gatesAccess: false,
+          sequence: plan.sequence,
+          label: defaultMonthlyWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: 0,
+        })),
+      });
+    }
+  }
+
+  // Fill in the months that have already closed for most mentees, and leave the
+  // month in progress largely outstanding — so the admin's completion view and
+  // the reminder/newsletter path are both demoable on realistic data.
+  const monthlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const closedMonths = await prisma.assessmentWindow.findMany({
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
+    orderBy: { sequence: 'asc' },
+    select: { id: true },
+  });
+  if (monthlyForm && closedMonths.length > 0) {
+    const monthlyGrants = await prisma.userRole.findMany({
+      where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+      orderBy: { createdAt: 'asc' },
+      select: { userId: true },
+    });
+    const monthlyMenteeIds = Array.from(new Set(monthlyGrants.map((g) => g.userId)));
+
+    for (const [index, month] of closedMonths.entries()) {
+      const already = await prisma.formResponse.findMany({
+        where: { assessmentWindowId: month.id, deletedAt: null },
+        select: { respondentId: true },
+      });
+      const done = new Set(already.map((r) => r.respondentId));
+      // Compliance tails off over the months, which is what real programmes see
+      // and what makes the reminder feature worth demonstrating.
+      const share = Math.max(0.5, 1 - index * 0.08);
+      const todo = monthlyMenteeIds
+        .slice(0, Math.floor(monthlyMenteeIds.length * share))
+        .filter((id) => !done.has(id));
+      if (todo.length === 0) continue;
+
+      await prisma.formResponse.createMany({
+        data: todo.map((userId, i) => ({
+          formId: monthlyForm.id,
+          respondentId: userId,
+          assessmentWindowId: month.id,
+          status: ReviewStatus.SUBMITTED,
+          submittedAt: new Date(),
+          answers: {
+            meeting_number: String(index + 1),
+            meeting_duration: i % 2 === 0 ? '60 minutes' : '45 minutes',
+            main_topics:
+              i % 3 === 0
+                ? 'Stakeholder management and handling pushback from senior colleagues.'
+                : 'Communication under pressure and delegating to a new team.',
+            issues_raised: i % 4 === 0 ? 'Balancing shift work with study time.' : null,
+            key_insights:
+              'Preparing a one-page brief before a difficult conversation changes how it goes.',
+            goal_progress: ['significant', 'moderate', 'moderate', 'limited'][i % 4],
+            progress_comment: i % 5 === 0 ? 'Slower than planned, but moving.' : null,
+            action_1: 'Lead the next production review meeting.',
+            action_2: i % 2 === 0 ? 'Draft a stakeholder map for my unit.' : null,
+            action_3: null,
+            resources_required: i % 6 === 0 ? 'Access to the leadership reading list.' : null,
+            additional_comments: null,
+            terms_agreed: true,
           },
         })),
       });

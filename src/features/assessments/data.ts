@@ -48,10 +48,16 @@ export const resolveMenteeCohortId = cache(async (userId: string): Promise<strin
   return grant?.cohortId ?? null;
 });
 
-/** Windows a mentee is answerable for, with their own submission state. */
+/**
+ * Windows a mentee is answerable for, with their own submission state.
+ *
+ * `gatesAccess: true` is the load-bearing filter: it is why the monthly meeting
+ * form can never lock anyone out, no matter how many are outstanding. A
+ * non-gating form is chased with reminders (lib/notifications/cron.ts) instead.
+ */
 async function loadGateWindows(cohortId: string, userId: string): Promise<GateWindow[]> {
   const windows = await prisma.assessmentWindow.findMany({
-    where: { cohortId, isActive: true, deletedAt: null },
+    where: { cohortId, isActive: true, gatesAccess: true, deletedAt: null },
     orderBy: { dueAt: 'asc' },
     select: {
       id: true,
@@ -108,16 +114,27 @@ export interface AssessmentHistoryEntry {
 
 export interface AssessmentAssignment {
   cohortId: string;
+  /** Gate state — always CLEAR for a non-gating form like the monthly one. */
   gate: AssessmentGate;
-  /** The active QUARTERLY form for mentees in this cohort, or null if unpublished. */
+  /** The window this mentee should fill now for this form type, if any. */
+  current: GateWindow | null;
+  /** The active form of this type for mentees in this cohort, or null. */
   form: FormDefinitionDetail | null;
   /** Past + current windows with this mentee's submission state, newest first. */
   history: AssessmentHistoryEntry[];
 }
 
-/** Everything the /assessment page needs. Null when the user isn't a mentee in a cohort. */
+/**
+ * Everything a recurring-form page needs, for one form type. Null when the user
+ * isn't a mentee in a cohort.
+ *
+ * For QUARTERLY the outstanding window comes from the gate (which is what locks
+ * the portal). For MONTHLY there is no gate, so the outstanding window is
+ * computed the same way but purely for display.
+ */
 export async function getAssessmentAssignment(
   user: SessionUser,
+  formType: ReviewType = ReviewType.QUARTERLY,
 ): Promise<AssessmentAssignment | null> {
   if (!user.roles.includes(RoleName.MENTEE)) return null;
 
@@ -126,14 +143,22 @@ export async function getAssessmentAssignment(
 
   const [gate, form, windows] = await Promise.all([
     getAssessmentGate(user),
-    getActiveFormDefinition(cohortId, ReviewType.QUARTERLY, RoleName.MENTEE),
+    getActiveFormDefinition(cohortId, formType, RoleName.MENTEE),
     prisma.assessmentWindow.findMany({
-      where: { cohortId, isActive: true, deletedAt: null, opensAt: { lte: new Date() } },
+      where: {
+        cohortId,
+        formType,
+        isActive: true,
+        deletedAt: null,
+        opensAt: { lte: new Date() },
+      },
       orderBy: { dueAt: 'desc' },
       select: {
         id: true,
         label: true,
+        opensAt: true,
         dueAt: true,
+        graceDays: true,
         responses: {
           where: { respondentId: user.id, status: ReviewStatus.SUBMITTED, deletedAt: null },
           orderBy: { submittedAt: 'desc' },
@@ -144,9 +169,25 @@ export async function getAssessmentAssignment(
     }),
   ]);
 
+  // For a gating form the gate has already picked the outstanding window (and
+  // it is the same computation); for a non-gating form nothing else does, so
+  // derive it here with the shared pure function.
+  const outstanding = evaluateAssessmentGate(
+    windows.map((w) => ({
+      id: w.id,
+      label: w.label,
+      opensAt: w.opensAt,
+      dueAt: w.dueAt,
+      graceDays: w.graceDays,
+      submitted: w.responses.length > 0,
+    })),
+    new Date(),
+  ).window;
+
   return {
     cohortId,
     gate,
+    current: outstanding,
     form,
     history: windows.map((w) => ({
       windowId: w.id,
@@ -199,6 +240,9 @@ export interface AssessmentWindowSummary {
 export interface AssessmentOverview {
   cohortId: string;
   cohortName: string;
+  formType: ReviewType;
+  /** False for the monthly meeting form — nobody is locked out by it. */
+  gatesAccess: boolean;
   intervalMonths: number;
   graceDays: number;
   startDate: Date | null;
@@ -223,7 +267,10 @@ export async function listCohortMenteeIds(cohortId: string): Promise<string[]> {
   return Array.from(new Set(grants.map((g) => g.userId)));
 }
 
-export async function getAssessmentOverview(cohortId: string): Promise<AssessmentOverview | null> {
+export async function getAssessmentOverview(
+  cohortId: string,
+  formType: ReviewType = ReviewType.QUARTERLY,
+): Promise<AssessmentOverview | null> {
   const cohort = await prisma.cohort.findFirst({
     where: { id: cohortId, deletedAt: null },
     select: {
@@ -239,7 +286,7 @@ export async function getAssessmentOverview(cohortId: string): Promise<Assessmen
 
   const [windows, menteeIds, form] = await Promise.all([
     prisma.assessmentWindow.findMany({
-      where: { cohortId, deletedAt: null },
+      where: { cohortId, formType, deletedAt: null },
       orderBy: { sequence: 'asc' },
       select: {
         id: true,
@@ -252,7 +299,7 @@ export async function getAssessmentOverview(cohortId: string): Promise<Assessmen
       },
     }),
     listCohortMenteeIds(cohortId),
-    getActiveFormDefinition(cohortId, ReviewType.QUARTERLY, RoleName.MENTEE),
+    getActiveFormDefinition(cohortId, formType, RoleName.MENTEE),
   ]);
 
   // Submitted counts per window in one grouped query (rather than a filtered
@@ -273,6 +320,8 @@ export async function getAssessmentOverview(cohortId: string): Promise<Assessmen
   return {
     cohortId: cohort.id,
     cohortName: cohort.name,
+    formType,
+    gatesAccess: formType !== ReviewType.MONTHLY,
     intervalMonths: cohort.assessmentIntervalMonths,
     graceDays: cohort.assessmentGraceDays,
     startDate: cohort.startDate,

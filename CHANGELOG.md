@@ -411,3 +411,38 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **The migration is written but not applied.** `20260907120000_quarterly_assessments_reports_newsletters` is hand-written and validated against the schema; applying it to the live Supabase instance is an owner decision (`npx prisma migrate deploy`).
 - **The newsletter cron runs daily, not hourly.** An hourly `0 * * * *` entry was rejected by Vercel at deploy time before any build ran — the Hobby plan refuses any cron more frequent than once a day. `vercel.json` now uses `0 9 * * *` (10:00 Lagos), and `isDraftDue()` gained a catch-up rule so a scheduled day whose send hour falls after the daily run is picked up on the next run rather than being lost forever, which is what the naive daily fix would have done silently. 4 new tests cover it, and the admin UI now states when the draft will actually appear.
 - **The assessment questions themselves are placeholders.** The seeded quarterly form is a reasonable six-question set; the real question set is still to be supplied and can be entered in the Forms Builder without a code change.
+
+## Monthly meeting form — recurring, mentee-owned, reminder-driven
+
+The programme's "Monthly Meeting Form" is now in the portal: the mentee's own record of each month's session, alongside the mentor's existing session log. Transcribed from the supplied document.
+
+### It never locks anyone out — and that is enforced structurally
+
+- Recurring windows now carry `formType` (`QUARTERLY` | `MONTHLY`) and **`gatesAccess`**. The monthly form's windows are created with `gatesAccess: false`, and the gate's query filters `gatesAccess: true`, so a missed monthly form cannot reach the lockout logic at all.
+- That property is asserted where it actually lives — the database query, not the pure function. `tests/assessments/gate-scope.test.ts` pins the `where` clause and, to prove the test is not vacuous, feeds the *same* long-overdue window back as a gating one and confirms it does then lock.
+- One table serves both cadences because the completion tracking, admin screens and reminder machinery are identical; only `gatesAccess` differs. The alternative — a parallel model — would have meant a second copy of all of it.
+
+### Reminders are the enforcement, so they are the feature
+
+- New `monthly_form_due` / `monthly_form_overdue` notifications, emitted by the existing daily cron, deduped per window and per stage. The copy asks rather than warns, because nothing is being withheld.
+- Unlike the assessment reminders, these **stop after 14 days past due** rather than escalating — nagging about a month that closed a fortnight ago is noise.
+- The newsletter digest now carries the open month's compliance as a first-class field, and the assistant prompt is instructed to put the deadline in the dates section and the ask in the call to action. The newsletter was the requested reminder channel, so it states real numbers ("12 of 30 mentees have submitted") rather than a generic nudge.
+
+### Calendar months, not cohort months
+
+- The quarterly assessment is anchored to the cohort start; the monthly form runs on **calendar** months, so "this month's form" means the same thing to everyone. Each window opens on the 1st and is due at the end of the last day.
+- `planMonthlyWindows` is pure and built from UTC month arithmetic rather than day addition, so a month-end start date cannot skew the sequence. 16 tests cover leap years, 30- and 31-day months, year-boundary rollover, mid-month cohort starts, and that consecutive windows leave no gap and no overlap (each opens exactly 1ms after the previous is due).
+
+### Decisions worth recording
+
+- **Mentees only.** The source document's own header says "helps mentors and mentees", but the requirement was mentees alone. Flagged rather than silently reinterpreted.
+- **Name, email and batch are not asked.** The portal already knows all three, and the response is tied to the signed-in mentee, so re-typing them monthly would add friction and a chance to mistype. Every other field from the document is present, including the progress rating (Significant / Moderate / Limited / No progress) and the terms/privacy affirmation.
+- **Grace days are hidden for the monthly form** rather than shown as a no-op field — grace only means something when access is being withheld.
+
+### Also
+
+- Submitting now requires the form's type to match its window's type, so a monthly window cannot be satisfied by submitting the quarterly form (which would have quietly cleared the wrong obligation).
+- The quarterly seed and generator are scoped to `formType: QUARTERLY`. Sequence numbers restart per type, so without that scoping the presence of monthly windows would have made the quarterly generator think its work was already done.
+- Admin screen gains a Quarterly / Monthly switch; "locked out" is replaced by "not yet submitted" on the monthly tab, since nobody can be locked out by it.
+- Typecheck, lint, **500/500 unit tests** (48 new) and the production build are green.
+- **The migration is written but not applied.** `20260907153000_monthly_meeting_form` adds two columns and re-keys one unique index; applying it to the live database is an owner decision.

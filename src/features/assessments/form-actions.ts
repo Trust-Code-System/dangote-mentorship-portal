@@ -3,6 +3,7 @@
 import type { ActionResult } from '@/lib/actions/result';
 import {
   generateAssessmentWindows,
+  generateMonthlyWindows,
   setAssessmentWindowActive,
   updateAssessmentWindow,
 } from './actions';
@@ -33,4 +34,12 @@ export async function setAssessmentWindowActiveForm(
   formData: FormData,
 ): Promise<WindowFormState> {
   return setAssessmentWindowActive(formData);
+}
+
+/** Generate the monthly meeting-form schedule (one window per calendar month). */
+export async function generateMonthlyWindowsForm(
+  _prev: GenerateWindowsFormState,
+  formData: FormData,
+): Promise<GenerateWindowsFormState> {
+  return generateMonthlyWindows(formData);
 }
