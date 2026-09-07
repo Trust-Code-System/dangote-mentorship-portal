@@ -4,7 +4,14 @@ import { ReviewStatus, ReviewType, RoleName } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { hasAnyRole, type SessionUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
-import { getMenteePairing } from '@/lib/pairings';
+import { getMenteePairing, getMentorPairings } from '@/lib/pairings';
+import {
+  formTypesFor,
+  isRecurringFormType,
+  respondentRoleFor,
+  rolesRequiredFor,
+  type RecurringFormType,
+} from './participants';
 import { getActiveFormDefinition, type FormDefinitionDetail } from '@/features/forms/data';
 import {
   evaluateAssessmentGate,
@@ -18,19 +25,49 @@ import {
 // narrow, indexed query and the whole evaluation is request-cached.
 
 /**
- * Only mentees are gated. Admins are never gated — locking the people who
- * administer the programme out of it would be self-defeating — and a mentor is
- * assessed through the mid-term/final reviews instead.
+ * Whether this user can be gated at all.
+ *
+ * Mentors AND mentees are both held to the quarterly assessment, so both are
+ * gateable. Admins never are — locking the people who administer the programme
+ * out of it would be self-defeating, and an admin holds no participant
+ * obligation (see participants.ts).
  */
 export function isGatedRole(user: SessionUser): boolean {
   if (hasAnyRole(user, ADMIN_ROLES)) return false;
-  return user.roles.includes(RoleName.MENTEE);
+  return formTypesFor(user.roles).length > 0;
 }
 
 /**
- * The cohort a mentee is assessed in: their accepted pairing's cohort, falling
- * back to their MENTEE role grant so a not-yet-matched mentee is still tracked.
+ * The cohort a participant is assessed in: their accepted pairing's cohort,
+ * falling back to a mentor/mentee role grant so someone not yet matched is
+ * still tracked.
+ *
+ * Kept under the old name as well (below) because it is the mentee-specific
+ * case several call sites still want.
  */
+export const resolveParticipantCohortId = cache(
+  async (userId: string): Promise<string | null> => {
+    const menteePairing = await getMenteePairing(userId);
+    if (menteePairing) return menteePairing.cohortId;
+
+    const mentorPairings = await getMentorPairings(userId);
+    if (mentorPairings[0]) return mentorPairings[0].cohortId;
+
+    const grant = await prisma.userRole.findFirst({
+      where: {
+        userId,
+        deletedAt: null,
+        cohortId: { not: null },
+        role: { name: { in: [RoleName.MENTEE, RoleName.MENTOR] } },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { cohortId: true },
+    });
+    return grant?.cohortId ?? null;
+  },
+);
+
+/** The cohort a mentee is assessed in. Mentee-specific by design. */
 export const resolveMenteeCohortId = cache(async (userId: string): Promise<string | null> => {
   const pairing = await getMenteePairing(userId);
   if (pairing) return pairing.cohortId;
@@ -55,9 +92,19 @@ export const resolveMenteeCohortId = cache(async (userId: string): Promise<strin
  * form can never lock anyone out, no matter how many are outstanding. A
  * non-gating form is chased with reminders (lib/notifications/cron.ts) instead.
  */
-async function loadGateWindows(cohortId: string, userId: string): Promise<GateWindow[]> {
+async function loadGateWindows(
+  cohortId: string,
+  userId: string,
+  formTypes: RecurringFormType[],
+): Promise<GateWindow[]> {
   const windows = await prisma.assessmentWindow.findMany({
-    where: { cohortId, isActive: true, gatesAccess: true, deletedAt: null },
+    where: {
+      cohortId,
+      formType: { in: formTypes },
+      isActive: true,
+      gatesAccess: true,
+      deletedAt: null,
+    },
     orderBy: { dueAt: 'asc' },
     select: {
       id: true,
@@ -98,10 +145,15 @@ const CLEAR: AssessmentGate = {
 export const getAssessmentGate = cache(async (user: SessionUser): Promise<AssessmentGate> => {
   if (!isGatedRole(user)) return CLEAR;
 
-  const cohortId = await resolveMenteeCohortId(user.id);
+  // Only the forms this user actually owes can gate them — a mentor is never
+  // held to the mentee-only monthly form.
+  const formTypes = formTypesFor(user.roles);
+  if (formTypes.length === 0) return CLEAR;
+
+  const cohortId = await resolveParticipantCohortId(user.id);
   if (!cohortId) return CLEAR;
 
-  const windows = await loadGateWindows(cohortId, user.id);
+  const windows = await loadGateWindows(cohortId, user.id, formTypes);
   return evaluateAssessmentGate(windows, new Date());
 });
 
@@ -114,6 +166,8 @@ export interface AssessmentHistoryEntry {
 
 export interface AssessmentAssignment {
   cohortId: string;
+  /** Which question set this user gets: MENTOR or MENTEE. */
+  respondentRole: RoleName;
   /** Gate state — always CLEAR for a non-gating form like the monthly one. */
   gate: AssessmentGate;
   /** The window this mentee should fill now for this form type, if any. */
@@ -134,16 +188,19 @@ export interface AssessmentAssignment {
  */
 export async function getAssessmentAssignment(
   user: SessionUser,
-  formType: ReviewType = ReviewType.QUARTERLY,
+  formType: RecurringFormType = ReviewType.QUARTERLY,
 ): Promise<AssessmentAssignment | null> {
-  if (!user.roles.includes(RoleName.MENTEE)) return null;
+  // The role they answer as also selects the question set: the quarterly
+  // assessment has a distinct mentor and mentee form.
+  const respondentRole = respondentRoleFor(user.roles, formType);
+  if (!respondentRole) return null;
 
-  const cohortId = await resolveMenteeCohortId(user.id);
+  const cohortId = await resolveParticipantCohortId(user.id);
   if (!cohortId) return null;
 
   const [gate, form, windows] = await Promise.all([
     getAssessmentGate(user),
-    getActiveFormDefinition(cohortId, formType, RoleName.MENTEE),
+    getActiveFormDefinition(cohortId, formType, respondentRole),
     prisma.assessmentWindow.findMany({
       where: {
         cohortId,
@@ -186,6 +243,7 @@ export async function getAssessmentAssignment(
 
   return {
     cohortId,
+    respondentRole,
     gate,
     current: outstanding,
     form,
@@ -240,7 +298,7 @@ export interface AssessmentWindowSummary {
 export interface AssessmentOverview {
   cohortId: string;
   cohortName: string;
-  formType: ReviewType;
+  formType: RecurringFormType;
   /** False for the monthly meeting form — nobody is locked out by it. */
   gatesAccess: boolean;
   intervalMonths: number;
@@ -253,13 +311,22 @@ export interface AssessmentOverview {
   windows: AssessmentWindowSummary[];
 }
 
-/** Mentee user ids in a cohort (accepted pairings plus cohort role grants). */
-export async function listCohortMenteeIds(cohortId: string): Promise<string[]> {
+/**
+ * User ids in a cohort who owe `formType` — the denominator for completion.
+ *
+ * Derived from participants.ts rather than hardcoded, so the admin's numbers
+ * and the gate can never disagree about who was supposed to submit: the
+ * quarterly assessment counts mentors and mentees, the monthly form mentees.
+ */
+export async function listCohortRespondentIds(
+  cohortId: string,
+  formType: RecurringFormType,
+): Promise<string[]> {
   const grants = await prisma.userRole.findMany({
     where: {
       cohortId,
       deletedAt: null,
-      role: { name: RoleName.MENTEE },
+      role: { name: { in: rolesRequiredFor(formType) } },
       user: { isActive: true, deletedAt: null },
     },
     select: { userId: true },
@@ -267,9 +334,14 @@ export async function listCohortMenteeIds(cohortId: string): Promise<string[]> {
   return Array.from(new Set(grants.map((g) => g.userId)));
 }
 
+/** Mentee user ids in a cohort. Kept for the mentee-specific call sites. */
+export async function listCohortMenteeIds(cohortId: string): Promise<string[]> {
+  return listCohortRespondentIds(cohortId, ReviewType.MONTHLY);
+}
+
 export async function getAssessmentOverview(
   cohortId: string,
-  formType: ReviewType = ReviewType.QUARTERLY,
+  formType: RecurringFormType = ReviewType.QUARTERLY,
 ): Promise<AssessmentOverview | null> {
   const cohort = await prisma.cohort.findFirst({
     where: { id: cohortId, deletedAt: null },
@@ -284,7 +356,7 @@ export async function getAssessmentOverview(
   });
   if (!cohort) return null;
 
-  const [windows, menteeIds, form] = await Promise.all([
+  const [windows, respondentIds, forms] = await Promise.all([
     prisma.assessmentWindow.findMany({
       where: { cohortId, formType, deletedAt: null },
       orderBy: { sequence: 'asc' },
@@ -298,8 +370,13 @@ export async function getAssessmentOverview(
         isActive: true,
       },
     }),
-    listCohortMenteeIds(cohortId),
-    getActiveFormDefinition(cohortId, formType, RoleName.MENTEE),
+    listCohortRespondentIds(cohortId, formType),
+    // "Is a form published?" means: is there one for every role that owes it.
+    Promise.all(
+      rolesRequiredFor(formType).map((role) =>
+        getActiveFormDefinition(cohortId, formType, role),
+      ),
+    ),
   ]);
 
   // Submitted counts per window in one grouped query (rather than a filtered
@@ -308,7 +385,7 @@ export async function getAssessmentOverview(
     by: ['assessmentWindowId'],
     where: {
       assessmentWindowId: { in: windows.map((w) => w.id) },
-      respondentId: { in: menteeIds },
+      respondentId: { in: respondentIds },
       status: ReviewStatus.SUBMITTED,
       deletedAt: null,
     },
@@ -326,8 +403,9 @@ export async function getAssessmentOverview(
     graceDays: cohort.assessmentGraceDays,
     startDate: cohort.startDate,
     endDate: cohort.endDate,
-    menteeCount: menteeIds.length,
-    formPublished: form !== null,
+    menteeCount: respondentIds.length,
+    // Every required role must have a live form, or somebody cannot submit.
+    formPublished: forms.length > 0 && forms.every((f) => f !== null),
     windows: windows.map((w) => ({
       id: w.id,
       sequence: w.sequence,
@@ -361,11 +439,19 @@ export async function listWindowCompletion(
 ): Promise<MenteeAssessmentRow[]> {
   const window = await prisma.assessmentWindow.findFirst({
     where: { id: windowId, cohortId, deletedAt: null },
-    select: { id: true, label: true, opensAt: true, dueAt: true, graceDays: true },
+    select: {
+      id: true,
+      label: true,
+      opensAt: true,
+      dueAt: true,
+      graceDays: true,
+      formType: true,
+    },
   });
   if (!window) return [];
+  if (!isRecurringFormType(window.formType)) return [];
 
-  const menteeIds = await listCohortMenteeIds(cohortId);
+  const menteeIds = await listCohortRespondentIds(cohortId, window.formType);
   if (menteeIds.length === 0) return [];
 
   const [users, responses] = await Promise.all([

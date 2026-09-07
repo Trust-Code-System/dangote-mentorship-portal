@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RoleName } from '@prisma/client';
+import { ReviewType, RoleName } from '@prisma/client';
 
 // The guarantee under test: **a non-gating form can never lock anyone out.**
 //
@@ -14,6 +14,7 @@ vi.mock('server-only', () => ({}));
 const findMany = vi.fn();
 const userRoleFindFirst = vi.fn();
 const getMenteePairing = vi.fn();
+const getMentorPairings = vi.fn();
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -24,7 +25,7 @@ vi.mock('@/lib/db/prisma', () => ({
 
 vi.mock('@/lib/pairings', () => ({
   getMenteePairing: (...args: unknown[]) => getMenteePairing(...args),
-  getMentorPairings: vi.fn(),
+  getMentorPairings: (...args: unknown[]) => getMentorPairings(...args),
 }));
 
 // rbac pulls in next-auth (and therefore next/server), which will not load under
@@ -71,6 +72,7 @@ const overdueWindow = {
 beforeEach(() => {
   vi.clearAllMocks();
   getMenteePairing.mockResolvedValue({ cohortId: 'cohort-1', mentorId: 'm1', mentorName: 'M' });
+  getMentorPairings.mockResolvedValue([]);
   findMany.mockResolvedValue([]);
 });
 
@@ -111,11 +113,34 @@ describe('getAssessmentGate window scope', () => {
     expect(gate.state).toBe('CLEAR');
   });
 
-  it('never queries at all for a user who is not a gated role', async () => {
-    const mentor = { ...mentee, id: 'user-mentor', roles: [RoleName.MENTOR] };
-    const gate = await getAssessmentGate(mentor);
+  it('never queries at all for an admin, who owes no participant form', async () => {
+    const admin = { ...mentee, id: 'user-admin', roles: [RoleName.SUPER_ADMIN] };
+    const gate = await getAssessmentGate(admin);
     expect(gate.state).toBe('CLEAR');
     expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it('scopes a mentee to both recurring forms', async () => {
+    await getAssessmentGate({ ...mentee, id: 'user-mentee-scope' });
+
+    const where = findMany.mock.calls[0]?.[0]?.where;
+    expect(where?.formType?.in).toEqual(
+      expect.arrayContaining([ReviewType.MONTHLY, ReviewType.QUARTERLY]),
+    );
+  });
+
+  it('scopes a mentor to the quarterly assessment only, never the monthly form', async () => {
+    getMenteePairing.mockResolvedValue(null);
+    getMentorPairings.mockResolvedValue([
+      { cohortId: 'cohort-1', menteeId: 'mentee-1', menteeName: 'A' },
+    ]);
+
+    await getAssessmentGate({ ...mentee, id: 'user-mentor', roles: [RoleName.MENTOR] });
+
+    const where = findMany.mock.calls[0]?.[0]?.where;
+    // The monthly meeting form is a mentee obligation; a mentor must never be
+    // gated on one.
+    expect(where?.formType?.in).toEqual([ReviewType.QUARTERLY]);
   });
 });
 
@@ -124,8 +149,12 @@ describe('isGatedRole', () => {
     expect(isGatedRole(mentee)).toBe(true);
   });
 
-  it('does not gate mentors', () => {
-    expect(isGatedRole({ ...mentee, roles: [RoleName.MENTOR] })).toBe(false);
+  it('gates mentors too — they owe the quarterly assessment', () => {
+    expect(isGatedRole({ ...mentee, roles: [RoleName.MENTOR] })).toBe(true);
+  });
+
+  it('does not gate someone with no participant role', () => {
+    expect(isGatedRole({ ...mentee, roles: [] })).toBe(false);
   });
 
   it('does not gate admins, even when they also hold a mentee role', () => {

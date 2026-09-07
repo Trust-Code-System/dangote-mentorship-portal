@@ -1614,6 +1614,7 @@
     "typeLongText": "Texte long",
     "typeRating": "Note",
     "typeSelect": "Choix multiple",
+    "typeMultiSelect": "Choix multiples (plusieurs réponses)",
     "typeBoolean": "Oui / Non",
     "questionCount": "{count} questions",
     "responseCount": "{count} réponses"

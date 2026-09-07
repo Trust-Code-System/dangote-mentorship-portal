@@ -160,6 +160,7 @@ export async function buildParticipantNavSections(
             label: tShell('navReviews'),
             items: [
               // Mentees only: the mandatory every-3-months assessment.
+              // Mentees owe the monthly meeting form; mentors do not.
               ...(isMentee
                 ? [
                     {
@@ -167,13 +168,14 @@ export async function buildParticipantNavSections(
                       label: tMonthly('navLabel'),
                       icon: 'monthly' as const,
                     },
-                    {
-                      href: '/assessment',
-                      label: tAssessments('navLabel'),
-                      icon: 'assessment' as const,
-                    },
                   ]
                 : []),
+              // The quarterly assessment is owed by both sides of the pair.
+              {
+                href: '/assessment',
+                label: tAssessments('navLabel'),
+                icon: 'assessment' as const,
+              },
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
               { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },

@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { Prisma, ReviewStatus, ReviewType, RoleName } from '@prisma/client';
+import { Prisma, ReviewStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { assertCohortAccess, requireRole, requireUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
@@ -9,7 +9,8 @@ import { writeAuditLog } from '@/lib/audit/audit';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
 import { getFormDefinition } from '@/features/forms/data';
 import { validateAnswers } from '@/features/reviews/schema';
-import { resolveMenteeCohortId } from './data';
+import { resolveParticipantCohortId } from './data';
+import { isRecurringFormType, respondentRoleFor } from './participants';
 import {
   defaultMonthlyWindowLabel,
   defaultWindowLabel,
@@ -41,14 +42,10 @@ export async function submitAssessment(
       answers: formData.get('answers'),
     });
 
-    // Authorize: only a mentee submits an assessment, and only in their own cohort.
-    if (!user.roles.includes(RoleName.MENTEE)) {
-      return fail({
-        code: 'FORBIDDEN',
-        message: 'Only mentees complete the quarterly assessment.',
-      });
-    }
-    const cohortId = await resolveMenteeCohortId(user.id);
+    // Authorize: a participant may only submit a form their own role owes, and
+    // only in their own cohort. Which role they answer as also determines which
+    // question set is legitimate for them (see participants.ts).
+    const cohortId = await resolveParticipantCohortId(user.id);
     if (!cohortId) {
       return fail({ code: 'FORBIDDEN', message: 'You are not enrolled in a cohort.' });
     }
@@ -70,16 +67,31 @@ export async function submitAssessment(
     // type — otherwise a monthly window could be satisfied by submitting the
     // quarterly form, which would quietly clear the wrong obligation.
     const form = await getFormDefinition(input.formId);
-    const isRecurring =
-      form?.type === ReviewType.QUARTERLY || form?.type === ReviewType.MONTHLY;
     if (
       !form ||
       form.cohortId !== cohortId ||
-      !isRecurring ||
+      !isRecurringFormType(form.type) ||
       form.type !== window.formType ||
       !form.isActive
     ) {
       return fail({ code: 'NOT_FOUND', message: 'This form is not available.' });
+    }
+
+    // The form's own audience must include this user's role — otherwise a
+    // mentor could submit the mentee question set (or vice versa) and clear an
+    // obligation with the wrong answers.
+    const respondentRole = respondentRoleFor(user.roles, form.type);
+    if (!respondentRole) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'This form is not one your role completes.',
+      });
+    }
+    if (form.roleName !== null && form.roleName !== respondentRole) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'This form is intended for a different role.',
+      });
     }
 
     const validated = validateAnswers(form.schema, input.answers);
@@ -134,6 +146,7 @@ export async function submitAssessment(
         windowId: window.id,
         formId: form.id,
         formType: window.formType,
+        respondentRole,
         fieldCount: form.schema.fields.length,
       },
     });

@@ -446,3 +446,33 @@ The programme's "Monthly Meeting Form" is now in the portal: the mentee's own re
 - Admin screen gains a Quarterly / Monthly switch; "locked out" is replaced by "not yet submitted" on the monthly tab, since nobody can be locked out by it.
 - Typecheck, lint, **500/500 unit tests** (48 new) and the production build are green.
 - **The migration is written but not applied.** `20260907153000_monthly_meeting_form` adds two columns and re-keys one unique index; applying it to the live database is an owner decision.
+
+## Quarterly assessment: real question sets, mentors included, and multi-select
+
+The quarterly assessment now carries the programme's actual questions, transcribed from the two supplied mid-point assessment documents — one question set for mentees, a different one for mentors.
+
+### Mentors are now held to it too
+
+- Reverses the earlier "mentees only" scope. Both sides of the pair complete the quarterly assessment, and **both are gated**: missing it past the grace window blocks the portal for a mentor exactly as it does for a mentee.
+- Who owes which form is no longer an `includes(MENTEE)` scattered through the queries. `features/assessments/participants.ts` states it once — quarterly is mentors + mentees, monthly is mentees only — and the gate, the reminders, the admin denominators and the submit authorization all derive from it. They cannot drift into chasing a different set of people than the gate holds responsible.
+- Consequently the monthly form still cannot gate a mentor: the gate's query is scoped to the form types the user's own role owes, which for a mentor is the quarterly alone. Asserted directly in `tests/assessments/gate-scope.test.ts`.
+- Submitting now checks the form's declared audience against the submitter's role, so a mentor cannot clear their obligation by submitting the mentee question set (or vice versa).
+
+### Multi-select fields
+
+- Several questions on both documents are checkbox lists — "what support do you need?" offers five options and plainly invites more than one. Forcing a single answer would have lost information, so the form builder gained a proper `multi_select` field type with an optional selection cap.
+- Answers are stored as a list, **de-duplicated and re-ordered into the form's own option order**, so two submissions are comparable regardless of the order someone clicked.
+- The validator accepts a JSON-encoded list or a bare string as well as a real list, so a draft autosaved before a field became multi-select is recovered rather than discarded. 19 tests cover the field, including that a `single_select` still refuses a list.
+- Options beyond the cap are disabled in the UI rather than silently dropped on submit.
+
+### Notes on the source documents
+
+- **Both are titled "Mid-point"**, and a mid-point assessment is normally a one-off. They are wired up as the recurring quarterly assessment as instructed; nothing inside the questions says "mid-point", so they read correctly at months 3, 6 and 9. Worth knowing that the portal also has a separate, currently unpopulated mid-term review feature these would fit.
+- **The mentee form's goal-clarity options read "Very Clear / Somewhat / Clear / Not Clear"** — "Somewhat" looks like a truncated "Somewhat Clear". Entered as Very clear / Clear / Somewhat clear / Not clear, in a sensible order.
+- **The mentor form asks for Batch, Meeting Number and Duration of Meeting**, which look carried over from the monthly form. Batch is dropped (the portal knows it); meeting number and duration are kept but optional.
+- Full name and date are not asked on either form: the response is already tied to the signed-in participant and stamped with a submission time.
+
+### Verification
+
+- Typecheck, lint, **540/540 unit tests** (40 new) and the production build are green.
+- **The migration from the monthly-form change is still unapplied**; this branch adds no new migration of its own.

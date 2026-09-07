@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { getAssessmentAssignment, getWindowSubmission } from './data';
+import type { RecurringFormType } from './participants';
 import { assessmentDraftKey } from './schema';
 
 /**
@@ -22,7 +23,7 @@ import { assessmentDraftKey } from './schema';
 export async function AssessmentScreen({
   formType = ReviewType.QUARTERLY,
 }: {
-  formType?: ReviewType;
+  formType?: RecurringFormType;
 } = {}) {
   const user = await requireUser();
   const isMonthly = formType === ReviewType.MONTHLY;
@@ -174,8 +175,8 @@ async function initialAnswersFor(
   userId: string,
   windowId: string,
   formId: string,
-): Promise<Record<string, string> | undefined> {
-  const draft = await getDraft<Record<string, string>>(
+): Promise<Record<string, string | string[]> | undefined> {
+  const draft = await getDraft<Record<string, string | string[]>>(
     userId,
     assessmentDraftKey(windowId, formId),
   );
@@ -184,9 +185,12 @@ async function initialAnswersFor(
   const submitted = await getWindowSubmission(userId, windowId);
   if (!submitted) return undefined;
 
-  const out: Record<string, string> = {};
+  const out: Record<string, string | string[]> = {};
   for (const [key, value] of Object.entries(submitted.answers)) {
-    out[key] = value == null ? '' : String(value);
+    // Multi-select answers must stay lists — stringifying them would lose the
+    // ticks when someone re-opens a submitted form to update it.
+    if (Array.isArray(value)) out[key] = value.filter((v): v is string => typeof v === 'string');
+    else out[key] = value == null ? '' : String(value);
   }
   return out;
 }
