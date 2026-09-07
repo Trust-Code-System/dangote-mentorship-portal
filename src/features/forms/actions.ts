@@ -1,14 +1,17 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { assertCohortAccess, requireRole, type SessionUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { writeAuditLog } from '@/lib/audit/audit';
+import { STANDARD_FORMS, validateStandardForm } from './catalogue';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
 import {
   createFormDefinitionSchema,
   formDefinitionIdSchema,
+  installStandardFormsSchema,
   updateFormDefinitionSchema,
 } from './schema';
 
@@ -188,3 +191,82 @@ export async function archiveFormDefinition(
     return mapActionError(error);
   }
 }
+
+/**
+ * Publish the programme's standard question sets into a cohort.
+ *
+ * Idempotent and non-destructive: it creates only the sets that are missing for
+ * this cohort (matched on type + role) and never touches one that already
+ * exists, so an admin's edits are safe and a second click does nothing. That
+ * matters because forms are per-cohort by design, so every new cohort needs its
+ * own copies — and hand-typing 37 bilingual questions is not a real option.
+ */
+export async function installStandardForms(
+  formData: FormData,
+): Promise<ActionResult<{ created: number; skipped: number }>> {
+  try {
+    const user = await requireRole(ADMIN_ROLES);
+    const { cohortId } = installStandardFormsSchema.parse({
+      cohortId: formData.get('cohortId'),
+    });
+    assertCohortAccess(user, cohortId);
+
+    const cohort = await prisma.cohort.findFirst({
+      where: { id: cohortId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!cohort) return fail({ code: 'NOT_FOUND', message: 'Cohort not found.' });
+
+    const existing = await prisma.formDefinition.findMany({
+      where: { cohortId, deletedAt: null },
+      select: { type: true, roleName: true },
+    });
+    const taken = new Set(existing.map((f) => `${f.type}:${f.roleName ?? 'ANY'}`));
+
+    let created = 0;
+    let skipped = 0;
+
+    for (const form of STANDARD_FORMS) {
+      if (taken.has(`${form.type}:${form.roleName}`)) {
+        skipped += 1;
+        continue;
+      }
+
+      // Validate before writing: a malformed catalogue entry should fail loudly
+      // here rather than produce a form nobody can fill in.
+      const valid = validateStandardForm(form);
+      if (!valid.ok) {
+        return fail({
+          code: 'CONFLICT',
+          message: `The standard "${form.title}" question set is invalid and was not installed.`,
+        });
+      }
+
+      await prisma.formDefinition.create({
+        data: {
+          cohortId,
+          type: form.type,
+          roleName: form.roleName,
+          title: form.title,
+          isActive: true,
+          schema: { fields: form.fields } as unknown as Prisma.InputJsonValue,
+        },
+      });
+      created += 1;
+    }
+
+    await writeAuditLog({
+      actorId: user.id,
+      cohortId,
+      action: 'form_definition.standard_installed',
+      entityType: 'FormDefinition',
+      metadata: { created, skipped, available: STANDARD_FORMS.length },
+    });
+
+    revalidatePath('/admin/forms');
+    return ok({ created, skipped });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+

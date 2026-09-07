@@ -1571,6 +1571,11 @@
     "emptyHint": "Aucun élément en attente pour le moment."
   },
   "forms": {
+    "standardTitle": "Jeux de questions standard",
+    "standardHelp": "Les jeux de questions trimestriel et mensuel du programme, en anglais et en français. N'ajoute que ce qui manque à cette cohorte et ne modifie jamais un jeu que vous avez édité.",
+    "standardInstall": "Publier {count} jeu(x) standard",
+    "standardAllPresent": "Les {count} jeux standard sont déjà publiés pour cette cohorte.",
+    "standardInstalled": "{created} publié(s). {skipped} déjà en place, laissé(s) tel quel.",
     "monthly": "Formulaire de rencontre mensuel",
     "quarterly": "Évaluation trimestrielle",
     "title": "Générateur de formulaires",
