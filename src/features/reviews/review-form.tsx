@@ -26,8 +26,10 @@ type Values = Record<string, string>;
 // Review fill form (CLAUDE.md §5, M3). Renders whatever question set the admin
 // published (Forms Builder), autosaves a draft so work is never lost
 // (experience-layer.md §1.11), and submits answers as a single validated blob.
-// Used by both the mid-term and final review screens. AI is not involved here —
-// this is human-authored data.
+// Used by the mid-term and final review screens and — via `submitAction` /
+// `extraFields` — by the recurring quarterly assessment, which posts the same
+// answer blob to its own action. AI is not involved here: this is
+// human-authored data.
 export function ReviewForm({
   formId,
   type,
@@ -35,6 +37,10 @@ export function ReviewForm({
   lang,
   cohortId,
   initial,
+  submitAction = submitReviewResponseForm,
+  draftKey,
+  extraFields,
+  submitLabel,
 }: {
   formId: string;
   type: ReviewType;
@@ -42,6 +48,13 @@ export function ReviewForm({
   lang: Lang;
   cohortId: string;
   initial?: Values;
+  /** Server action to post to. Defaults to the review submit action. */
+  submitAction?: (state: ReviewFormState, formData: FormData) => Promise<ReviewFormState>;
+  /** Autosave key. Defaults to the review draft key for this type + form. */
+  draftKey?: string;
+  /** Extra hidden inputs (e.g. the assessment window id). */
+  extraFields?: Record<string, string>;
+  submitLabel?: string;
 }) {
   const t = useTranslations('reviews');
   const tc = useTranslations('common');
@@ -49,12 +62,9 @@ export function ReviewForm({
   const router = useRouter();
 
   const [values, setValues] = useState<Values>(() => seed(fields, initial));
-  const [state, action, pending] = useActionState<ReviewFormState, FormData>(
-    submitReviewResponseForm,
-    null,
-  );
+  const [state, action, pending] = useActionState<ReviewFormState, FormData>(submitAction, null);
 
-  const formKey = reviewDraftKey(type, formId);
+  const formKey = draftKey ?? reviewDraftKey(type, formId);
   const { status: draftStatus, clear } = useFormDraft({ formKey, values, cohortId });
 
   useEffect(() => {
@@ -77,6 +87,9 @@ export function ReviewForm({
       <input type="hidden" name="formId" value={formId} />
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="answers" value={serialized} />
+      {Object.entries(extraFields ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
 
       {draftStatus === 'saved' ? (
         <p className="text-small text-ink-3" role="status">
@@ -109,7 +122,7 @@ export function ReviewForm({
       ) : null}
 
       <Button type="submit" disabled={pending}>
-        {pending ? tc('loading') : t('submit')}
+        {pending ? tc('loading') : (submitLabel ?? t('submit'))}
       </Button>
     </form>
   );

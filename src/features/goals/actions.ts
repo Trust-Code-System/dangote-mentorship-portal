@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { GoalStage, GoalStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
 import { getStorageProvider } from '@/lib/storage';
@@ -54,6 +55,9 @@ export async function requestGoalCoach(
 ): Promise<ActionResult<CoachResult>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const fields = coachSchema.parse(input);
     // Throttle the AI endpoint per user (production-readiness-report.md M1).
     if (!(await checkRateLimit(`ai:goal-coach:${user.id}`, 10, 60_000)).ok) {
@@ -108,6 +112,9 @@ function saveDataFrom(form: FormData) {
 export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = saveSchema.parse(saveDataFrom(formData));
 
     const fields = {
@@ -179,6 +186,9 @@ const idSchema = z.object({ goalId: z.string().cuid() });
 export async function submitGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId } = idSchema.parse({ goalId: formData.get('goalId') });
 
     const goal = await prisma.goal.findUnique({ where: { id: goalId } });
@@ -240,6 +250,9 @@ const reviewSchema = z.object({
 export async function reviewGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = reviewSchema.parse({
       goalId: formData.get('goalId'),
       decision: formData.get('decision'),
@@ -323,6 +336,9 @@ export async function advanceGoalStage(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId, stage } = advanceSchema.parse({
       goalId: formData.get('goalId'),
       stage: formData.get('stage'),
@@ -439,6 +455,9 @@ export async function prepareGoalEvidenceUpload(input: {
 }): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const file = evidenceUploadInput.parse({ ...input, note: input.note ?? '' });
     const goal = await prisma.goal.findUnique({ where: { id: file.goalId } });
     if (!goal || goal.deletedAt || goal.menteeId !== user.id) {
@@ -467,6 +486,9 @@ export async function confirmGoalEvidenceUpload(input: {
 }): Promise<GoalActionState> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const file = evidenceUploadInput.parse({ ...input, note: input.note ?? '' });
     const goal = await prisma.goal.findUnique({ where: { id: file.goalId } });
     if (!goal || goal.deletedAt || goal.menteeId !== user.id) {
@@ -504,6 +526,9 @@ export async function uploadGoalEvidence(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId } = idSchema.parse({ goalId: formData.get('goalId') });
     const note = optionalText(500).parse(formData.get('note') ?? '');
 

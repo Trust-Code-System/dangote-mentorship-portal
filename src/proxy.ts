@@ -69,6 +69,10 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
   // x-nonce is not read by Next; it is here so a server component can reach the
   // nonce via headers() if one ever needs to render a script tag itself.
   requestHeaders.set('x-nonce', nonce);
+  // A server layout cannot see the requested path. The assessment gate needs it
+  // to know whether a locked mentee is already on an allowed route (otherwise
+  // redirecting to /assessment would loop). Set here, read via headers().
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
   requestHeaders.set('Content-Security-Policy', csp);
 
   const passThrough = NextResponse.next({ request: { headers: requestHeaders } });

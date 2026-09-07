@@ -27,6 +27,9 @@ export async function buildAdminNavSections(
     tCertificates,
     tNav,
     tShell,
+    tAssessments,
+    tReports,
+    tNewsletters,
   ] = await Promise.all([
     getTranslations('admin'),
     getTranslations('imports'),
@@ -41,6 +44,9 @@ export async function buildAdminNavSections(
     getTranslations('adminCertificates'),
     getTranslations('nav'),
     getTranslations('shell'),
+    getTranslations('assessments'),
+    getTranslations('reports'),
+    getTranslations('newsletters'),
   ]);
 
   // Platform settings are Super-Admin only (CLAUDE.md §4); hide the link from
@@ -58,6 +64,9 @@ export async function buildAdminNavSections(
         { href: '/admin/cohorts', label: t('cohorts'), icon: 'cohorts' },
         { href: '/admin/imports', label: tImports('title'), icon: 'imports' },
         { href: '/admin/forms', label: tForms('title'), icon: 'forms' },
+        { href: '/admin/assessments', label: tAssessments('adminTitle'), icon: 'assessment' },
+        { href: '/admin/reports', label: tReports('title'), icon: 'reports' },
+        { href: '/admin/newsletters', label: tNewsletters('title'), icon: 'newsletters' },
         { href: '/admin/goals', label: tLists('navGoals'), icon: 'goals' },
         { href: '/admin/sessions', label: tLists('navSessions'), icon: 'sessions' },
         { href: '/admin/meetings', label: tLists('navMeetings'), icon: 'meetings' },
@@ -103,8 +112,14 @@ export async function buildParticipantNavSections(
   unread: number,
   unreadMessages = 0,
 ): Promise<NavSection[]> {
-  const [tNav, tShell] = await Promise.all([getTranslations('nav'), getTranslations('shell')]);
+  const [tNav, tShell, tAssessments, tReports] = await Promise.all([
+    getTranslations('nav'),
+    getTranslations('shell'),
+    getTranslations('assessments'),
+    getTranslations('reports'),
+  ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
+  const isMentee = roles.includes(RoleName.MENTEE);
 
   const pairItems: NavItem[] = isPair
     ? [
@@ -143,8 +158,19 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
+              // Mentees only: the mandatory every-3-months assessment.
+              ...(isMentee
+                ? [
+                    {
+                      href: '/assessment',
+                      label: tAssessments('navLabel'),
+                      icon: 'assessment' as const,
+                    },
+                  ]
+                : []),
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
+              { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },
               { href: '/certificate', label: tNav('certificate'), icon: 'certificate' as const },
             ],
           },

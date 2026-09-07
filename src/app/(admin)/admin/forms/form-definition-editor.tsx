@@ -189,6 +189,7 @@ export function FormDefinitionEditor({
             <SelectContent>
               <SelectItem value={ReviewType.MIDTERM}>{t('midterm')}</SelectItem>
               <SelectItem value={ReviewType.FINAL}>{t('final')}</SelectItem>
+              <SelectItem value={ReviewType.QUARTERLY}>{t('quarterly')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -25,8 +25,10 @@ import {
   MatchingStatus,
   MatchStatus,
   MeetingStatus,
+  NewsletterStatus,
   PrismaClient,
   ProgrammeStatus,
+  ReviewStatus,
   ReviewType,
   RoleName,
   SupportRequestReason,
@@ -35,6 +37,10 @@ import {
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { generateInviteToken, inviteExpiry } from '../src/lib/auth/invite';
+import {
+  defaultWindowLabel,
+  planAssessmentWindows,
+} from '../src/features/assessments/schedule';
 
 const prisma = new PrismaClient();
 
@@ -721,6 +727,265 @@ async function main() {
               labelFr: 'Qu’amélioreriez-vous pour la prochaine cohorte ?',
               type: 'long_text',
               required: false,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // --- The mandatory quarterly assessment: form + schedule ----------------
+  // Mentees must submit one of these every 3 months or the portal locks for
+  // them (features/assessments). Mentee-specific question set, bilingual.
+  const existingQuarterlyForm = await prisma.formDefinition.findFirst({
+    where: { cohortId: cohort.id, type: ReviewType.QUARTERLY, deletedAt: null },
+  });
+  if (!existingQuarterlyForm) {
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: ReviewType.QUARTERLY,
+        roleName: RoleName.MENTEE,
+        title: 'Quarterly mentee assessment',
+        isActive: true,
+        schema: {
+          fields: [
+            {
+              id: 'sessions_held',
+              labelEn: 'How many mentoring sessions did you hold this quarter?',
+              labelFr: 'Combien de séances de mentorat avez-vous tenues ce trimestre ?',
+              type: 'single_select',
+              required: true,
+              options: [
+                { value: 'none', labelEn: 'None', labelFr: 'Aucune' },
+                { value: 'one', labelEn: 'One', labelFr: 'Une' },
+                { value: 'two_three', labelEn: 'Two or three', labelFr: 'Deux ou trois' },
+                { value: 'four_plus', labelEn: 'Four or more', labelFr: 'Quatre ou plus' },
+              ],
+            },
+            {
+              id: 'goal_progress',
+              labelEn: 'How far have you progressed against your current goals?',
+              labelFr: 'Où en êtes-vous par rapport à vos objectifs actuels ?',
+              type: 'rating',
+              required: true,
+              max: 5,
+            },
+            {
+              id: 'competency_gained',
+              labelEn: 'Which competency did you strengthen most this quarter?',
+              labelFr: 'Quelle compétence avez-vous le plus renforcée ce trimestre ?',
+              type: 'short_text',
+              required: true,
+            },
+            {
+              id: 'applied_at_work',
+              labelEn: 'Give one example of applying what you learned at work.',
+              labelFr: 'Donnez un exemple concret d’application de vos acquis au travail.',
+              type: 'long_text',
+              required: true,
+            },
+            {
+              id: 'blockers',
+              labelEn: 'What is getting in the way of your development?',
+              labelFr: 'Qu’est-ce qui freine votre développement ?',
+              type: 'long_text',
+              required: false,
+            },
+            {
+              id: 'relationship_working',
+              labelEn: 'Is the mentoring relationship working for you?',
+              labelFr: 'La relation de mentorat vous convient-elle ?',
+              type: 'boolean',
+              required: true,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  // Schedule: one assessment every 3 months from the cohort start date. The
+  // planner is pure and shared with the admin "generate schedule" action, so
+  // the demo cohort and a real cohort get an identical cadence.
+  const existingWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, deletedAt: null },
+    select: { sequence: true },
+  });
+  if (cohort.startDate) {
+    const taken = new Set(existingWindows.map((w) => w.sequence));
+    const plans = planAssessmentWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+      intervalMonths: cohort.assessmentIntervalMonths,
+    }).filter((plan) => !taken.has(plan.sequence));
+
+    if (plans.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: plans.map((plan) => ({
+          cohortId: cohort.id,
+          sequence: plan.sequence,
+          label: defaultWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: cohort.assessmentGraceDays,
+        })),
+      });
+    }
+  }
+
+  // Past-due windows are pre-submitted for almost every mentee, so seeding the
+  // schedule doesn't lock the whole demo cohort out of the portal. Two mentees
+  // are deliberately left outstanding so the admin completion table (and the
+  // lockout itself) is demoable on real data.
+  const quarterlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const pastWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, isActive: true, deletedAt: null, dueAt: { lte: new Date() } },
+    select: { id: true },
+  });
+  if (quarterlyForm && pastWindows.length > 0) {
+    const menteeGrants = await prisma.userRole.findMany({
+      where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+      orderBy: { createdAt: 'asc' },
+      select: { userId: true },
+    });
+    const menteeIds = Array.from(new Set(menteeGrants.map((g) => g.userId)));
+    // Leave the last two outstanding: one in grace / one locked out.
+    const compliant = menteeIds.slice(0, Math.max(0, menteeIds.length - 2));
+
+    for (const window of pastWindows) {
+      const already = await prisma.formResponse.findMany({
+        where: { assessmentWindowId: window.id, deletedAt: null },
+        select: { respondentId: true },
+      });
+      const done = new Set(already.map((r) => r.respondentId));
+      const todo = compliant.filter((id) => !done.has(id));
+      if (todo.length === 0) continue;
+
+      await prisma.formResponse.createMany({
+        data: todo.map((userId, idx) => ({
+          formId: quarterlyForm.id,
+          respondentId: userId,
+          assessmentWindowId: window.id,
+          status: ReviewStatus.SUBMITTED,
+          submittedAt: new Date(),
+          answers: {
+            sessions_held: idx % 3 === 0 ? 'four_plus' : 'two_three',
+            goal_progress: 3 + (idx % 3),
+            competency_gained: 'Stakeholder management',
+            applied_at_work: 'Led the weekly production review for my unit.',
+            blockers: idx % 5 === 0 ? 'Hard to find time with shift work.' : null,
+            relationship_working: true,
+          },
+        })),
+      });
+    }
+  }
+
+  // --- Newsletter cadence + a draft waiting for review --------------------
+  // Twice a week (Monday + Thursday, 09:00 Lagos) is how the programme runs it.
+  // The schedule prepares drafts; sending stays a human action.
+  await prisma.newsletterSchedule.upsert({
+    where: { cohortId: cohort.id },
+    update: {},
+    create: {
+      cohortId: cohort.id,
+      enabled: true,
+      sendDays: [1, 4],
+      sendHour: 9,
+      timezone: 'Africa/Lagos',
+      autoDraft: true,
+    },
+  });
+
+  const existingNewsletter = await prisma.newsletter.findFirst({
+    where: { cohortId: cohort.id, deletedAt: null },
+    select: { id: true },
+  });
+  if (!existingNewsletter) {
+    await prisma.newsletter.create({
+      data: {
+        cohortId: cohort.id,
+        createdById: superAdmin.id,
+        title: 'Newsletter — sample issue',
+        subjectEn: 'Four goals approved and a clinic on Thursday',
+        subjectFr: 'Quatre objectifs approuvés et une clinique jeudi',
+        status: NewsletterStatus.DRAFT,
+        bodyJson: {
+          sections: [
+            {
+              kind: 'intro',
+              headingEn: 'This week in the programme',
+              headingFr: 'Cette semaine dans le programme',
+              bodyEn:
+                'A steady week: more pairs are meeting on schedule and the first goals of the quarter are through approval.',
+              bodyFr:
+                'Une semaine régulière : davantage de binômes se rencontrent comme prévu et les premiers objectifs du trimestre sont approuvés.',
+              enabled: true,
+            },
+            {
+              kind: 'highlights',
+              headingEn: 'Highlights',
+              headingFr: 'Points forts',
+              bodyEn: [
+                'Four goals were approved by mentors.',
+                'Twelve sessions were logged across the cohort.',
+                'The French-speaking pairs held their first joint session.',
+              ].join('\n'),
+              bodyFr: [
+                'Quatre objectifs ont été approuvés par les mentors.',
+                'Douze séances ont été consignées dans la cohorte.',
+                'Les binômes francophones ont tenu leur première séance commune.',
+              ].join('\n'),
+              enabled: true,
+            },
+            {
+              kind: 'numbers',
+              headingEn: 'By the numbers',
+              headingFr: 'En chiffres',
+              bodyEn: ['Goals approved: 4', 'Sessions logged: 12', 'Pairs that met: 11 of 20'].join(
+                '\n',
+              ),
+              bodyFr: [
+                'Objectifs approuvés : 4',
+                'Séances consignées : 12',
+                'Binômes qui se sont rencontrés : 11 sur 20',
+              ].join('\n'),
+              enabled: true,
+            },
+            {
+              kind: 'dates',
+              headingEn: 'Dates to remember',
+              headingFr: 'Dates à retenir',
+              bodyEn: 'Quarterly assessment — due at the end of the month',
+              bodyFr: 'Évaluation trimestrielle — à rendre à la fin du mois',
+              enabled: true,
+            },
+            {
+              kind: 'spotlight',
+              headingEn: 'Spotlight',
+              headingFr: 'Coup de projecteur',
+              bodyEn: '',
+              bodyFr: '',
+              enabled: false,
+            },
+            {
+              kind: 'callToAction',
+              headingEn: 'What to do next',
+              headingFr: 'Prochaine étape',
+              bodyEn:
+                'If you have not logged your last session, add it this week so your mentor can comment on it.',
+              bodyFr:
+                'Si vous n’avez pas consigné votre dernière séance, ajoutez-la cette semaine pour que votre mentor puisse la commenter.',
+              enabled: true,
             },
           ],
         },
