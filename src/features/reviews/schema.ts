@@ -18,8 +18,9 @@ import type { FormField, FormSchemaShape } from '@/features/forms/schema';
 // ──────────────────────────────────────────────────────────────────────────
 
 // The canonical, validated answer for one field. `null` means "left blank"
-// (only legal for optional fields).
-export type AnswerValue = string | number | boolean | null;
+// (only legal for optional fields). `string[]` is a multi_select's ticked
+// option values, in the order the form declares them.
+export type AnswerValue = string | number | boolean | string[] | null;
 export type ReviewAnswers = Record<string, AnswerValue>;
 
 const DEFAULT_RATING_MAX = 5;
@@ -28,7 +29,37 @@ const LONG_TEXT_MAX = 5000;
 
 /** True when a raw answer counts as "left blank" before type coercion. */
 function isBlank(raw: unknown): boolean {
-  return raw === undefined || raw === null || (typeof raw === 'string' && raw.trim() === '');
+  if (raw === undefined || raw === null) return true;
+  if (typeof raw === 'string') return raw.trim() === '';
+  // Nothing ticked is blank, not an empty-but-present answer.
+  if (Array.isArray(raw)) return raw.length === 0;
+  return false;
+}
+
+/**
+ * Coerce a multi_select's raw value into a list of option strings.
+ *
+ * Accepts the array the client posts, and also a JSON-encoded array or a
+ * single string — a stale autosaved draft written before this field became
+ * multi-select would otherwise be unrecoverable for the person filling it in.
+ */
+function toStringList(raw: unknown): string[] | null {
+  if (Array.isArray(raw)) {
+    return raw.every((v) => typeof v === 'string') ? raw : null;
+  }
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed) as unknown;
+      return Array.isArray(parsed) && parsed.every((v) => typeof v === 'string')
+        ? (parsed as string[])
+        : null;
+    } catch {
+      return null;
+    }
+  }
+  return [trimmed];
 }
 
 /**
@@ -71,6 +102,29 @@ function validateField(
         return { ok: false, message: 'Choose one of the available options.' };
       }
       return { ok: true, value };
+    }
+
+    case 'multi_select': {
+      const selected = toStringList(raw);
+      if (!selected) return { ok: false, message: 'Choose from the available options.' };
+
+      const allowed = (field.options ?? []).map((o) => o.value);
+      const unknown = selected.filter((value) => !allowed.includes(value));
+      if (unknown.length > 0) {
+        return { ok: false, message: 'Choose from the available options.' };
+      }
+
+      // De-duplicate, then order by the form's own option order so stored
+      // answers are comparable across submissions regardless of click order.
+      const unique = allowed.filter((value) => selected.includes(value));
+
+      if (field.maxSelections !== undefined && unique.length > field.maxSelections) {
+        return {
+          ok: false,
+          message: `Choose at most ${field.maxSelections} option(s).`,
+        };
+      }
+      return { ok: true, value: unique };
     }
 
     case 'boolean': {

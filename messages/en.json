@@ -1614,6 +1614,7 @@
     "typeLongText": "Long text",
     "typeRating": "Rating",
     "typeSelect": "Multiple choice",
+    "typeMultiSelect": "Multiple choice (tick several)",
     "typeBoolean": "Yes / No",
     "questionCount": "{count} questions",
     "responseCount": "{count} responses"
