@@ -43,6 +43,10 @@ import {
   planAssessmentWindows,
   planMonthlyWindows,
 } from '../src/features/assessments/schedule';
+import {
+  SEED_REMOTE_OVERRIDE,
+  evaluateSeedTarget,
+} from '../src/lib/db/seed-target';
 
 const prisma = new PrismaClient();
 
@@ -1650,6 +1654,31 @@ async function main() {
   console.log('  Reviewer:        reviewer@dangote.com');
   console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT} (all password: ${DEFAULT_PASSWORD})`);
 }
+
+/**
+ * Refuse to seed anything but a local database unless explicitly overridden.
+ *
+ * The seed creates a demo cohort whose accounts all share one password, and
+ * generates assessment schedules that can lock people out of the portal — so
+ * reaching a shared or live database with it is a real incident, not an
+ * inconvenience. It has happened once already.
+ */
+function assertSeedTargetAllowed(): void {
+  const decision = evaluateSeedTarget(
+    process.env.DATABASE_URL,
+    process.env[SEED_REMOTE_OVERRIDE] === 'true',
+  );
+
+  // Always say which database is about to be written, so a mistake is visible
+  // in the log even on the allowed path.
+  console.log(`Seeding database: ${decision.target}`);
+
+  if (!decision.allowed) {
+    throw new Error(decision.reason);
+  }
+}
+
+assertSeedTargetAllowed();
 
 main()
   .catch((e) => {
