@@ -9,7 +9,13 @@ export interface IntegrationHealthItem {
 type Environment = Readonly<Record<string, string | undefined>>;
 
 function microsoftIntegrationsEnabled(env: Environment): boolean {
-  return env.MICROSOFT_INTEGRATIONS_ENABLED === 'true';
+  // Trimmed on purpose. A dashboard or CLI paste can leave a trailing newline
+  // inside the stored value, and a strict equality check would then read the
+  // flag as OFF -- silently leaving mail on the log transport, with nothing
+  // anywhere to explain why no message is ever delivered. Production currently
+  // holds exactly that shape. The per-variable checks below already trim; this
+  // was the one inconsistent comparison.
+  return env.MICROSOFT_INTEGRATIONS_ENABLED?.trim() === 'true';
 }
 
 function groupHealth(env: Environment, names: string[]): IntegrationHealthItem {
