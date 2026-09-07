@@ -515,3 +515,16 @@ Admins asked to see people who have not been active, and to have that arrive as 
 - **Two dead buttons on the admin dashboard now work.** "Export report" links to the reports area (which now exists) and the decorative "Last 90 days" control is replaced by a link to the new engagement view. The orphaned `last90` string is removed from both catalogs.
 - Typecheck, lint, **581/581 unit tests** (41 new) and the production build are green.
 - The migration adds one enum value. Not applied.
+
+## Standard question sets an admin can publish in one click
+
+Setting up a cohort needed the programme's real question sets, and they only existed in the seed — which now (correctly) refuses to run against a shared database. That left an admin retyping **37 bilingual questions** per cohort, which nobody would do accurately.
+
+- **New `src/features/forms/catalogue.ts` is the single source of truth** for the three transcribed sets (quarterly mentee, quarterly mentor, monthly meeting form). The seed and the new admin installer both read from it, so a seeded cohort and an admin-installed one get byte-identical questions and neither can drift from the source documents.
+- **"Publish standard sets" on `/admin/forms`.** Idempotent and non-destructive: it adds only the sets this cohort is missing (matched on type + role) and never touches one an admin has edited, so a second click does nothing. The button shows how many are missing and goes quiet when they are all present.
+- The catalogue is **validated against the live form contract in the tests**, so a typo in a question set fails the build rather than being discovered by an admin when the installer errors. 20 tests, including fidelity spot-checks against the documents — the four progress options, the multi-select difficulties, the mentor engagement scale, the three action slots with only the first required, the required terms tick, and that no set asks anyone to retype their name, email or batch.
+- Removing the duplication took **~270 lines out of `prisma/seed.ts`** (1,600 → 1,327) and deleted two option lists that existed in both places.
+
+Forms are per-cohort by design — admins may edit them without a code change — so every new cohort will always need its own copies. This makes that a click instead of a transcription exercise.
+
+- Typecheck, lint, **617/617 unit tests** (20 new) and the production build are green. No migration.

@@ -146,3 +146,6 @@ export const formDefinitionIdSchema = z.object({ id: z.string().cuid() });
 
 export type CreateFormDefinitionInput = z.infer<typeof createFormDefinitionSchema>;
 export type UpdateFormDefinitionInput = z.infer<typeof updateFormDefinitionSchema>;
+
+/** Install the standard question sets into one cohort. */
+export const installStandardFormsSchema = z.object({ cohortId: z.string().cuid() });

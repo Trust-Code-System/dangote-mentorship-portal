@@ -4,6 +4,7 @@ import type { ActionResult } from '@/lib/actions/result';
 import {
   archiveFormDefinition,
   createFormDefinition,
+  installStandardForms,
   toggleFormDefinitionActive,
   updateFormDefinition,
 } from './actions';
@@ -38,4 +39,17 @@ export async function archiveFormDefinitionForm(
   formData: FormData,
 ): Promise<FormDefinitionFormState> {
   return archiveFormDefinition(formData);
+}
+
+/** Install the programme's standard question sets into a cohort. */
+export type InstallStandardFormsState = ActionResult<{
+  created: number;
+  skipped: number;
+}> | null;
+
+export async function installStandardFormsForm(
+  _prev: InstallStandardFormsState,
+  formData: FormData,
+): Promise<InstallStandardFormsState> {
+  return installStandardForms(formData);
 }

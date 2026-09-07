@@ -1571,6 +1571,11 @@
     "emptyHint": "No pending items right now."
   },
   "forms": {
+    "standardTitle": "Standard question sets",
+    "standardHelp": "The programme's own quarterly and monthly question sets, in English and French. Adds only what this cohort is missing and never changes a set you have edited.",
+    "standardInstall": "Publish {count} standard set(s)",
+    "standardAllPresent": "All {count} standard sets are already published for this cohort.",
+    "standardInstalled": "Published {created}. Left {skipped} already in place.",
     "monthly": "Monthly meeting form",
     "quarterly": "Quarterly assessment",
     "title": "Forms builder",
