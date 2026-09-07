@@ -41,7 +41,10 @@ export function creatableKinds(user: SessionUser): ReportKind[] {
   const kinds: ReportKind[] = [];
   if (user.roles.includes(RoleName.MENTEE)) kinds.push(ReportKind.MENTEE_PROGRESS);
   if (user.roles.includes(RoleName.MENTOR)) kinds.push(ReportKind.MENTOR_PAIR);
-  if (hasAnyRole(user, ADMIN_ROLES)) kinds.push(ReportKind.PROGRAMME);
+  if (hasAnyRole(user, ADMIN_ROLES)) {
+    kinds.push(ReportKind.PROGRAMME);
+    kinds.push(ReportKind.ENGAGEMENT);
+  }
   return kinds;
 }
 
@@ -207,7 +210,7 @@ export async function resolveReportTarget(
     return { cohortId: pairing.cohortId, subjectUserId };
   }
 
-  // PROGRAMME (admin): the active cohort, inside the admin's scope.
+  // PROGRAMME / ENGAGEMENT (admin): the active cohort, inside the admin's scope.
   if (!activeCohortId) return { error: 'No active cohort to report on.' };
   if (
     user.adminCohortScope !== 'ALL' &&

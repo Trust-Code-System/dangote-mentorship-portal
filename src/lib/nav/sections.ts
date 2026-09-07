@@ -30,6 +30,7 @@ export async function buildAdminNavSections(
     tAssessments,
     tReports,
     tNewsletters,
+    tEngagement,
   ] = await Promise.all([
     getTranslations('admin'),
     getTranslations('imports'),
@@ -47,6 +48,7 @@ export async function buildAdminNavSections(
     getTranslations('assessments'),
     getTranslations('reports'),
     getTranslations('newsletters'),
+    getTranslations('engagement'),
   ]);
 
   // Platform settings are Super-Admin only (CLAUDE.md §4); hide the link from
@@ -60,6 +62,7 @@ export async function buildAdminNavSections(
         { href: '/admin', label: tNav('dashboard'), icon: 'dashboard', primary: true, exact: true },
         { href: '/admin/matching', label: tMatching('title'), icon: 'matching', primary: true },
         { href: '/admin/insights', label: tInsights('navLabel'), icon: 'insights' },
+        { href: '/admin/engagement', label: tEngagement('navLabel'), icon: 'engagement' },
         { href: '/admin/programmes', label: t('programmes'), icon: 'programmes' },
         { href: '/admin/cohorts', label: t('cohorts'), icon: 'cohorts' },
         { href: '/admin/imports', label: tImports('title'), icon: 'imports' },
@@ -159,7 +162,6 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
-              // Mentees only: the mandatory every-3-months assessment.
               // Mentees owe the monthly meeting form; mentors do not.
               ...(isMentee
                 ? [

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Download } from 'lucide-react';
 import { getAdminDashboard } from '@/features/dashboard/data';
@@ -30,8 +31,14 @@ export default async function AdminHomePage() {
           <p className="text-small text-ink-2">{t('dashboardSubtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">{t('last90')}</Button>
-          <Button size="sm"><Download className="mr-2 size-4" /> {t('exportReport')}</Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/admin/engagement">{t('viewEngagement')}</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/admin/reports">
+              <Download className="mr-2 size-4" /> {t('exportReport')}
+            </Link>
+          </Button>
         </div>
       </header>
 
