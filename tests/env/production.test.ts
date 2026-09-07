@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertProductionEnvironment } from '@/lib/env/production';
+import { assertProductionEnvironment, assertSeedAllowed } from '@/lib/env/production';
 
 const validProductionEnv: NodeJS.ProcessEnv = {
   NODE_ENV: 'production',
@@ -47,5 +47,89 @@ describe('production environment validation', () => {
         AUTH_URL: 'http://localhost:3000',
       }),
     ).toThrow(/AUTH_SECRET|AUTH_URL/);
+  });
+});
+
+describe('seed guard', () => {
+  const validSeedEnv: NodeJS.ProcessEnv = {
+    NODE_ENV: 'development',
+    SEED_SUPER_ADMIN_EMAIL: 'Admin@Company.test',
+    SEED_DEFAULT_PASSWORD: 'a-deliberate-seed-password',
+    DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/app',
+  };
+
+  const remoteUrl = 'postgresql://postgres.projectref:pw@aws-1-eu-central-1.pooler.supabase.com:6543/postgres';
+  const otherProjectUrl = 'postgresql://postgres.otherref:pw@aws-1-eu-central-1.pooler.supabase.com:6543/postgres';
+
+  it('allows a development seed and normalises the admin email', () => {
+    expect(assertSeedAllowed(validSeedEnv)).toEqual({
+      superAdminEmail: 'admin@company.test',
+      defaultPassword: 'a-deliberate-seed-password',
+    });
+  });
+
+  it('refuses to seed a production runtime', () => {
+    expect(() => assertSeedAllowed({ ...validSeedEnv, NODE_ENV: 'production' })).toThrow(
+      /production environment/,
+    );
+    expect(() => assertSeedAllowed({ ...validSeedEnv, VERCEL_ENV: 'production' })).toThrow(
+      /production environment/,
+    );
+  });
+
+  it('allows a deliberate production seed via the documented escape hatch', () => {
+    expect(() =>
+      assertSeedAllowed({
+        ...validSeedEnv,
+        VERCEL_ENV: 'production',
+        ALLOW_PRODUCTION_SEED: 'true',
+      }),
+    ).not.toThrow();
+  });
+
+  // The likeliest accident: a laptop with NODE_ENV unset pointed at a real
+  // database. Only the absence of a fallback credential stops it.
+  it('refuses to seed when either credential is unset, even outside production', () => {
+    const { SEED_DEFAULT_PASSWORD: _pw, ...noPassword } = validSeedEnv;
+    expect(() => assertSeedAllowed(noPassword)).toThrow(/SEED_DEFAULT_PASSWORD/);
+
+    const { SEED_SUPER_ADMIN_EMAIL: _em, ...noEmail } = validSeedEnv;
+    expect(() => assertSeedAllowed(noEmail)).toThrow(/SEED_SUPER_ADMIN_EMAIL/);
+
+    expect(() => assertSeedAllowed({ NODE_ENV: 'development' })).toThrow(
+      /SEED_SUPER_ADMIN_EMAIL and SEED_DEFAULT_PASSWORD/,
+    );
+  });
+
+  it('seeds a local database without an explicit database pin', () => {
+    expect(() => assertSeedAllowed(validSeedEnv)).not.toThrow();
+  });
+
+  it('refuses a remote database that is not explicitly named', () => {
+    expect(() => assertSeedAllowed({ ...validSeedEnv, DATABASE_URL: remoteUrl })).toThrow(
+      /SEED_ALLOW_DATABASE/,
+    );
+  });
+
+  it('seeds a remote database once it is named', () => {
+    expect(() =>
+      assertSeedAllowed({
+        ...validSeedEnv,
+        DATABASE_URL: remoteUrl,
+        SEED_ALLOW_DATABASE: 'postgres.projectref@aws-1-eu-central-1.pooler.supabase.com',
+      }),
+    ).not.toThrow();
+  });
+
+  // Two Supabase projects share a regional pooler hostname, so a host-only
+  // comparison would wave this through. The project ref lives in the username.
+  it('re-locks when DATABASE_URL is repointed at a different project on the same host', () => {
+    expect(() =>
+      assertSeedAllowed({
+        ...validSeedEnv,
+        DATABASE_URL: otherProjectUrl,
+        SEED_ALLOW_DATABASE: 'postgres.projectref@aws-1-eu-central-1.pooler.supabase.com',
+      }),
+    ).toThrow(/postgres\.otherref@/);
   });
 });

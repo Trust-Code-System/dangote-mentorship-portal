@@ -41,11 +41,10 @@ import {
   defaultWindowLabel,
   planAssessmentWindows,
 } from '../src/features/assessments/schedule';
+import { assertSeedAllowed } from '../src/lib/env/production';
 
 const prisma = new PrismaClient();
 
-const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD ?? 'ChangeMe!2026';
-const SUPER_ADMIN_EMAIL = (process.env.SEED_SUPER_ADMIN_EMAIL ?? 'admin@dangote.com').toLowerCase();
 
 const GENERAL_COMPETENCIES = [
   'Leadership',
@@ -139,13 +138,17 @@ async function grantRole(userId: string, roleId: string, cohortId: string | null
 }
 
 async function main() {
+  // Refuses to run against production, and requires both seed credentials to be
+  // set explicitly (no fallbacks). Throws before any database work happens.
+  const { superAdminEmail, defaultPassword } = assertSeedAllowed();
+
   console.log('Seeding demo cohort…');
-  const passwordHash = await hash(DEFAULT_PASSWORD);
+  const passwordHash = await hash(defaultPassword);
   const roles = await ensureRoles();
 
   // --- Super Admin (global role grant) ------------------------------------
   const superAdmin = await ensureUser({
-    email: SUPER_ADMIN_EMAIL,
+    email: superAdminEmail,
     name: 'Super Admin',
     locale: Language.EN,
     passwordHash,
@@ -1082,12 +1085,12 @@ async function main() {
     });
   }
 
+  // Deliberately no credentials in the output: seed logs reach CI transcripts and
+  // scrollback. The password is the operator's own SEED_DEFAULT_PASSWORD.
   console.log('Seed complete.');
-  console.log(`  Super Admin:    ${SUPER_ADMIN_EMAIL} / ${DEFAULT_PASSWORD}`);
-  console.log('  Programme Admin: prog.admin@dangote.com');
-  console.log('  Trainer:         trainer@dangote.com');
-  console.log('  Reviewer:        reviewer@dangote.com');
-  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT} (all password: ${DEFAULT_PASSWORD})`);
+  console.log(`  Super Admin: ${superAdminEmail}`);
+  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT}`);
+  console.log('  All seeded accounts use the password in SEED_DEFAULT_PASSWORD.');
 }
 
 main()
