@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { ActionItemStatus, MeetingType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
@@ -51,6 +52,9 @@ export async function requestSessionAssistant(
 ): Promise<ActionResult<SessionSummaryOutcome>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { menteeId, notes } = assistantSchema.parse(input);
 
     const cohortId = await mentorPairCohort(user.id, menteeId);
@@ -125,6 +129,9 @@ function parseSuggestedItems(raw: string | undefined) {
 export async function saveSessionLog(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = saveSchema.parse({
       logId: (formData.get('logId') as string) || undefined,
       menteeId: (formData.get('menteeId') as string) || undefined,
@@ -247,6 +254,9 @@ const reflectionSchema = z.object({
 export async function saveReflection(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { logId, reflection } = reflectionSchema.parse({
       logId: formData.get('logId'),
       reflection: formData.get('reflection'),
@@ -289,6 +299,9 @@ const addItemSchema = z.object({
 export async function addActionItem(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = addItemSchema.parse({
       sessionLogId: formData.get('sessionLogId'),
       title: formData.get('title'),
@@ -345,6 +358,9 @@ export async function updateActionItemStatus(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { itemId, status } = statusSchema.parse({
       itemId: formData.get('itemId'),
       status: formData.get('status'),

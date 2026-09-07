@@ -34,6 +34,9 @@ import { submitReviewSchema, validateAnswers } from './schema';
 const REVIEW_PATH: Record<ReviewType, string> = {
   [ReviewType.MIDTERM]: '/mid-term-review',
   [ReviewType.FINAL]: '/final-review',
+  // Quarterly assessments are submitted through features/assessments (they must
+  // be tied to an AssessmentWindow); this action rejects them below.
+  [ReviewType.QUARTERLY]: '/assessment',
 };
 
 export async function submitReviewResponse(
@@ -47,6 +50,16 @@ export async function submitReviewResponse(
       type: formData.get('type'),
       answers: formData.get('answers'),
     });
+
+    // A quarterly assessment response must be tied to its AssessmentWindow, so
+    // it goes through submitAssessment() instead. Reject it here rather than
+    // silently storing an unlinked response that no gate would ever see.
+    if (input.type === ReviewType.QUARTERLY) {
+      return fail({
+        code: 'VALIDATION',
+        message: 'Quarterly assessments are submitted from the assessment page.',
+      });
+    }
 
     // Authorize: only a paired mentor/mentee fills a review.
     const participant = await resolveReviewParticipant(user);

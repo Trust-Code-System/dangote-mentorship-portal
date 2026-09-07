@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { notifyMany } from '@/lib/notifications/notify';
 import { ok, fail, mapActionError, type ActionResult } from '@/lib/actions/result';
 import { getThread } from './data';
@@ -25,6 +26,9 @@ export async function sendMessage(input: {
 }): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { conversationId, body } = sendSchema.parse(input);
 
     const [burst, minute] = await Promise.all([
@@ -100,6 +104,9 @@ export async function loadOlderMessages(input: { conversationId: string; cursor:
 > {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { conversationId, cursor } = olderMessagesSchema.parse(input);
     const thread = await getThread(conversationId, user.id, cursor);
     if (!thread) {

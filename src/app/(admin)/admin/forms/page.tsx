@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { CohortStatus } from '@prisma/client';
+import { CohortStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
@@ -64,9 +64,7 @@ export default async function FormsPage() {
                 <div className="space-y-1">
                   <CardTitle className="text-h2">{d.title}</CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={d.type === 'MIDTERM' ? 'info' : 'default'}>
-                      {d.type === 'MIDTERM' ? t('midterm') : t('final')}
-                    </Badge>
+                    <Badge variant={badgeVariantForType(d.type)}>{t(typeLabelKey(d.type))}</Badge>
                     <Badge variant="outline">{d.roleName ? t(`role${titleCase(d.roleName)}`) : t('allRoles')}</Badge>
                     <Badge variant={d.isActive ? 'ok' : 'neutral'}>
                       {d.isActive ? t('active') : t('inactive')}
@@ -86,6 +84,29 @@ export default async function FormsPage() {
       )}
     </section>
   );
+}
+
+/** i18n key for a form's review type. Exhaustive so a new type can't slip through. */
+function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' {
+  switch (type) {
+    case ReviewType.MIDTERM:
+      return 'midterm';
+    case ReviewType.FINAL:
+      return 'final';
+    case ReviewType.QUARTERLY:
+      return 'quarterly';
+  }
+}
+
+function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' {
+  switch (type) {
+    case ReviewType.MIDTERM:
+      return 'info';
+    case ReviewType.FINAL:
+      return 'default';
+    case ReviewType.QUARTERLY:
+      return 'warn';
+  }
 }
 
 function titleCase(role: string): string {

@@ -1,9 +1,13 @@
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { RoleName } from '@prisma/client';
 import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
+import { getAssessmentGate } from '@/features/assessments/data';
+import { isAllowedWhileLocked } from '@/features/assessments/gate';
+import { AssessmentGateBanner } from '@/features/assessments/gate-banner';
 import { AppShell, type AppShellLabels } from '@/components/shell/app-shell';
 import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/sections';
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
@@ -59,6 +63,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect('/maintenance');
   }
 
+  // Quarterly assessment gate: a mentee whose assessment is overdue past its
+  // grace window loses the portal until they submit it. Mutations are guarded
+  // separately (features/assessments/guard.ts) so this is not the only line of
+  // defence. Admins and mentors are never gated.
+  const gate = await getAssessmentGate(user);
+  if (gate.locked) {
+    const pathname = (await headers()).get('x-pathname') ?? '';
+    if (!isAllowedWhileLocked(pathname)) redirect('/assessment');
+  }
+
   const isAdmin = hasAnyRole(user, ADMIN_ROLES);
   const [tNav, tShell, tCommon] = await Promise.all([
     getTranslations('nav'),
@@ -102,6 +116,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }}
       labels={labels}
     >
+      <AssessmentGateBanner gate={gate} />
       {children}
       <QuickActions items={quickActionsFor(user.roles)} />
     </AppShell>

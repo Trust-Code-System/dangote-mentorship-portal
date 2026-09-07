@@ -28,6 +28,9 @@ import {
   Mail,
   BarChart3,
   Settings,
+  CalendarClock,
+  FileText,
+  Newspaper,
   Menu,
   X,
   ChevronLeft,
@@ -114,7 +117,10 @@ export type IconKey =
   | 'invites'
   | 'training'
   | 'insights'
-  | 'settings';
+  | 'settings'
+  | 'assessment'
+  | 'reports'
+  | 'newsletters';
 
 const ICONS: Record<IconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -143,6 +149,9 @@ const ICONS: Record<IconKey, LucideIcon> = {
   training: Award,
   insights: BarChart3,
   settings: Settings,
+  assessment: CalendarClock,
+  reports: FileText,
+  newsletters: Newspaper,
 };
 
 export interface NavItem {
