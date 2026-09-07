@@ -411,3 +411,8 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **The migration is written but not applied.** `20260907120000_quarterly_assessments_reports_newsletters` is hand-written and validated against the schema; applying it to the live Supabase instance is an owner decision (`npx prisma migrate deploy`).
 - **The newsletter cron runs daily, not hourly.** An hourly `0 * * * *` entry was rejected by Vercel at deploy time before any build ran — the Hobby plan refuses any cron more frequent than once a day. `vercel.json` now uses `0 9 * * *` (10:00 Lagos), and `isDraftDue()` gained a catch-up rule so a scheduled day whose send hour falls after the daily run is picked up on the next run rather than being lost forever, which is what the naive daily fix would have done silently. 4 new tests cover it, and the admin UI now states when the draft will actually appear.
 - **The assessment questions themselves are placeholders.** The seeded quarterly form is a reasonable six-question set; the real question set is still to be supplied and can be entered in the Forms Builder without a code change.
+## Security — untrack the client cost estimate
+
+- `CLIENT_COST_ESTIMATE.md` (vendor pricing posture, plan recommendations, infrastructure cost basis) is no longer tracked. It remains on disk as a working document.
+- Widened the existing commercial-document rule in `.gitignore`: the `/BLAK_MOH_*` prefix match was too narrow to catch a file that was exactly what the rule existed to stop. Now matches on content type (`*COST*`, `*PRICING*`, `*INVOICE*`, `*QUOTE*`) rather than filename prefix.
+- Note: `git rm --cached` removes the file from the working tree going forward, not from history. Treat the contents as disclosed.

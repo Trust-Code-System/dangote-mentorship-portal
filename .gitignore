@@ -57,7 +57,16 @@ stitch-designs/_live-*.png
 # working drafts that live alongside the repo, not part of the product, and a
 # shared repo's history is permanent. Ignored so a broad `git add` cannot sweep
 # them into a public commit. Force-add deliberately if one ever should ship.
+#
+# The prefix rule below was too narrow: CLIENT_COST_ESTIMATE.md is exactly the
+# kind of document it exists to stop and was committed anyway, simply because it
+# did not start with BLAK_MOH_. Match on what the file IS, not what it is called.
 /BLAK_MOH_*
+/CLIENT_COST_ESTIMATE.md
+/*COST*.md
+/*PRICING*.md
+/*INVOICE*.md
+/*QUOTE*.md
 
 # Scratch directory from agent tooling runs.
 /.codex-tmp/
