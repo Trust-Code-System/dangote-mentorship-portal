@@ -1739,12 +1739,13 @@
       "dashboard": "Accéder au tableau de bord"
     },
     "hero": {
-      "micro": "Mentorat bilingue · Assisté par l'IA · Validé par un humain",
+      "micro": "Programme de mentorat Dangote",
       "line1": "L'expérience devient une direction.",
       "line2": "L'ambition devient du leadership.",
       "body": "BLAK MOH est un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré et piloté par des humains.",
       "ctaPrimary": "Entrer dans le portail",
       "ctaSecondary": "Découvrir le parcours",
+      "partnershipLabel": "En collaboration avec",
       "sceneDescription": "Un mentor et un mentoré se tiennent à distance dans l'obscurité, reliés par un flux de lumière qui transporte le savoir de l'un à l'autre.",
       "mentorLabel": "Mentor",
       "menteeLabel": "Mentoré",

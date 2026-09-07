@@ -1739,12 +1739,13 @@
       "dashboard": "Go to dashboard"
     },
     "hero": {
-      "micro": "Bilingual mentorship · AI-assisted · Human-approved",
+      "micro": "Dangote Mentorship Programme",
       "line1": "Experience becomes direction.",
       "line2": "Ambition becomes leadership.",
       "body": "BLAK MOH is a bilingual, AI-assisted mentorship programme connecting experience, ambition and opportunity through a structured human-led journey.",
       "ctaPrimary": "Enter the portal",
       "ctaSecondary": "Explore the journey",
+      "partnershipLabel": "In collaboration with",
       "sceneDescription": "A mentor and a mentee stand apart in darkness, joined by a stream of light that carries knowledge between them.",
       "mentorLabel": "Mentor",
       "menteeLabel": "Mentee",
