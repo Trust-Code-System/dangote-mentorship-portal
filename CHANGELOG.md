@@ -476,3 +476,13 @@ The quarterly assessment now carries the programme's actual questions, transcrib
 
 - Typecheck, lint, **540/540 unit tests** (40 new) and the production build are green.
 - **The migration from the monthly-form change is still unapplied**; this branch adds no new migration of its own.
+
+## The seed can no longer reach a non-local database
+
+A `npm run db:seed` run reached the live Supabase instance and created two overdue quarterly assessment windows plus 56 form responses. Because the assessment gate was already deployed, that immediately locked two accounts out of the live portal, and would have locked out every mentor once mentor gating deployed.
+
+- **The seed now refuses any database that is not demonstrably local**, unless re-run with `SEED_ALLOW_REMOTE=true`. It also prints the host/port/database it is about to write on every run, including the allowed path, so a mistake is visible rather than silent.
+- The decision is a pure function (`src/lib/db/seed-target.ts`) and **fails closed**: an unparseable URL, a missing `DATABASE_URL`, or a host that merely *contains* "localhost" (`localhost.evil.com`) are all refused. 16 tests, including that the printed target never leaks credentials.
+- Verified against the real production URL: the seed stops with the target named and the reason spelled out.
+
+This matters more than a stray demo cohort. The seed creates dozens of accounts that all share one password *and* generates assessment schedules that gate portal access — so reaching a shared or live database with it is an incident, not an inconvenience.
