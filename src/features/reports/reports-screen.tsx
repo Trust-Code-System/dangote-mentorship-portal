@@ -118,7 +118,9 @@ export async function ReportsScreen({ basePath }: { basePath: string }) {
 }
 
 /** i18n key for a report kind. Exhaustive: a new kind must be labelled. */
-export function kindKey(kind: ReportKind): 'kindMentee' | 'kindMentor' | 'kindProgramme' {
+export function kindKey(
+  kind: ReportKind,
+): 'kindMentee' | 'kindMentor' | 'kindProgramme' | 'kindEngagement' {
   switch (kind) {
     case ReportKind.MENTEE_PROGRESS:
       return 'kindMentee';
@@ -126,5 +128,7 @@ export function kindKey(kind: ReportKind): 'kindMentee' | 'kindMentor' | 'kindPr
       return 'kindMentor';
     case ReportKind.PROGRAMME:
       return 'kindProgramme';
+    case ReportKind.ENGAGEMENT:
+      return 'kindEngagement';
   }
 }

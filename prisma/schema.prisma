@@ -178,6 +178,10 @@ enum ReportKind {
   MENTOR_PAIR
   // A cohort-wide programme report (admins only).
   PROGRAMME
+  // Weekly engagement report: who has gone quiet and what is outstanding.
+  // Generated automatically once a week (features/reports/cron.ts) and also
+  // available to admins on demand. Metadata only — never message content.
+  ENGAGEMENT
 }
 
 enum ConversationType {

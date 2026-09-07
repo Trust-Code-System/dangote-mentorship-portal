@@ -30,6 +30,7 @@ import {
   Settings,
   CalendarClock,
   CalendarCheck,
+  Activity,
   FileText,
   Newspaper,
   Menu,
@@ -122,7 +123,8 @@ export type IconKey =
   | 'assessment'
   | 'monthly'
   | 'reports'
-  | 'newsletters';
+  | 'newsletters'
+  | 'engagement';
 
 const ICONS: Record<IconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -155,6 +157,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   monthly: CalendarCheck,
   reports: FileText,
   newsletters: Newspaper,
+  engagement: Activity,
 };
 
 export interface NavItem {

@@ -116,7 +116,9 @@ export function CreateReportForm({
   );
 }
 
-function labelKeyFor(kind: ReportKind): 'kindMentee' | 'kindMentor' | 'kindProgramme' {
+function labelKeyFor(
+  kind: ReportKind,
+): 'kindMentee' | 'kindMentor' | 'kindProgramme' | 'kindEngagement' {
   switch (kind) {
     case ReportKind.MENTEE_PROGRESS:
       return 'kindMentee';
@@ -124,5 +126,7 @@ function labelKeyFor(kind: ReportKind): 'kindMentee' | 'kindMentor' | 'kindProgr
       return 'kindMentor';
     case ReportKind.PROGRAMME:
       return 'kindProgramme';
+    case ReportKind.ENGAGEMENT:
+      return 'kindEngagement';
   }
 }
