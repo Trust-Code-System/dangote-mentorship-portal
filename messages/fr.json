@@ -1584,6 +1584,7 @@
     "editForm": "Modifier le formulaire",
     "createForm": "Créer le formulaire",
     "builderHelp": "Créez les questionnaires d'évaluation à mi-parcours et finale. Les administrateurs peuvent les modifier à tout moment, sans changement de code.",
+    "englishOnlyCohort": "Cette cohorte fonctionne uniquement en anglais ; le texte français n'est donc pas requis. Cochez « Français » sur la cohorte pour le saisir.",
     "emptyTitle": "Aucun formulaire d'évaluation",
     "emptyHelp": "Créez un formulaire d'évaluation à mi-parcours ou finale pour commencer à recueillir des réponses.",
     "noActiveCohort": "Aucune cohorte active",

@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
-import { NewsletterStatus } from '@prisma/client';
+import { Language, NewsletterStatus } from '@prisma/client';
 import {
   approveNewsletterForm,
   requestNewsletterDraftForm,
@@ -22,6 +22,7 @@ import {
   type NewsletterBody,
   type NewsletterSectionKind,
 } from './schema';
+import { requiresFrench } from '@/features/cohorts/languages';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,6 +49,7 @@ export function NewsletterComposer({
   approvedByName,
   aiEnabled,
   sentCount,
+  cohortLanguages,
 }: {
   newsletterId: string;
   cohortName: string;
@@ -60,6 +62,8 @@ export function NewsletterComposer({
   approvedByName: string | null;
   aiEnabled: boolean;
   sentCount: number;
+  /** The cohort's own languages — decides whether the French half is shown. */
+  cohortLanguages: Language[];
 }) {
   const t = useTranslations('newsletters');
   const tc = useTranslations('common');
@@ -91,6 +95,11 @@ export function NewsletterComposer({
     sendNewsletterNowForm,
     null,
   );
+
+  // The French half of the composer only appears for a cohort that actually runs
+  // in French. Any French already saved stays in `body`/`subjectFr` and is
+  // resubmitted untouched, so ticking French back on brings it straight back.
+  const showFrench = requiresFrench({ languages: cohortLanguages });
 
   const isSent = status === NewsletterStatus.SENT;
   const isApproved = status === NewsletterStatus.SCHEDULED;
@@ -203,18 +212,24 @@ export function NewsletterComposer({
                 required
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="subjectFr">{t('fieldSubjectFr')}</Label>
-              <Input
-                id="subjectFr"
-                name="subjectFr"
-                value={subjectFr}
-                onChange={(event) => setSubjectFr(event.target.value)}
-                maxLength={200}
-                disabled={isSent}
-                required
-              />
-            </div>
+            {showFrench ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="subjectFr">{t('fieldSubjectFr')}</Label>
+                <Input
+                  id="subjectFr"
+                  name="subjectFr"
+                  value={subjectFr}
+                  onChange={(event) => setSubjectFr(event.target.value)}
+                  maxLength={200}
+                  disabled={isSent}
+                  required
+                />
+              </div>
+            ) : (
+              // Still submitted, so a French subject saved while the cohort was
+              // bilingual survives a save made after French was switched off.
+              <input type="hidden" name="subjectFr" value={subjectFr} />
+            )}
           </CardContent>
         </Card>
 
@@ -233,7 +248,7 @@ export function NewsletterComposer({
                 {t('includeSection')}
               </label>
             </CardHeader>
-            <CardContent className="grid gap-4 lg:grid-cols-2">
+            <CardContent className={showFrench ? 'grid gap-4 lg:grid-cols-2' : 'grid gap-4'}>
               <div className="space-y-2">
                 <div className="space-y-1.5">
                   <Label htmlFor={`headingEn-${section.kind}`}>{t('headingEn')}</Label>
@@ -260,31 +275,33 @@ export function NewsletterComposer({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor={`headingFr-${section.kind}`}>{t('headingFr')}</Label>
-                  <Input
-                    id={`headingFr-${section.kind}`}
-                    value={section.headingFr}
-                    onChange={(event) => updateSection(index, { headingFr: event.target.value })}
-                    placeholder={defaultHeadingFor(section.kind, 'FR')}
-                    maxLength={160}
-                    disabled={isSent}
-                  />
+              {showFrench ? (
+                <div className="space-y-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`headingFr-${section.kind}`}>{t('headingFr')}</Label>
+                    <Input
+                      id={`headingFr-${section.kind}`}
+                      value={section.headingFr}
+                      onChange={(event) => updateSection(index, { headingFr: event.target.value })}
+                      placeholder={defaultHeadingFor(section.kind, 'FR')}
+                      maxLength={160}
+                      disabled={isSent}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor={`bodyFr-${section.kind}`}>{t('bodyFr')}</Label>
+                    <Textarea
+                      id={`bodyFr-${section.kind}`}
+                      value={section.bodyFr}
+                      onChange={(event) => updateSection(index, { bodyFr: event.target.value })}
+                      rows={4}
+                      maxLength={4000}
+                      disabled={isSent}
+                      placeholder={t(hintKey(section.kind))}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor={`bodyFr-${section.kind}`}>{t('bodyFr')}</Label>
-                  <Textarea
-                    id={`bodyFr-${section.kind}`}
-                    value={section.bodyFr}
-                    onChange={(event) => updateSection(index, { bodyFr: event.target.value })}
-                    rows={4}
-                    maxLength={4000}
-                    disabled={isSent}
-                    placeholder={t(hintKey(section.kind))}
-                  />
-                </div>
-              </div>
+              ) : null}
             </CardContent>
           </Card>
         ))}

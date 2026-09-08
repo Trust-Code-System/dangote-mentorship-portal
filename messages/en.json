@@ -1584,6 +1584,7 @@
     "editForm": "Edit form",
     "createForm": "Create form",
     "builderHelp": "Build the mid-term and final review questionnaires. Admins can edit these any time without a code change.",
+    "englishOnlyCohort": "This cohort runs in English only, so French text is not required. Tick French on the cohort to author it.",
     "emptyTitle": "No review forms yet",
     "emptyHelp": "Create a mid-term or final review form to start collecting responses.",
     "noActiveCohort": "No active cohort",

@@ -21,12 +21,12 @@ export default async function EditFormPage({ params }: { params: Promise<{ id: s
   const cohorts = await prisma.cohort.findMany({
     where: { deletedAt: null, status: { in: [CohortStatus.ACTIVE, CohortStatus.DRAFT] } },
     orderBy: { createdAt: 'desc' },
-    select: { id: true, name: true },
+    select: { id: true, name: true, languages: true },
   });
   if (!cohorts.some((c) => c.id === definition.cohortId)) {
     const own = await prisma.cohort.findUnique({
       where: { id: definition.cohortId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, languages: true },
     });
     if (own) cohorts.unshift(own);
   }
