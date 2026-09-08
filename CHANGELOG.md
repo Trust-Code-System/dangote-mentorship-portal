@@ -528,3 +528,14 @@ Setting up a cohort needed the programme's real question sets, and they only exi
 Forms are per-cohort by design — admins may edit them without a code change — so every new cohort will always need its own copies. This makes that a click instead of a transcription exercise.
 
 - Typecheck, lint, **617/617 unit tests** (20 new) and the production build are green. No migration.
+
+## The Microsoft integrations flag no longer fails on invisible whitespace
+
+Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside the value**. The gate compared it with a strict `=== 'true'`, so setting it to `true` the same way it is currently set to `false` would have read as OFF — leaving mail on the log transport, with nothing anywhere to explain why no newsletter or reminder was ever delivered.
+
+- The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
+- Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
+- 7 new tests pin it, including the exact shape production holds today (`'false
+'`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
+
+Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
