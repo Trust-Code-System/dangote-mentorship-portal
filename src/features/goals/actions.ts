@@ -2,13 +2,17 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { GoalStage, GoalStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
 import { getStorageProvider } from '@/lib/storage';
+import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
+import { verifyFileSignature } from '@/lib/files/sniff';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
 import { getMenteePairing, isMentorOfGoal } from './data';
@@ -51,12 +55,18 @@ export async function requestGoalCoach(
 ): Promise<ActionResult<CoachResult>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const fields = coachSchema.parse(input);
     // Throttle the AI endpoint per user (production-readiness-report.md M1).
     if (!(await checkRateLimit(`ai:goal-coach:${user.id}`, 10, 60_000)).ok) {
       return fail({ code: 'CONFLICT', message: 'Too many AI requests. Please wait a moment.' });
     }
-    const lang = user.locale === 'FR' ? 'FR' : 'EN';
+    // QA-I18N-006 follow-up: coach responds in the ACTIVE UI locale (header
+    // switcher), not the saved account locale.
+    const activeLocale = await getLocale();
+    const lang = activeLocale.toLowerCase().startsWith('fr') ? 'FR' : 'EN';
     const result = await coachGoal(fields, lang);
     return ok(result);
   } catch (error) {
@@ -102,6 +112,9 @@ function saveDataFrom(form: FormData) {
 export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = saveSchema.parse(saveDataFrom(formData));
 
     const fields = {
@@ -173,6 +186,9 @@ const idSchema = z.object({ goalId: z.string().cuid() });
 export async function submitGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId } = idSchema.parse({ goalId: formData.get('goalId') });
 
     const goal = await prisma.goal.findUnique({ where: { id: goalId } });
@@ -234,6 +250,9 @@ const reviewSchema = z.object({
 export async function reviewGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = reviewSchema.parse({
       goalId: formData.get('goalId'),
       decision: formData.get('decision'),
@@ -317,6 +336,9 @@ export async function advanceGoalStage(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId, stage } = advanceSchema.parse({
       goalId: formData.get('goalId'),
       stage: formData.get('stage'),
@@ -370,11 +392,143 @@ function evidenceKey(cohortId: string, goalId: string, ext: string): string {
   return `goals/${cohortId}/${goalId}/${randomUUID()}${ext}`;
 }
 
+const evidenceUploadInput = z.object({
+  goalId: z.string().cuid(),
+  name: z.string().trim().min(1).max(200),
+  type: z.string().trim(),
+  size: z.number().int().positive().max(MAX_EVIDENCE_BYTES),
+  note: optionalText(500),
+});
+
+async function persistGoalEvidence(input: {
+  goal: { id: string; cohortId: string; stage: GoalStage };
+  userId: string;
+  key: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  note: string;
+}): Promise<ActionResult<{ id: string }>> {
+  const advanceStage =
+    input.goal.stage === GoalStage.APPROVED || input.goal.stage === GoalStage.IN_PROGRESS;
+  const evidence = await prisma.$transaction(async (tx) => {
+    const row = await tx.goalEvidence.create({
+      data: {
+        goalId: input.goal.id,
+        cohortId: input.goal.cohortId,
+        uploadedById: input.userId,
+        stage: GoalStage.EVIDENCE_SUBMITTED,
+        fileName: input.fileName.slice(0, 200),
+        url: input.key,
+        mimeType: input.mimeType,
+        size: input.size,
+        note: emptyToNull(input.note),
+      },
+    });
+    if (advanceStage) {
+      await tx.goal.update({
+        where: { id: input.goal.id },
+        data: { stage: GoalStage.EVIDENCE_SUBMITTED },
+      });
+    }
+    return row;
+  });
+
+  await writeAuditLog({
+    actorId: input.userId,
+    cohortId: input.goal.cohortId,
+    action: 'goal.evidence_uploaded',
+    entityType: 'GoalEvidence',
+    entityId: evidence.id,
+    metadata: { goalId: input.goal.id },
+  });
+  revalidatePath('/goals');
+  return ok({ id: evidence.id });
+}
+
+export async function prepareGoalEvidenceUpload(input: {
+  goalId: string;
+  name: string;
+  type: string;
+  size: number;
+  note?: string;
+}): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
+  try {
+    const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
+    const file = evidenceUploadInput.parse({ ...input, note: input.note ?? '' });
+    const goal = await prisma.goal.findUnique({ where: { id: file.goalId } });
+    if (!goal || goal.deletedAt || goal.menteeId !== user.id) {
+      return fail({ code: 'NOT_FOUND', message: 'Goal not found.' });
+    }
+    if (goal.status !== GoalStatus.APPROVED && goal.status !== GoalStatus.COMPLETED) {
+      return fail({ code: 'CONFLICT', message: 'You can add evidence once your goal is approved.' });
+    }
+    const ext = ALLOWED_EVIDENCE_TYPES[file.type];
+    if (!ext) return fail({ code: 'VALIDATION', message: 'Unsupported file type.' });
+    if (!canUseDirectUploads()) return ok({ mode: 'server' });
+    const target = await createSignedUploadTarget(evidenceKey(goal.cohortId, goal.id, ext));
+    return ok({ mode: 'direct', ...target });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+export async function confirmGoalEvidenceUpload(input: {
+  goalId: string;
+  path: string;
+  name: string;
+  type: string;
+  size: number;
+  note?: string;
+}): Promise<GoalActionState> {
+  try {
+    const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
+    const file = evidenceUploadInput.parse({ ...input, note: input.note ?? '' });
+    const goal = await prisma.goal.findUnique({ where: { id: file.goalId } });
+    if (!goal || goal.deletedAt || goal.menteeId !== user.id) {
+      return fail({ code: 'NOT_FOUND', message: 'Goal not found.' });
+    }
+    if (goal.status !== GoalStatus.APPROVED && goal.status !== GoalStatus.COMPLETED) {
+      return fail({ code: 'CONFLICT', message: 'You can add evidence once your goal is approved.' });
+    }
+    const ext = ALLOWED_EVIDENCE_TYPES[file.type];
+    const expectedPrefix = `goals/${goal.cohortId}/${goal.id}/`;
+    if (!ext || !input.path.startsWith(expectedPrefix) || !input.path.endsWith(ext)) {
+      return fail({ code: 'FORBIDDEN', message: 'The upload target is not valid for this goal.' });
+    }
+    const bytes = await getStorageProvider().get(input.path);
+    if (bytes.byteLength !== file.size || !verifyFileSignature(bytes, file.type)) {
+      await removeStoredObject(input.path);
+      return fail({ code: 'VALIDATION', message: "File contents don't match its type." });
+    }
+    return persistGoalEvidence({
+      goal,
+      userId: user.id,
+      key: input.path,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      note: file.note ?? '',
+    });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
 export async function uploadGoalEvidence(
   formData: FormData,
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { goalId } = idSchema.parse({ goalId: formData.get('goalId') });
     const note = optionalText(500).parse(formData.get('note') ?? '');
 
@@ -401,44 +555,22 @@ export async function uploadGoalEvidence(
 
     const key = evidenceKey(goal.cohortId, goal.id, ext);
     const bytes = new Uint8Array(await file.arrayBuffer());
+    // Don't trust the browser-supplied MIME: confirm the bytes match the format
+    // before anything is persisted (production-readiness-report.md M1).
+    if (!verifyFileSignature(bytes, file.type)) {
+      return fail({ code: 'VALIDATION', message: "File contents don't match its type." });
+    }
     await getStorageProvider().put({ key, bytes, contentType: file.type });
 
-    // Submitting evidence moves the progress bar to "Evidence submitted" unless
-    // the goal is already further along (e.g. ACHIEVED).
-    const advanceStage =
-      goal.stage === GoalStage.APPROVED || goal.stage === GoalStage.IN_PROGRESS;
-
-    const evidence = await prisma.$transaction(async (tx) => {
-      const row = await tx.goalEvidence.create({
-        data: {
-          goalId: goal.id,
-          cohortId: goal.cohortId,
-          uploadedById: user.id,
-          stage: GoalStage.EVIDENCE_SUBMITTED,
-          fileName: file.name.slice(0, 200),
-          url: key,
-          mimeType: file.type,
-          size: file.size,
-          note: emptyToNull(note),
-        },
-      });
-      if (advanceStage) {
-        await tx.goal.update({ where: { id: goal.id }, data: { stage: GoalStage.EVIDENCE_SUBMITTED } });
-      }
-      return row;
+    return persistGoalEvidence({
+      goal,
+      userId: user.id,
+      key,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      note: note ?? '',
     });
-
-    await writeAuditLog({
-      actorId: user.id,
-      cohortId: goal.cohortId,
-      action: 'goal.evidence_uploaded',
-      entityType: 'GoalEvidence',
-      entityId: evidence.id,
-      metadata: { goalId: goal.id },
-    });
-
-    revalidatePath('/goals');
-    return ok({ id: evidence.id });
   } catch (error) {
     return mapActionError(error);
   }

@@ -31,11 +31,14 @@ export interface DigestResult {
   notificationsSent: number;
 }
 
+const MAX_PENDING_PER_RUN = 2_000;
+
 export async function sendDailyDigests(): Promise<DigestResult> {
   const pending = await prisma.notification.findMany({
     where: { emailPending: true, emailedAt: null, deletedAt: null },
     orderBy: { createdAt: 'asc' },
     include: { user: { select: { id: true, email: true, locale: true } } },
+    take: MAX_PENDING_PER_RUN,
   });
   if (pending.length === 0) return { usersEmailed: 0, notificationsSent: 0 };
 
@@ -50,25 +53,40 @@ export async function sendDailyDigests(): Promise<DigestResult> {
   let usersEmailed = 0;
   let notificationsSent = 0;
 
-  for (const [, items] of byUser) {
-    const recipient = items[0]!.user;
-    const localeCode = toLocaleCode(recipient.locale);
-    const messages = await loadMessages(localeCode);
-    const t = createTranslator({ locale: localeCode, messages, namespace: 'notifications.digest' });
+  const groups = Array.from(byUser.values());
+  const concurrency = 10;
+  for (let offset = 0; offset < groups.length; offset += concurrency) {
+    const batch = groups.slice(offset, offset + concurrency);
+    await Promise.all(
+      batch.map(async (items) => {
+        const recipient = items[0]!.user;
+        const localeCode = toLocaleCode(recipient.locale);
+        const messages = await loadMessages(localeCode);
+        const t = createTranslator({
+          locale: localeCode,
+          messages,
+          namespace: 'notifications.digest',
+        });
 
-    const lines = items.map((n) => `• ${n.title}${n.body ? ` — ${n.body}` : ''}`);
-    const text = `${t('intro', { count: items.length })}\n\n${lines.join('\n')}`;
+        const lines = items.map((n) => `• ${n.title}${n.body ? ` — ${n.body}` : ''}`);
+        const text = `${t('intro', { count: items.length })}\n\n${lines.join('\n')}`;
 
-    if (recipient.email) {
-      await sendEmail({ to: recipient.email, subject: t('subject', { count: items.length }), text });
-      usersEmailed += 1;
-    }
+        if (recipient.email) {
+          await sendEmail({
+            to: recipient.email,
+            subject: t('subject', { count: items.length }),
+            text,
+          });
+          usersEmailed += 1;
+        }
 
-    await prisma.notification.updateMany({
-      where: { id: { in: items.map((n) => n.id) } },
-      data: { emailPending: false, emailedAt: new Date() },
-    });
-    notificationsSent += items.length;
+        await prisma.notification.updateMany({
+          where: { id: { in: items.map((n) => n.id) } },
+          data: { emailPending: false, emailedAt: new Date() },
+        });
+        notificationsSent += items.length;
+      }),
+    );
   }
 
   return { usersEmailed, notificationsSent };

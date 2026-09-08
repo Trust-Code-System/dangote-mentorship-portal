@@ -85,9 +85,7 @@ export function JourneyRailView({
   // Fill reaches the current node; if the journey is complete, fill the line.
   const targetFill = currentIndex < 0 ? 100 : n > 1 ? (currentIndex / (n - 1)) * 100 : 0;
 
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
-  const fill = mounted ? targetFill : 0;
+  const fill = targetFill;
 
   function nodeContent(node: RailNode) {
     const tip = (
@@ -146,7 +144,7 @@ export function JourneyRailView({
                         node.state === 'completed' || node.isCurrent
                           ? 'font-bold text-green-strong'
                           : node.state === 'pending'
-                            ? 'text-ink-3 opacity-70'
+                            ? 'text-ink-3'
                             : 'text-ink-2',
                       )}
                     >

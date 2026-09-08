@@ -80,13 +80,15 @@ export default async function ProfilePage() {
         <CardHeader>
           <CardTitle className="text-lg">{t('accountTitle')}</CardTitle>
           <CardDescription>{t('accountDescription')}</CardDescription>
-          <p className="flex flex-wrap gap-1 pt-1">
+          {/* Layout container must be a <div>, not <p>: Badge renders a <div>,
+              and a <div> inside <p> is invalid HTML → hydration mismatch (#418). */}
+          <div className="flex flex-wrap gap-1 pt-1">
             {sessionUser.roles.map((role) => (
               <Badge key={role} variant="secondary">
                 {t(ROLE_LABEL_KEY[role])}
               </Badge>
             ))}
-          </p>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <AvatarUploader
@@ -138,13 +140,13 @@ export default async function ProfilePage() {
               <Badge variant="secondary">{mentorProfile.preferredLanguage}</Badge>
             </CardTitle>
             {mentorProfile.competencies.length > 0 ? (
-              <p className="flex flex-wrap gap-1 pt-1">
+              <div className="flex flex-wrap gap-1 pt-1">
                 {mentorProfile.competencies.map((c) => (
                   <Badge key={c.id} variant="outline">
                     {c.competency.name}
                   </Badge>
                 ))}
-              </p>
+              </div>
             ) : null}
           </CardHeader>
           <CardContent>
@@ -181,13 +183,13 @@ export default async function ProfilePage() {
               <Badge variant="secondary">{menteeProfile.preferredLanguage}</Badge>
             </CardTitle>
             {menteeProfile.competencies.length > 0 ? (
-              <p className="flex flex-wrap gap-1 pt-1">
+              <div className="flex flex-wrap gap-1 pt-1">
                 {menteeProfile.competencies.map((c) => (
                   <Badge key={c.id} variant={c.isToStrengthen ? 'outline' : 'secondary'}>
                     {c.competency.name}
                   </Badge>
                 ))}
-              </p>
+              </div>
             ) : null}
           </CardHeader>
           <CardContent>

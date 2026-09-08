@@ -9,7 +9,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="border-t border-border bg-bg">
-      <div className="container flex flex-col gap-4 py-8 text-small text-ink-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="container flex flex-col gap-4 py-8 text-small text-ink-2 sm:flex-row sm:items-center sm:justify-between">
         <p>{t('home.footer.tagline')}</p>
 
         <nav className="flex items-center gap-4">

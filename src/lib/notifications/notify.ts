@@ -71,7 +71,9 @@ export async function notify(input: NotifyInput): Promise<void> {
 
     const channel = selectEmailChannel(input.type, prefs);
 
-    await prisma.notification.create({
+    const owesEmail =
+      channel === 'digest' || (channel === 'immediate' && Boolean(recipient.email));
+    const notification = await prisma.notification.create({
       data: {
         userId: recipient.id,
         cohortId: input.cohortId ?? null,
@@ -79,13 +81,18 @@ export async function notify(input: NotifyInput): Promise<void> {
         title,
         body,
         link: input.link ?? null,
-        emailPending: channel === 'digest',
-        emailedAt: channel === 'immediate' ? new Date() : null,
+        emailPending: owesEmail,
+        emailedAt: null,
       },
+      select: { id: true },
     });
 
     if (channel === 'immediate' && recipient.email) {
       await sendEmail({ to: recipient.email, subject: title, text: body });
+      await prisma.notification.update({
+        where: { id: notification.id },
+        data: { emailPending: false, emailedAt: new Date() },
+      });
     }
   } catch (error) {
     // Swallow — notifications are best-effort (CLAUDE.md §14: no PII in logs).

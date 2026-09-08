@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { AlertTriangle, GraduationCap, ShieldCheck, Users } from 'lucide-react';
 import type { AdminDashboard } from '@/features/dashboard/data';
 import { StatTile, type StatTileProps } from '@/components/ui/stat-tile';
@@ -17,6 +18,7 @@ function Tile({ href, ...props }: StatTileProps & { href?: string }) {
 }
 
 export async function AdminSummary({ data }: { data: AdminDashboard }) {
+  const t = await getTranslations('admin');
   const participants = data.activePairs * 2 + data.unmatchedMentees + data.unmatchedMentors;
   const matchRate = Math.round((data.activePairs / Math.max(1, data.activePairs + data.unmatchedMentees)) * 100);
 
@@ -24,30 +26,30 @@ export async function AdminSummary({ data }: { data: AdminDashboard }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Tile
         href="/admin/matching"
-        label="Total participants"
+        label={t('tileParticipants')}
         value={participants}
         tone="ok"
         icon={<Users className="size-5" />}
       />
       <Tile
         href="/admin/mentees"
-        label="Unmatched"
+        label={t('tileUnmatched')}
         value={data.unmatchedMentees + data.unmatchedMentors}
         tone={data.unmatchedMentees > 0 ? 'warn' : 'default'}
         icon={<GraduationCap className="size-5" />}
       />
       <Tile
-        href="/admin/mentors"
-        label="AI flags"
+        href="/admin/support"
+        label={t('tileOpenSupport')}
         value={data.openSupport}
         tone={data.openSupport > 0 ? 'risk' : 'default'}
         icon={<AlertTriangle className="size-5" />}
       />
       <Tile
         href="/admin/insights"
-        label="System health"
+        label={t('tileMatchRate')}
         value={`${matchRate}%`}
-        tone="ok"
+        tone={matchRate >= 60 ? 'ok' : matchRate >= 30 ? 'warn' : 'risk'}
         icon={<ShieldCheck className="size-5" />}
       />
     </div>

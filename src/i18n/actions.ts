@@ -28,5 +28,8 @@ export async function setLocale(locale: AppLocale): Promise<void> {
     });
   }
 
+  // Cookie writes alone do not refresh the RSC tree in production (`next start`).
+  // Revalidate the root layout so `<html lang>` and next-intl messages update
+  // in place — without a full navigation that would wipe half-typed forms.
   revalidatePath('/', 'layout');
 }

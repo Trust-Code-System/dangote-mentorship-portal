@@ -1,25 +1,16 @@
 @import 'tailwindcss';
 
-/* tailwindcss-animate (used by tailwindcss/shadcn primitives). v4 loads plugins
- * from CSS rather than the (now-removed) tailwind.config.ts. */
 @plugin 'tailwindcss-animate';
 
-/* Tailwind v4 is class-based dark mode (parity with the old `darkMode: ['class']`).
- * Dark theme is still out of scope for v1; this just wires the variant. */
+/* Keep dark mode class-based, matching the previous Tailwind configuration. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Design tokens (§19 — docs/design-system.md). Migrated from tailwind.config.ts
- * to Tailwind v4's CSS-first `@theme`. The raw palette lives as space-separated
- * RGB channels in `:root` below (hex in the comment) so both Tailwind alpha
- * modifiers (`bg-green/90`) AND hand-written `rgb(var(--green) / 0.7)` values in
- * components keep working. `@theme inline` maps those channels to `--color-*`
- * utilities; because the values are real colors, v4 derives alpha via color-mix.
- * shadcn's semantic names are aliased onto the same tokens so every primitive is
- * themed without raw defaults (§4). Dark mode is structured-for but not enabled.
+ * Tailwind 4 CSS-first theme. The raw RGB channels remain in :root below so
+ * existing alpha modifiers and hand-written rgb(var(--token) / alpha) values
+ * keep working across the portal, authentication, and landing surfaces.
  */
 @theme inline {
-  /* ── Palette utilities (§1) ── */
   --color-bg: rgb(var(--bg));
   --color-surface: rgb(var(--surface));
   --color-surface-2: rgb(var(--surface-2));
@@ -36,7 +27,6 @@
   --color-risk: rgb(var(--risk));
   --color-info: rgb(var(--info));
 
-  /* ── shadcn semantic aliases (themed onto the palette) ── */
   --color-border: rgb(var(--border));
   --color-input: rgb(var(--input));
   --color-ring: rgb(var(--ring));
@@ -57,60 +47,92 @@
   --color-card: rgb(var(--card));
   --color-card-foreground: rgb(var(--card-foreground));
 
-  /* ── Typography (§2). One grotesque for everything (Atlas-style): Inter for
-   * headings (heavy weights) and body/UI, self-hosted via next/font. ── */
+  --color-blak-black: rgb(var(--blak-black));
+  --color-blak-forest: rgb(var(--blak-forest));
+  --color-blak-forest-2: rgb(var(--blak-forest-2));
+  --color-blak-green: rgb(var(--blak-green));
+  --color-blak-green-deep: rgb(var(--blak-green-deep));
+  --color-blak-green-soft: rgb(var(--blak-green-soft));
+  --color-blak-gold: rgb(var(--blak-gold));
+  --color-blak-gold-soft: rgb(var(--blak-gold-soft));
+  --color-blak-ivory: rgb(var(--blak-ivory));
+  --color-blak-text: rgb(var(--blak-text));
+  --color-blak-text-2: rgb(var(--blak-text-2));
+  --color-blak-border: rgb(var(--blak-border));
+  --color-blak-glass: rgb(var(--blak-glass));
+
+  --color-auth-surface: rgb(var(--auth-surface));
+  --color-auth-field: rgb(var(--auth-field));
+  --color-auth-border: rgb(var(--auth-border));
+  --color-auth-ink: rgb(var(--auth-ink));
+  --color-auth-ink-2: rgb(var(--auth-ink-2));
+
   --font-display: var(--font-inter), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
 
-  /* Type scale (§2) — headings run heavy: big titles extrabold, sub-heads bold. */
-  --text-display: 2.25rem; /* 36/44 */
+  --text-display: 2.25rem;
   --text-display--line-height: 2.75rem;
   --text-display--font-weight: 800;
-  --text-h1: 1.75rem; /* 28/36 */
+  --text-h1: 1.75rem;
   --text-h1--line-height: 2.25rem;
   --text-h1--font-weight: 700;
-  --text-h2: 1.25rem; /* 20/28 */
+  --text-h2: 1.25rem;
   --text-h2--line-height: 1.75rem;
   --text-h2--font-weight: 700;
-  --text-h3: 1rem; /* 16/24 */
+  --text-h3: 1rem;
   --text-h3--line-height: 1.5rem;
   --text-h3--font-weight: 600;
-  --text-body: 0.9375rem; /* 15/24 */
+  --text-body: 0.9375rem;
   --text-body--line-height: 1.5rem;
-  --text-small: 0.8125rem; /* 13/20 */
+  --text-small: 0.8125rem;
   --text-small--line-height: 1.25rem;
-  --text-micro: 0.6875rem; /* 11/16 */
+  --text-micro: 0.6875rem;
   --text-micro--line-height: 1rem;
   --text-micro--letter-spacing: 0.04em;
   --text-micro--font-weight: 600;
 
-  /* ── Radii (§3): 16px cards, 10px controls, 8px sm, 999px pills ── */
-  --radius-lg: var(--radius); /* 16px — cards (rounded-lg) */
-  --radius-md: calc(var(--radius) - 6px); /* 10px controls */
-  --radius-sm: calc(var(--radius) - 8px); /* 8px */
+  --text-blak-hero: clamp(2.5rem, 6.2vw, 5.25rem);
+  --text-blak-hero--line-height: 1.02;
+  --text-blak-hero--letter-spacing: -0.03em;
+  --text-blak-statement: clamp(1.875rem, 4vw, 3.5rem);
+  --text-blak-statement--line-height: 1.12;
+  --text-blak-statement--letter-spacing: -0.02em;
+  --text-blak-section: clamp(1.75rem, 3vw, 2.75rem);
+  --text-blak-section--line-height: 1.15;
+  --text-blak-section--letter-spacing: -0.02em;
+  --text-blak-body: clamp(1rem, 1.1vw, 1.125rem);
+  --text-blak-body--line-height: 1.65;
+  --text-blak-label: 0.75rem;
+  --text-blak-label--line-height: 1rem;
+  --text-blak-label--letter-spacing: 0.14em;
+  --text-blak-label--font-weight: 600;
 
-  /* ── Soft layered elevation (§3): white cards "float" over the light canvas.
-   * `elevation-lg` is the raised/hover state; `glow` is the green ambient shadow
-   * under primary buttons and the active nav pill. ── */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 8px);
+
   --shadow-elevation: 0 1px 2px rgba(16, 42, 26, 0.04), 0 8px 24px -6px rgba(16, 42, 26, 0.08);
   --shadow-elevation-lg: 0 2px 4px rgba(16, 42, 26, 0.05), 0 18px 40px -10px rgba(16, 42, 26, 0.13);
   --shadow-glow: 0 6px 16px -4px rgba(40, 133, 68, 0.45);
 }
 
-/* Centered content container (§3) — replaces the v3 `theme.container` config:
- * centered, 1.5rem gutters, capped at ~1280px from the xl breakpoint up. */
 @utility container {
   margin-inline: auto;
   padding-inline: 1.5rem;
+
   @media (width >= 640px) {
     max-width: 640px;
   }
+
   @media (width >= 768px) {
     max-width: 768px;
   }
+
   @media (width >= 1024px) {
     max-width: 1024px;
   }
+
   @media (width >= 1280px) {
     max-width: 1280px;
   }
@@ -130,7 +152,7 @@
     --border: 226 232 240; /* #E2E8F0 hairlines, dividers, input borders */
     --ink: 25 28 28; /* #191C1C primary text (on-surface) */
     --ink-2: 64 72 73; /* #404849 secondary text, labels (on-surface-variant) */
-    --ink-3: 112 121 121; /* #707979 muted text, placeholders (outline) */
+    --ink-3: 111 120 120; /* #6F7878 muted text, placeholders (outline) — 4.5:1 on white (WCAG AA) */
 
     /* Brand green ramp, derived from the BLAK MOH logo green (#10b91f). The vivid
      * logo green is too light for white text, so the ramp keeps a bright accent
@@ -170,6 +192,43 @@
 
     /* ── Radii (§3): 16px cards, 10px controls, 999px pills (modern/3D) ── */
     --radius: 1rem; /* 16px — cards (rounded-lg) */
+
+    /* ── BLAK MOH cinematic landing tokens (LANDING_PAGE_MASTER_SPEC.md §3) ──
+     * ADDITIVE ONLY. These sit alongside the portal palette above and are used
+     * exclusively by src/app/(landing)/**. No value above is modified, so the
+     * authenticated portal cascade is untouched.
+     *
+     * The greens and the gold are sampled pixel-exact from the supplied logo
+     * artwork (public/brand/blak-moh-original.png), not eyeballed:
+     *   #14B21F  primary logo green   (26,497 opaque pixels)
+     *   #119A19  deep green of the script "m"
+     *   #CD9933  the gold full stop after MOH
+     * Contrast on #000: text #F7F7F7 20.1:1 · #B2BAB3 9.6:1 · green 7.4:1 ·
+     * gold 8.2:1. Near-black ink on the green CTA is 7.4:1. */
+    --blak-black: 0 0 0; /* #000000 foundation */
+    --blak-forest: 6 26 14; /* #061A0E deep green-black section bed */
+    --blak-forest-2: 11 36 22; /* #0B2416 raised bed */
+    --blak-green: 20 178 31; /* #14B21F EXACT logo green — growth, active connection */
+    --blak-green-deep: 17 154 25; /* #119A19 logo secondary green */
+    --blak-green-soft: 122 222 132; /* #7ADE84 muted green highlight */
+    --blak-gold: 205 153 51; /* #CD9933 EXACT logo gold — experience, milestones */
+    --blak-gold-soft: 226 189 122; /* #E2BD7A */
+    --blak-ivory: 244 241 234; /* #F4F1EA warm off-white */
+    --blak-text: 247 247 247; /* #F7F7F7 primary text (matches the logo plate) */
+    --blak-text-2: 178 186 179; /* #B2BAB3 softened ivory-grey secondary text */
+    --blak-border: 244 241 234; /* ivory, used at 8–18% alpha */
+    --blak-glass: 8 20 13; /* transparent dark green-black, used at 55–75% alpha */
+
+    /* ── Authentication surface (AUTH_UI_SPEC.md §2) ──
+     * The auth form sits on a WARM IVORY card against the dark cinematic page.
+     * Ivory rather than white, so it reads as paper rather than as a dialog,
+     * and warm rather than cool so it sits with the gold side of the palette.
+     * Ink on this surface is --blak-forest (17.4:1); muted ink is 7.6:1. */
+    --auth-surface: 244 241 234; /* #F4F1EA card */
+    --auth-field: 234 230 220; /* #EAE6DC input fill — one step warmer/darker */
+    --auth-border: 214 207 190; /* #D6CFBE hairline */
+    --auth-ink: 6 26 14; /* #061A0E primary ink on ivory */
+    --auth-ink-2: 74 90 80; /* #4A5A50 secondary ink on ivory */
   }
 }
 
@@ -321,31 +380,31 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Themed scrollbars (§1) — kept deliberately quiet so the bar barely reads:
-   * a transparent track (no green stripe), a slim neutral thumb that only tints
-   * green on hover, and no native up/down arrow buttons. Firefox uses
-   * scrollbar-width/color; Chromium/WebKit use the pseudo elements. */
+  /* Themed scrollbars (§1) — subtle branded bar: thin thumb, soft track, no
+   * native up/down arrow buttons. Firefox uses scrollbar-width/color;
+   * Chromium/WebKit use the pseudo elements. */
   html {
     scrollbar-width: thin;
-    scrollbar-color: rgb(var(--ink-3) / 0.35) transparent;
+    scrollbar-color: rgb(var(--green) / 0.35) transparent;
   }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background-color: transparent;
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--ink-3) / 0.35);
+    background-color: rgb(var(--green) / 0.35);
     border-radius: 999px;
     /* Transparent border + content-box clip leaves breathing room around the
      * thumb so it looks slim and pill-shaped, not edge-to-edge. */
-    border: 3px solid transparent;
+    border: 2px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--green) / 0.7);
+    background-color: rgb(var(--green) / 0.55);
   }
   /* Remove the native arrow buttons (single + double, both ends). */
   ::-webkit-scrollbar-button,
@@ -358,6 +417,33 @@
   }
   ::-webkit-scrollbar-corner {
     background: transparent;
+  }
+
+  /* Sidebar nav — nearly invisible so it doesn't compete with the rail. */
+  .shell-sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--ink-3) / 0.22) transparent;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--ink-3) / 0.22);
+    border-radius: 999px;
+    border: none;
+    background-clip: border-box;
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--ink-3) / 0.4);
+  }
+  .shell-sidebar-nav::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   /* Native form controls on-brand (§19): `accent-color` recolours the browser's
@@ -396,5 +482,364 @@
       linear-gradient(to right, rgb(255 255 255 / 0.08) 1px, transparent 1px),
       linear-gradient(to bottom, rgb(255 255 255 / 0.08) 1px, transparent 1px);
     background-size: 40px 40px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * BLAK MOH cinematic landing — scoped styles
+ * Everything below is gated behind `.landing-root`, which only ever wraps
+ * src/app/(landing)/**. The portal never sees any of it.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/* Anchor navigation: smooth only when motion is welcome, and every anchor
+ * target clears the floating nav so a heading is never hidden under it. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing-root) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Hide the viewport (and nested) scrollbars on the cinematic landing — the
+ * branded green bar reads as chrome on the black canvas. Page still scrolls
+ * with wheel/trackpad/keys/touch; the portal keeps its themed scrollbars. */
+html:has(.landing-root) {
+  scrollbar-width: none;
+}
+html:has(.landing-root)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.landing-root [id] {
+  scroll-margin-top: 6.5rem;
+}
+
+.landing-root {
+  background-color: rgb(var(--blak-black));
+  color: rgb(var(--blak-text));
+  scrollbar-width: none;
+}
+
+.landing-root ::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Consistent, high-visibility focus ring on the dark canvas (WCAG 2.2 AA:
+ * ≥3:1 against the adjacent backdrop — brand green on black is 7.4:1). */
+.landing-root :focus-visible {
+  outline: 2px solid rgb(var(--blak-green));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Readability mask placed between the 3D scene and the hero copy, so the text
+ * keeps its contrast whatever the scene is doing behind it.
+ *
+ * Small screens get a centred radial (copy is full-width there). From `lg` up
+ * the copy is left-aligned editorial and the scene sits to the right, so the
+ * mask becomes left-weighted — it protects the headline without dimming the
+ * half of the frame the composition actually lives in. */
+.landing-readability-mask {
+  background: radial-gradient(
+    ellipse 78% 60% at 50% 45%,
+    rgb(var(--blak-black) / 0.86) 0%,
+    rgb(var(--blak-black) / 0.6) 45%,
+    transparent 100%
+  );
+}
+
+@media (min-width: 1024px) {
+  .landing-readability-mask {
+    background: linear-gradient(
+      100deg,
+      rgb(var(--blak-black) / 0.94) 0%,
+      rgb(var(--blak-black) / 0.8) 34%,
+      rgb(var(--blak-black) / 0.34) 58%,
+      transparent 82%
+    );
+  }
+}
+
+/* Edge vignette — pulls the eye to the centre of the composition. */
+.landing-vignette {
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    transparent 55%,
+    rgb(var(--blak-black) / 0.75) 100%
+  );
+}
+
+/* The single environmental background layer (see LANDING_PAGE_COMPONENT_MAP.md
+ * §2): slow-drifting volumetric light shafts built from conic + radial
+ * gradients. CSS-only — no second WebGL canvas competing with the hero scene. */
+@keyframes blak-rays-drift {
+  0%,
+  100% {
+    transform: translate3d(-2%, 0, 0) rotate(-1.5deg);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(2%, 0, 0) rotate(1.5deg);
+    opacity: 0.85;
+  }
+}
+
+/* The drift is a desktop affordance. On a phone the shafts are barely legible
+ * and animating a full-viewport gradient forces a continuous repaint of the
+ * whole page behind the grain overlay — expensive enough on a throttled CPU to
+ * hold back the hero's Largest Contentful Paint. Below `md` the light field is
+ * simply static. */
+@media (max-width: 767px) {
+  .landing-rays {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+.landing-rays {
+  background:
+    conic-gradient(
+      from 200deg at 30% -10%,
+      transparent 0deg,
+      rgb(var(--blak-green) / 0.13) 12deg,
+      transparent 24deg,
+      transparent 36deg,
+      rgb(var(--blak-green) / 0.07) 46deg,
+      transparent 58deg
+    ),
+    conic-gradient(
+      from 320deg at 72% -10%,
+      transparent 0deg,
+      rgb(var(--blak-gold) / 0.1) 14deg,
+      transparent 28deg
+    );
+  animation: blak-rays-drift 24s ease-in-out infinite;
+}
+
+/* ── Hero entrance ──────────────────────────────────────────────────────────
+ * The above-the-fold hero animates with CSS, not JavaScript, and this is a
+ * performance decision rather than a stylistic one.
+ *
+ * Driving the hero copy with a JS animation library means the browser paints
+ * nothing until React has hydrated, so the Largest Contentful Paint element
+ * cannot appear until the whole client bundle has downloaded, parsed and run.
+ * Measured on a throttled mobile profile that put LCP at 4.6s. A CSS animation
+ * starts at first paint with no JS at all.
+ *
+ * Everything BELOW the fold still uses the JS scroll-reveal — there the trigger
+ * genuinely depends on scroll position, and by then hydration has long since
+ * finished. */
+@keyframes blak-hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.landing-hero-enter {
+  animation: blak-hero-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Per-word masked reveal for the hero headline — same look as the JS reveal
+ * used further down the page, but free of any hydration dependency. */
+@keyframes blak-hero-word {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(105%);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+.landing-hero-word {
+  display: inline-block;
+  animation: blak-hero-word 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Reveal for the green→gold gradient lines.
+ *
+ * These lines are painted with `background-clip: text`, and that is fragile in
+ * a very specific way: any descendant that creates its own stacking context
+ * paints its own glyphs, using the inherited `color: transparent`, and the
+ * ancestor's clipped background never reaches them — the line renders
+ * completely invisible. `transform` does that. So does `filter`, including
+ * `filter: blur(0)`. So does `will-change: transform`.
+ *
+ * Caught on a mobile filmstrip where "Ambition becomes leadership." simply was
+ * not there, then again after a first fix that only removed the transform.
+ *
+ * So gradient lines are animated as ONE element — the line itself, which owns
+ * the background — with opacity alone. No per-word split, no blur, no
+ * transform, nothing nested. */
+@keyframes blak-line-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.landing-line-fade {
+  animation: blak-line-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Scroll-triggered variant: hidden until the observer adds `.is-visible`. */
+@media (scripting: enabled) {
+  .landing-line-reveal:not(.is-visible) {
+    opacity: 0;
+  }
+}
+
+.landing-line-reveal.is-visible {
+  animation: blak-line-fade 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Scroll reveals ─────────────────────────────────────────────────────────
+ * Blocks and headings below the fold fade up when they first come into view.
+ *
+ * These are CSS transitions toggled by a one-line IntersectionObserver rather
+ * than animation-library components. There are ~40 of them on the page, and
+ * hydrating 40 JS-driven animators was the single largest contributor to
+ * main-thread work on a throttled mobile profile. A class toggle costs nothing.
+ *
+ * The hidden state is inside `@media (scripting: enabled)` on purpose: with
+ * JavaScript unavailable there is nothing to add `.is-visible`, so without the
+ * guard every revealed section would stay permanently invisible. Wrapped this
+ * way, a no-JS visitor simply gets the finished page. */
+.landing-reveal,
+.landing-reveal-text .landing-word {
+  will-change: opacity, transform;
+}
+
+@media (scripting: enabled) {
+  .landing-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .landing-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .landing-reveal-text:not(.is-visible) .landing-word {
+    opacity: 0;
+  }
+}
+
+.landing-reveal-text.is-visible .landing-word {
+  animation: blak-hero-word 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Reduced motion: everything is simply present, immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-root .landing-hero-enter,
+  .landing-root .landing-hero-word,
+  .landing-root .landing-line-fade,
+  .landing-root .landing-line-reveal,
+  .landing-root .landing-reveal-text.is-visible .landing-word {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .landing-root .landing-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .landing-root .landing-reveal-text .landing-word {
+    opacity: 1 !important;
+  }
+}
+
+/* Film grain.
+ *
+ * The tile is a 160×160 data-URI so the browser rasterises the turbulence
+ * ONCE and repeats it. The obvious implementation — an inline <svg> with
+ * feTurbulence stretched across the viewport — makes the compositor filter a
+ * full-screen surface on every paint, which on a throttled mobile profile
+ * delayed the hero's Largest Contentful Paint by seconds. Same look, a
+ * fraction of the cost. */
+.landing-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Soft ambient glow blooms, used behind the core and the CTA. */
+@keyframes blak-bloom {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+.landing-bloom {
+  animation: blak-bloom 9s ease-in-out infinite;
+}
+
+/* Light travelling along the connection — used by the static/fallback hero and
+ * the bilingual section's two paths. */
+@keyframes blak-stream {
+  0% {
+    stroke-dashoffset: 240;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.landing-stream {
+  animation: blak-stream 4.5s linear infinite;
+}
+
+@keyframes blak-pulse-ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.landing-pulse-ring {
+  animation: blak-pulse-ring 3.6s ease-out infinite;
+}
+
+/* Reduced motion: freeze every ambient landing animation on a composed still
+ * frame. Content and function are unchanged (spec §8). */
+@media (prefers-reduced-motion: reduce) {
+  .landing-root .landing-rays,
+  .landing-root .landing-bloom,
+  .landing-root .landing-stream,
+  .landing-root .landing-pulse-ring {
+    animation: none !important;
+  }
+  .landing-root .landing-stream {
+    stroke-dashoffset: 0 !important;
   }
 }

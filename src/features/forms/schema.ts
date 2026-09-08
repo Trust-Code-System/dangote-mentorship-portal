@@ -18,6 +18,10 @@ export const FORM_FIELD_TYPES = [
   'long_text',
   'rating',
   'single_select',
+  // Tick as many as apply. The programme's paper forms use checkbox lists for
+  // questions like "what support do you need?", where forcing one answer would
+  // lose information.
+  'multi_select',
   'boolean',
 ] as const;
 export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
@@ -47,15 +51,33 @@ export const formFieldSchema = z
     required: z.boolean().default(false),
     // Rating scale upper bound (1..max). Only meaningful for `rating`.
     max: z.number().int().min(2).max(10).optional(),
-    // Only meaningful for `single_select`.
+    // Only meaningful for `single_select` / `multi_select`.
     options: z.array(optionSchema).max(20).optional(),
+    // Cap on how many options may be ticked. Only meaningful for
+    // `multi_select`; unset means "any number".
+    maxSelections: z.number().int().min(1).max(20).optional(),
   })
   .superRefine((field, ctx) => {
-    if (field.type === 'single_select' && (!field.options || field.options.length < 2)) {
+    const needsOptions = field.type === 'single_select' || field.type === 'multi_select';
+    if (needsOptions && (!field.options || field.options.length < 2)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'A multiple-choice question needs at least two options.',
         path: ['options'],
+      });
+    }
+    // A cap above the number of options is not wrong so much as meaningless,
+    // and it would let an author think they had limited something.
+    if (
+      field.type === 'multi_select' &&
+      field.maxSelections !== undefined &&
+      field.options &&
+      field.maxSelections > field.options.length
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'The limit cannot exceed the number of options.',
+        path: ['maxSelections'],
       });
     }
   });
@@ -124,3 +146,6 @@ export const formDefinitionIdSchema = z.object({ id: z.string().cuid() });
 
 export type CreateFormDefinitionInput = z.infer<typeof createFormDefinitionSchema>;
 export type UpdateFormDefinitionInput = z.infer<typeof updateFormDefinitionSchema>;
+
+/** Install the standard question sets into one cohort. */
+export const installStandardFormsSchema = z.object({ cohortId: z.string().cuid() });

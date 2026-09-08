@@ -3,9 +3,58 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
-import { requireUser } from '@/lib/auth/rbac';
+import { requireUser, hasAnyRole } from '@/lib/auth/rbac';
+import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
+import { countUnreadMessages } from '@/features/messages/data';
+import { getUnreadCount, getUserNotifications } from './data';
 import { NOTIFICATION_TYPES } from './types';
+
+/** Shell dropdown payload — fetched on open so layouts skip the recent list query. */
+export interface RecentNotificationItem {
+  id: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+}
+
+export async function fetchRecentNotifications(
+  limit = 6,
+): Promise<ActionResult<{ items: RecentNotificationItem[] }>> {
+  try {
+    const user = await requireUser();
+    const rows = await getUserNotifications(user.id, limit);
+    return ok({
+      items: rows.map((n) => ({
+        id: n.id,
+        title: n.title,
+        body: n.body,
+        link: n.link,
+        read: n.readAt !== null,
+      })),
+    });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+/** Unread badges for the shell — loaded client-side so layouts stay off the badge DB path. */
+export async function fetchShellBadges(): Promise<
+  ActionResult<{ unreadNotifications: number; unreadMessages: number }>
+> {
+  try {
+    const user = await requireUser();
+    const isAdmin = hasAnyRole(user, ADMIN_ROLES);
+    const [unreadNotifications, unreadMessages] = await Promise.all([
+      getUnreadCount(user.id),
+      isAdmin ? Promise.resolve(0) : countUnreadMessages(user.id),
+    ]);
+    return ok({ unreadNotifications, unreadMessages });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
 
 // In-app notification controls (experience-layer.md §1.10). Marking read is
 // transient state (not audited); preferences are a per-user setting.

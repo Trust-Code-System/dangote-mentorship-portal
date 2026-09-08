@@ -13,21 +13,43 @@ export async function buildAdminNavSections(
   unread: number,
   roles: RoleName[] = [],
 ): Promise<NavSection[]> {
-  const [t, tImports, tMatching, tPeople, tInvites, tSupport, tForms, tLists, tInsights, tSettings, tNav, tShell] =
-    await Promise.all([
-      getTranslations('admin'),
-      getTranslations('imports'),
-      getTranslations('matching'),
-      getTranslations('people'),
-      getTranslations('invites'),
-      getTranslations('support'),
-      getTranslations('forms'),
-      getTranslations('adminLists'),
-      getTranslations('insights'),
-      getTranslations('settings'),
-      getTranslations('nav'),
-      getTranslations('shell'),
-    ]);
+  const [
+    t,
+    tImports,
+    tMatching,
+    tPeople,
+    tInvites,
+    tSupport,
+    tForms,
+    tLists,
+    tInsights,
+    tSettings,
+    tCertificates,
+    tNav,
+    tShell,
+    tAssessments,
+    tReports,
+    tNewsletters,
+    tEngagement,
+  ] = await Promise.all([
+    getTranslations('admin'),
+    getTranslations('imports'),
+    getTranslations('matching'),
+    getTranslations('people'),
+    getTranslations('invites'),
+    getTranslations('support'),
+    getTranslations('forms'),
+    getTranslations('adminLists'),
+    getTranslations('insights'),
+    getTranslations('settings'),
+    getTranslations('adminCertificates'),
+    getTranslations('nav'),
+    getTranslations('shell'),
+    getTranslations('assessments'),
+    getTranslations('reports'),
+    getTranslations('newsletters'),
+    getTranslations('engagement'),
+  ]);
 
   // Platform settings are Super-Admin only (CLAUDE.md §4); hide the link from
   // Programme Admins, who would only be bounced off the page.
@@ -40,13 +62,19 @@ export async function buildAdminNavSections(
         { href: '/admin', label: tNav('dashboard'), icon: 'dashboard', primary: true, exact: true },
         { href: '/admin/matching', label: tMatching('title'), icon: 'matching', primary: true },
         { href: '/admin/insights', label: tInsights('navLabel'), icon: 'insights' },
+        { href: '/admin/engagement', label: tEngagement('navLabel'), icon: 'engagement' },
         { href: '/admin/programmes', label: t('programmes'), icon: 'programmes' },
         { href: '/admin/cohorts', label: t('cohorts'), icon: 'cohorts' },
         { href: '/admin/imports', label: tImports('title'), icon: 'imports' },
         { href: '/admin/forms', label: tForms('title'), icon: 'forms' },
+        { href: '/admin/assessments', label: tAssessments('adminTitle'), icon: 'assessment' },
+        { href: '/admin/reports', label: tReports('title'), icon: 'reports' },
+        { href: '/admin/newsletters', label: tNewsletters('title'), icon: 'newsletters' },
         { href: '/admin/goals', label: tLists('navGoals'), icon: 'goals' },
+        { href: '/admin/sessions', label: tLists('navSessions'), icon: 'sessions' },
         { href: '/admin/meetings', label: tLists('navMeetings'), icon: 'meetings' },
         { href: '/admin/training', label: tLists('navTraining'), icon: 'training' },
+        { href: '/admin/certificates', label: tCertificates('navLabel'), icon: 'certificate' },
       ],
     },
     {
@@ -61,14 +89,21 @@ export async function buildAdminNavSections(
       ? [
           {
             label: tShell('navPlatform'),
-            items: [{ href: '/admin/settings', label: tSettings('title'), icon: 'settings' as const }],
+            items: [
+              { href: '/admin/settings', label: tSettings('title'), icon: 'settings' as const },
+            ],
           },
         ]
       : []),
     {
       label: tShell('navHelp'),
       items: [
-        { href: '/notifications', label: tNav('notifications'), icon: 'notifications', badge: unread || undefined },
+        {
+          href: '/notifications',
+          label: tNav('notifications'),
+          icon: 'notifications',
+          badge: unread || undefined,
+        },
         { href: '/admin/support', label: tSupport('queueTitle'), icon: 'support' },
       ],
     },
@@ -80,15 +115,27 @@ export async function buildParticipantNavSections(
   unread: number,
   unreadMessages = 0,
 ): Promise<NavSection[]> {
-  const [tNav, tShell] = await Promise.all([getTranslations('nav'), getTranslations('shell')]);
+  const [tNav, tShell, tAssessments, tReports, tMonthly] = await Promise.all([
+    getTranslations('nav'),
+    getTranslations('shell'),
+    getTranslations('assessments'),
+    getTranslations('reports'),
+    getTranslations('monthlyForm'),
+  ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
+  const isMentee = roles.includes(RoleName.MENTEE);
 
   const pairItems: NavItem[] = isPair
     ? [
         { href: '/pair', label: tNav('pair'), icon: 'pair', primary: true },
         { href: '/goals', label: tNav('goals'), icon: 'goals', primary: true },
         { href: '/sessions', label: tNav('sessions'), icon: 'sessions', primary: true },
-        { href: '/messages', label: tNav('messages'), icon: 'messages', badge: unreadMessages || undefined },
+        {
+          href: '/messages',
+          label: tNav('messages'),
+          icon: 'messages',
+          badge: unreadMessages || undefined,
+        },
         { href: '/meetings', label: tNav('meetings'), icon: 'meetings' },
         { href: '/calendar', label: tNav('calendar'), icon: 'calendar' },
         { href: '/journal', label: tNav('journal'), icon: 'journal' },
@@ -100,7 +147,13 @@ export async function buildParticipantNavSections(
     {
       label: tShell('navMain'),
       items: [
-        { href: defaultDashboardPath(roles), label: tNav('dashboard'), icon: 'dashboard', primary: true, exact: true },
+        {
+          href: defaultDashboardPath(roles),
+          label: tNav('dashboard'),
+          icon: 'dashboard',
+          primary: true,
+          exact: true,
+        },
         ...pairItems,
       ],
     },
@@ -109,8 +162,26 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
+              // Mentees owe the monthly meeting form; mentors do not.
+              ...(isMentee
+                ? [
+                    {
+                      href: '/monthly-form',
+                      label: tMonthly('navLabel'),
+                      icon: 'monthly' as const,
+                    },
+                  ]
+                : []),
+              // The quarterly assessment is owed by both sides of the pair.
+              {
+                href: '/assessment',
+                label: tAssessments('navLabel'),
+                icon: 'assessment' as const,
+              },
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
+              { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },
+              { href: '/certificate', label: tNav('certificate'), icon: 'certificate' as const },
             ],
           },
         ]
@@ -118,7 +189,12 @@ export async function buildParticipantNavSections(
     {
       label: tShell('navHelp'),
       items: [
-        { href: '/notifications', label: tNav('notifications'), icon: 'notifications', badge: unread || undefined },
+        {
+          href: '/notifications',
+          label: tNav('notifications'),
+          icon: 'notifications',
+          badge: unread || undefined,
+        },
         { href: '/support', label: tNav('support'), icon: 'support' },
         { href: '/help', label: tNav('help'), icon: 'help' },
       ],

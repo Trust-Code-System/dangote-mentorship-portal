@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -14,6 +14,7 @@ import {
   FileSignature,
   ClipboardCheck,
   Award,
+  ScrollText,
   LifeBuoy,
   HelpCircle,
   Bell,
@@ -27,6 +28,11 @@ import {
   Mail,
   BarChart3,
   Settings,
+  CalendarClock,
+  CalendarCheck,
+  Activity,
+  FileText,
+  Newspaper,
   Menu,
   X,
   ChevronLeft,
@@ -39,7 +45,47 @@ import { LocaleSwitcher } from '@/components/locale-switcher';
 import { BrandMark } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
+import { NavSpinner } from '@/components/shell/nav-spinner';
+import {
+  isNavItemCommitted,
+  resolveNavItemVisualState,
+} from '@/components/shell/nav-item-state';
+import {
+  fetchRecentNotifications,
+  fetchShellBadges,
+} from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
+
+/** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
+const PENDING_NAV_TIMEOUT_MS = 12_000;
+
+function ShellAvatar({
+  imageUrl,
+  initials,
+}: {
+  imageUrl: string | null | undefined;
+  initials: string;
+}) {
+  const [failedUrl, setFailedUrl] = React.useState<string | null>(null);
+
+  if (!imageUrl || failedUrl === imageUrl) return <>{initials}</>;
+
+  return (
+    // The private avatar route can return 404 when a stored object was removed.
+    // Keep navigation usable and visually complete in that recoverable state.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={imageUrl}
+      alt=""
+      className="size-full object-cover"
+      onError={() => setFailedUrl(imageUrl)}
+    />
+  );
+}
+/** Avoid flicker for very fast background refreshes. */
+const REFRESH_INDICATOR_MIN_MS = 150;
+/** Survives AppShell remount when crossing (admin) ↔ (dashboard) layouts. */
+const SIDEBAR_SCROLL_KEY = 'shell:sidebar-scroll';
 
 // AppShell (§19 §3) — the authenticated chrome shared by the participant and
 // admin areas: a collapsible left sidebar (icons + grouped nav), a slim top bar
@@ -58,6 +104,7 @@ export type IconKey =
   | 'agreements'
   | 'midterm'
   | 'final'
+  | 'certificate'
   | 'support'
   | 'help'
   | 'notifications'
@@ -72,7 +119,12 @@ export type IconKey =
   | 'invites'
   | 'training'
   | 'insights'
-  | 'settings';
+  | 'settings'
+  | 'assessment'
+  | 'monthly'
+  | 'reports'
+  | 'newsletters'
+  | 'engagement';
 
 const ICONS: Record<IconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -85,6 +137,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   agreements: FileSignature,
   midterm: ClipboardCheck,
   final: Award,
+  certificate: ScrollText,
   support: LifeBuoy,
   help: HelpCircle,
   notifications: Bell,
@@ -100,6 +153,11 @@ const ICONS: Record<IconKey, LucideIcon> = {
   training: Award,
   insights: BarChart3,
   settings: Settings,
+  assessment: CalendarClock,
+  monthly: CalendarCheck,
+  reports: FileText,
+  newsletters: Newspaper,
+  engagement: Activity,
 };
 
 export interface NavItem {
@@ -132,6 +190,10 @@ export interface AppShellLabels {
   collapse: string;
   expand: string;
   more: string;
+  /** Quiet header cue while cached RSC is revalidated in the background. */
+  updating: string;
+  /** Screen-reader label for the sidebar pending spinner. */
+  navigating: string;
 }
 
 export interface NotifItem {
@@ -152,54 +214,291 @@ export interface AppShellUser {
 export interface AppShellProps {
   sections: NavSection[];
   user: AppShellUser;
-  unread: number;
-  recent: NotifItem[];
+  /** Initial unread notification count (layouts pass 0; client hydrates). */
+  unread?: number;
+  /** When true, fetch notification/message badges after mount (non-blocking). */
+  loadBadges?: boolean;
   labels: AppShellLabels;
   children: React.ReactNode;
 }
 
-function isActive(pathname: string, href: string, exact?: boolean): boolean {
-  if (href === pathname) return true;
-  if (exact) return false;
-  // Avoid '/'-style false positives; match nested routes only on a segment edge.
-  return href !== '/' && pathname.startsWith(href + '/');
+function withBadges(
+  sections: NavSection[],
+  unreadNotifications: number,
+  unreadMessages: number,
+): NavSection[] {
+  return sections.map((section) => ({
+    ...section,
+    items: section.items.map((item) => {
+      if (item.href === '/notifications') {
+        return { ...item, badge: unreadNotifications || undefined };
+      }
+      if (item.href === '/messages' || item.href.startsWith('/messages/')) {
+        return { ...item, badge: unreadMessages || undefined };
+      }
+      return item;
+    }),
+  }));
 }
 
-export function AppShell({ sections, user, unread, recent, labels, children }: AppShellProps) {
+export function AppShell({
+  sections,
+  user,
+  unread: unreadProp = 0,
+  loadBadges = false,
+  labels,
+  children,
+}: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
+  // Pending destination only — never shares the full active chrome with the committed route.
+  const [pendingHref, setPendingHref] = React.useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [recent, setRecent] = React.useState<NotifItem[]>([]);
+  const [recentStatus, setRecentStatus] = React.useState<
+    'idle' | 'loading' | 'ready' | 'error'
+  >('idle');
+  const [unread, setUnread] = React.useState(unreadProp);
+  const [unreadMessages, setUnreadMessages] = React.useState(0);
 
-  // Close the notification dropdown on route change.
+  const prefetchedRef = React.useRef(new Set<string>());
+  const visitedRef = React.useRef(new Set<string>());
+  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const refreshGenRef = React.useRef(0);
+  const sidebarNavRef = React.useRef<HTMLElement>(null);
+
+  // Restore sidebar scroll after layout remounts (e.g. /admin → /notifications).
+  // sessionStorage so it survives the unmount; useLayoutEffect avoids a top→saved flash.
+  React.useLayoutEffect(() => {
+    const nav = sidebarNavRef.current;
+    if (!nav) return;
+    try {
+      const saved = window.sessionStorage.getItem(SIDEBAR_SCROLL_KEY);
+      if (saved != null) {
+        const top = Number(saved);
+        if (Number.isFinite(top) && top > 0) nav.scrollTop = top;
+      }
+    } catch {
+      // sessionStorage can throw in private mode; ignore.
+    }
+  }, []);
+
+  function clearPendingTimer() {
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
+  }
+
+  function armPendingTimeout() {
+    clearPendingTimer();
+    pendingTimerRef.current = setTimeout(() => {
+      setPendingHref(null);
+      pendingTimerRef.current = null;
+    }, PENDING_NAV_TIMEOUT_MS);
+  }
+
+  // Close overlays and clear pending when the URL commits. Repeat visits reuse
+  // the Next.js client router cache (staleTimes) for instant content; we do NOT
+  // call router.refresh() on every navigation — in Next 16 that eagerly
+  // re-prefetches in-viewport Links and defeats neighbouring cache hits.
   React.useEffect(() => {
-    setNotifOpen(false);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setNotifOpen(false);
+      setMobileOpen(false);
+      setPendingHref(null);
+      clearPendingTimer();
+      setRecent([]);
+      setRecentStatus('idle');
+    });
+    visitedRef.current.add(pathname);
+    return () => {
+      cancelled = true;
+    };
   }, [pathname]);
+
+  // Quiet background revalidation when the tab regains focus on a previously
+  // visited route. Mutations already revalidatePath + router.refresh() locally.
+  React.useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    function softRefreshCurrentRoute() {
+      if (!visitedRef.current.has(pathname)) return;
+      const gen = ++refreshGenRef.current;
+      let shownAt = 0;
+
+      const showTimer = setTimeout(() => {
+        if (refreshGenRef.current !== gen) return;
+        shownAt = Date.now();
+        setIsRefreshing(true);
+      }, REFRESH_INDICATOR_MIN_MS);
+      timers.push(showTimer);
+
+      void Promise.resolve(router.refresh()).finally(() => {
+        if (refreshGenRef.current !== gen) return;
+        clearTimeout(showTimer);
+        if (!shownAt) {
+          setIsRefreshing(false);
+          return;
+        }
+        const remain = Math.max(
+          0,
+          REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt),
+        );
+        timers.push(
+          setTimeout(() => {
+            if (refreshGenRef.current === gen) setIsRefreshing(false);
+          }, remain),
+        );
+      });
+    }
+
+    function onFocus() {
+      softRefreshCurrentRoute();
+    }
+    function onVisibility() {
+      if (document.visibilityState === 'visible') softRefreshCurrentRoute();
+    }
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      refreshGenRef.current += 1;
+      for (const id of timers) clearTimeout(id);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+      setIsRefreshing(false);
+    };
+  }, [pathname, router]);
 
   // Persist the desktop collapse preference so it doesn't reset on navigation.
   React.useEffect(() => {
     const saved = window.localStorage.getItem('shell:collapsed');
-    if (saved) setCollapsed(saved === '1');
+    if (saved) queueMicrotask(() => setCollapsed(saved === '1'));
   }, []);
   React.useEffect(() => {
     window.localStorage.setItem('shell:collapsed', collapsed ? '1' : '0');
   }, [collapsed]);
 
-  // Close the mobile drawer on route change.
-  React.useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  React.useEffect(() => () => clearPendingTimer(), []);
 
-  const allItems = sections.flatMap((s) => s.items);
+  // Badge hydration — runs after paint and on focus; never blocks sidebar clicks.
+  React.useEffect(() => {
+    if (!loadBadges) return;
+    let cancelled = false;
+
+    function refreshBadges() {
+      void fetchShellBadges().then((result) => {
+        if (cancelled || !result.ok) return;
+        setUnread(result.data.unreadNotifications);
+        setUnreadMessages(result.data.unreadMessages);
+      });
+    }
+
+    refreshBadges();
+    function onFocus() {
+      refreshBadges();
+    }
+    window.addEventListener('focus', onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadBadges, pathname]);
+
+  // Load recent notification bodies only when the dropdown opens (not on every nav).
+  // Depend only on notifOpen — including recentStatus caused a stuck skeleton:
+  // set('loading') re-ran the effect, cancelled the in-flight fetch, then bailed
+  // on the loading guard so the result was never applied.
+  React.useEffect(() => {
+    if (!notifOpen) return;
+
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
+      return fetchRecentNotifications(6);
+    }).then((result) => {
+      if (!result) return;
+      if (cancelled) return;
+      if (result.ok) {
+        setRecent(result.data.items);
+        setRecentStatus('ready');
+      } else {
+        setRecentStatus((prev) => (prev === 'ready' ? prev : 'error'));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [notifOpen]);
+
+  const navSections = withBadges(sections, unread, unreadMessages);
+  const allItems = navSections.flatMap((s) => s.items);
   const primary = allItems.filter((i) => i.primary).slice(0, 4);
+  const navigating = pendingHref !== null;
+
+  function prefetchHref(href: string) {
+    if (prefetchedRef.current.has(href) || href === pathname) return;
+    prefetchedRef.current.add(href);
+    try {
+      router.prefetch(href);
+    } catch {
+      // Prefetch is best-effort; navigation still works without it.
+      prefetchedRef.current.delete(href);
+    }
+  }
+
+  function onNavClick(
+    href: string,
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    // Same destination already pending — ignore repeat clicks without blocking others.
+    if (pendingHref === href) {
+      event.preventDefault();
+      return;
+    }
+    // Already on this exact route — no duplicate pending chrome.
+    if (href === pathname) {
+      event.preventDefault();
+      return;
+    }
+    setPendingHref(href);
+    armPendingTimeout();
+    prefetchHref(href);
+  }
 
   return (
     <div className="min-h-screen bg-bg">
+      {/* Thin top progress — visible only while a sidebar/tab nav is pending. */}
+      <div
+        aria-hidden={!navigating}
+        className={cn(
+          'pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden bg-transparent',
+          navigating ? 'opacity-100' : 'opacity-0',
+        )}
+      >
+        <div
+          className={cn(
+            'h-full w-1/3 bg-green',
+            navigating && 'animate-pulse motion-reduce:animate-none',
+          )}
+        />
+      </div>
+
       {/* ── Mobile backdrop ── */}
       {mobileOpen && (
         <div
           aria-hidden
-          className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-ink/30 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -229,7 +528,9 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                   name={labels.brand}
                   className="block max-w-[7.5rem] whitespace-normal font-display text-[0.72rem] font-bold leading-tight text-ink"
                 />
-                <span className="mt-0.5 block text-[0.58rem] text-ink-3">{labels.subtitle}</span>
+                <span className="mt-0.5 block text-[0.58rem] text-ink-3">
+                  {labels.subtitle}
+                </span>
               </span>
             )}
           </Link>
@@ -244,7 +545,11 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
               collapsed ? 'lg:mx-auto' : 'ml-auto',
             )}
           >
-            {collapsed ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
+            {collapsed ? (
+              <ChevronRight className="size-5" />
+            ) : (
+              <ChevronLeft className="size-5" />
+            )}
           </button>
 
           {/* Mobile drawer close */}
@@ -258,36 +563,91 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
           </button>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-2">
-          {sections.map((section, si) => (
+        {/* Nav — thin near-invisible scrollbar; scroll position persisted across layout remounts */}
+        <nav
+          ref={sidebarNavRef}
+          className="shell-sidebar-nav flex-1 space-y-3 overflow-y-auto px-2 py-2"
+          onScroll={(event) => {
+            try {
+              window.sessionStorage.setItem(
+                SIDEBAR_SCROLL_KEY,
+                String(event.currentTarget.scrollTop),
+              );
+            } catch {
+              // Ignore quota / private-mode failures.
+            }
+          }}
+        >
+          {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
-              {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
+              {section.label && !collapsed && (
+                <p className="sr-only">{section.label}</p>
+              )}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
-                const active = isActive(pathname, item.href, item.exact);
+                const visual = resolveNavItemVisualState({
+                  pathname,
+                  href: item.href,
+                  exact: item.exact,
+                  pendingHref,
+                });
+                const committed = isNavItemCommitted(
+                  pathname,
+                  item.href,
+                  item.exact,
+                );
+                const active = visual === 'active';
+                const pending = visual === 'pending';
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={false}
                     title={collapsed ? item.label : undefined}
-                    aria-current={active ? 'page' : undefined}
+                    aria-current={committed ? 'page' : undefined}
+                    aria-busy={pending || undefined}
+                    data-nav-state={visual}
+                    onClick={(e) => onNavClick(item.href, e)}
+                    onPointerEnter={() => prefetchHref(item.href)}
+                    onFocus={() => prefetchHref(item.href)}
                     className={cn(
-                      'group flex items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
+                      'group flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
                       collapsed && 'lg:justify-center lg:px-0',
-                      active
-                        ? 'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong'
-                        : 'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                      active &&
+                        'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong',
+                      pending &&
+                        'border border-green/40 bg-green-soft/25 font-medium text-green-strong/90',
+                      !active &&
+                        !pending &&
+                        'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                      pending && 'opacity-90',
                     )}
                   >
                     <Icon
                       className={cn(
                         'size-4 shrink-0',
-                        active ? 'text-green-strong' : 'text-ink-3 group-hover:text-green-light',
+                        active || pending
+                          ? 'text-green-strong'
+                          : 'text-ink-3 group-hover:text-green-light',
                       )}
                     />
-                    {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                    {!collapsed && item.badge ? (
+                    {!collapsed && (
+                      <span
+                        className={cn(
+                          'flex-1 truncate',
+                          pending && 'opacity-80',
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                    )}
+                    {!collapsed && pending ? (
+                      <NavSpinner
+                        className="size-3.5"
+                        label={labels.navigating}
+                      />
+                    ) : null}
+                    {!collapsed && !pending && item.badge ? (
                       <span
                         className={cn(
                           'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-micro text-white',
@@ -317,22 +677,22 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
               className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-green-soft text-micro font-bold text-green-strong"
               title={user.name}
             >
-              {user.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                user.initials
-              )}
+              <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
             {!collapsed && (
               <Link href="/profile" className="min-w-0 flex-1 leading-tight">
-                <span className="block truncate text-small font-bold text-ink">{user.name}</span>
+                <span className="block truncate text-small font-bold text-ink">
+                  {user.name}
+                </span>
                 <span className="block truncate text-micro uppercase tracking-wider text-ink-3">
                   {user.roleLabel}
                 </span>
               </Link>
             )}
-            <form action={signOutAction} className={cn(collapsed && 'lg:hidden')}>
+            <form
+              action={signOutAction}
+              className={cn(collapsed && 'lg:hidden')}
+            >
               <button
                 type="submit"
                 aria-label={labels.signOut}
@@ -365,7 +725,9 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
           </button>
 
           {/* Global search — pages (client-side) + RBAC-scoped records (admins). */}
-          <GlobalSearch navItems={allItems.map((i) => ({ label: i.label, href: i.href }))} />
+          <GlobalSearch
+            navItems={allItems.map((i) => ({ label: i.label, href: i.href }))}
+          />
 
           <div className="ml-auto flex items-center gap-2">
             <LocaleSwitcher />
@@ -393,13 +755,23 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                     className="fixed inset-0 z-40"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface shadow-elevation-lg">
+                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface">
                     <div className="border-b border-border px-4 py-3">
                       <p className="text-small font-semibold text-ink">
                         {labels.notificationsTitle}
                       </p>
                     </div>
-                    {recent.length === 0 ? (
+                    {recentStatus === 'loading' || recentStatus === 'idle' ? (
+                      <div className="space-y-3 px-4 py-4" aria-busy="true">
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                      </div>
+                    ) : recentStatus === 'error' ? (
+                      <p className="px-4 py-6 text-center text-small text-ink-3">
+                        {labels.noNotifications}
+                      </p>
+                    ) : recent.length === 0 ? (
                       <p className="px-4 py-6 text-center text-small text-ink-3">
                         {labels.noNotifications}
                       </p>
@@ -419,7 +791,9 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                                   {n.title}
                                 </p>
                                 {n.body && (
-                                  <p className="line-clamp-2 text-micro text-ink-2">{n.body}</p>
+                                  <p className="line-clamp-2 text-micro text-ink-2">
+                                    {n.body}
+                                  </p>
                                 )}
                               </div>
                             </div>
@@ -427,7 +801,10 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                           return (
                             <li
                               key={n.id}
-                              className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}
+                              className={cn(
+                                'px-4 py-3',
+                                !n.read && 'bg-green-soft/40',
+                              )}
                             >
                               {n.link ? (
                                 <Link
@@ -447,7 +824,10 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
                     )}
                     <Link
                       href="/notifications"
-                      onClick={() => setNotifOpen(false)}
+                      onClick={(e) => {
+                        setNotifOpen(false);
+                        onNavClick('/notifications', e);
+                      }}
                       className="block border-t border-border px-4 py-3 text-center text-small font-medium text-green-strong hover:bg-surface-2"
                     >
                       {labels.seeAll}
@@ -461,18 +841,23 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
               aria-label={user.name}
               className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full border border-border bg-green-soft text-small font-bold text-green-strong transition-colors hover:border-green-light"
             >
-              {user.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                user.initials
-              )}
+              <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+        {/* Content — shell stays mounted; only this region swaps / refreshes. */}
+        <main className="relative mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+          {isRefreshing ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="pointer-events-none absolute right-4 top-5 z-10 flex items-center gap-1.5 text-micro text-ink-3 sm:right-5"
+            >
+              <NavSpinner className="size-3.5" />
+              <span>{labels.updating}</span>
+            </div>
+          ) : null}
           {children}
         </main>
       </div>
@@ -481,19 +866,45 @@ export function AppShell({ sections, user, unread, recent, labels, children }: A
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-bg lg:hidden">
         {primary.map((item) => {
           const Icon = ICONS[item.icon];
-          const active = isActive(pathname, item.href, item.exact);
+          const visual = resolveNavItemVisualState({
+            pathname,
+            href: item.href,
+            exact: item.exact,
+            pendingHref,
+          });
+          const committed = isNavItemCommitted(pathname, item.href, item.exact);
+          const active = visual === 'active';
+          const pending = visual === 'pending';
           return (
             <Link
               key={item.href}
               href={item.href}
-              aria-current={active ? 'page' : undefined}
+              prefetch={false}
+              aria-current={committed ? 'page' : undefined}
+              aria-busy={pending || undefined}
+              data-nav-state={visual}
+              onClick={(e) => onNavClick(item.href, e)}
+              onPointerEnter={() => prefetchHref(item.href)}
+              onFocus={() => prefetchHref(item.href)}
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 text-micro',
-                active ? 'text-green-strong' : 'text-ink-3',
+                'flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 text-micro transition-colors duration-150',
+                active && 'font-semibold text-green-strong',
+                pending && 'text-green-strong/85',
+                !active && !pending && 'text-ink-3',
               )}
             >
-              <Icon className="size-5" />
-              <span className="truncate">{item.label}</span>
+              <span className="relative">
+                <Icon className="size-5" />
+                {pending ? (
+                  <NavSpinner
+                    className="absolute -right-2 -top-1 size-3"
+                    label={labels.navigating}
+                  />
+                ) : null}
+              </span>
+              <span className={cn('truncate', pending && 'opacity-80')}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

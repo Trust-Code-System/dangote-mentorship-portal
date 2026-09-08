@@ -140,6 +140,15 @@ enum ActionItemStatus {
 enum ReviewType {
   MIDTERM
   FINAL
+  // Recurring every-3-months mentee assessment. Reuses the same editable
+  // FormDefinition/FormResponse machinery as the midterm/final reviews, but its
+  // responses are additionally tied to an AssessmentWindow so completion can
+  // gate portal access (see features/assessments).
+  QUARTERLY
+  // The mentee's monthly meeting form: their own account of the month's
+  // session(s). Same recurring-window machinery as QUARTERLY, but its windows
+  // carry gatesAccess = false — missing it produces reminders, never a lockout.
+  MONTHLY
 }
 
 enum ReviewStatus {
@@ -158,6 +167,21 @@ enum NewsletterStatus {
   DRAFT
   SCHEDULED
   SENT
+}
+
+// Who a report covers. Drives which reads the builder runs and which sections
+// the export contains (CLAUDE.md §12 dashboards → §13 "Reports").
+enum ReportKind {
+  // A mentee's own progress report (their goals, sessions, assessments).
+  MENTEE_PROGRESS
+  // A mentor's report on one mentee they are paired with.
+  MENTOR_PAIR
+  // A cohort-wide programme report (admins only).
+  PROGRAMME
+  // Weekly engagement report: who has gone quiet and what is outstanding.
+  // Generated automatically once a week (features/reports/cron.ts) and also
+  // available to admins on demand. Metadata only — never message content.
+  ENGAGEMENT
 }
 
 enum ConversationType {
@@ -280,7 +304,8 @@ model User {
   clinicRsvps     ClinicRsvp[]
   clinicQuestions ClinicQuestion[]
 
-  createdNewsletters   Newsletter[]
+  createdNewsletters   Newsletter[]          @relation("NewsletterCreatedBy")
+  approvedNewsletters  Newsletter[]          @relation("NewsletterApprovedBy")
   newsletterRecipients NewsletterRecipient[]
 
   forumThreads    ForumThread[]
@@ -308,6 +333,10 @@ model User {
   uploadedGoalEvidence   GoalEvidence[]
   notificationPreference NotificationPreference?
   reportedNoShows        Meeting[]                @relation("MeetingNoShowReporter")
+
+  // Reports (§13): one authored by this user, and reports written *about* them.
+  authoredReports Report[] @relation("ReportAuthor")
+  reportsAboutMe  Report[] @relation("ReportSubject")
 
   @@index([email])
   @@map("users")
@@ -363,17 +392,23 @@ model Programme {
 }
 
 model Cohort {
-  id            String       @id @default(cuid())
-  programmeId   String       @map("programme_id")
-  name          String
-  description   String?
-  status        CohortStatus @default(DRAFT)
-  startDate     DateTime?    @map("start_date")
-  endDate       DateTime?    @map("end_date")
+  id                       String       @id @default(cuid())
+  programmeId              String       @map("programme_id")
+  name                     String
+  description              String?
+  status                   CohortStatus @default(DRAFT)
+  startDate                DateTime?    @map("start_date")
+  endDate                  DateTime?    @map("end_date")
   // Languages offered in this cohort (CLAUDE.md §1: EN + FR).
-  languages     Language[]   @default([EN, FR])
+  languages                Language[]   @default([EN, FR])
   // Per-cohort data-retention window in days (CLAUDE.md §14).
-  retentionDays Int?         @map("retention_days")
+  retentionDays            Int?         @map("retention_days")
+  // Recurring mentee assessment cadence. The programme runs a mandatory
+  // assessment every `assessmentIntervalMonths` from `startDate`; a mentee who
+  // has not submitted by `dueAt + assessmentGraceDays` loses portal access
+  // until they do (features/assessments/gate.ts).
+  assessmentIntervalMonths Int          @default(3) @map("assessment_interval_months")
+  assessmentGraceDays      Int          @default(7) @map("assessment_grace_days")
 
   programme Programme @relation(fields: [programmeId], references: [id])
 
@@ -414,6 +449,11 @@ model Cohort {
   mentorPrivateNotes MentorPrivateNote[]
   formDrafts         FormDraft[]
   goalEvidence       GoalEvidence[]
+
+  // Quarterly assessments, reports, recurring newsletters
+  assessmentWindows  AssessmentWindow[]
+  reports            Report[]
+  newsletterSchedule NewsletterSchedule?
 
   @@map("cohorts")
 }
@@ -461,17 +501,17 @@ model AuditLog {
 }
 
 model Notification {
-  id       String    @id @default(cuid())
-  userId   String    @map("user_id")
-  cohortId String?   @map("cohort_id")
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  cohortId     String?   @map("cohort_id")
   // `type` is a free string backed by the NOTIFICATION_TYPES union in
   // lib/notifications (experience-layer.md §1.10) — kept as a column rather than a
   // DB enum so new types ship across milestones without a migration each time.
-  type     String
-  title    String
-  body     String?
-  link     String?
-  readAt   DateTime? @map("read_at")
+  type         String
+  title        String
+  body         String?
+  link         String?
+  readAt       DateTime? @map("read_at")
   // Email channel state (§1.10): time-critical types email immediately; the rest
   // wait in a daily digest. `emailPending` means "still owed an email"; once sent
   // (immediately or via the digest) `emailedAt` is stamped and pending cleared.
@@ -487,6 +527,7 @@ model Notification {
 
   @@index([userId])
   @@index([emailPending])
+  @@index([emailPending, emailedAt, createdAt])
   @@map("notifications")
 }
 
@@ -992,8 +1033,8 @@ model Meeting {
 
   // AI meeting preparation cache (experience-layer.md §1.5). Generated on demand
   // and cached per meeting; regenerating overwrites it.
-  prepJson         Json?     @map("prep_json")
-  prepGeneratedAt  DateTime? @map("prep_generated_at")
+  prepJson        Json?     @map("prep_json")
+  prepGeneratedAt DateTime? @map("prep_generated_at")
 
   cohort           Cohort       @relation(fields: [cohortId], references: [id])
   organizer        User         @relation("MeetingOrganizer", fields: [organizerId], references: [id])
@@ -1099,24 +1140,31 @@ model FormDefinition {
 }
 
 model FormResponse {
-  id              String       @id @default(cuid())
-  formId          String       @map("form_id")
-  respondentId    String       @map("respondent_id")
-  answers         Json
-  status          ReviewStatus @default(IN_PROGRESS)
-  submittedAt     DateTime?    @map("submitted_at")
-  midtermReviewId String?      @map("midterm_review_id")
-  finalReviewId   String?      @map("final_review_id")
+  id                 String       @id @default(cuid())
+  formId             String       @map("form_id")
+  respondentId       String       @map("respondent_id")
+  answers            Json
+  status             ReviewStatus @default(IN_PROGRESS)
+  submittedAt        DateTime?    @map("submitted_at")
+  midtermReviewId    String?      @map("midterm_review_id")
+  finalReviewId      String?      @map("final_review_id")
+  // Set when this response answers a recurring quarterly assessment; the gate
+  // reads it to decide whether a mentee has satisfied the open window.
+  assessmentWindowId String?      @map("assessment_window_id")
 
-  form          FormDefinition @relation(fields: [formId], references: [id], onDelete: Cascade)
-  respondent    User           @relation(fields: [respondentId], references: [id])
-  midtermReview MidtermReview? @relation(fields: [midtermReviewId], references: [id])
-  finalReview   FinalReview?   @relation(fields: [finalReviewId], references: [id])
+  form             FormDefinition    @relation(fields: [formId], references: [id], onDelete: Cascade)
+  respondent       User              @relation(fields: [respondentId], references: [id])
+  midtermReview    MidtermReview?    @relation(fields: [midtermReviewId], references: [id])
+  finalReview      FinalReview?      @relation(fields: [finalReviewId], references: [id])
+  assessmentWindow AssessmentWindow? @relation(fields: [assessmentWindowId], references: [id])
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  // The assessment gate runs on every authenticated page load, so the
+  // "has this mentee answered this window?" lookup must be indexed.
+  @@index([assessmentWindowId, respondentId])
   @@map("form_responses")
 }
 
@@ -1152,6 +1200,94 @@ model FinalReview {
 
   @@index([cohortId])
   @@map("final_reviews")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Recurring quarterly assessments  (mandatory, gates portal access)
+// ──────────────────────────────────────────────────────────────────────────
+
+// One assessment occurrence for a cohort. Windows are generated from the
+// cohort's start date at `assessmentIntervalMonths` steps (default: every 3
+// months) and are editable afterwards — an admin can move a due date or
+// deactivate a window, which is the escape hatch for a locked-out mentee.
+//
+// A mentee must have a SUBMITTED FormResponse tied to the window by
+// `dueAt + graceDays`, or the portal locks for them until they submit.
+model AssessmentWindow {
+  id          String     @id @default(cuid())
+  cohortId    String     @map("cohort_id")
+  // Which recurring mentee form this window is an occurrence of. QUARTERLY is
+  // the mandatory assessment; MONTHLY is the monthly meeting form. Both share
+  // this table because the cadence, completion tracking and reminder machinery
+  // are identical — only `gatesAccess` differs.
+  formType    ReviewType @default(QUARTERLY) @map("form_type")
+  // Whether missing this window blocks the portal. True for the quarterly
+  // assessment; false for the monthly meeting form, which is chased with
+  // reminders instead. features/assessments/gate.ts only ever sees gating
+  // windows, so a non-gating form can never lock anyone out.
+  gatesAccess Boolean    @default(true) @map("gates_access")
+  // 1-based occurrence within the cohort, per formType.
+  sequence    Int
+  // Admin-facing name, e.g. "Quarter 1 assessment". Bilingual copy for the
+  // participant comes from the linked FormDefinition's own EN/FR labels.
+  label       String
+  // Mentees can start submitting from here.
+  opensAt     DateTime   @map("opens_at")
+  dueAt       DateTime   @map("due_at")
+  // Days after `dueAt` before access is blocked. Copied from the cohort at
+  // generation time so changing the cohort default never silently locks people
+  // who were already inside a grace window.
+  graceDays   Int        @default(7) @map("grace_days")
+  // Deactivating a window removes it from the gate entirely.
+  isActive    Boolean    @default(true) @map("is_active")
+
+  cohort    Cohort         @relation(fields: [cohortId], references: [id])
+  responses FormResponse[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@unique([cohortId, formType, sequence])
+  @@index([cohortId, formType, dueAt])
+  @@map("assessment_windows")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Reports  (CLAUDE.md §13 — exportable to Word/Excel)
+// ──────────────────────────────────────────────────────────────────────────
+
+// A saved report. `content` holds structured blocks (see
+// features/reports/schema.ts ReportContent) rather than a rendered document, so
+// the same report can be exported to Word or Excel and re-exported later
+// without regenerating. The AI polish pass rewrites the narrative blocks in
+// place *only* after the author accepts it (CLAUDE.md §0 rule 5).
+model Report {
+  id            String     @id @default(cuid())
+  cohortId      String     @map("cohort_id")
+  authorId      String     @map("author_id")
+  kind          ReportKind
+  title         String
+  // Who the report is about: the mentee for MENTEE_PROGRESS / MENTOR_PAIR,
+  // null for a cohort-wide PROGRAMME report.
+  subjectUserId String?    @map("subject_user_id")
+  periodStart   DateTime?  @map("period_start")
+  periodEnd     DateTime?  @map("period_end")
+  content       Json
+  aiPolished    Boolean    @default(false) @map("ai_polished")
+  aiPolishedAt  DateTime?  @map("ai_polished_at")
+
+  cohort  Cohort @relation(fields: [cohortId], references: [id])
+  author  User   @relation("ReportAuthor", fields: [authorId], references: [id])
+  subject User?  @relation("ReportSubject", fields: [subjectUserId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([cohortId, kind])
+  @@index([authorId])
+  @@map("reports")
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -1243,8 +1379,28 @@ model Newsletter {
   scheduledAt DateTime?        @map("scheduled_at")
   sentAt      DateTime?        @map("sent_at")
 
+  // Structured, section-by-section content the composer edits and the email
+  // renderer lays out (features/newsletters/schema.ts NewsletterBody).
+  // bodyEn/bodyFr stay as the flattened plain-text rendering, so an older
+  // newsletter without sections still reads.
+  bodyJson     Json?     @map("body_json")
+  // Subject line actually sent (title is the internal name).
+  subjectEn    String?   @map("subject_en")
+  subjectFr    String?   @map("subject_fr")
+  // Sending is always a human action (CLAUDE.md §0 rule 5 / §16): an AI draft
+  // cannot leave DRAFT until an admin approves it here.
+  approvedById String?   @map("approved_by_id")
+  approvedAt   DateTime? @map("approved_at")
+  // True when the body was first drafted by the Newsletter Assistant. Kept for
+  // the audit trail, not to change behaviour.
+  aiDrafted    Boolean   @default(false) @map("ai_drafted")
+  // Set when the recurring schedule generated this draft.
+  scheduleId   String?   @map("schedule_id")
+
   cohort     Cohort                @relation(fields: [cohortId], references: [id])
-  createdBy  User                  @relation(fields: [createdById], references: [id])
+  createdBy  User                  @relation("NewsletterCreatedBy", fields: [createdById], references: [id])
+  approvedBy User?                 @relation("NewsletterApprovedBy", fields: [approvedById], references: [id])
+  schedule   NewsletterSchedule?   @relation(fields: [scheduleId], references: [id])
   recipients NewsletterRecipient[]
 
   createdAt DateTime  @default(now()) @map("created_at")
@@ -1252,7 +1408,38 @@ model Newsletter {
   deletedAt DateTime? @map("deleted_at")
 
   @@index([cohortId])
+  // The dispatch cron scans for approved newsletters whose send time has passed.
+  @@index([status, scheduledAt])
   @@map("newsletters")
+}
+
+// Recurring newsletter cadence (the admin sends twice a week). The schedule
+// never sends by itself — on each scheduled day it prepares a DRAFT (optionally
+// AI-drafted from real portal activity) and notifies the admin, who reviews,
+// edits and approves it. That keeps CLAUDE.md §16 ("don't let AI … send
+// newsletters automatically") true while removing the manual setup work.
+model NewsletterSchedule {
+  id             String    @id @default(cuid())
+  cohortId       String    @unique @map("cohort_id")
+  enabled        Boolean   @default(false)
+  // ISO weekdays to prepare a draft on: 1 = Monday … 7 = Sunday.
+  sendDays       Int[]     @map("send_days")
+  // Local hour-of-day (0–23) in `timezone` for both drafting and sending.
+  sendHour       Int       @default(9) @map("send_hour")
+  timezone       String    @default("Africa/Lagos")
+  // When true, the Newsletter Assistant pre-fills the draft from portal data.
+  autoDraft      Boolean   @default(true) @map("auto_draft")
+  // Guard against double-drafting when the cron runs more than once an hour.
+  lastDraftedFor DateTime? @map("last_drafted_for")
+
+  cohort      Cohort       @relation(fields: [cohortId], references: [id])
+  newsletters Newsletter[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("newsletter_schedules")
 }
 
 model NewsletterRecipient {
@@ -1399,10 +1586,11 @@ model ForumReport {
 // ──────────────────────────────────────────────────────────────────────────
 
 model Conversation {
-  id       String           @id @default(cuid())
-  cohortId String           @map("cohort_id")
-  type     ConversationType @default(DIRECT)
-  title    String?
+  id        String           @id @default(cuid())
+  cohortId  String           @map("cohort_id")
+  type      ConversationType @default(DIRECT)
+  title     String?
+  directKey String?          @unique @map("direct_key")
 
   cohort       Cohort                    @relation(fields: [cohortId], references: [id])
   participants ConversationParticipant[]
@@ -1429,6 +1617,7 @@ model ConversationParticipant {
   deletedAt DateTime? @map("deleted_at")
 
   @@unique([conversationId, userId])
+  @@index([userId, deletedAt])
   @@map("conversation_participants")
 }
 
@@ -1452,6 +1641,7 @@ model Message {
   deletedAt DateTime? @map("deleted_at")
 
   @@index([conversationId])
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -1469,6 +1659,7 @@ model MessageRead {
   deletedAt DateTime? @map("deleted_at")
 
   @@unique([messageId, userId])
+  @@index([userId, messageId])
   @@map("message_reads")
 }
 

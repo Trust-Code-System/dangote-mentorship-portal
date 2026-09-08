@@ -51,3 +51,13 @@ yarn-error.log*
 
 # Stitch redesign — throwaway live verification screenshots (keep the design refs)
 stitch-designs/_live-*.png
+.gstack/
+
+# Client commercial documents — budgets, cost breakdowns, pricing. These are
+# working drafts that live alongside the repo, not part of the product, and a
+# shared repo's history is permanent. Ignored so a broad `git add` cannot sweep
+# them into a public commit. Force-add deliberately if one ever should ship.
+/BLAK_MOH_*
+
+# Scratch directory from agent tooling runs.
+/.codex-tmp/

@@ -1,0 +1,20 @@
+{
+  "capturedAt": "2026-07-26T00:02:20.092Z",
+  "postgresVersion": "17.6",
+  "maxConnections": 60,
+  "observedConnections": {
+    "total": 21,
+    "active": 1,
+    "idle": 13,
+    "database": 15
+  },
+  "cumulativeDatabaseStats": {
+    "commits": 1544185,
+    "rollbacks": 267,
+    "cacheHitRatio": 0.9999190569300652,
+    "tempFiles": 2811,
+    "deadlocks": 0,
+    "databaseBytes": 18640019
+  },
+  "note": "Read-only snapshot. Provider plan, CPU, RAM and pool saturation require provider telemetry."
+}

@@ -9,38 +9,34 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 // so middleware stays dedicated to auth/RBAC. See src/i18n/request.ts.
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
-// Supabase origin (Storage + M4 Realtime websockets) must be allowed in
-// connect-src; it's the only cross-origin the browser talks to directly.
-const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseWs = supabaseOrigin.replace(/^https/, 'wss');
-
-// Hardened response headers (production-readiness-report.md B1). CSP is a
-// pragmatic starting policy: 'unsafe-inline' on script/style is still required
-// by Next's inlined runtime + Tailwind; tighten to a nonce-based policy as the
-// L3 follow-up. frame-ancestors 'none' + X-Frame-Options block clickjacking;
-// HSTS pins TLS; nosniff blocks MIME confusion.
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "font-src 'self'",
-  // *.sentry.io is only contacted when NEXT_PUBLIC_SENTRY_DSN is set (client
-  // error reporting); harmless otherwise.
-  `connect-src 'self' ${supabaseOrigin} ${supabaseWs} https://*.sentry.io`.trim(),
+// Hardened response headers (production-readiness-report.md B1).
+//
+// The document CSP is NOT here any more. It is built per-request in
+// `src/proxy.ts` so `script-src` can carry a nonce instead of 'unsafe-inline';
+// see `src/lib/security/csp.ts`. Setting it in both places would emit two CSP
+// headers, and browsers enforce every one they are sent — the effective policy
+// becomes their intersection, which is a confusing way to reason about a
+// security control. The proxy is the single source for it.
+//
+// API routes are outside the proxy's matcher, so they get their own policy
+// below: they only ever return JSON, and nothing in a JSON response should be
+// allowed to load anything at all.
+const apiContentSecurityPolicy = [
+  "default-src 'none'",
   "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
+  "base-uri 'none'",
 ]
   .join('; ')
-  .replace(/\s+/g, ' ')
   .trim();
 
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // Severs the opener relationship with any window that launched us, so a
+  // cross-origin opener cannot reach into this one. Safe here: nothing in the
+  // portal relies on window.opener or cross-origin popup handshakes.
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
   {
     key: 'Strict-Transport-Security',
@@ -48,7 +44,6 @@ const securityHeaders = [
   },
   // Internal, auth-gated portal: never index it (production-readiness-report.md M5).
   { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
-  { key: 'Content-Security-Policy', value: contentSecurityPolicy },
 ];
 
 /** @type {import('next').NextConfig} */
@@ -65,9 +60,23 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '5mb',
     },
+    // Client router cache for dynamic segments (default dynamic=0 forces a full
+    // RSC refetch on every sidebar click). AppShell revalidates repeat visits in
+    // the background (stale-while-revalidate). Private data stays session-scoped
+    // in memory — never localStorage. Auth still runs on hard loads / refresh.
+    staleTimes: {
+      dynamic: 60,
+      static: 300,
+    },
   },
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      {
+        source: '/api/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: apiContentSecurityPolicy }],
+      },
+    ];
   },
 };
 

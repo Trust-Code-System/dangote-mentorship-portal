@@ -1,6 +1,7 @@
 import 'server-only';
 import type { AiAdapter, CompleteOptions } from './types';
 import { adapterFromComplete } from './assistant';
+import { AI_REQUEST_TIMEOUT_MS, withAiCapacity } from './capacity';
 
 // Anthropic Messages API implementation. Calls the REST API directly to keep
 // the dependency surface small; the adapter interface hides this entirely.
@@ -23,8 +24,9 @@ export function createAnthropicAdapter(apiKey: string, model?: string): AiAdapte
   const activeModel = model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
 
   async function callMessages(options: CompleteOptions): Promise<string> {
-    const response = await fetch(API_URL, {
+    const response = await withAiCapacity(() => fetch(API_URL, {
       method: 'POST',
+      signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
       headers: {
         'content-type': 'application/json',
         'x-api-key': apiKey,
@@ -37,7 +39,7 @@ export function createAnthropicAdapter(apiKey: string, model?: string): AiAdapte
         ...(options.system ? { system: options.system } : {}),
         messages: [{ role: 'user', content: options.prompt }],
       }),
-    });
+    }));
 
     if (!response.ok) {
       // Surface status only — never log prompt content (may contain PII, §14).

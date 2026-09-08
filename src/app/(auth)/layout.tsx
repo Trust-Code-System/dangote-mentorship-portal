@@ -1,21 +1,21 @@
-// Auth chrome (Stitch redesign — docs/stitch-redesign.md). A calm, centered
-// single-column surface on the light canvas with two soft teal "ambient glow"
-// spots, matching the Stitch Login screen. Wraps every auth page (login, signup,
-// forgot/reset, invite) so they share the same frame; each page supplies its own
-// brand header / card / footer.
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+import { AuthShell } from '@/components/auth/auth-shell';
+import { FilmGrain } from '@/app/(landing)/visuals/film-grain';
+
+// The Threshold — shared chrome for every authentication page
+// (AUTH_UI_SPEC.md §2). Replaces the previous centred light column, which put a
+// small card in the middle of a large empty page and shared nothing with the
+// public brand experience.
+//
+// The shell owns the split-screen frame and the brand panel; each page supplies
+// only its own card contents, so login / forgot / reset / invite / request
+// access are automatically consistent.
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg px-4 py-12">
-      {/* Atmospheric teal glow spots (decorative) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-48 -top-48 size-[600px] rounded-full bg-green-light/10 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-48 -right-48 size-[600px] rounded-full bg-green-light/10 blur-3xl"
-      />
-      <main className="relative w-full max-w-[440px]">{children}</main>
-    </div>
+    <>
+      <AuthShell>{children}</AuthShell>
+      {/* Same fine grain as the landing page — it is what stops the large dark
+          areas from banding. Costs one composited layer and no request. */}
+      <FilmGrain />
+    </>
   );
 }

@@ -7,6 +7,8 @@ import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { getStorageProvider } from '@/lib/storage';
+import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
+import { verifyFileSignature } from '@/lib/files/sniff';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 
 export type ProfileActionState = ActionResult<{ id: string }> | null;
@@ -186,8 +188,68 @@ const ALLOWED_AVATAR_TYPES: Record<string, string> = {
   'image/webp': '.webp',
 };
 
+const avatarUploadInput = z.object({
+  name: z.string().trim().min(1).max(200),
+  type: z.string().trim(),
+  size: z.number().int().positive().max(MAX_AVATAR_BYTES),
+});
+
 function avatarKey(userId: string, ext: string): string {
   return `avatars/${userId}/${randomUUID()}${ext}`;
+}
+
+export async function prepareOwnAvatarUpload(input: {
+  name: string;
+  type: string;
+  size: number;
+}): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
+  try {
+    const user = await requireUser();
+    const file = avatarUploadInput.parse(input);
+    const ext = ALLOWED_AVATAR_TYPES[file.type];
+    if (!ext) {
+      return fail({ code: 'VALIDATION', message: 'Unsupported image type. Use PNG, JPEG, or WebP.' });
+    }
+    if (!canUseDirectUploads()) return ok({ mode: 'server' });
+    const target = await createSignedUploadTarget(avatarKey(user.id, ext));
+    return ok({ mode: 'direct', ...target });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+export async function confirmOwnAvatarUpload(input: {
+  path: string;
+  type: string;
+  size: number;
+}): Promise<ProfileActionState> {
+  try {
+    const user = await requireUser();
+    const file = avatarUploadInput.omit({ name: true }).parse(input);
+    const ext = ALLOWED_AVATAR_TYPES[file.type];
+    if (!ext || !input.path.startsWith(`avatars/${user.id}/`) || !input.path.endsWith(ext)) {
+      return fail({ code: 'FORBIDDEN', message: 'The upload target is not valid for this account.' });
+    }
+
+    const bytes = await getStorageProvider().get(input.path);
+    if (bytes.byteLength !== file.size || !verifyFileSignature(bytes, file.type)) {
+      await removeStoredObject(input.path);
+      return fail({ code: 'VALIDATION', message: "Image contents don't match the selected file." });
+    }
+
+    await prisma.user.update({ where: { id: user.id }, data: { image: input.path } });
+    await writeAuditLog({
+      actorId: user.id,
+      action: 'profile.avatar_updated',
+      entityType: 'User',
+      entityId: user.id,
+    });
+    revalidatePath('/profile');
+    revalidatePath('/', 'layout');
+    return ok({ id: user.id });
+  } catch (error) {
+    return mapActionError(error);
+  }
 }
 
 export async function uploadOwnAvatar(
@@ -211,6 +273,9 @@ export async function uploadOwnAvatar(
 
     const key = avatarKey(user.id, ext);
     const bytes = new Uint8Array(await file.arrayBuffer());
+    if (!verifyFileSignature(bytes, file.type)) {
+      return fail({ code: 'VALIDATION', message: "Image contents don't match its type." });
+    }
     await getStorageProvider().put({ key, bytes, contentType: file.type });
 
     await prisma.user.update({ where: { id: user.id }, data: { image: key } });

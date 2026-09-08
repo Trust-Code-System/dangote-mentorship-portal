@@ -42,7 +42,9 @@ export async function GET(
     status: 200,
     headers: {
       'content-type': evidence.mimeType ?? 'application/octet-stream',
-      'content-disposition': `inline; filename="${encodeURIComponent(evidence.fileName)}"`,
+      // `attachment` (not `inline`) so a forged file can never be rendered as a
+      // top-level document in our origin (production-readiness-report.md M1).
+      'content-disposition': `attachment; filename="${encodeURIComponent(evidence.fileName)}"`,
       'cache-control': 'private, no-store',
     },
   });

@@ -1,15 +1,17 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
 import { RoleName } from '@prisma/client';
-import { requireUser } from '@/lib/auth/rbac';
-import { getViewablePairs } from '@/features/pair/data';
+import { getTranslations } from 'next-intl/server';
+import { requirePageUser } from '@/lib/auth/page-user';
+import { getPairWorkspace, getViewablePairs } from '@/features/pair/data';
+import { PairWorkspaceView } from '@/features/pair/workspace-view';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Entry point for the Pair Contract Page (§1.8). A mentee has a single pair and
-// is sent straight to it; a mentor picks which mentee's workspace to open.
+// Entry point for the Pair Contract Page (§1.8). A mentee with a single pair
+// renders the workspace in-place (no server redirect) to avoid prefetch+redirect
+// races during sidebar client navigation. Mentors pick a mentee when they have
+// more than one pairing.
 export default async function PairIndexPage() {
-  const user = await requireUser();
+  const user = await requirePageUser();
   const t = await getTranslations('pair');
 
   const isMentor = user.roles.includes(RoleName.MENTOR);
@@ -35,10 +37,19 @@ export default async function PairIndexPage() {
     );
   }
 
-  // A mentee (single pair) goes straight in.
+  // Mentee (single pair): render workspace here — do not redirect.
   const only = pairs[0];
   if (pairs.length === 1 && !isMentor && only) {
-    redirect(`/pair/${only.menteeId}`);
+    const workspace = await getPairWorkspace(user.id, only.menteeId);
+    if (!workspace) {
+      return (
+        <div className="space-y-4">
+          <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+          <p className="text-ink-2">{t('noPair')}</p>
+        </div>
+      );
+    }
+    return <PairWorkspaceView pair={workspace} />;
   }
 
   return (

@@ -3,6 +3,8 @@
 // (experience-layer.md §1.12 — push events to participants' calendars via Graph);
 // full Zoom join-link provisioning lands in M5 behind this same interface.
 export interface MeetingDraft {
+  /** Stable application meeting id used as Graph's transactionId for safe retries. */
+  idempotencyKey: string;
   title: string;
   description?: string;
   startsAt: Date;

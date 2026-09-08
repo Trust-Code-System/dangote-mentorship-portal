@@ -49,6 +49,9 @@ Optional / feature-gated (the app hides these features when unset):
 `AUTH_MICROSOFT_ENTRA_ID_ID` / `_SECRET` / `_TENANT_ID` (Entra SSO),
 `ANTHROPIC_API_KEY` (+ `ANTHROPIC_MODEL`) for AI assistants,
 `MAIL_GRAPH_*` for email, `CRON_SECRET` for scheduled notifications.
+Microsoft Entra, Graph mail, and Graph calendar are additionally fail-closed:
+leave `MICROSOFT_INTEGRATIONS_ENABLED=false` until the owner explicitly approves
+their tenant configuration. Credentials alone do not activate those services.
 Do **not** set the `SEED_*` vars in production (local seeding only).
 
 ## First deploy

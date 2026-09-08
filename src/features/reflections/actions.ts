@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Language, RoleName } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser, hasAnyRole } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 import { mentorPairCohort } from '@/lib/pairings';
@@ -41,6 +42,9 @@ export async function saveReflectionEntry(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     if (!hasAnyRole(user, RoleName.MENTEE)) {
       return fail({ code: 'FORBIDDEN', message: 'Only mentees keep a reflection journal.' });
     }
@@ -131,6 +135,9 @@ export async function setReflectionShared(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { entryId, shared } = shareSchema.parse({
       entryId: formData.get('entryId'),
       shared: formData.get('shared'),
@@ -169,6 +176,9 @@ export async function deleteReflectionEntry(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { entryId } = deleteEntrySchema.parse({ entryId: formData.get('entryId') });
 
     const entry = await prisma.reflectionJournalEntry.findUnique({ where: { id: entryId } });
@@ -212,6 +222,9 @@ const saveNoteSchema = z.object({
 export async function saveMentorNote(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     if (!hasAnyRole(user, RoleName.MENTOR)) {
       return fail({ code: 'FORBIDDEN', message: 'Only mentors keep private notes.' });
     }
@@ -285,6 +298,9 @@ const deleteNoteSchema = z.object({ noteId: z.string().cuid() });
 export async function deleteMentorNote(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { noteId } = deleteNoteSchema.parse({ noteId: formData.get('noteId') });
 
     const note = await prisma.mentorPrivateNote.findUnique({ where: { id: noteId } });

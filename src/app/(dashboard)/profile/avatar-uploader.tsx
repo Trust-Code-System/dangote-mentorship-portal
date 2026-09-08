@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   removeOwnAvatar,
+  prepareOwnAvatarUpload,
+  confirmOwnAvatarUpload,
   uploadOwnAvatar,
   type ProfileActionState,
 } from '@/features/profiles/actions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { uploadFileToSignedTarget } from '@/lib/storage/browser-upload';
 
 export function AvatarUploader({
   imageUrl,
@@ -26,21 +29,57 @@ export function AvatarUploader({
   const router = useRouter();
   const [preview, setPreview] = useState<string | null>(null);
 
-  const [uploadState, upload, uploading] = useActionState<ProfileActionState, FormData>(
-    uploadOwnAvatar,
-    null,
-  );
+  const [uploadState, setUploadState] = useState<ProfileActionState>(null);
+  const [uploading, setUploading] = useState(false);
   const [removeState, remove, removing] = useActionState<ProfileActionState, FormData>(
     removeOwnAvatar,
     null,
   );
 
-  useEffect(() => {
-    if (uploadState?.ok || removeState?.ok) {
-      formRef.current?.reset();
-      setPreview(null);
-      router.refresh();
+  async function submitUpload(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const file = formData.get('file');
+    if (!(file instanceof File) || file.size === 0) return;
+    setUploading(true);
+    setUploadState(null);
+    try {
+      const prepared = await prepareOwnAvatarUpload({ name: file.name, type: file.type, size: file.size });
+      if (!prepared.ok) return setUploadState(prepared);
+      if (prepared.data.mode === 'server') {
+        setUploadState(await uploadOwnAvatar(null, formData));
+      } else {
+        await uploadFileToSignedTarget({ ...prepared.data, file });
+        setUploadState(
+          await confirmOwnAvatarUpload({
+            path: prepared.data.path,
+            type: file.type,
+            size: file.size,
+          }),
+        );
+      }
+    } catch (error) {
+      setUploadState({
+        ok: false,
+        error: { code: 'UNKNOWN', message: error instanceof Error ? error.message : 'Upload failed.' },
+      });
+    } finally {
+      setUploading(false);
     }
+  }
+
+  useEffect(() => {
+    if (!uploadState?.ok && !removeState?.ok) return;
+    formRef.current?.reset();
+    router.refresh();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setPreview(null);
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadState, removeState]);
 
@@ -58,7 +97,7 @@ export function AvatarUploader({
       </Avatar>
 
       <div className="space-y-2">
-        <form ref={formRef} action={upload} className="flex flex-wrap items-center gap-2">
+        <form ref={formRef} onSubmit={(event) => void submitUpload(event)} className="flex flex-wrap items-center gap-2">
           <Input
             id={fileId}
             name="file"

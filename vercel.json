@@ -4,6 +4,14 @@
     {
       "path": "/api/cron/notifications",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/newsletters",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-reports",
+      "schedule": "0 6 * * *"
     }
   ]
 }

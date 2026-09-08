@@ -191,3 +191,87 @@ export async function getTrainingOverview(): Promise<AdminTrainingOverview> {
     rows,
   };
 }
+
+// ── Session logs (mentor reports) ─────────────────────────────────────────────
+
+export interface AdminSessionLogRow {
+  id: string;
+  date: Date | null;
+  time: string | null;
+  meetingType: MeetingType | null;
+  competencyDiscussed: string | null;
+  goalDiscussed: string | null;
+  // The substance a mentor reports after a session. `mentorNotes` is deliberately
+  // omitted: the session log UI treats it as the mentor's private scratchpad
+  // ("visible to the mentor only"), so admins see the shared record, not that.
+  summary: string | null;
+  actionsAgreed: string | null;
+  challenges: string | null;
+  resourcesNeeded: string | null;
+  nextActionPlan: string | null;
+  timeline: string | null;
+  nextMeetingDate: Date | null;
+  menteeReflection: string | null;
+  mentorName: string | null;
+  mentorProfileId: string | null;
+  menteeName: string | null;
+  menteeProfileId: string | null;
+  cohortName: string;
+}
+
+/**
+ * Every session log a mentor has filed across the programme, newest first — the
+ * admin's read-only window onto the reports mentors submit (RBAC §4: admins may
+ * *view* session logs). Read-only and capped; excludes soft-deleted rows and the
+ * mentor's private notes. Mentors keep their own read-back on the sessions page.
+ */
+export async function getProgrammeSessionLogs(): Promise<AdminSessionLogRow[]> {
+  const logs = await prisma.sessionLog.findMany({
+    where: { deletedAt: null },
+    orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+    take: LIST_LIMIT,
+    select: {
+      id: true,
+      date: true,
+      time: true,
+      meetingType: true,
+      competencyDiscussed: true,
+      goalDiscussed: true,
+      discussionSummary: true,
+      aiSummary: true,
+      actionsAgreed: true,
+      challenges: true,
+      resourcesNeeded: true,
+      nextActionPlan: true,
+      timeline: true,
+      nextMeetingDate: true,
+      menteeReflection: true,
+      mentor: { select: { name: true, mentorProfile: { select: { id: true } } } },
+      mentee: { select: { name: true, menteeProfile: { select: { id: true } } } },
+      cohort: { select: { name: true } },
+    },
+  });
+
+  return logs.map((l) => ({
+    id: l.id,
+    date: l.date,
+    time: l.time,
+    meetingType: l.meetingType,
+    competencyDiscussed: l.competencyDiscussed,
+    goalDiscussed: l.goalDiscussed,
+    // Prefer the AI summary (what the mentor accepted) and fall back to the raw notes.
+    summary: l.aiSummary ?? l.discussionSummary,
+    actionsAgreed: l.actionsAgreed,
+    challenges: l.challenges,
+    resourcesNeeded: l.resourcesNeeded,
+    nextActionPlan: l.nextActionPlan,
+    timeline: l.timeline,
+    nextMeetingDate: l.nextMeetingDate,
+    menteeReflection: l.menteeReflection,
+    mentorName: l.mentor.name,
+    mentorProfileId: l.mentor.mentorProfile?.id ?? null,
+    menteeName: l.mentee.name,
+    menteeProfileId: l.mentee.menteeProfile?.id ?? null,
+    cohortName: l.cohort.name,
+  }));
+}

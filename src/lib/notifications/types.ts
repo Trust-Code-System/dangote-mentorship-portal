@@ -20,6 +20,18 @@ export const NOTIFICATION_TYPES = [
   'clinic_tomorrow',
   'support_received',
   'support_responded',
+  // Quarterly assessment gate (features/assessments): a reminder while the
+  // window is open, and an escalation once it is overdue and access is at risk.
+  'assessment_due',
+  'assessment_overdue',
+  // The monthly meeting form. Same shape, but it never gates access, so the
+  // copy asks rather than warns.
+  'monthly_form_due',
+  'monthly_form_overdue',
+  // A scheduled newsletter draft is waiting for an admin to review and approve.
+  'newsletter_draft_ready',
+  // The weekly engagement report has been generated for admins to read.
+  'engagement_report_ready',
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -32,6 +44,8 @@ const TIME_CRITICAL: ReadonlySet<NotificationType> = new Set([
   'session_log_due',
   'review_due',
   'clinic_tomorrow',
+  // Losing portal access is a deadline; it does not wait for tomorrow's digest.
+  'assessment_overdue',
 ]);
 
 export function isTimeCritical(type: NotificationType): boolean {

@@ -38,11 +38,17 @@ export function useOfflineForm<T extends Record<string, unknown>>(params: {
   const [online, setOnline] = useState(true);
 
   const valuesRef = useRef(values);
-  valuesRef.current = values;
   const pending = useRef(false);
+
+  useEffect(() => {
+    valuesRef.current = values;
+  }, [values]);
 
   // Hydrate any locally-saved draft and wire connectivity listeners once.
   useEffect(() => {
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
     try {
       const raw = localStorage.getItem(storageKey);
       if (raw) {
@@ -53,11 +59,13 @@ export function useOfflineForm<T extends Record<string, unknown>>(params: {
       // Corrupt draft — ignore and start clean.
     }
     setOnline(navigator.onLine);
+    });
     const goOnline = () => setOnline(true);
     const goOffline = () => setOnline(false);
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
     return () => {
+      cancelled = true;
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };

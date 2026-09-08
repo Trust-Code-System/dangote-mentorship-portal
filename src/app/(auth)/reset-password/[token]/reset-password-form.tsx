@@ -1,46 +1,70 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ResetPasswordState } from './actions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { PasswordField } from '@/components/auth/auth-field';
+import { AuthAlert, AuthSubmitButton } from '@/components/auth/auth-controls';
 
 type Action = (prev: ResetPasswordState, formData: FormData) => Promise<ResetPasswordState>;
 
-export function ResetPasswordForm({ action }: { action: Action }) {
+export function ResetPasswordForm({
+  action,
+  requirements,
+}: {
+  action: Action;
+  /** Rendered server-side and passed in, so the rules stay a server component. */
+  requirements: React.ReactNode;
+}) {
   const t = useTranslations('auth');
   const tc = useTranslations('common');
-  const [state, formAction, pending] = useActionState<ResetPasswordState, FormData>(action, {});
+  const [state, formAction] = useActionState<ResetPasswordState, FormData>(action, {});
+  const [mismatch, setMismatch] = useState(false);
 
   const errorMessage = {
-    invalid: t('resetInvalid'),
+    invalid: t('resetInvalidTitle'),
     rate_limited: t('tooManyAttempts'),
     validation: tc('errorBody'),
   };
 
+  /**
+   * Confirm-password is a client-side guard only. The server action's contract
+   * is unchanged — it still reads a single `password` field — so this adds a
+   * safety net against typos without touching authentication logic.
+   */
+  function submit(formData: FormData) {
+    if (formData.get('password') !== formData.get('confirmPassword')) {
+      setMismatch(true);
+      return;
+    }
+    setMismatch(false);
+    formAction(formData);
+  }
+
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="password">{t('newPassword')}</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
-      </div>
-      {state.error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {errorMessage[state.error]}
-        </p>
-      ) : null}
-      <Button type="submit" className="w-full" disabled={pending}>
-        {t('resetSubmit')}
-      </Button>
+    <form action={submit} className="space-y-5" noValidate>
+      <PasswordField
+        id="password"
+        name="password"
+        label={t('newPassword')}
+        autoComplete="new-password"
+        minLength={8}
+      />
+
+      <PasswordField
+        id="confirmPassword"
+        name="confirmPassword"
+        label={t('confirmPassword')}
+        autoComplete="new-password"
+        minLength={8}
+        error={mismatch ? t('passwordMismatch') : undefined}
+      />
+
+      {requirements}
+
+      {state.error ? <AuthAlert tone="error" title={errorMessage[state.error]} /> : null}
+
+      <AuthSubmitButton pendingLabel={t('signingIn')}>{t('resetSubmit')}</AuthSubmitButton>
     </form>
   );
 }

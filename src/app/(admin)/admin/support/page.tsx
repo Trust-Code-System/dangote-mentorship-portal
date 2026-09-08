@@ -15,10 +15,10 @@ const STATUS_VARIANT = {
 // Private admin queue for support requests (experience-layer.md §1.13). Admin
 // roles only (gated again in the action). Admins always see the requester.
 export default async function AdminSupportPage() {
-  await requireRole(ADMIN_ROLES);
+  const admin = await requireRole(ADMIN_ROLES);
   const t = await getTranslations('support');
 
-  const requests = await getSupportQueue();
+  const requests = await getSupportQueue(admin);
   const open = countOpen(requests);
 
   return (

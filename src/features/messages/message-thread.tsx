@@ -6,11 +6,10 @@ import { useRouter } from 'next/navigation';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { ArrowLeft, Send } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase/client';
-import { sendMessage } from './actions';
+import { loadOlderMessages, sendMessage } from './actions';
 import { cn } from '@/lib/utils';
 import type { ThreadMessage } from './data';
 
-const CHANNEL_PREFIX = 'conversation:';
 const NEW_MESSAGE_EVENT = 'message';
 
 export interface ThreadLabels {
@@ -18,6 +17,9 @@ export interface ThreadLabels {
   send: string;
   empty: string;
   back: string;
+  loadOlder: string;
+  sendFailed: string;
+  retry: string;
 }
 
 // Client thread: renders the message history and a composer. Sends via the
@@ -27,24 +29,26 @@ export function MessageThread({
   conversationId,
   otherName,
   initialMessages,
+  initialNextCursor,
   labels,
+  realtimeChannel,
 }: {
   conversationId: string;
   otherName: string | null;
   initialMessages: ThreadMessage[];
+  initialNextCursor: string | null;
   labels: ThreadLabels;
+  realtimeChannel: string | null;
 }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<ThreadMessage[]>(initialMessages);
   const [input, setInput] = React.useState('');
   const [pending, setPending] = React.useState(false);
+  const [nextCursor, setNextCursor] = React.useState(initialNextCursor);
+  const [loadingOlder, setLoadingOlder] = React.useState(false);
+  const [sendError, setSendError] = React.useState<string | null>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const channelRef = React.useRef<RealtimeChannel | null>(null);
-
-  // Reconcile when the server sends fresh props (after refresh / navigation).
-  React.useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
 
   // Supabase Realtime (CLAUDE.md §10). Both participants join a per-conversation
   // Broadcast channel. The payload is a content-free nudge — on receipt we
@@ -53,19 +57,44 @@ export function MessageThread({
   // when Supabase isn't configured.
   React.useEffect(() => {
     const supabase = getSupabaseBrowser();
-    if (!supabase) return;
-    const channel = supabase.channel(`${CHANNEL_PREFIX}${conversationId}`, {
-      config: { broadcast: { self: false } },
-    });
-    channel
-      .on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh())
-      .subscribe();
-    channelRef.current = channel;
+    if (!supabase || !realtimeChannel) return;
+
+    let channel: RealtimeChannel | null = null;
+    try {
+      channel = supabase.channel(realtimeChannel, {
+        config: { broadcast: { self: false } },
+      });
+      channel
+        .on('broadcast', { event: NEW_MESSAGE_EVENT }, () => router.refresh())
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') router.refresh();
+        });
+      channelRef.current = channel;
+    } catch {
+      // Realtime is best-effort — never crash the thread if the channel fails.
+      channelRef.current = null;
+      channel = null;
+    }
+
     return () => {
-      void supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
       channelRef.current = null;
     };
-  }, [conversationId, router]);
+  }, [realtimeChannel, router]);
+
+  React.useEffect(() => {
+    const reconcile = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) router.refresh();
+    };
+    const timer = window.setInterval(reconcile, 15_000);
+    window.addEventListener('online', reconcile);
+    document.addEventListener('visibilitychange', reconcile);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('online', reconcile);
+      document.removeEventListener('visibilitychange', reconcile);
+    };
+  }, [router]);
 
   React.useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -75,6 +104,7 @@ export function MessageThread({
     const body = input.trim();
     if (!body || pending) return;
     setPending(true);
+    setSendError(null);
     // Optimistic append.
     const optimistic: ThreadMessage = {
       id: `tmp-${Date.now()}`,
@@ -91,6 +121,7 @@ export function MessageThread({
         // Roll back the optimistic message on failure.
         setMessages((m) => m.filter((x) => x.id !== optimistic.id));
         setInput(body);
+        setSendError(res.error.message || labels.sendFailed);
       } else {
         // Nudge the peer to re-fetch (content stays server-gated), then refresh.
         void channelRef.current?.send({
@@ -112,11 +143,32 @@ export function MessageThread({
     }
   }
 
+  async function loadOlder() {
+    if (!nextCursor || loadingOlder) return;
+    setLoadingOlder(true);
+    try {
+      const result = await loadOlderMessages({ conversationId, cursor: nextCursor });
+      if (!result.ok) return;
+      const older = result.data.messages.map((message) => ({
+        ...message,
+        createdAt: new Date(message.createdAt),
+      }));
+      setMessages((current) => [...older, ...current]);
+      setNextCursor(result.data.nextCursor);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
+
   return (
     <section className="flex h-full min-h-[34rem] flex-col overflow-hidden bg-surface">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <Link href="/messages" className="rounded-md p-1.5 text-ink-2 hover:bg-surface-2 lg:hidden" aria-label={labels.back}>
+        <Link
+          href="/messages"
+          className="rounded-md p-1.5 text-ink-2 hover:bg-surface-2 lg:hidden"
+          aria-label={labels.back}
+        >
           <ArrowLeft className="size-5" />
         </Link>
         <span className="flex size-9 items-center justify-center rounded-full bg-green-soft text-small font-semibold text-green-strong">
@@ -127,6 +179,18 @@ export function MessageThread({
 
       {/* Messages */}
       <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-4">
+        {nextCursor ? (
+          <div className="pb-2 text-center">
+            <button
+              type="button"
+              onClick={() => void loadOlder()}
+              disabled={loadingOlder}
+              className="rounded-md border border-border px-3 py-1.5 text-small text-ink-2 hover:bg-surface-2 disabled:opacity-50"
+            >
+              {labels.loadOlder}
+            </button>
+          </div>
+        ) : null}
         {messages.length === 0 ? (
           <p className="py-10 text-center text-small text-ink-3">{labels.empty}</p>
         ) : (
@@ -147,6 +211,14 @@ export function MessageThread({
 
       {/* Composer */}
       <div className="border-t border-border p-3">
+        {sendError ? (
+          <div className="mb-2 flex items-center justify-between gap-3 rounded-md bg-risk/10 px-3 py-2 text-small text-risk">
+            <p role="alert">{sendError}</p>
+            <button type="button" className="shrink-0 font-semibold underline" onClick={() => void submit()}>
+              {labels.retry}
+            </button>
+          </div>
+        ) : null}
         <div className="flex items-end gap-2">
           <textarea
             value={input}

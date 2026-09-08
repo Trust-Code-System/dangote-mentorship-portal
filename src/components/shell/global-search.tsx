@@ -21,6 +21,8 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
   const [open, setOpen] = React.useState(false);
   const [hits, setHits] = React.useState<SearchHit[]>([]);
   const [pending, setPending] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const q = query.trim();
 
@@ -31,13 +33,9 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
   }, [q, navItems]);
 
   React.useEffect(() => {
-    if (q.length < 2) {
-      setHits([]);
-      setPending(false);
-      return;
-    }
-    setPending(true);
+    if (q.length < 2) return;
     const id = setTimeout(async () => {
+      setPending(true);
       try {
         const res = await searchPortal({ query: q });
         setHits(res.ok ? res.data.hits : []);
@@ -48,20 +46,49 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
     return () => clearTimeout(id);
   }, [q]);
 
+  const visibleHits = q.length >= 2 ? hits : [];
+  const visiblyPending = q.length >= 2 && pending;
+
   function close() {
     setOpen(false);
   }
 
-  const showDropdown = open && q.length >= 1;
-  const hasResults = pageHits.length > 0 || hits.length > 0;
+  // The panel opens on focus, so WCAG 2.2 SC 1.4.13 requires a way to dismiss it
+  // without moving focus. Escape alone isn't enough: returning focus to the input
+  // re-fires onFocus and the panel springs straight back open, so the dismissal
+  // is latched until the query changes.
+  function dismiss() {
+    setDismissed(true);
+    setOpen(false);
+    inputRef.current?.focus();
+  }
+
+  const showDropdown = open && !dismissed && q.length >= 1;
+  const hasResults = pageHits.length > 0 || visibleHits.length > 0;
 
   return (
-    <div className="relative hidden max-w-md flex-1 sm:block">
+    <div
+      className="relative hidden max-w-md flex-1 sm:block"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && showDropdown) {
+          e.stopPropagation();
+          dismiss();
+        }
+      }}
+    >
       <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
       <input
+        ref={inputRef}
         type="search"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          // Typing is an explicit request for results, so it both releases the
+          // Escape latch and re-opens: after Escape the input still holds focus,
+          // so onFocus will not fire again to do it.
+          setDismissed(false);
+          setOpen(true);
+        }}
         onFocus={() => setOpen(true)}
         placeholder={t('placeholder')}
         aria-label={t('placeholder')}
@@ -72,7 +99,7 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
         <>
           <div aria-hidden className="fixed inset-0 z-40" onClick={close} />
           <div className="absolute left-0 right-0 z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-xl border border-border bg-surface py-2 shadow-elevation-lg">
-            {pending && (
+            {visiblyPending && (
               <div className="flex items-center gap-2 px-4 py-2 text-small text-ink-3">
                 <Loader2 className="size-4 animate-spin" />
                 {t('searching')}
@@ -87,9 +114,9 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
               </Group>
             )}
 
-            {hits.length > 0 && (
+            {visibleHits.length > 0 && (
               <Group label={t('records')}>
-                {hits.map((h, i) => (
+                {visibleHits.map((h, i) => (
                   <ResultLink
                     key={`${h.kind}-${h.href}-${i}`}
                     href={h.href}
@@ -102,7 +129,7 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
               </Group>
             )}
 
-            {!pending && !hasResults && q.length >= 2 && (
+            {!visiblyPending && !hasResults && q.length >= 2 && (
               <p className="px-4 py-3 text-small text-ink-3">{t('noResults')}</p>
             )}
           </div>

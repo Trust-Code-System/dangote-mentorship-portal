@@ -254,9 +254,294 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **Ops + reliability.** Added `/api/health` (DB `SELECT 1`), `vercel.json` daily cron for `/api/cron/notifications`, `robots.ts` (noindex) + `metadataBase`, explicit 12h `session.maxAge`, `.nvmrc` + `engines.node`, and backup/restore + retention + gated-migration docs in `docs/deployment.md`.
 - **CI gates.** Added GitHub Actions for `npm audit`/Snyk, Lighthouse CI, pa11y-ci, and an on-demand OWASP ZAP baseline, plus `.github/dependabot.yml`. Login accessibility fixes (contrast + 24px target sizes) on the public login page.
 
+## Fix — profile page hydration crash (React #418) + diagnosable action errors
+
+- **Fixed the production hydration error #418 on `/profile`.** Three role/competency badge rows wrapped their `<Badge>` pills in a `<p>` (`<p className="flex flex-wrap gap-1 pt-1">`), but `Badge` renders a `<div>` — a `<div>` cannot be a descendant of `<p>`, so the browser auto-closed the `<p>` and the parsed DOM no longer matched React's tree. Hydration bailed (`Minified React error #418`) and the entire route re-rendered on the client, destabilizing the page (including the avatar upload form, which surfaced an opaque "Something went wrong"). Swapped the three `<p>` layout wrappers to `<div>`. Reproduced the mismatch in a local production build (`<div> cannot be a descendant of <p>`) and verified it's gone after the fix (no console/page errors; profile renders cleanly).
+- **Unexpected server-action errors are now reported, not swallowed.** `mapActionError`'s `UNKNOWN` branch routes through the `reportError` Sentry seam (server-only, no-op until `SENTRY_DSN` is set) instead of a bare `console.error`, so the next time an action fails with the generic "Something went wrong" message the real cause is captured. No client-bundle impact (the only client importer of `lib/actions/result` uses `import type`).
+
+## Chore — Vercel Web Analytics
+
+- **Added Vercel Web Analytics.** `@vercel/analytics@^1.6.1` with `<Analytics />` (the `/next` entry) mounted in the root layout. It loads a first-party script (`/_vercel/insights/*`) and beacons same-origin, so the existing CSP (`'self'`) already permits it — no header change. Inert off Vercel; cookieless/anonymized (no PII). Pinned to the 1.x line because 2.x drags in a Svelte/Vite 8 optional-peer chain that conflicts with our Vite 5 (Vitest/Sentry). Added `.npmrc` (`legacy-peer-deps=true`) so npm's strict optional-peer resolver doesn't try to satisfy the unused `@sveltejs/kit` peer — keeps local, `npm ci`, and Vercel installs identical.
+
+## Hardening — production-readiness re-audit fixes (H1, uploads, Next 16 proxy)
+
+- **Cohort-scoped admin authorization (m2-audit-findings H1).** Admin sessions now carry an `adminCohortScope` claim derived from their `UserRole` grants: a null-cohort grant (the global Super Admin) resolves to `'ALL'` (every cohort, unchanged), while a cohort-scoped admin is confined to exactly their granted cohorts. New pure, edge-safe primitives (`cohortFilterFor`/`scopeAllows` in `src/lib/auth/scope.ts`) and rbac wrappers (`adminCohortFilter`/`canAccessCohort`/`assertCohortAccess`) close the latent cross-cohort leak before a second cohort is onboarded. Applied to the support-queue read as the first consumer; spread `adminCohortFilter(user)` into other admin reads as cohort 2 approaches. 6 new unit tests; behaviour-preserving for the current single global-admin reality (legacy tokens default to `'ALL'`, re-issued precisely within 12h).
+- **Upload integrity (production-readiness-report.md M1).** Goal-evidence uploads now verify the file's magic-byte signature server-side against the declared MIME (`src/lib/files/sniff.ts`) — a forged `Content-Type` whose bytes don't match (e.g. HTML claiming `image/png`) is rejected before storage. The evidence stream route now serves `Content-Disposition: attachment` (was `inline`) so a file can never render as a top-level document in our origin.
+- **Next 16 `proxy` convention.** Renamed `src/middleware.ts` → `src/proxy.ts` (same edge entry point), clearing the Next 16 deprecation warning.
+- Verified: typecheck ✅, lint ✅ (0 errors), 272/272 tests ✅, `next build` ✅.
+
+## Fix — CI gates green (pa11y contrast + E2E login selector)
+
+- **pa11y-ci (WCAG 2.1 AA contrast).** Fixed the 7 contrast failures on the public `/` and `/login` pages so both URLs pass: the wordmark accent green `#10b91f` (2.6:1) → `#0C8517` (4.79:1) and gold period `#d39b2b` (2.5:1) → `#9A6A12` (4.73:1); the `--ink-3` muted token nudged `#707979` → `#6F7878` (4.53:1 on white) and the homepage journey-rail "pending" labels lost their compounding `opacity-70`; the public footer tagline moved `text-ink-3` → `text-ink-2` (8.94:1 on the tinted canvas). All verified ≥4.5:1.
+- **E2E happy path.** Two stale assertions: `getByLabel('Password')` matched two elements once the password field gained a "Show password" toggle (its aria-label also contains "password") — pinned the fill to `getByLabel('Password', { exact: true })`; and the post-login heading still expected the old M0 stub title `'Administration'` — updated to the redesigned `'Enterprise Health Dashboard'`.
+- These were pre-existing failures surfaced by the first real run of the newly-added pa11y/E2E CI gates, not regressions from the H1 security PR.
+
+## Feature — admin visibility of mentor session reports
+
+- **Admins can now read the session logs mentors file.** Added a read-only `/admin/sessions` page (linked from the admin "Manage" nav) listing every session a mentor has reported across the programme, newest first, via `getProgrammeSessionLogs()` — the RBAC §4 "admins may *view* session logs" capability that had no UI. Mentors keep their existing editable read-back on `/sessions`. Each entry shows date/type/competency, the (AI or raw) discussion summary, actions agreed, challenges, next plan, timeline and the mentee's reflection, with mentor/mentee names linking to their admin profiles. The mentor's private notes field is deliberately excluded (it stays "visible to the mentor only", consistent with the mentee view). EN/FR strings added; typecheck ✅, lint ✅ (0 errors), 272/272 tests ✅.
+
+## Design — certificate uses the original BLAK MOH lockup
+
+- **Certificate header now shows the official full logo** (`public/brand/blak-moh-original.png` — mark + wordmark + tagline) instead of the cropped mark plus a typed "BLAK MOH." line; white paper keyed out with `mix-blend-mode: multiply` so it sits cleanly on the cream certificate.
+
+## Redesign — cinematic public landing page ("The Mentorship Continuum")
+
+- **The public homepage `/` was rebuilt** as a twelve-part dark editorial narrative with a custom React Three Fiber hero, moving out of `(public)` into a new `(landing)` route group with its own chrome — `/about`, `/faq` and `/design` keep the existing light `SiteHeader`/`SiteFooter` and the authenticated portal is untouched. Greens and gold are sampled pixel-exact from the supplied logo artwork (`#14B21F`, `#119A19`, `#CD9933`); Instrument Serif joins Public Sans as the second and last family. New `landing` namespace in EN/FR, key-parity enforced by unit test. Fabricated participation figures ("120+ mentors", "300+ mentees") were removed pending owner confirmation and a test now blocks their return; the page states only repo-verifiable structure (9 months, 9 stages, 2 languages, 6 criteria, 6 roles, 1 hard rule). Lighthouse: accessibility 100/100 desktop+mobile, performance 81 desktop / 70 mobile, CLS 0.0006, desktop LCP 1.18s. Mobile LCP is over budget because the app-wide Sentry browser SDK (139.6 KiB) dominates the mobile critical path — flagged as an owner decision, not changed here. See `LANDING_PAGE_IMPLEMENTATION_REPORT.md`.
+
+## Perf — authenticated portal flat UI + faster sidebar navigation
+
+- **Flattened internal buttons** (solid green, thin border, 150ms colour transitions; no glow/gradient/3D shadows) across `Button`, FAB, Quick Actions, Atlas launcher.
+- **Sidebar clicks get immediate pending/active feedback** plus a thin top progress cue; shell stays mounted; destination-shaped `loading.tsx` skeletons for key routes.
+- **Slimmed auth layouts:** dropped per-navigation recent-notification list + duplicate avatar query; unread badges hydrate client-side (layouts no longer await badge DB counts); `experimental.staleTimes.dynamic: 30` for snappier client navigations; recent bodies load when the dropdown opens; Insights Recharts dynamically imported. Features/routes removed: **0**. Docs: `docs/internal-portal-performance/`.
+
+## Perf — sidebar Active/Pending/Inactive + router-cache SWR
+
+- **Fixed double-active sidebar:** pending destinations use a distinct subtle style + spinner; full active chrome stays on the committed route only when idle (`data-nav-state`, unit-tested).
+- **Intent prefetch** (`prefetch={false}` + `router.prefetch` on hover/focus); **staleTimes** dynamic 60s / static 300s; quiet “Updating” indicator on tab focus revalidation (no TanStack/SWR dependency).
+- **More route `loading.tsx` skeletons** (programmes, cohorts, imports, forms, invites, admin lists, notifications, support, pair, agreements). Features/routes removed: **0**. Report: `NAVIGATION_CACHE_REFINEMENT_REPORT.md`.
+
+## Fix — intermittent `/pair` and `/messages` soft-navigation crash
+
+- **Root cause:** happy-path server `redirect()` on `/messages` and mentee `/pair` raced with hover prefetch + client router cache, surfacing Next’s default “This page couldn’t load” global screen; page `requireUser()` throws could compound it. Reloads bypassed the soft-nav Flight race.
+- **Fix:** render workspaces in-place (no redirect), `requirePageUser()` redirects to login, segment error boundaries with Retry, race-safe DM provisioning, optional pair queries via `Promise.allSettled`. Report: `PAIR_MESSAGES_FAILURE_FIX_REPORT.md`. Features/routes removed: **0**.
+
+## Fix — locale switcher refreshes UI after language change
+
+- **Restored `revalidatePath('/', 'layout')` in `setLocale`.** A merge conflict resolution dropped the layout revalidation that applies the `NEXT_LOCALE` cookie to the RSC tree. Without it, clicking Français set the cookie but left `<html lang="en">` and English copy in place under `next start` (CI E2E). Cookie write alone does not refresh production RSC caches.
+
+## Redesign — authentication experience ("The Threshold")
+
+- **All five `(auth)` routes rebuilt** to match the cinematic landing page: a dark split-screen brand panel beside a warm-ivory form card, with a new `src/components/auth/` library (`AuthShell`, `AuthVisual`, `AuthCard`, `AuthField`, `PasswordField`, `AuthSubmitButton`, `AuthAlert`, `AuthLanguageSwitcher`, `AuthFooter`, `PasswordRequirements`). No authentication logic changed — no provider, action signature, session, rate-limit, token or redirect behaviour touched; verified by a real sign-in landing on the admin dashboard. CSS/SVG only, zero new packages, no WebGL. Discovery found seven defects: **removed the "Remember me for 30 days" checkbox** (read by no server code, and the session is capped at 12 hours), **fixed the invitation form's name field being labelled "BLAK MOH"** (it used `appName`), **replaced the dead `/support` footer link** (auth-gated, 307'd signed-out users back to login) with a mailto, stopped labelling `/faq` as "Privacy Policy" and omitted Terms (no route, no approved copy), restyled the previously-unstyled forgot/reset/invite pages, added confirm-password + visible requirements, and split invalid-vs-expired-vs-used token states. The login email now survives a failed submit (React 19 resets uncontrolled forms after an action). 9 new e2e tests in `tests/e2e/auth-ui.spec.ts`; suite 19/19, 281 unit tests, eslint 0 problems. Note: `m0-login.spec.ts` fails locally due to a **pre-existing** `AUTH_URL` port mismatch in `.env` (3000 vs the 3001 tests use) — passes when aligned. See `AUTH_UI_IMPLEMENTATION_REPORT.md`.
+
+## Fix — cohort-scoped admin authz gap in matching, invites, forms, imports
+
+- **`assertCohortAccess()` was only wired into `certificate/data.ts` and `support/data.ts` (the June H1 fix); every other cohort-taking admin action checked only `requireRole(SUPER_ADMIN)`, not whether the acting admin's own `adminCohortScope` covers the cohort being acted on.** A cohort-scoped Super Admin (a `SUPER_ADMIN` grant with a non-null `cohortId` — this codebase's representation of a "Programme Admin") could therefore run/approve/override matches, upload or commit participant imports, or create/edit forms for a cohort they don't administer, or (via invites) create a brand-new admin scoped to another cohort or globally. Not exploitable in the current single-cohort production deployment — the seeded Super Admin is global (`cohortId: null`) — but a real gap the moment a second cohort or a cohort-scoped admin is created.
+- **Fixed:** added `assertCohortAccess(actor, cohortId)` checks to `runMatching`, `approveMatch` (against the match's real cohort), and `overrideMatch` (`src/features/matching/actions.ts`); to `prepareImportUpload`, `confirmImportUpload`, `uploadImport`, `fixImportRow`, `setImportRowStatus`, and `commitImport` (`src/features/imports/actions.ts`, checked against the import's real cohort where the row/import already exists); to `createFormDefinition`, `updateFormDefinition` (against the form's real cohort, not the client-submitted one), `toggleFormDefinitionActive`, and `archiveFormDefinition` (`src/features/forms/actions.ts`); and a cohort-scope check on `createInvite` (`src/features/invites/actions.ts`) so a cohort-scoped admin can neither invite into a cohort outside their scope nor issue a global (cohort-less) grant. Global admins (`adminCohortScope === 'ALL'`) are unaffected. Typecheck ✅, lint ✅ (0 errors), 316/316 tests ✅.
+
+## Audit — WCAG 2.2 AA / CWV / SEO / security-header sweep, Tier 1–2 remediation
+
+- **Audited** local source plus live production across five public pages (accessibility, Core Web Vitals, SEO/metadata, security headers, privacy). Measured: Lighthouse home 90 desktop / 82 mobile, a11y 100, best-practices 100, CLS 0. SEO 69 is the deliberate `noindex` on an auth-gated internal portal, not a defect. Report: the published audit artifact.
+- **`Cross-Origin-Opener-Policy: same-origin`** added to `securityHeaders` in `next.config.mjs` — the one header from the standard set that was not being served.
+- **Global search is now keyboard-dismissible** (`src/components/shell/global-search.tsx`). The panel opens on focus, so WCAG 2.2 SC 1.4.13 requires a way to dismiss it without moving focus; there was no `Escape` handler at all. Added one, plus a `dismissed` latch — `dismiss()` returns focus to the input, and without the latch `onFocus` immediately re-opens the panel. Typing releases the latch **and** re-opens, because after Escape the input still holds focus and `onFocus` cannot fire again. First component test in the repo (`tests/shell/global-search.test.tsx`), driven with `react-dom` directly since `@testing-library/react`'s `@testing-library/dom` peer is not installed.
+- **`role="img"` on the wordmark spans** (`src/components/wordmark.tsx`, `src/components/public/public-lockup.tsx`). A bare `<span>` maps to role `generic`, which prohibits an accessible name, so the existing `aria-label="BLAK MOH"` was not reliably honoured. Kept the label and made it legal rather than deleting it, so the wordmark is still announced as one unit instead of letting the decorative gold full stop leak into the reading. The `app/loading.tsx` instance sits on `role="status"` and was already valid — untouched.
+- **Generated Open Graph card** at `src/app/(landing)/opengraph-image.tsx` (`next/og`, 1200×630) — generated rather than committed as a binary so it cannot drift from the brand tokens. Next emits both `og:image` and `twitter:image` from it. Deliberately English-only: an unfurler fetches it with no session, so there is no locale cookie to read.
+- **`/opengraph-image-*` allowlisted in `isPublicPath()`** (`src/lib/auth/auth.config.ts`). Found only by fetching the generated URL rather than trusting the meta tag: the auth proxy was returning **307 to `/login`**, so every shared link's preview would have been silently broken in production. Re-confirmed `/dashboard`, `/support` and `/admin` still gate.
+- **Retracted a false positive:** the audit's "skip link obscured by the fixed header" finding is wrong. The focused link measures `position:fixed, z-index:70, visibility:visible`, and `elementFromPoint` at its centre returns the link itself — it paints above the header (`z-50`). The tool's check is bounding-box containment that never consults z-index, and the header's `y:-24` entry animation momentarily encloses the link's box. No code changed.
+- Typecheck ✅, lint ✅ (0 problems), 320/320 tests ✅ (4 new), production build ✅.
+
+## Security — nonce-based Content-Security-Policy (audit P1)
+
+- **`script-src` no longer trusts inline script.** The previous policy shipped `'unsafe-inline'` with no `'strict-dynamic'`, which is the token that makes a CSP decorative: an injected inline script still executed. The document policy is now built per request in `src/proxy.ts` as `script-src 'self' 'nonce-<random>' 'strict-dynamic'`. Next stamps the nonce onto its own inline bootstrap and Flight-payload scripts (it reads it off the request's CSP header), `'strict-dynamic'` lets those pull in the chunk graph, and anything injected without the nonce is refused. Verified: 24/24 inline scripts carry the nonce, it matches the header, and it differs per request.
+- **Policy moved out of `next.config.mjs` into `src/lib/security/csp.ts`.** Setting it in both places emits two CSP headers and browsers enforce the intersection of every one they are sent — a confusing way to reason about a security control. API routes sit outside the proxy's matcher and only ever return JSON, so they get their own `default-src 'none'` policy in `next.config.mjs` instead.
+- **The nonce-less variant is a deliberate fail-safe, not a leftover.** If the nonce cannot be threaded into a render, `buildContentSecurityPolicy()` returns the previous `'unsafe-inline'` policy. A nonce-less *strict* policy would block Next's own inline scripts and take the portal down; degrading to the old policy loses the hardening but keeps it serving. Redirects take this path too — no document is rendered, so there is no script to nonce.
+- **`style-src` deliberately keeps `'unsafe-inline'`.** A nonce cannot be applied to a `style=""` attribute, and the app leans on inline styles heavily — every Framer Motion animation writes them and the certificate renders almost entirely through them. Removing it would break visible behaviour to close a markedly lower-severity hole than script injection. `'unsafe-eval'` is allowed outside production only, because `next dev` compiles with eval-based HMR; it is gated on `NODE_ENV` and unit-tested so it can never reach a production response.
+- **The auth gate is untouched.** `src/proxy.ts` wraps `NextAuth(authConfig).auth` from the outside and only rebuilds the response on a clean pass-through; every other outcome, redirects above all, is returned exactly as Auth.js produced it. Notably this does **not** use the `.auth((req) => …)` wrapper form: passing a middleware function makes next-auth skip the `!authorized` branch that issues the redirect to `/login`, which would have silently stopped the route gate from gating. Auth.js's rotated session cookies are copied onto the rebuilt response — dropping them would have signed people out mid-session.
+- Verified end-to-end: zero CSP violations and zero console errors across `/`, `/login`, `/about`, `/programme`, `/faq` with React hydrated and client-side navigation working; a real super-admin sign-in lands on the admin dashboard; private routes still 307 to `/login`; session cookies still set. Typecheck ✅, lint ✅, 326/326 unit tests ✅ (6 new in `tests/security/csp.test.ts`), 33/33 Playwright E2E ✅ (including the authenticated platform-audit crawl).
+
+## UI — branded loader for routes with no skeleton of their own
+
+- **`/final-review`, `/certificate`, `/help` and `/mid-term-review` were falling back to the dashboard's skeleton.** None of them has a `loading.tsx`, so they inherited the `(dashboard)` group fallback — a four-stat-card-plus-two-panel layout that is not their shape at all. The result read as a screen of empty grey boxes rather than a page loading. Both generic group fallbacks (`(dashboard)` and `(admin)`) now render `BrandedRouteLoader`: the brand mark and progress bar, reusing the root splash's `brand-splash-*` keyframes so the two loading tiers read as one system.
+- **Pages with a bespoke skeleton keep it.** Goals, messages, calendar, profile, journal, insights, the admin tables and the rest still hold their real layout in place while loading, which reads as faster than replacing it. Only the generic fallbacks changed; `DashboardLoadingSkeleton` and `AdminTableLoadingSkeleton` are still used by the routes actually shaped like them.
+- Accessible and bilingual: `role="status"` with `aria-busy`, the decorative mark hidden from assistive tech so it does not talk over the status, and the announced string is the localized `common.loading` ("Loading…" / "Chargement…") rather than the brand name. The reused keyframes are already disabled under `prefers-reduced-motion`. 5 new tests in `tests/shell/branded-route-loader.test.tsx`; typecheck ✅, lint ✅, 333/333 ✅.
+
+## Security — pin the two patched transitives so `npm audit --omit=dev` is clean
+
+- **`npm audit (prod deps)` had been failing on `main`** for several commits on two high-severity advisories: `brace-expansion` (via `@sentry/nextjs` → `@sentry/bundler-plugin-core` → `glob` → `minimatch@10`, and via `typescript-eslint` → `minimatch@10`) and `nanoid` (via `next` → `postcss`). Both are build-time tooling that never executes at request time or ships in the browser bundle, but both sit in the production dependency tree, which is why `--omit=dev` still flagged them.
+- **Fixed with scoped `overrides`, not `npm audit fix`.** Measured: plain `npm audit fix` takes the tree from 2 high to 10 vulnerabilities including 1 critical. The patched releases are ordinary patch bumps — `brace-expansion@5.0.9`, `nanoid@3.3.18` — so pinning them is enough.
+- **The `brace-expansion` override is deliberately scoped to `minimatch@^10`.** A blanket `"brace-expansion": "^5.0.9"` also forces v5 into ESLint's `minimatch@3.1.5`, which expects the v1 API, and ESLint dies with `TypeError: expand is not a function` — caught by running lint after the change. ESLint's `brace-expansion@1.x` was never in the advisory range (4.0.0–5.0.8), so it needs no override at all; it stays on 1.1.18.
+- Verified: `npm audit --omit=dev --audit-level=high` reports 0 vulnerabilities and exits 0 (the exact CI command). Typecheck ✅, lint ✅, 333/333 ✅, build ✅.
+
+## Audit — closing the two open P2s: both measured, both false positives
+
+- **"8 containers clip their text at 200% zoom" — not a defect.** All eight are `span.sr-only`, whose entire job is to be clipped: `clip: rect(0,0,0,0)` at 1×1px, visually hidden but fully available to assistive tech. WCAG 1.4.4 concerns *visible* text being cut off. No change.
+- **"Hero text over a background image may fail contrast" — passes comfortably.** axe reports `incomplete` here rather than a violation, because it cannot resolve a background it did not paint. Measured instead against the real render (`scripts/measure-hero-contrast.mjs`): hide each text node, screenshot the exact rectangle it occupied, diff the glyph pixels against the backdrop. 13 of 14 hero text nodes measure 8.9–18.7:1. The fourteenth, `Ambition becomes leadership.`, is `color: transparent` with a gradient clipped to the glyphs (`bg-clip-text`), so there is no text colour to compare; its three gradient stops measure **12.3:1** (green), **19:1** (cream) and **8.0:1** (gold) against the near-black backdrop, against the 3:1 required at 84px. The sub-3:1 pixels the first pass reported were antialiased glyph edges — every rendered glyph has them, and raising the glyph-core threshold walked the number smoothly from 1.05:1 to 3.83:1, which is the signature of antialiasing rather than dark text. No change.
+- Added `scripts/measure-hero-contrast.mjs` so this stays answerable rather than being re-argued: it is the tool that turns axe's "could not determine" into a number.
+
+## Build — local and CI now build what production actually ships
+
+- **`npm run build` no longer pins `--webpack`.** Local and CI built with webpack while **Vercel built with Turbopack** (confirmed by the runtime chunk in each: `webpack-*.js` locally, `turbopack-*.js` in production). That gap let a production-breaking bug through *every* gate — typecheck, lint, 326 unit tests, 33 E2E, pa11y, Lighthouse and the Vercel **preview** deploy check all passed while the nonce CSP blocked a script on every real page load, because Turbopack leaves one async chunk un-nonced and the webpack build does not.
+- **The original reason for the pin no longer holds.** It was added in the Next 16 upgrade (#17) because "Turbopack trips a PageNotFoundError during page-data collection with our config", with an explicit note to revisit. On Next 16.2.12 the Turbopack build completes cleanly, and production has been running it all along. Build time drops from ~5.1 min to ~17–25 s.
+- **New E2E guard: `tests/e2e/csp-nonce.spec.ts`.** Asserts inline scripts always carry the served nonce, that `script-src` never falls back to `'unsafe-inline'`, that full nonce coverage holds *if* `'strict-dynamic'` is ever present, and that no CSP violation fires during load and hydration. Proven non-vacuous: re-introducing `'strict-dynamic'` fails all four, restoring it passes all four.
+- Verified on the Turbopack build: typecheck ✅, lint ✅, 333/333 unit ✅, **39/39 Playwright E2E ✅** including the authenticated platform-audit crawl.
+- **Open follow-up for whoever owns the Vercel project:** the pin also cited "webpack keeps Sentry source-map upload working". Production already builds with Turbopack, so whatever state source-map upload is in, it is already the live state — this change makes local match rather than altering it. Worth confirming maps are still uploading once `SENTRY_AUTH_TOKEN` is checked.
+
+## UI — the brand mark is now the loading state everywhere
+
+- **All 34 in-shell `loading.tsx` fallbacks now render `BrandedRouteLoader`.** Content skeletons stood in for each page's layout on the theory that holding the shape reads as faster; in practice they read as a screen of empty grey boxes, most visibly on `/login` and on routes that had no skeleton of their own and inherited the *dashboard's* stat-card shape. One loader across the app means loading always looks like the same thing.
+- **Added a `tone` prop.** The app runs two token systems — the portal's light `--surface-*` scale and the dark `--blak-*` scale used by the landing, Knowledge Library and auth frame. The mark and green bar are legible on both; only the track behind the bar needed to change, so `tone="dark"` swaps `bg-surface-2` for `bg-blak-ivory/10`. Verified by rendering both tones against the real stylesheet.
+- **Deleted `src/components/shell/route-skeletons.tsx`** — all eleven skeleton variants are now unreferenced. `components/ui/skeleton.tsx` stays; it is still used by the Insights page and the design-system gallery for non-loading purposes.
+- Also drops a hardcoded English `aria-label="Loading certificates"` from the admin certificates fallback (CLAUDE.md §16) — the shared loader's status text is translated.
+- The root `app/loading.tsx` splash is unchanged: it covers full page loads where there is no shell yet, and already showed the mark. The two tiers now share the `brand-splash-*` animations and read as one system.
+- Verified: typecheck ✅, lint ✅, 336/336 unit ✅ (3 new for `tone`/`className`), 39/39 Playwright E2E ✅ including the authenticated crawl. The mark costs 3 KB over the wire — `next/image` serves a 64px variant, not the 249 KB source.
+
+## Quarterly assessments, exportable reports, and scheduled newsletters
+
+### Quarterly assessments that gate the portal
+
+- **Mentees must submit an assessment every 3 months or lose the portal.** New `AssessmentWindow` model, generated from the cohort's start date at `assessmentIntervalMonths` steps (default 3), each carrying its own `dueAt` and `graceDays`. A mentee who has not submitted by `dueAt + graceDays` is redirected to `/assessment` from everywhere else in the authenticated area.
+- **The gate is pure and fully unit-tested** (`features/assessments/gate.ts`, 16 tests): CLEAR → DUE → GRACE → LOCKED, earliest-outstanding-window-first for someone who missed two quarters, boundary cases at the exact lock instant, and a route allowlist so the assessment, help, support and account pages stay reachable while locked. The cadence planner is pure too (`schedule.ts`, 12 tests) including month-end clamping and the zero-interval guard.
+- **Two lines of defence, not one.** The `(dashboard)` layout blocks navigation (reading the path from a new `x-pathname` request header set in `proxy.ts`); `requirePortalAccess()` blocks the mutations, wired into all 24 participant actions across goals, sessions, reflections, messages and meetings — so a locked mentee cannot keep working from a stale tab. It is deliberately NOT applied to the assessment submit itself, nor to support/help: someone who genuinely cannot complete it must still be able to say so.
+- **Only mentees are gated.** Admins are never locked out of the programme they administer; mentors are assessed through the existing mid-term/final reviews.
+- **Reuses the editable forms machinery.** A new `ReviewType.QUARTERLY` means admins change the questions in the Forms Builder with no code change, and `validateAnswers()` is shared with the reviews flow. `submitReviewResponse` now rejects QUARTERLY explicitly rather than silently storing a response no gate would ever see.
+- **Admin screen** (`/admin/assessments`): generate the schedule (idempotent — re-running only tops up missing windows), edit any window's name/dates/grace, turn one off, and see per-mentee completion with who is in grace and who is locked out. Answers are never shown here — completion is metadata (§4/§14). Moving a due date is the escape hatch for a mentee locked out for a good reason.
+- **Nobody is surprised by the lock:** an escalating banner in the shell (quiet prompt → warning naming the exact lock date → explanation once locked), plus new `assessment_due` / `assessment_overdue` notifications emitted by the existing daily cron, deduped per window and per stage.
+
+### Reports exportable to Word and Excel, with AI formatting
+
+- **New `Report` model storing structured blocks**, not a rendered document, so one saved report exports to both formats and re-exports later without regenerating. Three kinds: a mentee's own progress, a mentor's report on one mentee, and a cohort-wide programme report — each assembled from real portal data (goals, sessions, action items, assessment compliance, department participation).
+- **Real `.docx`, not HTML with a Word extension.** Added the `docx` package (server-side only) and a renderer that maps the block model to OOXML: headings, bold emphasis, bullet lists and bordered tables in the portal's palette. Excel gets the numbers instead — each table becomes its own sheet with a frozen header and autofilter, plus a Summary sheet carrying the narrative.
+- **Inline emphasis is a deliberately tiny markup (double asterisks)** because that is what the AI can reliably produce and what both exporters render natively. `parseInlineRuns` is pure and total: an unmatched marker stays literal rather than bolding the rest of the paragraph.
+- **The AI formatter cannot change the facts, and this is enforced structurally rather than requested in the prompt.** `mergePolishedNarrative` copies table and KPI blocks through untouched, rejects a bullet list that comes back with a different number of bullets, ignores blank replacements, cannot add/remove/reorder blocks, and re-validates the merged document against the content contract — falling back to the original if anything fails. 16 tests cover exactly these guarantees.
+- **AI proposes, the author commits** (§0 rule 5): "Format with AI" fetches a suggestion and shows it in place of the saved version with a notice; nothing is written until Keep is pressed. Refreshing from data discards an accepted polish, because the text is newly built.
+- **The export route authorizes itself.** `/api/reports/[id]/export` sits outside the edge auth matcher, so it enforces author-or-in-scope-admin and returns the same 404 for "missing" and "not yours" — an export URL must not confirm that someone else's report exists. Every export is audited.
+
+### Newsletters the admin can actually send twice a week
+
+- **Section-based composer** rather than a blank rich-text box: a fixed, pre-arranged order (opening, highlights, by-the-numbers, dates, spotlight, call to action), each section bilingual, each toggleable. Recipients get the issue in their own language, falling back to the other rather than dropping a section.
+- **New `NewsletterSchedule` — pick the days (defaults to Monday + Thursday, 09:00 Lagos).** On each scheduled day the new `/api/cron/newsletters` job prepares a DRAFT, optionally pre-filled by the Newsletter Assistant from real portal activity, and notifies the admins. **It never sends** (§16). Idempotent: the schedule claims the slot before the slow AI call and records the local day it drafted for, so the job produces exactly one draft per scheduled day however often it runs. 34 tests, including the timezone cases (23:30 UTC Sunday is already Monday in Lagos).
+- **Sending is a two-step human gate.** Approve records who signed the issue off; dispatch refuses any issue without an `approvedAt`. Editing an approved issue withdraws the approval server-side, so what goes out is always what a person read in its final form.
+- **The assistant is given counts and dates only** — no names, no message content — and `mergeAssistantDraft` never overwrites text the admin wrote by hand, never touches their headings, and cannot add or reorder sections.
+- **The email renderer is pure and escaping-tested** (18 tests): inline-styled table layout for real email clients, and every piece of admin-authored text HTML-escaped, because a newsletter is the one thing the portal sends to hundreds of inboxes at once.
+- **Delivery is tracked per recipient** and idempotent: a partial failure can be retried without double-sending, and an issue where every send failed stays approved rather than being marked sent.
+
+### Verification and what is deliberately not done
+
+- Typecheck ✅, lint ✅, **466/466 unit tests ✅** (up from 364 — 102 new), production build ✅ with every new route present. The single Turbopack build warning is pre-existing and traces to `src/lib/storage/local.ts` via the agreements PDF route, untouched by this work.
+- Seed data demonstrates all three: a published quarterly assessment form, a generated schedule with past windows pre-submitted for all but two mentees (so the demo cohort is not locked out, while the admin completion table and the lockout are both demoable), and a newsletter schedule plus a sample bilingual draft.
+- **The migration is written but not applied.** `20260907120000_quarterly_assessments_reports_newsletters` is hand-written and validated against the schema; applying it to the live Supabase instance is an owner decision (`npx prisma migrate deploy`).
+- **The newsletter cron runs daily, not hourly.** An hourly `0 * * * *` entry was rejected by Vercel at deploy time before any build ran — the Hobby plan refuses any cron more frequent than once a day. `vercel.json` now uses `0 9 * * *` (10:00 Lagos), and `isDraftDue()` gained a catch-up rule so a scheduled day whose send hour falls after the daily run is picked up on the next run rather than being lost forever, which is what the naive daily fix would have done silently. 4 new tests cover it, and the admin UI now states when the draft will actually appear.
+- **The assessment questions themselves are placeholders.** The seeded quarterly form is a reasonable six-question set; the real question set is still to be supplied and can be entered in the Forms Builder without a code change.
+
+## Monthly meeting form — recurring, mentee-owned, reminder-driven
+
+The programme's "Monthly Meeting Form" is now in the portal: the mentee's own record of each month's session, alongside the mentor's existing session log. Transcribed from the supplied document.
+
+### It never locks anyone out — and that is enforced structurally
+
+- Recurring windows now carry `formType` (`QUARTERLY` | `MONTHLY`) and **`gatesAccess`**. The monthly form's windows are created with `gatesAccess: false`, and the gate's query filters `gatesAccess: true`, so a missed monthly form cannot reach the lockout logic at all.
+- That property is asserted where it actually lives — the database query, not the pure function. `tests/assessments/gate-scope.test.ts` pins the `where` clause and, to prove the test is not vacuous, feeds the *same* long-overdue window back as a gating one and confirms it does then lock.
+- One table serves both cadences because the completion tracking, admin screens and reminder machinery are identical; only `gatesAccess` differs. The alternative — a parallel model — would have meant a second copy of all of it.
+
+### Reminders are the enforcement, so they are the feature
+
+- New `monthly_form_due` / `monthly_form_overdue` notifications, emitted by the existing daily cron, deduped per window and per stage. The copy asks rather than warns, because nothing is being withheld.
+- Unlike the assessment reminders, these **stop after 14 days past due** rather than escalating — nagging about a month that closed a fortnight ago is noise.
+- The newsletter digest now carries the open month's compliance as a first-class field, and the assistant prompt is instructed to put the deadline in the dates section and the ask in the call to action. The newsletter was the requested reminder channel, so it states real numbers ("12 of 30 mentees have submitted") rather than a generic nudge.
+
+### Calendar months, not cohort months
+
+- The quarterly assessment is anchored to the cohort start; the monthly form runs on **calendar** months, so "this month's form" means the same thing to everyone. Each window opens on the 1st and is due at the end of the last day.
+- `planMonthlyWindows` is pure and built from UTC month arithmetic rather than day addition, so a month-end start date cannot skew the sequence. 16 tests cover leap years, 30- and 31-day months, year-boundary rollover, mid-month cohort starts, and that consecutive windows leave no gap and no overlap (each opens exactly 1ms after the previous is due).
+
+### Decisions worth recording
+
+- **Mentees only.** The source document's own header says "helps mentors and mentees", but the requirement was mentees alone. Flagged rather than silently reinterpreted.
+- **Name, email and batch are not asked.** The portal already knows all three, and the response is tied to the signed-in mentee, so re-typing them monthly would add friction and a chance to mistype. Every other field from the document is present, including the progress rating (Significant / Moderate / Limited / No progress) and the terms/privacy affirmation.
+- **Grace days are hidden for the monthly form** rather than shown as a no-op field — grace only means something when access is being withheld.
+
+### Also
+
+- Submitting now requires the form's type to match its window's type, so a monthly window cannot be satisfied by submitting the quarterly form (which would have quietly cleared the wrong obligation).
+- The quarterly seed and generator are scoped to `formType: QUARTERLY`. Sequence numbers restart per type, so without that scoping the presence of monthly windows would have made the quarterly generator think its work was already done.
+- Admin screen gains a Quarterly / Monthly switch; "locked out" is replaced by "not yet submitted" on the monthly tab, since nobody can be locked out by it.
+- Typecheck, lint, **500/500 unit tests** (48 new) and the production build are green.
+- **The migration is written but not applied.** `20260907153000_monthly_meeting_form` adds two columns and re-keys one unique index; applying it to the live database is an owner decision.
+
+## Quarterly assessment: real question sets, mentors included, and multi-select
+
+The quarterly assessment now carries the programme's actual questions, transcribed from the two supplied mid-point assessment documents — one question set for mentees, a different one for mentors.
+
+### Mentors are now held to it too
+
+- Reverses the earlier "mentees only" scope. Both sides of the pair complete the quarterly assessment, and **both are gated**: missing it past the grace window blocks the portal for a mentor exactly as it does for a mentee.
+- Who owes which form is no longer an `includes(MENTEE)` scattered through the queries. `features/assessments/participants.ts` states it once — quarterly is mentors + mentees, monthly is mentees only — and the gate, the reminders, the admin denominators and the submit authorization all derive from it. They cannot drift into chasing a different set of people than the gate holds responsible.
+- Consequently the monthly form still cannot gate a mentor: the gate's query is scoped to the form types the user's own role owes, which for a mentor is the quarterly alone. Asserted directly in `tests/assessments/gate-scope.test.ts`.
+- Submitting now checks the form's declared audience against the submitter's role, so a mentor cannot clear their obligation by submitting the mentee question set (or vice versa).
+
+### Multi-select fields
+
+- Several questions on both documents are checkbox lists — "what support do you need?" offers five options and plainly invites more than one. Forcing a single answer would have lost information, so the form builder gained a proper `multi_select` field type with an optional selection cap.
+- Answers are stored as a list, **de-duplicated and re-ordered into the form's own option order**, so two submissions are comparable regardless of the order someone clicked.
+- The validator accepts a JSON-encoded list or a bare string as well as a real list, so a draft autosaved before a field became multi-select is recovered rather than discarded. 19 tests cover the field, including that a `single_select` still refuses a list.
+- Options beyond the cap are disabled in the UI rather than silently dropped on submit.
+
+### Notes on the source documents
+
+- **Both are titled "Mid-point"**, and a mid-point assessment is normally a one-off. They are wired up as the recurring quarterly assessment as instructed; nothing inside the questions says "mid-point", so they read correctly at months 3, 6 and 9. Worth knowing that the portal also has a separate, currently unpopulated mid-term review feature these would fit.
+- **The mentee form's goal-clarity options read "Very Clear / Somewhat / Clear / Not Clear"** — "Somewhat" looks like a truncated "Somewhat Clear". Entered as Very clear / Clear / Somewhat clear / Not clear, in a sensible order.
+- **The mentor form asks for Batch, Meeting Number and Duration of Meeting**, which look carried over from the monthly form. Batch is dropped (the portal knows it); meeting number and duration are kept but optional.
+- Full name and date are not asked on either form: the response is already tied to the signed-in participant and stamped with a submission time.
+
+### Verification
+
+- Typecheck, lint, **540/540 unit tests** (40 new) and the production build are green.
+- **The migration from the monthly-form change is still unapplied**; this branch adds no new migration of its own.
+
+## The seed can no longer reach a non-local database
+
+A `npm run db:seed` run reached the live Supabase instance and created two overdue quarterly assessment windows plus 56 form responses. Because the assessment gate was already deployed, that immediately locked two accounts out of the live portal, and would have locked out every mentor once mentor gating deployed.
+
+- **The seed now refuses any database that is not demonstrably local**, unless re-run with `SEED_ALLOW_REMOTE=true`. It also prints the host/port/database it is about to write on every run, including the allowed path, so a mistake is visible rather than silent.
+- The decision is a pure function (`src/lib/db/seed-target.ts`) and **fails closed**: an unparseable URL, a missing `DATABASE_URL`, or a host that merely *contains* "localhost" (`localhost.evil.com`) are all refused. 16 tests, including that the printed target never leaks credentials.
+- Verified against the real production URL: the seed stops with the target named and the reason spelled out.
+
+This matters more than a stray demo cohort. The seed creates dozens of accounts that all share one password *and* generates assessment schedules that gate portal access — so reaching a shared or live database with it is an incident, not an inconvenience.
+
+## Who has gone quiet, and a weekly report of it
+
+Admins asked to see people who have not been active, and to have that arrive as a report every week.
+
+### Person-level, not pair-level
+
+- The existing risk monitor judges matched **pairs**; this judges **people**. Different question with a different answer: a pair can look healthy on session count while one side has done nothing for a month.
+- New `/admin/engagement` lists every mentor and mentee worst-first — never-active before merely inactive, then longest silence — with filters by status and role, and a count of the recurring forms each person owes.
+- Activity is the most recent of six signals: a logged session, goal activity, a submitted form, a meeting, a journal entry, or a message sent. Someone is **going quiet** after 10 days and **inactive** after 21.
+- **New joiners are protected from false positives.** A grace period (7 days) suppresses both the never-active and gone-quiet paths, so a fresh intake does not light the report up red on day one. Sessions and meetings count for *both* sides of the pair, so a mentee who attends without logging anything still reads as active.
+- 24 tests on the pure logic, concentrated on the boundaries in both directions — chasing someone who just joined and missing someone who vanished are both real failures.
+
+### Confidentiality held
+
+- Every query selects **timestamps and ids only**. Messages contribute `createdAt` and never `bodyOriginal`; journal entries contribute their existence, never their text. That is the §7/§10 posture — admins see activity metadata, never content — and it is stated at the top of the data module so an extension does not quietly break it.
+- The report names people, because an admin cannot follow up on an anonymous row, but it quotes nothing anyone wrote.
+
+### The weekly report reuses what already exists
+
+- New `ReportKind.ENGAGEMENT` rather than a separate delivery path, so the weekly report lands in `/admin/reports` and **exports to Word and Excel through the machinery already built**. Admins can also generate one on demand.
+- Generated by a new daily cron that enforces **one report per ISO week**. Two consequences of that framing: it is idempotent (a second run in the week does nothing), and it **catches up** — a missed Monday still produces that week's report rather than losing the week. 17 tests, including the ISO year boundaries where 1 January is week 53 of the previous year.
+- Admins are notified when it appears; a report nobody knows about is the same as no report. Nothing leaves the portal — this is an internal artefact, so unlike the newsletter cron there is no human send gate.
+
+### Also
+
+- **Two dead buttons on the admin dashboard now work.** "Export report" links to the reports area (which now exists) and the decorative "Last 90 days" control is replaced by a link to the new engagement view. The orphaned `last90` string is removed from both catalogs.
+- Typecheck, lint, **581/581 unit tests** (41 new) and the production build are green.
+- The migration adds one enum value. Not applied.
+
+## Standard question sets an admin can publish in one click
+
+Setting up a cohort needed the programme's real question sets, and they only existed in the seed — which now (correctly) refuses to run against a shared database. That left an admin retyping **37 bilingual questions** per cohort, which nobody would do accurately.
+
+- **New `src/features/forms/catalogue.ts` is the single source of truth** for the three transcribed sets (quarterly mentee, quarterly mentor, monthly meeting form). The seed and the new admin installer both read from it, so a seeded cohort and an admin-installed one get byte-identical questions and neither can drift from the source documents.
+- **"Publish standard sets" on `/admin/forms`.** Idempotent and non-destructive: it adds only the sets this cohort is missing (matched on type + role) and never touches one an admin has edited, so a second click does nothing. The button shows how many are missing and goes quiet when they are all present.
+- The catalogue is **validated against the live form contract in the tests**, so a typo in a question set fails the build rather than being discovered by an admin when the installer errors. 20 tests, including fidelity spot-checks against the documents — the four progress options, the multi-select difficulties, the mentor engagement scale, the three action slots with only the first required, the required terms tick, and that no set asks anyone to retype their name, email or batch.
+- Removing the duplication took **~270 lines out of `prisma/seed.ts`** (1,600 → 1,327) and deleted two option lists that existed in both places.
+
+Forms are per-cohort by design — admins may edit them without a code change — so every new cohort will always need its own copies. This makes that a click instead of a transcription exercise.
+
+- Typecheck, lint, **617/617 unit tests** (20 new) and the production build are green. No migration.
+
+## The Microsoft integrations flag no longer fails on invisible whitespace
+
+Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside the value**. The gate compared it with a strict `=== 'true'`, so setting it to `true` the same way it is currently set to `false` would have read as OFF — leaving mail on the log transport, with nothing anywhere to explain why no newsletter or reminder was ever delivered.
+
+- The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
+- Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
+- 7 new tests pin it, including the exact shape production holds today (`'false
+'`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
+
+Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
+
 ## Chore — Tailwind CSS 3 → 4 (CSS-first theme)
 
-- **Upgraded `tailwindcss` 3.4 → 4.3 and moved the entire design system into a CSS-first `@theme`.** `tailwind.config.ts` is deleted; `src/app/globals.css` now drives everything: `@import 'tailwindcss'`, `@plugin 'tailwindcss-animate'`, a `@custom-variant dark` (class-based, parity with the old `darkMode: ['class']`), and an `@theme inline` block that maps the §1 palette, shadcn semantic aliases, §2 type scale (`text-display/h1/h2/h3/body/small/micro` with their line-heights/weights), §3 radii, and the soft elevation/glow shadows to `--color-*`/`--text-*`/`--radius-*`/`--shadow-*` utilities.
-- **The raw RGB-channel tokens stay in `:root`** (e.g. `--green: 10 110 19`) so both Tailwind alpha modifiers and the hand-written `rgb(var(--green) / 0.7)` values in components keep working unchanged. Because the `@theme` values are real colors, v4 derives opacity via `color-mix` automatically — `<alpha-value>` placeholders are gone.
-- **PostCSS:** `postcss.config.mjs` now uses the single `@tailwindcss/postcss` plugin; `autoprefixer` is dropped (vendor prefixing is built into v4). The v3 `theme.container` config (center + 1.5rem gutters, capped at 1280px) is reimplemented as an `@utility container`. `components.json` `tailwind.config` cleared for the shadcn v4 CSS-config convention.
-- Verified: typecheck ✅, lint (0 errors) ✅, 266/266 tests ✅, `next build --webpack` ✅ (45 routes), and live — `/login` renders 200 with all security headers + CSP intact, FR renders (`<html lang="fr">`), `/api/health` up, and the compiled stylesheet carries the v4 banner, our `--green`/`--primary` tokens, and `color-mix` alpha.
+- **Upgraded `tailwindcss` 3.4 → 4.3 and moved the design system into a CSS-first `@theme`.** `tailwind.config.ts` is deleted; `src/app/globals.css` now owns the portal, landing, authentication, typography, radius, and shadow tokens.
+- **Preserved the current RGB-channel tokens** so Tailwind alpha modifiers and existing hand-written `rgb(var(--token) / alpha)` values continue to work. Tailwind 4 derives utility opacity through `color-mix`.
+- **PostCSS now uses `@tailwindcss/postcss`;** the standalone `autoprefixer` dependency is removed because Tailwind 4 handles vendor prefixing. The existing centered container behavior is retained as a CSS utility.

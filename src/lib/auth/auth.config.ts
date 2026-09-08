@@ -2,6 +2,7 @@ import type { NextAuthConfig } from 'next-auth';
 import type { RoleName } from '@prisma/client';
 import MicrosoftEntraID from 'next-auth/providers/microsoft-entra-id';
 import { isEntraConfigured } from './entra';
+import type { AdminCohortScope } from './scope';
 
 // Edge-safe base config. NO Prisma import here (not even the RoleName enum) —
 // this config is what middleware.ts instantiates, so it must stay outside the
@@ -12,10 +13,25 @@ import { isEntraConfigured } from './entra';
 // Prisma client into the edge bundle; the canonical list lives in roles.ts.
 const ADMIN_ROLE_NAMES = new Set(['SUPER_ADMIN']);
 
+// The public Knowledge Library (PUBLIC_PAGES_ROUTE_MAP.md §5).
+//
+// `/contact` is the PUBLIC support page. The private participant
+// support-request workflow is `/support`, which is deliberately NOT listed here
+// and must stay gated — that route collision is the whole reason the public
+// page is `/contact` rather than `/support`.
+//
 // `/design` is the Design System component preview (§19) — a dev/demo gallery.
 // It is public ONLY outside production (production-readiness-report.md B3); in
 // production it requires a session like any other authenticated route.
-const PUBLIC_PREFIXES = ['/about', '/faq', '/programme', '/mentor-guide', '/mentee-guide'];
+const PUBLIC_PREFIXES = [
+  '/about',
+  '/faq',
+  '/confidentiality',
+  '/contact',
+  '/programme',
+  '/mentor-guide',
+  '/mentee-guide',
+];
 if (process.env.NODE_ENV !== 'production') {
   PUBLIC_PREFIXES.push('/design');
 }
@@ -27,6 +43,11 @@ function isPublicPath(pathname: string): boolean {
   // Password recovery is public (the token is the credential).
   if (pathname === '/forgot-password' || pathname.startsWith('/reset-password')) return true;
   if (pathname.startsWith('/api/auth')) return true;
+  // The generated Open Graph card for the public landing page, which Next
+  // serves at /opengraph-image-<hash>. A social unfurler fetches it with no
+  // session, so gating it turns every shared link's preview into a login
+  // redirect. It is static brand art and carries no participant data.
+  if (pathname.startsWith('/opengraph-image')) return true;
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
@@ -77,6 +98,11 @@ export const authConfig = {
       if (session.user) {
         session.user.id = (token.sub ?? token.id) as string;
         session.user.roles = (token.roles ?? []) as RoleName[];
+        // Legacy tokens issued before H1 lack this claim. Default to 'ALL' so a
+        // live admin session isn't locked out mid-flight; the next sign-in (≤12h)
+        // re-issues a token with the precise scope. Harmless for non-admins —
+        // the scope is only ever consulted inside requireRole-gated admin reads.
+        session.user.adminCohortScope = (token.adminCohortScope ?? 'ALL') as AdminCohortScope;
         session.user.locale = (token.locale ?? 'EN') as string;
       }
       return session;

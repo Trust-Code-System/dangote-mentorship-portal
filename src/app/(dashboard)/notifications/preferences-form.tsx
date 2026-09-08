@@ -35,10 +35,16 @@ export function PreferencesForm({
   );
 
   useEffect(() => {
-    if (state?.ok) {
+    if (!state?.ok) return;
+    router.refresh();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
       setSaved(true);
-      router.refresh();
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 

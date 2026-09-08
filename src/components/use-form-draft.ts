@@ -25,10 +25,6 @@ export function useFormDraft(params: {
   const { formKey, values, cohortId, enabled = true, delayMs = 1000 } = params;
   const [status, setStatus] = useState<DraftStatus>('idle');
 
-  // Keep the newest values in a ref so the debounced timer always sends the
-  // latest snapshot without re-subscribing the effect on every keystroke.
-  const valuesRef = useRef(values);
-  valuesRef.current = values;
   const serialized = JSON.stringify(values);
 
   // Skip the first run: the initial render reflects the loaded draft (or empty
@@ -43,11 +39,11 @@ export function useFormDraft(params: {
     }
     setStatus('saving');
     const handle = setTimeout(async () => {
-      const res = await saveDraft({ formKey, data: valuesRef.current, cohortId });
+      const res = await saveDraft({ formKey, data: values, cohortId });
       setStatus(res.ok ? 'saved' : 'error');
     }, delayMs);
     return () => clearTimeout(handle);
-  }, [serialized, formKey, cohortId, enabled, delayMs]);
+  }, [serialized, formKey, cohortId, enabled, delayMs, values]);
 
   const clear = useCallback(async () => {
     await clearDraft({ formKey });

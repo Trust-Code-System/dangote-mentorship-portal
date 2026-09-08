@@ -62,7 +62,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface p-5 shadow-elevation">
+    <section className="min-w-0 rounded-2xl border border-border bg-surface p-5 shadow-elevation">
       <div className="mb-4 space-y-0.5">
         <h2 className="font-display text-h3 font-semibold text-ink">{title}</h2>
         <p className="text-small text-ink-3">{subtitle}</p>
@@ -119,7 +119,12 @@ export function InsightsCharts({
       {/* Language distribution — donut */}
       <ChartCard title={labels.languageTitle} subtitle={labels.languageSubtitle}>
         {hasLanguages ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            initialDimension={{ width: 1, height: 260 }}
+          >
             <PieChart>
               <Pie
                 data={data.languages.map((l) => ({ name: l.language, value: l.count }))}
@@ -130,8 +135,10 @@ export function InsightsCharts({
                 paddingAngle={2}
                 strokeWidth={0}
               >
+                {/* QA-INSIGHT-004: two perceptually-distinct hues for the EN/FR
+                    categorical series (was two near-identical greens). */}
                 <Cell fill={C.green} />
-                <Cell fill={C.greenLight} />
+                <Cell fill={C.warn} />
               </Pie>
               <Tooltip contentStyle={tooltipStyle} />
               <Legend iconType="circle" />
@@ -144,7 +151,12 @@ export function InsightsCharts({
 
       {/* Matching status — stacked bar */}
       <ChartCard title={labels.matchingTitle} subtitle={labels.matchingSubtitle}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={0}
+          initialDimension={{ width: 1, height: 260 }}
+        >
           <BarChart data={matchingData} barSize={48}>
             <CartesianGrid vertical={false} stroke={C.border} />
             <XAxis dataKey="name" {...axisProps} />
@@ -159,7 +171,12 @@ export function InsightsCharts({
 
       {/* Training completion — stacked bar */}
       <ChartCard title={labels.trainingTitle} subtitle={labels.trainingSubtitle}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={0}
+          initialDimension={{ width: 1, height: 260 }}
+        >
           <BarChart data={trainingData} barSize={48}>
             <CartesianGrid vertical={false} stroke={C.border} />
             <XAxis dataKey="name" {...axisProps} />
@@ -174,7 +191,12 @@ export function InsightsCharts({
 
       {/* Goal pipeline — bar */}
       <ChartCard title={labels.goalsTitle} subtitle={labels.goalsSubtitle}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={0}
+          initialDimension={{ width: 1, height: 260 }}
+        >
           <BarChart data={goalsData} barSize={56}>
             <CartesianGrid vertical={false} stroke={C.border} />
             <XAxis dataKey="name" {...axisProps} />

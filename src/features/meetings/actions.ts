@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { MatchStatus, MeetingStatus, MeetingType, NoShowReason } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
 import { getMeetingProvider } from '@/lib/meetings';
@@ -62,6 +63,9 @@ const scheduleSchema = z.object({
 export async function scheduleMeeting(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = scheduleSchema.parse({
       counterpartId: formData.get('counterpartId'),
       title: formData.get('title'),
@@ -107,6 +111,7 @@ export async function scheduleMeeting(formData: FormData): Promise<ActionResult<
           prisma.user.findUnique({ where: { id: data.counterpartId }, select: { email: true } }),
         ]);
         const result = await provider.createEvent({
+          idempotencyKey: meeting.id,
           title: data.title,
           description: data.description || undefined,
           startsAt,
@@ -166,6 +171,9 @@ const idSchema = z.object({ meetingId: z.string().cuid() });
 export async function cancelMeeting(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { meetingId } = idSchema.parse({ meetingId: formData.get('meetingId') });
 
     const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
@@ -247,6 +255,9 @@ export async function reportMeetingOutcome(
 ): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const data = outcomeSchema.parse({
       meetingId: formData.get('meetingId'),
       happened: formData.get('happened'),
@@ -310,6 +321,9 @@ export async function generateMeetingPrep(
 ): Promise<ActionResult<{ aiEnabled: boolean; cached: boolean }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { meetingId } = prepSchema.parse({ meetingId: formData.get('meetingId') });
 
     const view = await getMeetingPrep(meetingId, user.id);

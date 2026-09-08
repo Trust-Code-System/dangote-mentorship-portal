@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { AgreementType, Language, MatchStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -22,7 +23,7 @@ const signSchema = z.object({
 });
 
 function languageFor(locale: string): Language {
-  return locale === 'FR' ? Language.FR : Language.EN;
+  return locale.toUpperCase().startsWith('FR') ? Language.FR : Language.EN;
 }
 
 /** Storage key for a signed agreement's PDF. */
@@ -75,7 +76,22 @@ export async function signAgreement(formData: FormData): Promise<ActionResult<{ 
       return fail({ code: 'CONFLICT', message: 'You have already signed this agreement.' });
     }
 
-    const lang = languageFor(user.locale);
+    // QA-AGREE-005: the typed name IS the signature, but it must match the
+    // signer's registered name (case/whitespace-insensitive). An e-signature that
+    // accepts an arbitrary name has no integrity on a legal/confidentiality record.
+    const signerName = match.mentorId === user.id ? match.mentor.name : match.mentee.name;
+    const normalizeName = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (signerName && normalizeName(typedName) !== normalizeName(signerName)) {
+      return fail({
+        code: 'VALIDATION',
+        message: `Please sign with your full name as registered: ${signerName}.`,
+        fieldErrors: { typedName: [`Enter your full name as registered: ${signerName}.`] },
+      });
+    }
+
+    // QA-I18N-006: snapshot the agreement in the locale the signer is actually
+    // viewing (header switcher), not their stored account locale.
+    const lang = languageFor(await getLocale());
     const template = getAgreementTemplate(type, lang);
     const counterpartName = match.mentorId === user.id ? match.mentee.name : match.mentor.name;
     const signedAt = new Date();

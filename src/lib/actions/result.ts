@@ -1,5 +1,6 @@
 import { ZodError } from 'zod';
 import { ForbiddenError, UnauthenticatedError } from '@/lib/auth/rbac';
+import { reportError } from '@/lib/observability/report';
 
 // Typed result returned by every server action (CLAUDE.md §3, §8: actions
 // return a typed result rather than throwing across the RSC boundary).
@@ -34,7 +35,9 @@ export function mapActionError(error: unknown): ActionResult<never> {
       fieldErrors: error.flatten().fieldErrors as Record<string, string[]>,
     });
   }
-  // Never leak internals to the client (CLAUDE.md §14: no PII in logs/errors).
-  console.error('[action] unexpected error', error);
+  // Unexpected/internal: never leak details to the client (CLAUDE.md §14), but
+  // DO capture the real error server-side (Sentry when configured) so opaque
+  // "Something went wrong" failures in production are diagnosable rather than blind.
+  reportError(error, { source: 'action' });
   return fail({ code: 'UNKNOWN', message: 'Something went wrong. Please try again.' });
 }

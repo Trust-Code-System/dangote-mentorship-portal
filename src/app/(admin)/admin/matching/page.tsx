@@ -77,19 +77,21 @@ export default async function MatchingPage() {
   const featured = ranked[0];
   const queue = ranked.slice(1);
 
+  // Toast templates keep `{mentor}` / `{mentee}` placeholders for client-side
+  // `.replace()` — use `t.raw` so next-intl does not require values at render.
   const overrideLabels = {
     mentor: t('mentor'),
     overrideSubmit: t('overrideSubmit'),
     assigning: t('assigning'),
     doneTitle: t('overrideDoneTitle'),
-    done: t('overrideDone'),
+    done: t.raw('overrideDone') as string,
     errorTitle: t('overrideErrorTitle'),
   };
   const approveLabels = {
     approve: t('approve'),
     approving: t('approving'),
     doneTitle: t('approveDoneTitle'),
-    done: t('approveDone'),
+    done: t.raw('approveDone') as string,
     errorTitle: t('approveErrorTitle'),
   };
   const mentorOpts = mentorOptions.map((m) => ({
@@ -113,7 +115,7 @@ export default async function MatchingPage() {
             run: t('run'),
             running: t('running'),
             doneTitle: t('runDoneTitle'),
-            done: t('runDone'),
+            done: t.raw('runDone') as string,
             allMatched: t('runAllMatched'),
             errorTitle: t('runErrorTitle'),
           }}
@@ -213,15 +215,15 @@ export default async function MatchingPage() {
             </div>
           </article>
           <aside className="rounded-lg border border-border bg-surface p-5 shadow-elevation">
-            <h2 className="text-h3 text-ink">Cohort strength</h2>
-            <p className="mt-1 text-micro text-ink-3">Real compatibility signals for this recommendation.</p>
+            <h2 className="text-h3 text-ink">{t('cohortStrength')}</h2>
+            <p className="mt-1 text-micro text-ink-3">{t('compatibilitySignals')}</p>
             <div className="mt-5 space-y-5">
-              <StrengthBar label="Overall confidence" value={Math.round(featured.score)} />
-              <StrengthBar label="Language compatibility" value={100} />
+              <StrengthBar label={t('overallConfidence')} value={Math.round(featured.score)} />
+              <StrengthBar label={t('languageCompatibility')} value={100} />
             </div>
             <div className="mt-5 rounded-md bg-surface-2 p-3 text-small text-ink-2">
-              <p className="font-semibold text-ink">Cohort 2026</p>
-              <p className="mt-1">Ranked using the configured matching rules and profile data.</p>
+              <p className="font-semibold text-ink">{cohort.name}</p>
+              <p className="mt-1">{t('rankedUsingRules')}</p>
             </div>
           </aside>
           </div>

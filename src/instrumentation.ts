@@ -5,7 +5,12 @@
 // `EvalError: Code generation from strings disallowed` that a hand-rolled edge
 // import caused.
 export async function register(): Promise<void> {
+  const { assertProductionEnvironment } = await import('./lib/env/production');
+  assertProductionEnvironment();
+
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { integrationDiagnosticLines } = await import('./lib/integrations/health');
+    for (const line of integrationDiagnosticLines()) console.info(line);
     await import('./sentry.server.config');
   }
   if (process.env.NEXT_RUNTIME === 'edge') {

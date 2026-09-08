@@ -2,6 +2,7 @@ import 'server-only';
 import { CohortStatus, type SupportRequestReason, type SupportRequestStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
+import { adminCohortFilter, type SessionUser } from '@/lib/auth/rbac';
 import type { SupportRequestView } from './queue';
 
 // Reads for the private support queue (experience-layer.md §1.13). A request is
@@ -70,10 +71,13 @@ const detailInclude = {
   handledBy: { select: { name: true } },
 } as const;
 
-/** Admin queue: open requests first, then most recent. */
-export async function getSupportQueue(): Promise<SupportRequestView[]> {
+/**
+ * Admin queue: open requests first, then most recent. Confined to the cohorts the
+ * calling admin may see (m2-audit-findings H1) — a global admin sees all.
+ */
+export async function getSupportQueue(admin: SessionUser): Promise<SupportRequestView[]> {
   const rows = await prisma.supportRequest.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, ...adminCohortFilter(admin) },
     orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
     include: detailInclude,
     take: 200,

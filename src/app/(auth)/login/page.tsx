@@ -4,82 +4,59 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth/rbac';
 import { defaultDashboardPath } from '@/lib/auth/roles';
 import { isEntraConfigured } from '@/lib/auth/entra';
-import { BrandMark } from '@/components/brand-logo';
-import { Wordmark } from '@/components/wordmark';
+import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthAlert } from '@/components/auth/auth-controls';
 import { LoginForm } from './login-form';
 
-// Login (Stitch redesign — docs/stitch-redesign.md). Centered brand header → SSO
-// + credentials card → request-access + legal footer, matching the Stitch Login
-// screen. Auth wiring (Entra SSO, credentials, forgot-password) is preserved in
-// LoginForm.
-export default async function LoginPage() {
+// Login. Auth wiring (Entra SSO gating, credentials action, rate limiting) is
+// unchanged — this is the visual and UX layer only (AUTH_UI_SPEC.md).
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ expired?: string; error?: string }>;
+}) {
   // Already signed in → go straight to the role-correct dashboard.
   const user = await getCurrentUser();
   if (user) redirect(defaultDashboardPath(user.roles));
 
   const t = await getTranslations('auth');
-  const tc = await getTranslations('common');
+  const params = await searchParams;
+
+  // Session-expiry and provider-error are query states on /login rather than
+  // separate routes: Auth.js already redirects here (`pages.signIn`), so adding
+  // routes would mean changing auth configuration for no user-facing gain.
+  // The provider's own error code is never rendered — only our own copy.
+  const notice = params.expired
+    ? ({ tone: 'info', title: t('sessionExpiredTitle'), body: t('sessionExpiredBody') } as const)
+    : params.error
+      ? ({ tone: 'error', title: t('authErrorTitle'), body: t('authErrorBody') } as const)
+      : null;
 
   return (
     <div>
-      {/* Brand header — logo links back to the public landing page */}
-      <div className="mb-8 flex flex-col items-center">
-        <Link
-          href="/"
-          aria-label={t('backToHome')}
-          className="mb-4 rounded-2xl bg-surface-2 p-3 shadow-elevation transition-shadow hover:shadow-elevation-lg"
-        >
-          <BrandMark className="size-14" />
-        </Link>
-        <h1 className="text-center font-display text-h1 font-bold text-ink">
-          <Wordmark name={tc('appShortName')} />
-        </h1>
-        <p className="mt-1 text-small text-ink-2">{t('enterprisePortal')}</p>
-      </div>
+      <AuthCard>
+        <AuthHeader heading={t('loginHeading')} supporting={t('loginSupporting')} />
 
-      {/* Card */}
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-elevation transition-shadow hover:shadow-elevation-lg">
+        {notice ? (
+          <AuthAlert tone={notice.tone} title={notice.title} className="mb-6">
+            {notice.body}
+          </AuthAlert>
+        ) : null}
+
         <LoginForm entraEnabled={isEntraConfigured()} />
-      </div>
 
-      {/* Footer */}
-      <footer className="mt-10 text-center">
-        <p className="text-small text-ink-2">
+        <p className="mt-7 border-t border-auth-border pt-6 text-center text-sm text-auth-ink-2">
           {t('noAccount')}{' '}
-          <Link href="/signup" className="font-bold text-green-light hover:underline">
+          <Link
+            href="/signup"
+            className="inline-flex min-h-11 items-center font-semibold text-[#0A6E13] underline-offset-4 hover:underline"
+          >
             {t('requestAccess')}
           </Link>
         </p>
-        {/* No opacity here: it dropped link contrast below WCAG AA. Each link is
-            an inline-flex with min-h-6 to meet the 24px target size (M4). */}
-        <div className="mt-4 flex justify-center gap-6">
-          <Link
-            href="/faq"
-            className="inline-flex min-h-6 items-center text-micro text-ink-2 hover:text-green-strong"
-          >
-            {t('privacyPolicy')}
-          </Link>
-          <Link
-            href="/faq"
-            className="inline-flex min-h-6 items-center text-micro text-ink-2 hover:text-green-strong"
-          >
-            {t('termsOfService')}
-          </Link>
-          <Link
-            href="/support"
-            className="inline-flex min-h-6 items-center text-micro text-ink-2 hover:text-green-strong"
-          >
-            {t('supportLink')}
-          </Link>
-        </div>
-        <p className="mt-4 text-micro text-ink-2">{t('copyright')}</p>
-        <Link
-          href="/"
-          className="mt-4 inline-flex items-center gap-1 text-small font-medium text-ink-2 hover:text-green-strong"
-        >
-          <span aria-hidden>←</span> {t('backToHome')}
-        </Link>
-      </footer>
+      </AuthCard>
+
+      <AuthFooter />
     </div>
   );
 }

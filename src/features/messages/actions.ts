@@ -5,8 +5,11 @@ import { z } from 'zod';
 import { Language } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
+import { requirePortalAccess } from '@/features/assessments/guard';
 import { notifyMany } from '@/lib/notifications/notify';
 import { ok, fail, mapActionError, type ActionResult } from '@/lib/actions/result';
+import { getThread } from './data';
+import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
 
 // Send a direct message (CLAUDE.md §10). Authorizes that the sender is a
 // participant of the conversation; content stays private to participants.
@@ -23,7 +26,18 @@ export async function sendMessage(input: {
 }): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
     const { conversationId, body } = sendSchema.parse(input);
+
+    const [burst, minute] = await Promise.all([
+      checkRateLimit(`message:${user.id}:burst`, 8, 10_000),
+      checkRateLimit(`message:${user.id}:minute`, 30, 60_000),
+    ]);
+    if (!burst.ok || !minute.ok) {
+      return fail({ code: 'CONFLICT', message: 'You are sending messages too quickly. Please wait and retry.' });
+    }
 
     // Authorization: only a participant may post. Load the conversation with its
     // participants so we can both authorize and notify the recipients afterwards.
@@ -72,6 +86,39 @@ export async function sendMessage(input: {
     revalidatePath('/messages');
     revalidatePath(`/messages/${conversationId}`);
     return ok({ id: message.id });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+const olderMessagesSchema = z.object({
+  conversationId: z.string().cuid(),
+  cursor: z.string().cuid(),
+});
+
+export async function loadOlderMessages(input: { conversationId: string; cursor: string }): Promise<
+  ActionResult<{
+    messages: Array<Omit<import('./data').ThreadMessage, 'createdAt'> & { createdAt: string }>;
+    nextCursor: string | null;
+  }>
+> {
+  try {
+    const user = await requireUser();
+    // Assessment lock: a mentee with an overdue quarterly assessment cannot
+    // act in the mentorship loop until they submit it (no-op for mentors/admins).
+    await requirePortalAccess(user);
+    const { conversationId, cursor } = olderMessagesSchema.parse(input);
+    const thread = await getThread(conversationId, user.id, cursor);
+    if (!thread) {
+      return fail({ code: 'FORBIDDEN', message: 'You are not part of this conversation.' });
+    }
+    return ok({
+      messages: thread.messages.map((message) => ({
+        ...message,
+        createdAt: message.createdAt.toISOString(),
+      })),
+      nextCursor: thread.nextCursor,
+    });
   } catch (error) {
     return mapActionError(error);
   }

@@ -25,8 +25,10 @@ import {
   MatchingStatus,
   MatchStatus,
   MeetingStatus,
+  NewsletterStatus,
   PrismaClient,
   ProgrammeStatus,
+  ReviewStatus,
   ReviewType,
   RoleName,
   SupportRequestReason,
@@ -35,6 +37,17 @@ import {
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { generateInviteToken, inviteExpiry } from '../src/lib/auth/invite';
+import { STANDARD_FORMS } from '../src/features/forms/catalogue';
+import {
+  defaultMonthlyWindowLabel,
+  defaultWindowLabel,
+  planAssessmentWindows,
+  planMonthlyWindows,
+} from '../src/features/assessments/schedule';
+import {
+  SEED_REMOTE_OVERRIDE,
+  evaluateSeedTarget,
+} from '../src/lib/db/seed-target';
 
 const prisma = new PrismaClient();
 
@@ -728,6 +741,460 @@ async function main() {
     });
   }
 
+  // --- The mandatory quarterly assessment: forms + schedule ---------------
+  // Transcribed from the programme's mid-point assessment documents. There are
+  // TWO question sets — mentors and mentees are asked different things — and
+  // both sides are held to it: missing it past the grace window blocks the
+  // portal for either role (features/assessments/participants.ts).
+  //
+  // Full name / date / batch are not asked: the response is already tied to the
+  // signed-in participant and their cohort.
+  const existingQuarterlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTEE,
+      deletedAt: null,
+    },
+  });
+  if (!existingQuarterlyForm) {
+    // Question set comes from the shared catalogue, so a seeded cohort and
+    // an admin-installed one are byte-identical.
+    const standard = STANDARD_FORMS.find(
+      (f) => f.type === ReviewType.QUARTERLY && f.roleName === RoleName.MENTEE,
+    )!;
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: standard.type,
+        roleName: standard.roleName,
+        title: standard.title,
+        isActive: true,
+        schema: { fields: standard.fields },
+      },
+    });
+  }
+
+  const existingMentorQuarterlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTOR,
+      deletedAt: null,
+    },
+  });
+  if (!existingMentorQuarterlyForm) {
+    // Question set comes from the shared catalogue, so a seeded cohort and
+    // an admin-installed one are byte-identical.
+    const standard = STANDARD_FORMS.find(
+      (f) => f.type === ReviewType.QUARTERLY && f.roleName === RoleName.MENTOR,
+    )!;
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: standard.type,
+        roleName: standard.roleName,
+        title: standard.title,
+        isActive: true,
+        schema: { fields: standard.fields },
+      },
+    });
+  }
+
+  // Schedule: one assessment every 3 months from the cohort start date. The
+  // planner is pure and shared with the admin "generate schedule" action, so
+  // the demo cohort and a real cohort get an identical cadence.
+  const existingWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, formType: ReviewType.QUARTERLY, deletedAt: null },
+    select: { sequence: true },
+  });
+  if (cohort.startDate) {
+    const taken = new Set(existingWindows.map((w) => w.sequence));
+    const plans = planAssessmentWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+      intervalMonths: cohort.assessmentIntervalMonths,
+    }).filter((plan) => !taken.has(plan.sequence));
+
+    if (plans.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: plans.map((plan) => ({
+          cohortId: cohort.id,
+          formType: ReviewType.QUARTERLY,
+          gatesAccess: true,
+          sequence: plan.sequence,
+          label: defaultWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: cohort.assessmentGraceDays,
+        })),
+      });
+    }
+  }
+
+  // Past-due windows are pre-submitted for almost everyone, so seeding the
+  // schedule doesn't lock the whole demo cohort out of the portal. A couple of
+  // mentees and one mentor are deliberately left outstanding so the admin
+  // completion table — and the lockout itself — are demoable on real data.
+  const quarterlyMenteeForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTEE,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const quarterlyMentorForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.QUARTERLY,
+      roleName: RoleName.MENTOR,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const pastWindows = await prisma.assessmentWindow.findMany({
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.QUARTERLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
+    select: { id: true },
+  });
+
+  if (quarterlyMenteeForm && quarterlyMentorForm && pastWindows.length > 0) {
+    const [menteeGrants, mentorGrants] = await Promise.all([
+      prisma.userRole.findMany({
+        where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+        orderBy: { createdAt: 'asc' },
+        select: { userId: true },
+      }),
+      prisma.userRole.findMany({
+        where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTOR },
+        orderBy: { createdAt: 'asc' },
+        select: { userId: true },
+      }),
+    ]);
+
+    const menteeIds = Array.from(new Set(menteeGrants.map((g) => g.userId)));
+    const mentorIds = Array.from(new Set(mentorGrants.map((g) => g.userId)));
+    // Leave the last two mentees and the last mentor outstanding: one of each
+    // in grace, one locked out.
+    const compliantMentees = menteeIds.slice(0, Math.max(0, menteeIds.length - 2));
+    const compliantMentors = mentorIds.slice(0, Math.max(0, mentorIds.length - 1));
+
+    for (const window of pastWindows) {
+      const already = await prisma.formResponse.findMany({
+        where: { assessmentWindowId: window.id, deletedAt: null },
+        select: { respondentId: true },
+      });
+      const done = new Set(already.map((r) => r.respondentId));
+
+      const menteeTodo = compliantMentees.filter((id) => !done.has(id));
+      if (menteeTodo.length > 0) {
+        await prisma.formResponse.createMany({
+          data: menteeTodo.map((userId, idx) => ({
+            formId: quarterlyMenteeForm.id,
+            respondentId: userId,
+            assessmentWindowId: window.id,
+            status: ReviewStatus.SUBMITTED,
+            submittedAt: new Date(),
+            answers: {
+              meet_frequency: ['biweekly', 'monthly', 'weekly'][idx % 3],
+              relationship_quality: idx % 5 === 0 ? 'supportive' : 'very_supportive',
+              goal_clarity: idx % 4 === 0 ? 'somewhat_clear' : 'clear',
+              goal_progress: ['significant', 'some', 'some', 'limited'][idx % 4],
+              what_helped_most:
+                'Having someone senior talk through a real decision with me before I made it.',
+              // A multi_select answer is stored as a list of option values.
+              difficulties: idx % 3 === 0 ? ['time'] : ['time', 'expectations'],
+              difficulties_other: null,
+              support_needed:
+                idx % 2 === 0
+                  ? ['mentor_engagement', 'goal_refinement']
+                  : ['peer_support'],
+              support_needed_other: null,
+              improvement_suggestions:
+                idx % 6 === 0 ? 'A shared calendar would make scheduling easier.' : null,
+            },
+          })),
+        });
+      }
+
+      const mentorTodo = compliantMentors.filter((id) => !done.has(id));
+      if (mentorTodo.length > 0) {
+        await prisma.formResponse.createMany({
+          data: mentorTodo.map((userId, idx) => ({
+            formId: quarterlyMentorForm.id,
+            respondentId: userId,
+            assessmentWindowId: window.id,
+            status: ReviewStatus.SUBMITTED,
+            submittedAt: new Date(),
+            answers: {
+              meeting_number: String(idx + 2),
+              meeting_duration: '60 minutes',
+              meet_frequency: idx % 2 === 0 ? 'biweekly' : 'monthly',
+              interaction_quality: ['excellent', 'good', 'good', 'fair'][idx % 4],
+              mentee_engagement: ['highly', 'moderately', 'highly', 'minimally'][idx % 4],
+              goals_focused:
+                'Stakeholder management, and preparing to present to the operations board.',
+              mentee_progress: ['significant', 'some', 'some', 'limited'][idx % 4],
+              progress_drivers:
+                'Consistent meetings and a willingness to try things between sessions.',
+              had_challenges: idx % 3 === 0,
+              challenges_detail:
+                idx % 3 === 0 ? 'Hard to find a slot that works across shift patterns.' : null,
+              support_wanted: idx % 2 === 0 ? ['templates', 'peer_support'] : ['skill_materials'],
+              support_wanted_other: null,
+              programme_suggestions:
+                idx % 5 === 0 ? 'A short refresher for mentors at the halfway point.' : null,
+              additional_comments: null,
+            },
+          })),
+        });
+      }
+    }
+  }
+
+  // --- The monthly meeting form (mentees only, never gates access) ---------
+  // Transcribed from the programme's "Monthly Meeting Form" document. Name,
+  // email and batch are deliberately NOT asked: the response is already tied to
+  // the signed-in mentee and their cohort, so re-typing them monthly would only
+  // add friction and a chance to mistype.
+  const existingMonthlyForm = await prisma.formDefinition.findFirst({
+    where: { cohortId: cohort.id, type: ReviewType.MONTHLY, deletedAt: null },
+  });
+  if (!existingMonthlyForm) {
+    // Question set comes from the shared catalogue, so a seeded cohort and
+    // an admin-installed one are byte-identical.
+    const standard = STANDARD_FORMS.find(
+      (f) => f.type === ReviewType.MONTHLY && f.roleName === RoleName.MENTEE,
+    )!;
+    await prisma.formDefinition.create({
+      data: {
+        cohortId: cohort.id,
+        type: standard.type,
+        roleName: standard.roleName,
+        title: standard.title,
+        isActive: true,
+        schema: { fields: standard.fields },
+      },
+    });
+  }
+
+  // One monthly window per calendar month of the cohort. gatesAccess is false:
+  // a missed monthly form produces reminders, never a lockout.
+  const existingMonthlyWindows = await prisma.assessmentWindow.findMany({
+    where: { cohortId: cohort.id, formType: ReviewType.MONTHLY, deletedAt: null },
+    select: { sequence: true },
+  });
+  if (cohort.startDate) {
+    const takenMonths = new Set(existingMonthlyWindows.map((w) => w.sequence));
+    const monthlyPlans = planMonthlyWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+    }).filter((plan) => !takenMonths.has(plan.sequence));
+
+    if (monthlyPlans.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: monthlyPlans.map((plan) => ({
+          cohortId: cohort.id,
+          formType: ReviewType.MONTHLY,
+          gatesAccess: false,
+          sequence: plan.sequence,
+          label: defaultMonthlyWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: 0,
+        })),
+      });
+    }
+  }
+
+  // Fill in the months that have already closed for most mentees, and leave the
+  // month in progress largely outstanding — so the admin's completion view and
+  // the reminder/newsletter path are both demoable on realistic data.
+  const monthlyForm = await prisma.formDefinition.findFirst({
+    where: {
+      cohortId: cohort.id,
+      type: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  const closedMonths = await prisma.assessmentWindow.findMany({
+    where: {
+      cohortId: cohort.id,
+      formType: ReviewType.MONTHLY,
+      isActive: true,
+      deletedAt: null,
+      dueAt: { lte: new Date() },
+    },
+    orderBy: { sequence: 'asc' },
+    select: { id: true },
+  });
+  if (monthlyForm && closedMonths.length > 0) {
+    const monthlyGrants = await prisma.userRole.findMany({
+      where: { cohortId: cohort.id, deletedAt: null, roleId: roles.MENTEE },
+      orderBy: { createdAt: 'asc' },
+      select: { userId: true },
+    });
+    const monthlyMenteeIds = Array.from(new Set(monthlyGrants.map((g) => g.userId)));
+
+    for (const [index, month] of closedMonths.entries()) {
+      const already = await prisma.formResponse.findMany({
+        where: { assessmentWindowId: month.id, deletedAt: null },
+        select: { respondentId: true },
+      });
+      const done = new Set(already.map((r) => r.respondentId));
+      // Compliance tails off over the months, which is what real programmes see
+      // and what makes the reminder feature worth demonstrating.
+      const share = Math.max(0.5, 1 - index * 0.08);
+      const todo = monthlyMenteeIds
+        .slice(0, Math.floor(monthlyMenteeIds.length * share))
+        .filter((id) => !done.has(id));
+      if (todo.length === 0) continue;
+
+      await prisma.formResponse.createMany({
+        data: todo.map((userId, i) => ({
+          formId: monthlyForm.id,
+          respondentId: userId,
+          assessmentWindowId: month.id,
+          status: ReviewStatus.SUBMITTED,
+          submittedAt: new Date(),
+          answers: {
+            meeting_number: String(index + 1),
+            meeting_duration: i % 2 === 0 ? '60 minutes' : '45 minutes',
+            main_topics:
+              i % 3 === 0
+                ? 'Stakeholder management and handling pushback from senior colleagues.'
+                : 'Communication under pressure and delegating to a new team.',
+            issues_raised: i % 4 === 0 ? 'Balancing shift work with study time.' : null,
+            key_insights:
+              'Preparing a one-page brief before a difficult conversation changes how it goes.',
+            goal_progress: ['significant', 'moderate', 'moderate', 'limited'][i % 4],
+            progress_comment: i % 5 === 0 ? 'Slower than planned, but moving.' : null,
+            action_1: 'Lead the next production review meeting.',
+            action_2: i % 2 === 0 ? 'Draft a stakeholder map for my unit.' : null,
+            action_3: null,
+            resources_required: i % 6 === 0 ? 'Access to the leadership reading list.' : null,
+            additional_comments: null,
+            terms_agreed: true,
+          },
+        })),
+      });
+    }
+  }
+
+  // --- Newsletter cadence + a draft waiting for review --------------------
+  // Twice a week (Monday + Thursday, 09:00 Lagos) is how the programme runs it.
+  // The schedule prepares drafts; sending stays a human action.
+  await prisma.newsletterSchedule.upsert({
+    where: { cohortId: cohort.id },
+    update: {},
+    create: {
+      cohortId: cohort.id,
+      enabled: true,
+      sendDays: [1, 4],
+      sendHour: 9,
+      timezone: 'Africa/Lagos',
+      autoDraft: true,
+    },
+  });
+
+  const existingNewsletter = await prisma.newsletter.findFirst({
+    where: { cohortId: cohort.id, deletedAt: null },
+    select: { id: true },
+  });
+  if (!existingNewsletter) {
+    await prisma.newsletter.create({
+      data: {
+        cohortId: cohort.id,
+        createdById: superAdmin.id,
+        title: 'Newsletter — sample issue',
+        subjectEn: 'Four goals approved and a clinic on Thursday',
+        subjectFr: 'Quatre objectifs approuvés et une clinique jeudi',
+        status: NewsletterStatus.DRAFT,
+        bodyJson: {
+          sections: [
+            {
+              kind: 'intro',
+              headingEn: 'This week in the programme',
+              headingFr: 'Cette semaine dans le programme',
+              bodyEn:
+                'A steady week: more pairs are meeting on schedule and the first goals of the quarter are through approval.',
+              bodyFr:
+                'Une semaine régulière : davantage de binômes se rencontrent comme prévu et les premiers objectifs du trimestre sont approuvés.',
+              enabled: true,
+            },
+            {
+              kind: 'highlights',
+              headingEn: 'Highlights',
+              headingFr: 'Points forts',
+              bodyEn: [
+                'Four goals were approved by mentors.',
+                'Twelve sessions were logged across the cohort.',
+                'The French-speaking pairs held their first joint session.',
+              ].join('\n'),
+              bodyFr: [
+                'Quatre objectifs ont été approuvés par les mentors.',
+                'Douze séances ont été consignées dans la cohorte.',
+                'Les binômes francophones ont tenu leur première séance commune.',
+              ].join('\n'),
+              enabled: true,
+            },
+            {
+              kind: 'numbers',
+              headingEn: 'By the numbers',
+              headingFr: 'En chiffres',
+              bodyEn: ['Goals approved: 4', 'Sessions logged: 12', 'Pairs that met: 11 of 20'].join(
+                '\n',
+              ),
+              bodyFr: [
+                'Objectifs approuvés : 4',
+                'Séances consignées : 12',
+                'Binômes qui se sont rencontrés : 11 sur 20',
+              ].join('\n'),
+              enabled: true,
+            },
+            {
+              kind: 'dates',
+              headingEn: 'Dates to remember',
+              headingFr: 'Dates à retenir',
+              bodyEn: 'Quarterly assessment — due at the end of the month',
+              bodyFr: 'Évaluation trimestrielle — à rendre à la fin du mois',
+              enabled: true,
+            },
+            {
+              kind: 'spotlight',
+              headingEn: 'Spotlight',
+              headingFr: 'Coup de projecteur',
+              bodyEn: '',
+              bodyFr: '',
+              enabled: false,
+            },
+            {
+              kind: 'callToAction',
+              headingEn: 'What to do next',
+              headingFr: 'Prochaine étape',
+              bodyEn:
+                'If you have not logged your last session, add it this week so your mentor can comment on it.',
+              bodyFr:
+                'Si vous n’avez pas consigné votre dernière séance, ajoutez-la cette semaine pour que votre mentor puisse la commenter.',
+              enabled: true,
+            },
+          ],
+        },
+      },
+    });
+  }
+
   // --- A messy mentor import for the M1 validator to catch -----------------
   const existingImport = await prisma.import.findFirst({
     where: { cohortId: cohort.id, fileName: 'mentors-batch-2026.csv' },
@@ -824,6 +1291,31 @@ async function main() {
   console.log('  Reviewer:        reviewer@dangote.com');
   console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT} (all password: ${DEFAULT_PASSWORD})`);
 }
+
+/**
+ * Refuse to seed anything but a local database unless explicitly overridden.
+ *
+ * The seed creates a demo cohort whose accounts all share one password, and
+ * generates assessment schedules that can lock people out of the portal — so
+ * reaching a shared or live database with it is a real incident, not an
+ * inconvenience. It has happened once already.
+ */
+function assertSeedTargetAllowed(): void {
+  const decision = evaluateSeedTarget(
+    process.env.DATABASE_URL,
+    process.env[SEED_REMOTE_OVERRIDE] === 'true',
+  );
+
+  // Always say which database is about to be written, so a mistake is visible
+  // in the log even on the allowed path.
+  console.log(`Seeding database: ${decision.target}`);
+
+  if (!decision.allowed) {
+    throw new Error(decision.reason);
+  }
+}
+
+assertSeedTargetAllowed();
 
 main()
   .catch((e) => {
