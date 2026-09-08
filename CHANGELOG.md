@@ -540,6 +540,12 @@ Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside
 
 Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
 
+## Security — untrack the client cost estimate
+
+- `CLIENT_COST_ESTIMATE.md` (vendor pricing posture, plan recommendations, infrastructure cost basis) is no longer tracked. It remains on disk as a working document.
+- Widened the existing commercial-document rule in `.gitignore`: the `/BLAK_MOH_*` prefix match was too narrow to catch a file that was exactly what the rule existed to stop. Now matches on content type (`*COST*`, `*PRICING*`, `*INVOICE*`, `*QUOTE*`) rather than filename prefix.
+- Note: `git rm --cached` removes the file from the working tree going forward, not from history. Treat the contents as disclosed.
+
 ## Chore — Tailwind CSS 3 → 4 (CSS-first theme)
 
 - **Upgraded `tailwindcss` 3.4 → 4.3 and moved the design system into a CSS-first `@theme`.** `tailwind.config.ts` is deleted; `src/app/globals.css` now owns the portal, landing, authentication, typography, radius, and shadow tokens.
