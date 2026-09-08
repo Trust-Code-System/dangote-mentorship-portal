@@ -34,9 +34,10 @@ import { submitReviewSchema, validateAnswers } from './schema';
 const REVIEW_PATH: Record<ReviewType, string> = {
   [ReviewType.MIDTERM]: '/mid-term-review',
   [ReviewType.FINAL]: '/final-review',
-  // Quarterly assessments are submitted through features/assessments (they must
-  // be tied to an AssessmentWindow); this action rejects them below.
+  // The recurring mentee forms are submitted through features/assessments (they
+  // must be tied to an AssessmentWindow); this action rejects them below.
   [ReviewType.QUARTERLY]: '/assessment',
+  [ReviewType.MONTHLY]: '/monthly-form',
 };
 
 export async function submitReviewResponse(
@@ -51,13 +52,13 @@ export async function submitReviewResponse(
       answers: formData.get('answers'),
     });
 
-    // A quarterly assessment response must be tied to its AssessmentWindow, so
-    // it goes through submitAssessment() instead. Reject it here rather than
-    // silently storing an unlinked response that no gate would ever see.
-    if (input.type === ReviewType.QUARTERLY) {
+    // A recurring-form response must be tied to its AssessmentWindow, so it goes
+    // through submitAssessment() instead. Reject it here rather than silently
+    // storing an unlinked response that no window or reminder would ever see.
+    if (input.type === ReviewType.QUARTERLY || input.type === ReviewType.MONTHLY) {
       return fail({
         code: 'VALIDATION',
-        message: 'Quarterly assessments are submitted from the assessment page.',
+        message: 'This form is submitted from its own page, not the review page.',
       });
     }
 

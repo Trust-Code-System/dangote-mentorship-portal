@@ -10,6 +10,11 @@ import {
 } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import type { ReportBlock, ReportContent } from './schema';
+import { getCohortEngagement } from '@/features/engagement/data';
+import {
+  DEFAULT_ENGAGEMENT_THRESHOLDS,
+  needsAttention,
+} from '@/features/engagement/activity';
 
 // Report builders (CLAUDE.md §13). Each builder assembles a report from real
 // portal data into the structured block model, which the Word and Excel
@@ -430,6 +435,150 @@ async function buildProgrammeReport(scope: BuildScope): Promise<BuiltReport> {
   };
 }
 
+// ── Weekly engagement report (admin) ────────────────────────────────────────
+
+/**
+ * Who has gone quiet, and what is outstanding.
+ *
+ * Metadata only: this reads features/engagement, which selects timestamps and
+ * counts and never message, reflection or note content (CLAUDE.md §7, §10). The
+ * report names people — an admin cannot follow up on an anonymous row — but it
+ * never quotes anything they wrote.
+ */
+async function buildEngagementReport(scope: BuildScope): Promise<BuiltReport> {
+  const engagement = await getCohortEngagement(scope.cohortId, DEFAULT_ENGAGEMENT_THRESHOLDS, scope.to);
+  if (!engagement) throw new Error('Cohort not found.');
+
+  const { summary, rows, thresholds } = engagement;
+  const attention = rows.filter((row) => needsAttention(row.state));
+  const quiet = rows.filter((row) => row.state === 'quiet');
+
+  const blocks: ReportBlock[] = [
+    {
+      kind: 'kpis',
+      items: [
+        { label: 'Participants', value: String(summary.total) },
+        { label: 'Active', value: String(summary.active), hint: percent(summary.active, summary.total) },
+        { label: 'Quiet', value: String(summary.quiet), hint: `${thresholds.quietAfterDays}+ days` },
+        {
+          label: 'Inactive',
+          value: String(summary.inactive),
+          hint: `${thresholds.inactiveAfterDays}+ days`,
+        },
+        { label: 'Never active', value: String(summary.never) },
+        {
+          label: 'Need attention',
+          value: String(summary.needsAttention),
+          hint: percent(summary.needsAttention, summary.total),
+        },
+      ],
+    },
+    { kind: 'heading', level: 2, text: 'What this covers' },
+    {
+      kind: 'paragraph',
+      text:
+        `Activity means any of: a logged session, goal activity, a submitted form, a meeting, ` +
+        `a journal entry, or a message sent. Someone is **quiet** after ` +
+        `${thresholds.quietAfterDays} days of silence and **inactive** after ` +
+        `${thresholds.inactiveAfterDays}. Anyone enrolled less than ` +
+        `${thresholds.newJoinerGraceDays} days is not judged yet. ` +
+        `Only timestamps are used — no message or journal content is read.`,
+    },
+  ];
+
+  blocks.push({ kind: 'heading', level: 2, text: 'Needs attention' });
+  if (attention.length === 0) {
+    blocks.push({
+      kind: 'paragraph',
+      text: 'Nobody in this cohort has been silent long enough to need chasing.',
+    });
+  } else {
+    blocks.push({
+      kind: 'table',
+      caption: 'Needs attention',
+      columns: ['Name', 'Email', 'Role', 'Status', 'Days silent', 'Last did', 'Forms owed'],
+      rows: attention.map((row) => [
+        row.name ?? '—',
+        row.email,
+        titleCase(row.role),
+        row.state === 'never' ? 'Never active' : 'Inactive',
+        row.daysSinceActive === null ? `never (${row.daysSinceJoined} since joining)` : String(row.daysSinceActive),
+        row.lastSignal ? titleCase(row.lastSignal) : '—',
+        String(row.outstandingForms),
+      ]),
+    });
+  }
+
+  if (quiet.length > 0) {
+    blocks.push(
+      { kind: 'heading', level: 2, text: 'Going quiet' },
+      {
+        kind: 'table',
+        caption: 'Going quiet',
+        columns: ['Name', 'Email', 'Role', 'Days silent', 'Last did', 'Forms owed'],
+        rows: quiet.map((row) => [
+          row.name ?? '—',
+          row.email,
+          titleCase(row.role),
+          String(row.daysSinceActive ?? 0),
+          row.lastSignal ? titleCase(row.lastSignal) : '—',
+          String(row.outstandingForms),
+        ]),
+      },
+    );
+  }
+
+  // Role split, because "mentors have stopped" and "mentees have stopped" call
+  // for completely different follow-up.
+  const byRole = [RoleName.MENTOR, RoleName.MENTEE].map((role) => {
+    const ofRole = rows.filter((row) => row.role === role);
+    const need = ofRole.filter((row) => needsAttention(row.state)).length;
+    return [
+      titleCase(role),
+      String(ofRole.length),
+      String(need),
+      percent(need, ofRole.length),
+    ];
+  });
+  blocks.push(
+    { kind: 'heading', level: 2, text: 'By role' },
+    {
+      kind: 'table',
+      caption: 'By role',
+      columns: ['Role', 'People', 'Need attention', 'Rate'],
+      rows: byRole,
+    },
+  );
+
+  blocks.push(
+    { kind: 'heading', level: 2, text: 'Everyone' },
+    {
+      kind: 'table',
+      caption: 'All participants',
+      columns: ['Name', 'Role', 'Status', 'Last active', 'Days silent', 'Forms owed'],
+      rows: rows.map((row) => [
+        row.name ?? row.email,
+        titleCase(row.role),
+        titleCase(row.state),
+        formatDate(row.lastActiveAt),
+        row.daysSinceActive === null ? '—' : String(row.daysSinceActive),
+        String(row.outstandingForms),
+      ]),
+    },
+  );
+
+  return {
+    title: `Engagement report — ${engagement.cohortName}`,
+    subjectUserId: null,
+    content: {
+      subtitle: scope.from
+        ? `Week of ${formatDate(scope.from)} to ${formatDate(scope.to)}`
+        : `As at ${formatDate(scope.to)}`,
+      blocks,
+    },
+  };
+}
+
 /** Dispatch to the right builder for a report kind. */
 export async function buildReport(
   kind: ReportKind,
@@ -445,5 +594,7 @@ export async function buildReport(
     }
     case ReportKind.PROGRAMME:
       return buildProgrammeReport(scope);
+    case ReportKind.ENGAGEMENT:
+      return buildEngagementReport(scope);
   }
 }

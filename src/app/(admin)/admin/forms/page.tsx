@@ -4,12 +4,14 @@ import { CohortStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
-import { listFormDefinitions } from '@/features/forms/data';
+import { listFormDefinitions } from '@/features/forms/data';
+import { STANDARD_FORMS } from '@/features/forms/catalogue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { FormRowActions } from './form-row-actions';
+import { FormRowActions } from './form-row-actions';
+import { InstallStandardForms } from './install-standard-forms';
 
 export default async function FormsPage() {
   await requireRole(ADMIN_ROLES);
@@ -34,6 +36,13 @@ export default async function FormsPage() {
 
   const definitions = await listFormDefinitions(cohort.id);
 
+  // Which standard sets this cohort is still missing, matched on type + role —
+  // the same key the installer uses, so the count and the button agree.
+  const present = new Set(definitions.map((d) => `${d.type}:${d.roleName ?? 'ANY'}`));
+  const missingStandard = STANDARD_FORMS.filter(
+    (form) => !present.has(`${form.type}:${form.roleName}`),
+  ).length;
+
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -45,6 +54,12 @@ export default async function FormsPage() {
           <Link href="/admin/forms/new">{t('newForm')}</Link>
         </Button>
       </div>
+
+      <InstallStandardForms
+        cohortId={cohort.id}
+        missingCount={missingStandard}
+        totalCount={STANDARD_FORMS.length}
+      />
 
       {definitions.length === 0 ? (
         <EmptyState
@@ -87,7 +102,7 @@ export default async function FormsPage() {
 }
 
 /** i18n key for a form's review type. Exhaustive so a new type can't slip through. */
-function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' {
+function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' | 'monthly' {
   switch (type) {
     case ReviewType.MIDTERM:
       return 'midterm';
@@ -95,10 +110,12 @@ function typeLabelKey(type: ReviewType): 'midterm' | 'final' | 'quarterly' {
       return 'final';
     case ReviewType.QUARTERLY:
       return 'quarterly';
+    case ReviewType.MONTHLY:
+      return 'monthly';
   }
 }
 
-function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' {
+function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' | 'ok' {
   switch (type) {
     case ReviewType.MIDTERM:
       return 'info';
@@ -106,6 +123,8 @@ function badgeVariantForType(type: ReviewType): 'info' | 'default' | 'warn' {
       return 'default';
     case ReviewType.QUARTERLY:
       return 'warn';
+    case ReviewType.MONTHLY:
+      return 'ok';
   }
 }
 

@@ -18,6 +18,12 @@ const digest: NewsletterDigest = {
   actionsOpen: 15,
   activePairs: 11,
   totalPairs: 20,
+  monthlyForm: {
+    label: 'September 2026 meeting form',
+    dueAt: new Date('2026-09-30T23:59:59Z'),
+    submitted: 12,
+    total: 30,
+  },
   upcomingAssessments: [
     { label: 'Month 6 assessment', dueAt: new Date('2026-09-20T00:00:00Z'), submitted: 8, total: 30 },
   ],
@@ -38,6 +44,17 @@ describe('digestLines', () => {
     // The digest type has no name/email fields at all; assert the rendered
     // prompt lines stay free of an @ address as a regression guard.
     expect(digestLines(digest).join('\n')).not.toMatch(/@/);
+  });
+
+  it('states the open monthly form and its completion', () => {
+    const lines = digestLines(digest).join('\n');
+    expect(lines).toContain('September 2026 meeting form');
+    expect(lines).toContain('12 of 30');
+  });
+
+  it('omits the monthly form line when none is open', () => {
+    const lines = digestLines({ ...digest, monthlyForm: null }).join('\n');
+    expect(lines).not.toContain('meeting form');
   });
 
   it('handles a clinic with no confirmed date', () => {

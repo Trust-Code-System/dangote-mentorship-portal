@@ -30,6 +30,7 @@ export async function buildAdminNavSections(
     tAssessments,
     tReports,
     tNewsletters,
+    tEngagement,
   ] = await Promise.all([
     getTranslations('admin'),
     getTranslations('imports'),
@@ -47,6 +48,7 @@ export async function buildAdminNavSections(
     getTranslations('assessments'),
     getTranslations('reports'),
     getTranslations('newsletters'),
+    getTranslations('engagement'),
   ]);
 
   // Platform settings are Super-Admin only (CLAUDE.md §4); hide the link from
@@ -60,6 +62,7 @@ export async function buildAdminNavSections(
         { href: '/admin', label: tNav('dashboard'), icon: 'dashboard', primary: true, exact: true },
         { href: '/admin/matching', label: tMatching('title'), icon: 'matching', primary: true },
         { href: '/admin/insights', label: tInsights('navLabel'), icon: 'insights' },
+        { href: '/admin/engagement', label: tEngagement('navLabel'), icon: 'engagement' },
         { href: '/admin/programmes', label: t('programmes'), icon: 'programmes' },
         { href: '/admin/cohorts', label: t('cohorts'), icon: 'cohorts' },
         { href: '/admin/imports', label: tImports('title'), icon: 'imports' },
@@ -112,11 +115,12 @@ export async function buildParticipantNavSections(
   unread: number,
   unreadMessages = 0,
 ): Promise<NavSection[]> {
-  const [tNav, tShell, tAssessments, tReports] = await Promise.all([
+  const [tNav, tShell, tAssessments, tReports, tMonthly] = await Promise.all([
     getTranslations('nav'),
     getTranslations('shell'),
     getTranslations('assessments'),
     getTranslations('reports'),
+    getTranslations('monthlyForm'),
   ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
   const isMentee = roles.includes(RoleName.MENTEE);
@@ -158,16 +162,22 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
-              // Mentees only: the mandatory every-3-months assessment.
+              // Mentees owe the monthly meeting form; mentors do not.
               ...(isMentee
                 ? [
                     {
-                      href: '/assessment',
-                      label: tAssessments('navLabel'),
-                      icon: 'assessment' as const,
+                      href: '/monthly-form',
+                      label: tMonthly('navLabel'),
+                      icon: 'monthly' as const,
                     },
                   ]
                 : []),
+              // The quarterly assessment is owed by both sides of the pair.
+              {
+                href: '/assessment',
+                label: tAssessments('navLabel'),
+                icon: 'assessment' as const,
+              },
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
               { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },

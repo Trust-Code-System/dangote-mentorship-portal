@@ -21,7 +21,9 @@ import {
 import { cn } from '@/lib/utils';
 
 type Lang = 'EN' | 'FR';
-type Values = Record<string, string>;
+// A multi_select answer is a list of option values; everything else is a string.
+type FieldValue = string | string[];
+type Values = Record<string, FieldValue>;
 
 // Review fill form (CLAUDE.md §5, M3). Renders whatever question set the admin
 // published (Forms Builder), autosaves a draft so work is never lost
@@ -78,7 +80,7 @@ export function ReviewForm({
   const serialized = useMemo(() => JSON.stringify(values), [values]);
   const fieldErrors = !state?.ok && state?.error.code === 'VALIDATION' ? state.error.fieldErrors : undefined;
 
-  function set(id: string, value: string) {
+  function set(id: string, value: FieldValue) {
     setValues((v) => ({ ...v, [id]: value }));
   }
 
@@ -106,7 +108,7 @@ export function ReviewForm({
             field={field}
             label={label}
             lang={lang}
-            value={values[field.id] ?? ''}
+            value={values[field.id] ?? (field.type === 'multi_select' ? [] : '')}
             onChange={(v) => set(field.id, v)}
             error={error}
             yesWord={tc('yes')}
@@ -141,12 +143,14 @@ function FieldRenderer({
   field: FormField;
   label: string;
   lang: Lang;
-  value: string;
-  onChange: (value: string) => void;
+  value: FieldValue;
+  onChange: (value: FieldValue) => void;
   error?: string;
   yesWord: string;
   noWord: string;
 }) {
+  // Every branch below except multi_select works on a single string.
+  const single = Array.isArray(value) ? (value[0] ?? '') : value;
   const errorNode = error ? (
     <p className="text-small text-risk" role="alert">
       {error}
@@ -162,7 +166,7 @@ function FieldRenderer({
           label={label}
           lang={lang}
           as={field.type === 'short_text' ? 'input' : 'textarea'}
-          value={value}
+          value={single}
           onChange={onChange}
           required={field.required}
           rows={field.type === 'long_text' ? 4 : undefined}
@@ -183,7 +187,7 @@ function FieldRenderer({
         </legend>
         <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
           {scale.map((n) => {
-            const selected = value === String(n);
+            const selected = single === String(n);
             return (
               <button
                 key={n}
@@ -222,7 +226,7 @@ function FieldRenderer({
         </legend>
         <div role="radiogroup" aria-label={label} className="flex gap-2">
           {choices.map((c) => {
-            const selected = value === c.v;
+            const selected = single === c.v;
             return (
               <button
                 key={c.v}
@@ -247,6 +251,67 @@ function FieldRenderer({
     );
   }
 
+  if (field.type === 'multi_select') {
+    const options = field.options ?? [];
+    const selected = Array.isArray(value) ? value : value ? [value] : [];
+    const atLimit =
+      field.maxSelections !== undefined && selected.length >= field.maxSelections;
+
+    function toggle(optionValue: string) {
+      // Keep the form's own option order rather than click order, so the stored
+      // answer is comparable across submissions.
+      const next = options
+        .map((o) => o.value)
+        .filter((v) =>
+          v === optionValue ? !selected.includes(optionValue) : selected.includes(v),
+        );
+      onChange(next);
+    }
+
+    return (
+      <fieldset className="space-y-1.5">
+        <legend className="text-h3 text-ink">
+          {label}
+          {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
+        </legend>
+        {field.maxSelections !== undefined ? (
+          <p className="text-small text-ink-3">
+            {lang === 'FR'
+              ? `Choisissez jusqu'à ${field.maxSelections} option(s).`
+              : `Choose up to ${field.maxSelections}.`}
+          </p>
+        ) : null}
+        <div className="flex flex-col gap-2">
+          {options.map((option) => {
+            const checked = selected.includes(option.value);
+            return (
+              <label
+                key={option.value}
+                className={cn(
+                  'flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-body transition-colors',
+                  checked ? 'border-green bg-green-soft/40 text-ink' : 'border-border text-ink',
+                  // Options beyond the cap are disabled rather than silently
+                  // ignored on submit.
+                  !checked && atLimit ? 'cursor-not-allowed opacity-50' : 'hover:border-green',
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={!checked && atLimit}
+                  onChange={() => toggle(option.value)}
+                  className="mt-1 size-4 rounded border-border text-green focus:ring-2 focus:ring-green/30"
+                />
+                <span>{lang === 'FR' ? option.labelFr : option.labelEn}</span>
+              </label>
+            );
+          })}
+        </div>
+        {errorNode}
+      </fieldset>
+    );
+  }
+
   // single_select
   const options = field.options ?? [];
   return (
@@ -255,7 +320,7 @@ function FieldRenderer({
         {label}
         {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
       </Label>
-      <Select value={value || undefined} onValueChange={onChange}>
+      <Select value={single || undefined} onValueChange={onChange}>
         <SelectTrigger id={`f-${field.id}`} aria-label={label}>
           <SelectValue placeholder="—" />
         </SelectTrigger>
@@ -277,6 +342,12 @@ function seed(fields: FormField[], initial?: Values): Values {
   const out: Values = {};
   for (const f of fields) {
     const v = initial?.[f.id];
+    if (f.type === 'multi_select') {
+      // Must stay a list — String(['a','b']) would silently become "a,b" and
+      // then match no option at all.
+      out[f.id] = Array.isArray(v) ? v : v != null && v !== '' ? [String(v)] : [];
+      continue;
+    }
     out[f.id] = v != null ? String(v) : '';
   }
   return out;

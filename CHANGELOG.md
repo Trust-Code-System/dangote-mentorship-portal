@@ -411,6 +411,135 @@ The first slice of the screen sweep, on the spec's hero screens (the rest follow
 - **The migration is written but not applied.** `20260907120000_quarterly_assessments_reports_newsletters` is hand-written and validated against the schema; applying it to the live Supabase instance is an owner decision (`npx prisma migrate deploy`).
 - **The newsletter cron runs daily, not hourly.** An hourly `0 * * * *` entry was rejected by Vercel at deploy time before any build ran — the Hobby plan refuses any cron more frequent than once a day. `vercel.json` now uses `0 9 * * *` (10:00 Lagos), and `isDraftDue()` gained a catch-up rule so a scheduled day whose send hour falls after the daily run is picked up on the next run rather than being lost forever, which is what the naive daily fix would have done silently. 4 new tests cover it, and the admin UI now states when the draft will actually appear.
 - **The assessment questions themselves are placeholders.** The seeded quarterly form is a reasonable six-question set; the real question set is still to be supplied and can be entered in the Forms Builder without a code change.
+
+## Monthly meeting form — recurring, mentee-owned, reminder-driven
+
+The programme's "Monthly Meeting Form" is now in the portal: the mentee's own record of each month's session, alongside the mentor's existing session log. Transcribed from the supplied document.
+
+### It never locks anyone out — and that is enforced structurally
+
+- Recurring windows now carry `formType` (`QUARTERLY` | `MONTHLY`) and **`gatesAccess`**. The monthly form's windows are created with `gatesAccess: false`, and the gate's query filters `gatesAccess: true`, so a missed monthly form cannot reach the lockout logic at all.
+- That property is asserted where it actually lives — the database query, not the pure function. `tests/assessments/gate-scope.test.ts` pins the `where` clause and, to prove the test is not vacuous, feeds the *same* long-overdue window back as a gating one and confirms it does then lock.
+- One table serves both cadences because the completion tracking, admin screens and reminder machinery are identical; only `gatesAccess` differs. The alternative — a parallel model — would have meant a second copy of all of it.
+
+### Reminders are the enforcement, so they are the feature
+
+- New `monthly_form_due` / `monthly_form_overdue` notifications, emitted by the existing daily cron, deduped per window and per stage. The copy asks rather than warns, because nothing is being withheld.
+- Unlike the assessment reminders, these **stop after 14 days past due** rather than escalating — nagging about a month that closed a fortnight ago is noise.
+- The newsletter digest now carries the open month's compliance as a first-class field, and the assistant prompt is instructed to put the deadline in the dates section and the ask in the call to action. The newsletter was the requested reminder channel, so it states real numbers ("12 of 30 mentees have submitted") rather than a generic nudge.
+
+### Calendar months, not cohort months
+
+- The quarterly assessment is anchored to the cohort start; the monthly form runs on **calendar** months, so "this month's form" means the same thing to everyone. Each window opens on the 1st and is due at the end of the last day.
+- `planMonthlyWindows` is pure and built from UTC month arithmetic rather than day addition, so a month-end start date cannot skew the sequence. 16 tests cover leap years, 30- and 31-day months, year-boundary rollover, mid-month cohort starts, and that consecutive windows leave no gap and no overlap (each opens exactly 1ms after the previous is due).
+
+### Decisions worth recording
+
+- **Mentees only.** The source document's own header says "helps mentors and mentees", but the requirement was mentees alone. Flagged rather than silently reinterpreted.
+- **Name, email and batch are not asked.** The portal already knows all three, and the response is tied to the signed-in mentee, so re-typing them monthly would add friction and a chance to mistype. Every other field from the document is present, including the progress rating (Significant / Moderate / Limited / No progress) and the terms/privacy affirmation.
+- **Grace days are hidden for the monthly form** rather than shown as a no-op field — grace only means something when access is being withheld.
+
+### Also
+
+- Submitting now requires the form's type to match its window's type, so a monthly window cannot be satisfied by submitting the quarterly form (which would have quietly cleared the wrong obligation).
+- The quarterly seed and generator are scoped to `formType: QUARTERLY`. Sequence numbers restart per type, so without that scoping the presence of monthly windows would have made the quarterly generator think its work was already done.
+- Admin screen gains a Quarterly / Monthly switch; "locked out" is replaced by "not yet submitted" on the monthly tab, since nobody can be locked out by it.
+- Typecheck, lint, **500/500 unit tests** (48 new) and the production build are green.
+- **The migration is written but not applied.** `20260907153000_monthly_meeting_form` adds two columns and re-keys one unique index; applying it to the live database is an owner decision.
+
+## Quarterly assessment: real question sets, mentors included, and multi-select
+
+The quarterly assessment now carries the programme's actual questions, transcribed from the two supplied mid-point assessment documents — one question set for mentees, a different one for mentors.
+
+### Mentors are now held to it too
+
+- Reverses the earlier "mentees only" scope. Both sides of the pair complete the quarterly assessment, and **both are gated**: missing it past the grace window blocks the portal for a mentor exactly as it does for a mentee.
+- Who owes which form is no longer an `includes(MENTEE)` scattered through the queries. `features/assessments/participants.ts` states it once — quarterly is mentors + mentees, monthly is mentees only — and the gate, the reminders, the admin denominators and the submit authorization all derive from it. They cannot drift into chasing a different set of people than the gate holds responsible.
+- Consequently the monthly form still cannot gate a mentor: the gate's query is scoped to the form types the user's own role owes, which for a mentor is the quarterly alone. Asserted directly in `tests/assessments/gate-scope.test.ts`.
+- Submitting now checks the form's declared audience against the submitter's role, so a mentor cannot clear their obligation by submitting the mentee question set (or vice versa).
+
+### Multi-select fields
+
+- Several questions on both documents are checkbox lists — "what support do you need?" offers five options and plainly invites more than one. Forcing a single answer would have lost information, so the form builder gained a proper `multi_select` field type with an optional selection cap.
+- Answers are stored as a list, **de-duplicated and re-ordered into the form's own option order**, so two submissions are comparable regardless of the order someone clicked.
+- The validator accepts a JSON-encoded list or a bare string as well as a real list, so a draft autosaved before a field became multi-select is recovered rather than discarded. 19 tests cover the field, including that a `single_select` still refuses a list.
+- Options beyond the cap are disabled in the UI rather than silently dropped on submit.
+
+### Notes on the source documents
+
+- **Both are titled "Mid-point"**, and a mid-point assessment is normally a one-off. They are wired up as the recurring quarterly assessment as instructed; nothing inside the questions says "mid-point", so they read correctly at months 3, 6 and 9. Worth knowing that the portal also has a separate, currently unpopulated mid-term review feature these would fit.
+- **The mentee form's goal-clarity options read "Very Clear / Somewhat / Clear / Not Clear"** — "Somewhat" looks like a truncated "Somewhat Clear". Entered as Very clear / Clear / Somewhat clear / Not clear, in a sensible order.
+- **The mentor form asks for Batch, Meeting Number and Duration of Meeting**, which look carried over from the monthly form. Batch is dropped (the portal knows it); meeting number and duration are kept but optional.
+- Full name and date are not asked on either form: the response is already tied to the signed-in participant and stamped with a submission time.
+
+### Verification
+
+- Typecheck, lint, **540/540 unit tests** (40 new) and the production build are green.
+- **The migration from the monthly-form change is still unapplied**; this branch adds no new migration of its own.
+
+## The seed can no longer reach a non-local database
+
+A `npm run db:seed` run reached the live Supabase instance and created two overdue quarterly assessment windows plus 56 form responses. Because the assessment gate was already deployed, that immediately locked two accounts out of the live portal, and would have locked out every mentor once mentor gating deployed.
+
+- **The seed now refuses any database that is not demonstrably local**, unless re-run with `SEED_ALLOW_REMOTE=true`. It also prints the host/port/database it is about to write on every run, including the allowed path, so a mistake is visible rather than silent.
+- The decision is a pure function (`src/lib/db/seed-target.ts`) and **fails closed**: an unparseable URL, a missing `DATABASE_URL`, or a host that merely *contains* "localhost" (`localhost.evil.com`) are all refused. 16 tests, including that the printed target never leaks credentials.
+- Verified against the real production URL: the seed stops with the target named and the reason spelled out.
+
+This matters more than a stray demo cohort. The seed creates dozens of accounts that all share one password *and* generates assessment schedules that gate portal access — so reaching a shared or live database with it is an incident, not an inconvenience.
+
+## Who has gone quiet, and a weekly report of it
+
+Admins asked to see people who have not been active, and to have that arrive as a report every week.
+
+### Person-level, not pair-level
+
+- The existing risk monitor judges matched **pairs**; this judges **people**. Different question with a different answer: a pair can look healthy on session count while one side has done nothing for a month.
+- New `/admin/engagement` lists every mentor and mentee worst-first — never-active before merely inactive, then longest silence — with filters by status and role, and a count of the recurring forms each person owes.
+- Activity is the most recent of six signals: a logged session, goal activity, a submitted form, a meeting, a journal entry, or a message sent. Someone is **going quiet** after 10 days and **inactive** after 21.
+- **New joiners are protected from false positives.** A grace period (7 days) suppresses both the never-active and gone-quiet paths, so a fresh intake does not light the report up red on day one. Sessions and meetings count for *both* sides of the pair, so a mentee who attends without logging anything still reads as active.
+- 24 tests on the pure logic, concentrated on the boundaries in both directions — chasing someone who just joined and missing someone who vanished are both real failures.
+
+### Confidentiality held
+
+- Every query selects **timestamps and ids only**. Messages contribute `createdAt` and never `bodyOriginal`; journal entries contribute their existence, never their text. That is the §7/§10 posture — admins see activity metadata, never content — and it is stated at the top of the data module so an extension does not quietly break it.
+- The report names people, because an admin cannot follow up on an anonymous row, but it quotes nothing anyone wrote.
+
+### The weekly report reuses what already exists
+
+- New `ReportKind.ENGAGEMENT` rather than a separate delivery path, so the weekly report lands in `/admin/reports` and **exports to Word and Excel through the machinery already built**. Admins can also generate one on demand.
+- Generated by a new daily cron that enforces **one report per ISO week**. Two consequences of that framing: it is idempotent (a second run in the week does nothing), and it **catches up** — a missed Monday still produces that week's report rather than losing the week. 17 tests, including the ISO year boundaries where 1 January is week 53 of the previous year.
+- Admins are notified when it appears; a report nobody knows about is the same as no report. Nothing leaves the portal — this is an internal artefact, so unlike the newsletter cron there is no human send gate.
+
+### Also
+
+- **Two dead buttons on the admin dashboard now work.** "Export report" links to the reports area (which now exists) and the decorative "Last 90 days" control is replaced by a link to the new engagement view. The orphaned `last90` string is removed from both catalogs.
+- Typecheck, lint, **581/581 unit tests** (41 new) and the production build are green.
+- The migration adds one enum value. Not applied.
+
+## Standard question sets an admin can publish in one click
+
+Setting up a cohort needed the programme's real question sets, and they only existed in the seed — which now (correctly) refuses to run against a shared database. That left an admin retyping **37 bilingual questions** per cohort, which nobody would do accurately.
+
+- **New `src/features/forms/catalogue.ts` is the single source of truth** for the three transcribed sets (quarterly mentee, quarterly mentor, monthly meeting form). The seed and the new admin installer both read from it, so a seeded cohort and an admin-installed one get byte-identical questions and neither can drift from the source documents.
+- **"Publish standard sets" on `/admin/forms`.** Idempotent and non-destructive: it adds only the sets this cohort is missing (matched on type + role) and never touches one an admin has edited, so a second click does nothing. The button shows how many are missing and goes quiet when they are all present.
+- The catalogue is **validated against the live form contract in the tests**, so a typo in a question set fails the build rather than being discovered by an admin when the installer errors. 20 tests, including fidelity spot-checks against the documents — the four progress options, the multi-select difficulties, the mentor engagement scale, the three action slots with only the first required, the required terms tick, and that no set asks anyone to retype their name, email or batch.
+- Removing the duplication took **~270 lines out of `prisma/seed.ts`** (1,600 → 1,327) and deleted two option lists that existed in both places.
+
+Forms are per-cohort by design — admins may edit them without a code change — so every new cohort will always need its own copies. This makes that a click instead of a transcription exercise.
+
+- Typecheck, lint, **617/617 unit tests** (20 new) and the production build are green. No migration.
+
+## The Microsoft integrations flag no longer fails on invisible whitespace
+
+Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside the value**. The gate compared it with a strict `=== 'true'`, so setting it to `true` the same way it is currently set to `false` would have read as OFF — leaving mail on the log transport, with nothing anywhere to explain why no newsletter or reminder was ever delivered.
+
+- The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
+- Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
+- 7 new tests pin it, including the exact shape production holds today (`'false
+'`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
+
+Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
+
 ## Security — untrack the client cost estimate
 
 - `CLIENT_COST_ESTIMATE.md` (vendor pricing posture, plan recommendations, infrastructure cost basis) is no longer tracked. It remains on disk as a working document.

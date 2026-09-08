@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { Prisma, ReviewStatus, ReviewType, RoleName } from '@prisma/client';
+import { Prisma, ReviewStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { assertCohortAccess, requireRole, requireUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
@@ -9,9 +9,16 @@ import { writeAuditLog } from '@/lib/audit/audit';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
 import { getFormDefinition } from '@/features/forms/data';
 import { validateAnswers } from '@/features/reviews/schema';
-import { resolveMenteeCohortId } from './data';
-import { defaultWindowLabel, planAssessmentWindows } from './schedule';
+import { resolveParticipantCohortId } from './data';
+import { isRecurringFormType, respondentRoleFor } from './participants';
 import {
+  defaultMonthlyWindowLabel,
+  defaultWindowLabel,
+  planAssessmentWindows,
+  planMonthlyWindows,
+} from './schedule';
+import {
+  cohortIdSchema,
   generateWindowsSchema,
   submitAssessmentSchema,
   toggleWindowSchema,
@@ -35,14 +42,10 @@ export async function submitAssessment(
       answers: formData.get('answers'),
     });
 
-    // Authorize: only a mentee submits an assessment, and only in their own cohort.
-    if (!user.roles.includes(RoleName.MENTEE)) {
-      return fail({
-        code: 'FORBIDDEN',
-        message: 'Only mentees complete the quarterly assessment.',
-      });
-    }
-    const cohortId = await resolveMenteeCohortId(user.id);
+    // Authorize: a participant may only submit a form their own role owes, and
+    // only in their own cohort. Which role they answer as also determines which
+    // question set is legitimate for them (see participants.ts).
+    const cohortId = await resolveParticipantCohortId(user.id);
     if (!cohortId) {
       return fail({ code: 'FORBIDDEN', message: 'You are not enrolled in a cohort.' });
     }
@@ -51,7 +54,7 @@ export async function submitAssessment(
     // cf. the M2 audit H1 finding): both must belong to this mentee's cohort.
     const window = await prisma.assessmentWindow.findFirst({
       where: { id: input.windowId, cohortId, isActive: true, deletedAt: null },
-      select: { id: true, label: true, opensAt: true },
+      select: { id: true, label: true, opensAt: true, formType: true },
     });
     if (!window) {
       return fail({ code: 'NOT_FOUND', message: 'This assessment is not available.' });
@@ -60,14 +63,35 @@ export async function submitAssessment(
       return fail({ code: 'CONFLICT', message: 'This assessment has not opened yet.' });
     }
 
+    // The form must be a recurring mentee form AND must match the window's own
+    // type — otherwise a monthly window could be satisfied by submitting the
+    // quarterly form, which would quietly clear the wrong obligation.
     const form = await getFormDefinition(input.formId);
     if (
       !form ||
       form.cohortId !== cohortId ||
-      form.type !== ReviewType.QUARTERLY ||
+      !isRecurringFormType(form.type) ||
+      form.type !== window.formType ||
       !form.isActive
     ) {
-      return fail({ code: 'NOT_FOUND', message: 'This assessment form is not available.' });
+      return fail({ code: 'NOT_FOUND', message: 'This form is not available.' });
+    }
+
+    // The form's own audience must include this user's role — otherwise a
+    // mentor could submit the mentee question set (or vice versa) and clear an
+    // obligation with the wrong answers.
+    const respondentRole = respondentRoleFor(user.roles, form.type);
+    if (!respondentRole) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'This form is not one your role completes.',
+      });
+    }
+    if (form.roleName !== null && form.roleName !== respondentRole) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'This form is intended for a different role.',
+      });
     }
 
     const validated = validateAnswers(form.schema, input.answers);
@@ -121,6 +145,8 @@ export async function submitAssessment(
       metadata: {
         windowId: window.id,
         formId: form.id,
+        formType: window.formType,
+        respondentRole,
         fieldCount: form.schema.fields.length,
       },
     });
@@ -182,7 +208,7 @@ export async function generateAssessmentWindows(
     });
 
     const existing = await prisma.assessmentWindow.findMany({
-      where: { cohortId: cohort.id, deletedAt: null },
+      where: { cohortId: cohort.id, formType: ReviewType.QUARTERLY, deletedAt: null },
       select: { sequence: true },
     });
     const taken = new Set(existing.map((w) => w.sequence));
@@ -202,6 +228,8 @@ export async function generateAssessmentWindows(
       await prisma.assessmentWindow.createMany({
         data: toCreate.map((plan) => ({
           cohortId: cohort.id,
+          formType: ReviewType.QUARTERLY,
+          gatesAccess: true,
           sequence: plan.sequence,
           label: defaultWindowLabel(plan),
           opensAt: plan.opensAt,
@@ -222,6 +250,77 @@ export async function generateAssessmentWindows(
         planned: plans.length,
         created: toCreate.length,
       },
+    });
+
+    revalidatePath('/admin/assessments');
+    return ok({ created: toCreate.length });
+  } catch (error) {
+    return mapActionError(error);
+  }
+}
+
+/**
+ * Create any missing monthly meeting-form windows for a cohort — one per
+ * calendar month it runs in. Idempotent like the quarterly generator.
+ *
+ * These windows are created with `gatesAccess: false`: a mentee who misses the
+ * monthly form is reminded, never locked out. `graceDays` is 0 because there is
+ * nothing to be lenient about when nothing is being withheld — it only affects
+ * when the reminder escalates to "overdue".
+ */
+export async function generateMonthlyWindows(
+  formData: FormData,
+): Promise<ActionResult<{ created: number }>> {
+  try {
+    const user = await requireRole(ADMIN_ROLES);
+    const { cohortId } = cohortIdSchema.parse({ cohortId: formData.get('cohortId') });
+    assertCohortAccess(user, cohortId);
+
+    const cohort = await prisma.cohort.findFirst({
+      where: { id: cohortId, deletedAt: null },
+      select: { id: true, startDate: true, endDate: true },
+    });
+    if (!cohort) return fail({ code: 'NOT_FOUND', message: 'Cohort not found.' });
+    if (!cohort.startDate) {
+      return fail({
+        code: 'CONFLICT',
+        message: 'Set the cohort start date before generating monthly forms.',
+      });
+    }
+
+    const plans = planMonthlyWindows({
+      startDate: cohort.startDate,
+      endDate: cohort.endDate,
+    });
+
+    const existing = await prisma.assessmentWindow.findMany({
+      where: { cohortId: cohort.id, formType: ReviewType.MONTHLY, deletedAt: null },
+      select: { sequence: true },
+    });
+    const taken = new Set(existing.map((w) => w.sequence));
+    const toCreate = plans.filter((plan) => !taken.has(plan.sequence));
+
+    if (toCreate.length > 0) {
+      await prisma.assessmentWindow.createMany({
+        data: toCreate.map((plan) => ({
+          cohortId: cohort.id,
+          formType: ReviewType.MONTHLY,
+          gatesAccess: false,
+          sequence: plan.sequence,
+          label: defaultMonthlyWindowLabel(plan),
+          opensAt: plan.opensAt,
+          dueAt: plan.dueAt,
+          graceDays: 0,
+        })),
+      });
+    }
+
+    await writeAuditLog({
+      actorId: user.id,
+      cohortId: cohort.id,
+      action: 'monthly_window.generated',
+      entityType: 'AssessmentWindow',
+      metadata: { planned: plans.length, created: toCreate.length },
     });
 
     revalidatePath('/admin/assessments');

@@ -29,6 +29,8 @@ import {
   BarChart3,
   Settings,
   CalendarClock,
+  CalendarCheck,
+  Activity,
   FileText,
   Newspaper,
   Menu,
@@ -119,8 +121,10 @@ export type IconKey =
   | 'insights'
   | 'settings'
   | 'assessment'
+  | 'monthly'
   | 'reports'
-  | 'newsletters';
+  | 'newsletters'
+  | 'engagement';
 
 const ICONS: Record<IconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -150,8 +154,10 @@ const ICONS: Record<IconKey, LucideIcon> = {
   insights: BarChart3,
   settings: Settings,
   assessment: CalendarClock,
+  monthly: CalendarCheck,
   reports: FileText,
   newsletters: Newspaper,
+  engagement: Activity,
 };
 
 export interface NavItem {

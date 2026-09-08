@@ -20,6 +20,7 @@ export function WindowEditor({
   window,
   meta,
   isFocused,
+  formType,
 }: {
   window: {
     id: string;
@@ -31,6 +32,8 @@ export function WindowEditor({
   };
   meta: string;
   isFocused: boolean;
+  /** Kept on the "view completion" link so switching window doesn't switch tab. */
+  formType: string;
 }) {
   const t = useTranslations('assessments');
   const tc = useTranslations('common');
@@ -59,7 +62,9 @@ export function WindowEditor({
             <p className="text-small text-ink-2">{meta}</p>
           </div>
           <Button asChild variant="ghost" size="sm">
-            <Link href={`/admin/assessments?window=${window.id}`}>{t('viewCompletion')}</Link>
+            <Link href={`/admin/assessments?type=${formType}&window=${window.id}`}>
+              {t('viewCompletion')}
+            </Link>
           </Button>
         </div>
 
@@ -94,18 +99,25 @@ export function WindowEditor({
               required
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor={`grace-${window.id}`}>{t('graceDays')}</Label>
-            <Input
-              id={`grace-${window.id}`}
-              name="graceDays"
-              type="number"
-              min={0}
-              max={90}
-              defaultValue={window.graceDays}
-              required
-            />
-          </div>
+          {/* Grace only means something when access is being withheld; the
+              monthly form withholds nothing, so the field is hidden (and the
+              value posted unchanged) rather than shown as a no-op. */}
+          {formType === 'MONTHLY' ? (
+            <input type="hidden" name="graceDays" value={window.graceDays} />
+          ) : (
+            <div className="space-y-1.5">
+              <Label htmlFor={`grace-${window.id}`}>{t('graceDays')}</Label>
+              <Input
+                id={`grace-${window.id}`}
+                name="graceDays"
+                type="number"
+                min={0}
+                max={90}
+                defaultValue={window.graceDays}
+                required
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

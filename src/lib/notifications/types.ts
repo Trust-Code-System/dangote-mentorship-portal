@@ -24,8 +24,14 @@ export const NOTIFICATION_TYPES = [
   // window is open, and an escalation once it is overdue and access is at risk.
   'assessment_due',
   'assessment_overdue',
+  // The monthly meeting form. Same shape, but it never gates access, so the
+  // copy asks rather than warns.
+  'monthly_form_due',
+  'monthly_form_overdue',
   // A scheduled newsletter draft is waiting for an admin to review and approve.
   'newsletter_draft_ready',
+  // The weekly engagement report has been generated for admins to read.
+  'engagement_report_ready',
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

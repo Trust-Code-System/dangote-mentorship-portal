@@ -35,6 +35,9 @@ export function assessmentDraftKey(windowId: string, formId: string): string {
 
 // ── Admin schemas ───────────────────────────────────────────────────────────
 
+/** A cohort id on its own — used by the monthly generator, which needs no options. */
+export const cohortIdSchema = z.object({ cohortId: z.string().cuid() });
+
 /** Generate (or top up) a cohort's assessment windows from its start date. */
 export const generateWindowsSchema = z.object({
   cohortId: z.string().cuid(),

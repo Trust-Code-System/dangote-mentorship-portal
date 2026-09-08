@@ -379,8 +379,8 @@
     "overviewSubtitle": "Programme health at a glance — pairs, matching, goals and support.",
     "dashboardTitle": "Enterprise Health Dashboard",
     "dashboardSubtitle": "Monitoring engagement across all global business units.",
-    "last90": "Last 90 days",
     "exportReport": "Export report",
+    "viewEngagement": "Who has gone quiet",
     "tileParticipants": "Total participants",
     "tileUnmatched": "Unmatched",
     "tileOpenSupport": "Open support",
@@ -1547,15 +1547,36 @@
         "title": "Your assessment is overdue",
         "body": "{label} was due on {date}. Portal access is blocked from {lockDate} until you submit it."
       },
+      "monthly_form_due": {
+        "label": "Monthly form",
+        "title": "Your monthly meeting form is open",
+        "body": "{label} is due by {date}. It takes a few minutes and keeps your programme record complete."
+      },
+      "monthly_form_overdue": {
+        "label": "Monthly form",
+        "title": "Your monthly meeting form is still outstanding",
+        "body": "{label} was due on {date}. Nothing is blocked, but your record is incomplete until you submit it."
+      },
       "newsletter_draft_ready": {
         "label": "Newsletter draft",
         "title": "A newsletter draft is ready to review",
         "body": "This issue has been prepared for {cohort}. Review, edit and approve it before it goes out."
+      },
+      "engagement_report_ready": {
+        "label": "Engagement report",
+        "title": "This week’s engagement report is ready",
+        "body": "{cohort} — week {week}. It lists who has gone quiet and what is outstanding."
       }
     },
     "emptyHint": "No pending items right now."
   },
   "forms": {
+    "standardTitle": "Standard question sets",
+    "standardHelp": "The programme's own quarterly and monthly question sets, in English and French. Adds only what this cohort is missing and never changes a set you have edited.",
+    "standardInstall": "Publish {count} standard set(s)",
+    "standardAllPresent": "All {count} standard sets are already published for this cohort.",
+    "standardInstalled": "Published {created}. Left {skipped} already in place.",
+    "monthly": "Monthly meeting form",
     "quarterly": "Quarterly assessment",
     "title": "Forms builder",
     "subtitle": "Review forms for {cohort}",
@@ -1603,6 +1624,7 @@
     "typeLongText": "Long text",
     "typeRating": "Rating",
     "typeSelect": "Multiple choice",
+    "typeMultiSelect": "Multiple choice (tick several)",
     "typeBoolean": "Yes / No",
     "questionCount": "{count} questions",
     "responseCount": "{count} responses"
@@ -1717,12 +1739,13 @@
       "dashboard": "Go to dashboard"
     },
     "hero": {
-      "micro": "Bilingual mentorship · AI-assisted · Human-approved",
+      "micro": "Dangote Mentorship Programme",
       "line1": "Experience becomes direction.",
       "line2": "Ambition becomes leadership.",
       "body": "BLAK MOH is a bilingual, AI-assisted mentorship programme connecting experience, ambition and opportunity through a structured human-led journey.",
       "ctaPrimary": "Enter the portal",
       "ctaSecondary": "Explore the journey",
+      "partnershipLabel": "In collaboration with",
       "sceneDescription": "A mentor and a mentee stand apart in darkness, joined by a stream of light that carries knowledge between them.",
       "mentorLabel": "Mentor",
       "menteeLabel": "Mentee",
@@ -2503,6 +2526,16 @@
     }
   },
   "assessments": {
+    "adminMonthlyTitle": "Monthly meeting forms",
+    "adminMonthlySubtitle": "Mentees' own record of each month's session for {cohort}. Missing one never blocks the portal — it produces reminders and shows up in the newsletter.",
+    "formTypeSwitcher": "Choose which recurring form to manage",
+    "tabQuarterly": "Quarterly assessment",
+    "tabMonthly": "Monthly meeting form",
+    "monthlyCadenceTitle": "Monthly schedule",
+    "monthlyCadenceHelp": "Creates one form per calendar month the cohort runs in, open from the 1st and due on the last day. Existing months keep any edits you have made.",
+    "generateMonthly": "Generate monthly forms",
+    "statOutstanding": "Not yet submitted",
+    "noFormBodyMonthly": "Create a form of type \"Monthly meeting form\" for mentees, or nobody will be able to submit.",
     "title": "Quarterly assessment",
     "subtitle": "Every three months you complete a short assessment. It keeps your development on record and unlocks the rest of the portal.",
     "submit": "Submit assessment",
@@ -2568,6 +2601,7 @@
     "stateLOCKED": "Locked out"
   },
   "reports": {
+    "kindEngagement": "Engagement report",
     "title": "Reports",
     "subtitle": "Build a report from live portal data, let AI tidy the wording, then export it to Word or Excel.",
     "navLabel": "Reports",
@@ -2690,5 +2724,69 @@
     "sending": "Sending…",
     "sendResult": "Sent to {sent}. Failed: {failed}.",
     "backToDraft": "Back to draft"
+  },
+  "monthlyForm": {
+    "title": "Monthly meeting form",
+    "subtitle": "Your own record of this month's mentoring session — what you discussed, what came out of it, and what you agreed to do next.",
+    "navLabel": "Monthly form",
+    "submit": "Submit this month's form",
+    "saved": "Saved",
+    "dueOn": "For the month ending {date}",
+    "completedOn": "Submitted {date}",
+    "outstanding": "Not submitted",
+    "historyTitle": "Your monthly forms",
+    "colAssessment": "Month",
+    "colDue": "Month ending",
+    "colStatus": "Status",
+    "notEligibleTitle": "No monthly form for you right now",
+    "notEligibleBody": "The monthly meeting form is completed by mentees enrolled in a cohort. If you think this is wrong, contact your programme administrator.",
+    "notPublishedTitle": "The monthly form is not ready yet",
+    "notPublishedBody": "Your programme administrator has not published this cohort's monthly form. You will be notified when it opens.",
+    "noneDueTitle": "You are up to date",
+    "noneDueBody": "There is no monthly form waiting for you. We will remind you when the next one opens.",
+    "lockedExplainer": ""
+  },
+  "engagement": {
+    "title": "Who has gone quiet",
+    "subtitle": "Every mentor and mentee in {cohort}, worst first. A weekly report of this is generated automatically.",
+    "navLabel": "Engagement",
+    "noActiveCohort": "No active cohort",
+    "noActiveCohortHelp": "Activate a cohort to track engagement.",
+    "seeReports": "Weekly reports",
+    "statNeedsAttention": "Need attention",
+    "statInactive": "Inactive ({days}+ days)",
+    "statQuiet": "Going quiet ({days}+ days)",
+    "statActive": "Active",
+    "howTitle": "How this is worked out",
+    "howBody": "Activity means any of: a logged session, goal activity, a submitted form, a meeting, a journal entry, or a message sent. Someone is going quiet after {quiet} days of silence and inactive after {inactive}. Anyone enrolled less than {grace} days is not judged yet.",
+    "privacyNote": "Only timestamps are used. No message, journal or note content is read — that stays private to the people who wrote it.",
+    "filters": "Filter the list",
+    "filterAll": "Everyone ({count})",
+    "roleAll": "All roles",
+    "roleMentor": "Mentors",
+    "roleMentee": "Mentees",
+    "stateactive": "Active",
+    "statequiet": "Going quiet",
+    "stateinactive": "Inactive",
+    "statenever": "Never active",
+    "neverActive": "Never",
+    "sinceJoined": "never ({days} since joining)",
+    "signalsession": "Session",
+    "signalgoal": "Goal",
+    "signalform": "Form",
+    "signalmeeting": "Meeting",
+    "signalreflection": "Journal",
+    "signalmessage": "Message",
+    "peopleTitle": "{count} people",
+    "peopleSubtitle": "Never-active first, then longest silence.",
+    "colPerson": "Person",
+    "colRole": "Role",
+    "colStatus": "Status",
+    "colLastActive": "Last active",
+    "colDays": "Days silent",
+    "colLastDid": "Last did",
+    "colFormsOwed": "Forms owed",
+    "emptyTitle": "Nobody matches that filter",
+    "emptyBody": "Try a different status or role."
   }
 }

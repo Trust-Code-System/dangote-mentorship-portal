@@ -379,8 +379,8 @@
     "overviewSubtitle": "L’état du programme en un coup d’œil — binômes, jumelage, objectifs et soutien.",
     "dashboardTitle": "Tableau de bord de santé",
     "dashboardSubtitle": "Suivi de l’engagement dans toutes les unités opérationnelles.",
-    "last90": "90 derniers jours",
     "exportReport": "Exporter le rapport",
+    "viewEngagement": "Qui s'est fait discret",
     "tileParticipants": "Participants au total",
     "tileUnmatched": "Non jumelés",
     "tileOpenSupport": "Demandes ouvertes",
@@ -1547,15 +1547,36 @@
         "title": "Votre évaluation est en retard",
         "body": "{label} était à rendre le {date}. L’accès au portail sera bloqué à partir du {lockDate} jusqu’à son envoi."
       },
+      "monthly_form_due": {
+        "label": "Formulaire mensuel",
+        "title": "Votre formulaire de rencontre mensuel est ouvert",
+        "body": "{label} est à rendre avant le {date}. Cela prend quelques minutes et complète votre dossier de programme."
+      },
+      "monthly_form_overdue": {
+        "label": "Formulaire mensuel",
+        "title": "Votre formulaire de rencontre mensuel est toujours en attente",
+        "body": "{label} était à rendre le {date}. Rien n’est bloqué, mais votre dossier reste incomplet jusqu’à son envoi."
+      },
       "newsletter_draft_ready": {
         "label": "Projet d’infolettre",
         "title": "Un projet d’infolettre est prêt à relire",
         "body": "Ce numéro a été préparé pour {cohort}. Relisez-le, modifiez-le et approuvez-le avant l’envoi."
+      },
+      "engagement_report_ready": {
+        "label": "Rapport d'engagement",
+        "title": "Le rapport d'engagement de la semaine est prêt",
+        "body": "{cohort} — semaine {week}. Il indique qui s’est fait discret et ce qui reste à faire."
       }
     },
     "emptyHint": "Aucun élément en attente pour le moment."
   },
   "forms": {
+    "standardTitle": "Jeux de questions standard",
+    "standardHelp": "Les jeux de questions trimestriel et mensuel du programme, en anglais et en français. N'ajoute que ce qui manque à cette cohorte et ne modifie jamais un jeu que vous avez édité.",
+    "standardInstall": "Publier {count} jeu(x) standard",
+    "standardAllPresent": "Les {count} jeux standard sont déjà publiés pour cette cohorte.",
+    "standardInstalled": "{created} publié(s). {skipped} déjà en place, laissé(s) tel quel.",
+    "monthly": "Formulaire de rencontre mensuel",
     "quarterly": "Évaluation trimestrielle",
     "title": "Générateur de formulaires",
     "subtitle": "Formulaires d'évaluation pour {cohort}",
@@ -1603,6 +1624,7 @@
     "typeLongText": "Texte long",
     "typeRating": "Note",
     "typeSelect": "Choix multiple",
+    "typeMultiSelect": "Choix multiples (plusieurs réponses)",
     "typeBoolean": "Oui / Non",
     "questionCount": "{count} questions",
     "responseCount": "{count} réponses"
@@ -1717,12 +1739,13 @@
       "dashboard": "Accéder au tableau de bord"
     },
     "hero": {
-      "micro": "Mentorat bilingue · Assisté par l'IA · Validé par un humain",
+      "micro": "Programme de mentorat Dangote",
       "line1": "L'expérience devient une direction.",
       "line2": "L'ambition devient du leadership.",
       "body": "BLAK MOH est un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré et piloté par des humains.",
       "ctaPrimary": "Entrer dans le portail",
       "ctaSecondary": "Découvrir le parcours",
+      "partnershipLabel": "En collaboration avec",
       "sceneDescription": "Un mentor et un mentoré se tiennent à distance dans l'obscurité, reliés par un flux de lumière qui transporte le savoir de l'un à l'autre.",
       "mentorLabel": "Mentor",
       "menteeLabel": "Mentoré",
@@ -2503,6 +2526,16 @@
     }
   },
   "assessments": {
+    "adminMonthlyTitle": "Formulaires de rencontre mensuels",
+    "adminMonthlySubtitle": "Compte rendu des mentorés pour la séance de chaque mois, cohorte {cohort}. En manquer un ne bloque jamais le portail : cela déclenche des rappels et apparaît dans l'infolettre.",
+    "formTypeSwitcher": "Choisir le formulaire récurrent à gérer",
+    "tabQuarterly": "Évaluation trimestrielle",
+    "tabMonthly": "Formulaire mensuel",
+    "monthlyCadenceTitle": "Calendrier mensuel",
+    "monthlyCadenceHelp": "Crée un formulaire par mois civil de la cohorte, ouvert dès le 1er et à rendre le dernier jour. Les mois existants conservent vos modifications.",
+    "generateMonthly": "Générer les formulaires mensuels",
+    "statOutstanding": "Non encore envoyés",
+    "noFormBodyMonthly": "Créez un formulaire de type « Formulaire de rencontre mensuel » pour les mentorés, sans quoi personne ne pourra répondre.",
     "title": "Évaluation trimestrielle",
     "subtitle": "Tous les trois mois, vous remplissez une courte évaluation. Elle consigne votre progression et débloque le reste du portail.",
     "submit": "Envoyer l'évaluation",
@@ -2568,6 +2601,7 @@
     "stateLOCKED": "Accès bloqué"
   },
   "reports": {
+    "kindEngagement": "Rapport d'engagement",
     "title": "Rapports",
     "subtitle": "Créez un rapport à partir des données du portail, laissez l'IA en corriger la formulation, puis exportez-le vers Word ou Excel.",
     "navLabel": "Rapports",
@@ -2690,5 +2724,69 @@
     "sending": "Envoi…",
     "sendResult": "Envoyée à {sent}. Échecs : {failed}.",
     "backToDraft": "Revenir au projet"
+  },
+  "monthlyForm": {
+    "title": "Formulaire de rencontre mensuel",
+    "subtitle": "Votre propre compte rendu de la séance de mentorat du mois : ce dont vous avez discuté, ce qui en est ressorti et ce que vous avez convenu de faire ensuite.",
+    "navLabel": "Formulaire mensuel",
+    "submit": "Envoyer le formulaire du mois",
+    "saved": "Enregistré",
+    "dueOn": "Pour le mois se terminant le {date}",
+    "completedOn": "Envoyé le {date}",
+    "outstanding": "Non envoyé",
+    "historyTitle": "Vos formulaires mensuels",
+    "colAssessment": "Mois",
+    "colDue": "Fin du mois",
+    "colStatus": "Statut",
+    "notEligibleTitle": "Aucun formulaire mensuel pour vous actuellement",
+    "notEligibleBody": "Le formulaire de rencontre mensuel est rempli par les mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
+    "notPublishedTitle": "Le formulaire mensuel n'est pas encore prêt",
+    "notPublishedBody": "Votre administrateur de programme n'a pas encore publié le formulaire mensuel de cette cohorte. Vous serez averti dès son ouverture.",
+    "noneDueTitle": "Vous êtes à jour",
+    "noneDueBody": "Aucun formulaire mensuel ne vous attend. Nous vous le rappellerons à l'ouverture du prochain.",
+    "lockedExplainer": ""
+  },
+  "engagement": {
+    "title": "Qui s'est fait discret",
+    "subtitle": "Tous les mentors et mentorés de {cohort}, les plus préoccupants d'abord. Un rapport hebdomadaire est généré automatiquement.",
+    "navLabel": "Engagement",
+    "noActiveCohort": "Aucune cohorte active",
+    "noActiveCohortHelp": "Activez une cohorte pour suivre l'engagement.",
+    "seeReports": "Rapports hebdomadaires",
+    "statNeedsAttention": "À relancer",
+    "statInactive": "Inactifs ({days} jours et +)",
+    "statQuiet": "Deviennent discrets ({days} jours et +)",
+    "statActive": "Actifs",
+    "howTitle": "Comment ce calcul est fait",
+    "howBody": "Une activité désigne l'un de ces éléments : une séance consignée, une action sur un objectif, un formulaire envoyé, une rencontre, une entrée de journal ou un message envoyé. Une personne devient discrète après {quiet} jours de silence et inactive après {inactive}. Toute personne inscrite depuis moins de {grace} jours n'est pas encore évaluée.",
+    "privacyNote": "Seuls les horodatages sont utilisés. Aucun contenu de message, de journal ou de note n'est lu : il reste privé à ceux qui l'ont écrit.",
+    "filters": "Filtrer la liste",
+    "filterAll": "Tout le monde ({count})",
+    "roleAll": "Tous les rôles",
+    "roleMentor": "Mentors",
+    "roleMentee": "Mentorés",
+    "stateactive": "Actif",
+    "statequiet": "Devient discret",
+    "stateinactive": "Inactif",
+    "statenever": "Jamais actif",
+    "neverActive": "Jamais",
+    "sinceJoined": "jamais ({days} depuis l'inscription)",
+    "signalsession": "Séance",
+    "signalgoal": "Objectif",
+    "signalform": "Formulaire",
+    "signalmeeting": "Rencontre",
+    "signalreflection": "Journal",
+    "signalmessage": "Message",
+    "peopleTitle": "{count} personnes",
+    "peopleSubtitle": "Jamais actifs d'abord, puis les silences les plus longs.",
+    "colPerson": "Personne",
+    "colRole": "Rôle",
+    "colStatus": "Statut",
+    "colLastActive": "Dernière activité",
+    "colDays": "Jours de silence",
+    "colLastDid": "Dernière action",
+    "colFormsOwed": "Formulaires dus",
+    "emptyTitle": "Personne ne correspond à ce filtre",
+    "emptyBody": "Essayez un autre statut ou un autre rôle."
   }
 }

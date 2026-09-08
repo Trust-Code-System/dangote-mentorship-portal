@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -140,6 +141,37 @@ export function LandingHero() {
           >
             {t('ctaSecondary')}
           </a>
+        </div>
+
+        {/* Programme ownership and delivery partner. The lockup stays quiet so
+            it endorses the hero rather than competing with its headline. */}
+        <div
+          className="landing-hero-enter mt-8 flex w-fit max-w-full items-center gap-5 border-t border-blak-border/20 pt-5 sm:mt-10 sm:gap-7"
+          style={{ animationDelay: '0.58s' }}
+          aria-label={`${t('micro')}. ${t('partnershipLabel')} Kennedia Consulting.`}
+        >
+          <Image
+            src="/brand/dangote-logo.png"
+            alt="Dangote"
+            width={103}
+            height={55}
+            className="h-9 w-auto shrink-0 object-contain sm:h-10"
+          />
+
+          <span aria-hidden className="h-10 w-px shrink-0 bg-blak-border/25" />
+
+          <div className="min-w-0">
+            <p className="mb-2 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-blak-text-2">
+              {t('partnershipLabel')}
+            </p>
+            <Image
+              src="/brand/kennedia-consulting-logo.png"
+              alt="Kennedia Consulting"
+              width={320}
+              height={91}
+              className="h-7 w-auto max-w-[11.5rem] object-contain object-left sm:h-8 sm:max-w-[13rem]"
+            />
+          </div>
         </div>
       </div>
 
