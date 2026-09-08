@@ -1,16 +1,143 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+/* Keep dark mode class-based, matching the previous Tailwind configuration. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Design System (§19 — docs/design-system.md). Single source of truth for the
- * palette, radii, and elevation. Tokens are stored as space-separated RGB
- * channels (hex in the comment) so Tailwind's alpha modifiers work, e.g.
- * `bg-green/90`, `ring-green/20`. shadcn's semantic names are aliased onto these
- * tokens so every existing primitive is themed without ad-hoc values (§4: no raw
- * defaults). Dark mode is out of scope for v1 — tokens are structured so a dark
- * theme can be added later (§1).
+ * Tailwind 4 CSS-first theme. The raw RGB channels remain in :root below so
+ * existing alpha modifiers and hand-written rgb(var(--token) / alpha) values
+ * keep working across the portal, authentication, and landing surfaces.
  */
+@theme inline {
+  --color-bg: rgb(var(--bg));
+  --color-surface: rgb(var(--surface));
+  --color-surface-2: rgb(var(--surface-2));
+  --color-ink: rgb(var(--ink));
+  --color-ink-2: rgb(var(--ink-2));
+  --color-ink-3: rgb(var(--ink-3));
+  --color-green: rgb(var(--green));
+  --color-green-light: rgb(var(--green-light));
+  --color-green-strong: rgb(var(--green-strong));
+  --color-green-soft: rgb(var(--green-soft));
+  --color-gold: rgb(var(--gold));
+  --color-ok: rgb(var(--ok));
+  --color-warn: rgb(var(--warn));
+  --color-risk: rgb(var(--risk));
+  --color-info: rgb(var(--info));
+
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+
+  --color-blak-black: rgb(var(--blak-black));
+  --color-blak-forest: rgb(var(--blak-forest));
+  --color-blak-forest-2: rgb(var(--blak-forest-2));
+  --color-blak-green: rgb(var(--blak-green));
+  --color-blak-green-deep: rgb(var(--blak-green-deep));
+  --color-blak-green-soft: rgb(var(--blak-green-soft));
+  --color-blak-gold: rgb(var(--blak-gold));
+  --color-blak-gold-soft: rgb(var(--blak-gold-soft));
+  --color-blak-ivory: rgb(var(--blak-ivory));
+  --color-blak-text: rgb(var(--blak-text));
+  --color-blak-text-2: rgb(var(--blak-text-2));
+  --color-blak-border: rgb(var(--blak-border));
+  --color-blak-glass: rgb(var(--blak-glass));
+
+  --color-auth-surface: rgb(var(--auth-surface));
+  --color-auth-field: rgb(var(--auth-field));
+  --color-auth-border: rgb(var(--auth-border));
+  --color-auth-ink: rgb(var(--auth-ink));
+  --color-auth-ink-2: rgb(var(--auth-ink-2));
+
+  --font-display: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+
+  --text-display: 2.25rem;
+  --text-display--line-height: 2.75rem;
+  --text-display--font-weight: 800;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h1--font-weight: 700;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.75rem;
+  --text-h2--font-weight: 700;
+  --text-h3: 1rem;
+  --text-h3--line-height: 1.5rem;
+  --text-h3--font-weight: 600;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.25rem;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1rem;
+  --text-micro--letter-spacing: 0.04em;
+  --text-micro--font-weight: 600;
+
+  --text-blak-hero: clamp(2.5rem, 6.2vw, 5.25rem);
+  --text-blak-hero--line-height: 1.02;
+  --text-blak-hero--letter-spacing: -0.03em;
+  --text-blak-statement: clamp(1.875rem, 4vw, 3.5rem);
+  --text-blak-statement--line-height: 1.12;
+  --text-blak-statement--letter-spacing: -0.02em;
+  --text-blak-section: clamp(1.75rem, 3vw, 2.75rem);
+  --text-blak-section--line-height: 1.15;
+  --text-blak-section--letter-spacing: -0.02em;
+  --text-blak-body: clamp(1rem, 1.1vw, 1.125rem);
+  --text-blak-body--line-height: 1.65;
+  --text-blak-label: 0.75rem;
+  --text-blak-label--line-height: 1rem;
+  --text-blak-label--letter-spacing: 0.14em;
+  --text-blak-label--font-weight: 600;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 8px);
+
+  --shadow-elevation: 0 1px 2px rgba(16, 42, 26, 0.04), 0 8px 24px -6px rgba(16, 42, 26, 0.08);
+  --shadow-elevation-lg: 0 2px 4px rgba(16, 42, 26, 0.05), 0 18px 40px -10px rgba(16, 42, 26, 0.13);
+  --shadow-glow: 0 6px 16px -4px rgba(40, 133, 68, 0.45);
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+
+  @media (width >= 640px) {
+    max-width: 640px;
+  }
+
+  @media (width >= 768px) {
+    max-width: 768px;
+  }
+
+  @media (width >= 1024px) {
+    max-width: 1024px;
+  }
+
+  @media (width >= 1280px) {
+    max-width: 1280px;
+  }
+}
+
 @layer base {
   :root {
     /* ── Palette — STITCH REDESIGN (docs/stitch-redesign.md) ──
