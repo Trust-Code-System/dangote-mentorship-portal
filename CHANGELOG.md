@@ -551,3 +551,10 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **Upgraded `tailwindcss` 3.4 → 4.3 and moved the design system into a CSS-first `@theme`.** `tailwind.config.ts` is deleted; `src/app/globals.css` now owns the portal, landing, authentication, typography, radius, and shadow tokens.
 - **Preserved the current RGB-channel tokens** so Tailwind alpha modifiers and existing hand-written `rgb(var(--token) / alpha)` values continue to work. Tailwind 4 derives utility opacity through `color-mix`.
 - **PostCSS now uses `@tailwindcss/postcss`;** the standalone `autoprefixer` dependency is removed because Tailwind 4 handles vendor prefixing. The existing centered container behavior is retained as a CSS utility.
+
+## Security — seed credentials, and pinning the seed to one database
+
+- `SEED_ALLOW_REMOTE` now accepts a target string (`host:port/database`) as well as `true`. `true` unlocks any remote; a target pins seeding to one database and re-locks the moment `DATABASE_URL` changes. This matters because the test database is itself remote (hosted Neon), so the boolean override has to stay on permanently — at which point it no longer protects the production Supabase project it was added to guard.
+- Removed the hardcoded `'ChangeMe!2026'` / `'admin@dangote.com'` fallbacks from `prisma/seed.ts`. `SEED_DEFAULT_PASSWORD` and `SEED_SUPER_ADMIN_EMAIL` must now be set explicitly or the seed refuses — a default demo password is how known credentials reach a real database.
+- The seed no longer echoes the password to stdout (seed logs reach CI transcripts), and no longer prints the Programme Admin / Trainer / Reviewer accounts, which it has not created since `20260620120000_remove_staff_roles` in June.
+- 5 new unit tests in `tests/unit/seed-target.test.ts` cover the pinned-target path, including refusing a different database while the override is set.

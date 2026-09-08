@@ -51,8 +51,20 @@ import {
 
 const prisma = new PrismaClient();
 
-const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD ?? 'ChangeMe!2026';
-const SUPER_ADMIN_EMAIL = (process.env.SEED_SUPER_ADMIN_EMAIL ?? 'admin@dangote.com').toLowerCase();
+// No fallbacks, deliberately. A hardcoded demo password is how known credentials
+// reach a real database: the operator sets these or the seed refuses to run.
+function requiredSeedEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `Refusing to seed: ${name} must be set explicitly (there is no default). See .env.example.`,
+    );
+  }
+  return value;
+}
+
+const DEFAULT_PASSWORD = requiredSeedEnv('SEED_DEFAULT_PASSWORD');
+const SUPER_ADMIN_EMAIL = requiredSeedEnv('SEED_SUPER_ADMIN_EMAIL').toLowerCase();
 
 const GENERAL_COMPETENCIES = [
   'Leadership',
@@ -1285,11 +1297,13 @@ async function main() {
   }
 
   console.log('Seed complete.');
-  console.log(`  Super Admin:    ${SUPER_ADMIN_EMAIL} / ${DEFAULT_PASSWORD}`);
-  console.log('  Programme Admin: prog.admin@dangote.com');
-  console.log('  Trainer:         trainer@dangote.com');
-  console.log('  Reviewer:        reviewer@dangote.com');
-  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT} (all password: ${DEFAULT_PASSWORD})`);
+  // No credentials in the output: seed logs reach CI transcripts and scrollback.
+  // The Programme Admin / Trainer / Reviewer lines are gone because those roles
+  // were removed in 20260620120000_remove_staff_roles — the seed had been
+  // advertising three accounts it has not created since June.
+  console.log(`  Super Admin: ${SUPER_ADMIN_EMAIL}`);
+  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT}`);
+  console.log('  All seeded accounts use the password in SEED_DEFAULT_PASSWORD.');
 }
 
 /**
@@ -1303,7 +1317,7 @@ async function main() {
 function assertSeedTargetAllowed(): void {
   const decision = evaluateSeedTarget(
     process.env.DATABASE_URL,
-    process.env[SEED_REMOTE_OVERRIDE] === 'true',
+    process.env[SEED_REMOTE_OVERRIDE],
   );
 
   // Always say which database is about to be written, so a mistake is visible

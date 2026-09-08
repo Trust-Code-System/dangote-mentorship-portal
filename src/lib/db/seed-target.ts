@@ -64,7 +64,7 @@ export interface SeedTargetDecision {
  */
 export function evaluateSeedTarget(
   databaseUrl: string | undefined,
-  overrideSet: boolean,
+  override: boolean | string | undefined,
 ): SeedTargetDecision {
   const target = describeDatabaseTarget(databaseUrl) ?? '(unparseable DATABASE_URL)';
 
@@ -74,8 +74,27 @@ export function evaluateSeedTarget(
   if (isLocalDatabaseUrl(databaseUrl)) {
     return { allowed: true, target, reason: '' };
   }
-  if (overrideSet) {
+  // `true` unlocks any remote. A target string instead pins the seed to ONE
+  // database: repointing DATABASE_URL elsewhere re-locks it. That distinction
+  // matters when the test database is itself remote (a hosted Neon/Supabase
+  // dev instance), because then the boolean has to stay on permanently and
+  // stops protecting the production database it was meant to guard.
+  if (override === true || override === 'true') {
     return { allowed: true, target, reason: '' };
+  }
+  if (typeof override === 'string' && override.trim() !== '') {
+    if (override.trim() === target) {
+      return { allowed: true, target, reason: '' };
+    }
+    return {
+      allowed: false,
+      target,
+      reason:
+        `Refusing to seed ${target}.\n\n` +
+        `${SEED_REMOTE_OVERRIDE} pins seeding to "${override.trim()}", and this is a ` +
+        'different database. If you really mean to seed this one, change that value to ' +
+        `"${target}".`,
+    };
   }
   return {
     allowed: false,

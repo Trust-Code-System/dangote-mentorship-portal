@@ -100,3 +100,34 @@ describe('evaluateSeedTarget', () => {
     expect(reason).toMatch(/lock accounts out/i);
   });
 });
+
+describe('pinned seed target', () => {
+  const neon = 'postgresql://u:p@ep-x-pooler.eu-central-1.aws.neon.tech/neondb';
+  const supabase = 'postgresql://postgres.ref:p@aws-1-eu-central-1.pooler.supabase.com:5432/postgres';
+
+  it('still unlocks any remote when the override is literally true', () => {
+    expect(evaluateSeedTarget(neon, true).allowed).toBe(true);
+    expect(evaluateSeedTarget(neon, 'true').allowed).toBe(true);
+    expect(evaluateSeedTarget(supabase, true).allowed).toBe(true);
+  });
+
+  it('allows the pinned database', () => {
+    const target = describeDatabaseTarget(neon)!;
+    expect(evaluateSeedTarget(neon, target).allowed).toBe(true);
+  });
+
+  // The reason the pin exists: when the TEST database is itself remote, the
+  // boolean override must stay on permanently, and then it no longer protects
+  // production. A pin re-locks the moment DATABASE_URL changes.
+  it('refuses a different database even though the override is set', () => {
+    const pinnedToNeon = describeDatabaseTarget(neon)!;
+    const decision = evaluateSeedTarget(supabase, pinnedToNeon);
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toMatch(/pins seeding to/);
+  });
+
+  it('still refuses a remote with no override at all', () => {
+    expect(evaluateSeedTarget(neon, undefined).allowed).toBe(false);
+    expect(evaluateSeedTarget(neon, '').allowed).toBe(false);
+  });
+});
