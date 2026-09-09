@@ -6,10 +6,6 @@ import {
   isLocalDatabaseUrl,
 } from '@/lib/db/seed-target';
 
-// This guard exists because a seed run reached the live Supabase instance and
-// created two overdue assessment windows. The property that matters is that it
-// fails CLOSED: anything not demonstrably local is refused.
-
 const LOCAL = 'postgresql://user:pw@localhost:5432/portal';
 const REMOTE = 'postgresql://user:pw@aws-1-eu-central-1.pooler.supabase.com:5432/postgres';
 
@@ -59,43 +55,47 @@ describe('describeDatabaseTarget', () => {
 
 describe('evaluateSeedTarget', () => {
   it('allows a local database with no override', () => {
-    const decision = evaluateSeedTarget(LOCAL, false);
+    const decision = evaluateSeedTarget(LOCAL, undefined);
     expect(decision.allowed).toBe(true);
     expect(decision.reason).toBe('');
   });
 
   it('refuses a remote database', () => {
-    const decision = evaluateSeedTarget(REMOTE, false);
+    const decision = evaluateSeedTarget(REMOTE, undefined);
     expect(decision.allowed).toBe(false);
     expect(decision.reason).toContain('Refusing to seed a non-local database');
   });
 
   it('names the refused target so the mistake is obvious', () => {
-    const decision = evaluateSeedTarget(REMOTE, false);
+    const decision = evaluateSeedTarget(REMOTE, undefined);
     expect(decision.target).toBe('aws-1-eu-central-1.pooler.supabase.com:5432/postgres');
     expect(decision.reason).toContain(decision.target);
   });
 
   it('tells the operator how to override deliberately', () => {
-    expect(evaluateSeedTarget(REMOTE, false).reason).toContain(SEED_REMOTE_OVERRIDE);
+    expect(evaluateSeedTarget(REMOTE, undefined).reason).toContain(SEED_REMOTE_OVERRIDE);
   });
 
   it('allows a remote database when the override is set', () => {
-    expect(evaluateSeedTarget(REMOTE, true).allowed).toBe(true);
+    expect(evaluateSeedTarget(REMOTE, 'true').allowed).toBe(true);
   });
 
   it('refuses a missing DATABASE_URL', () => {
-    const decision = evaluateSeedTarget(undefined, false);
+    const decision = evaluateSeedTarget(undefined, undefined);
     expect(decision.allowed).toBe(false);
     expect(decision.reason).toContain('DATABASE_URL is not set');
   });
 
   it('refuses an unparseable URL even with the override unset', () => {
-    expect(evaluateSeedTarget('not a url', false).allowed).toBe(false);
+    expect(evaluateSeedTarget('not a url', undefined).allowed).toBe(false);
+  });
+
+  it('refuses an unparseable URL even with the broad override', () => {
+    expect(evaluateSeedTarget('not a url', 'true').allowed).toBe(false);
   });
 
   it('warns about what the seed actually does, not just that it refused', () => {
-    const reason = evaluateSeedTarget(REMOTE, false).reason;
+    const reason = evaluateSeedTarget(REMOTE, undefined).reason;
     expect(reason).toMatch(/one password/i);
     expect(reason).toMatch(/lock accounts out/i);
   });
@@ -106,9 +106,8 @@ describe('pinned seed target', () => {
   const supabase = 'postgresql://postgres.ref:p@aws-1-eu-central-1.pooler.supabase.com:5432/postgres';
 
   it('still unlocks any remote when the override is literally true', () => {
-    expect(evaluateSeedTarget(neon, true).allowed).toBe(true);
     expect(evaluateSeedTarget(neon, 'true').allowed).toBe(true);
-    expect(evaluateSeedTarget(supabase, true).allowed).toBe(true);
+    expect(evaluateSeedTarget(supabase, 'true').allowed).toBe(true);
   });
 
   it('allows the pinned database', () => {
@@ -116,9 +115,6 @@ describe('pinned seed target', () => {
     expect(evaluateSeedTarget(neon, target).allowed).toBe(true);
   });
 
-  // The reason the pin exists: when the TEST database is itself remote, the
-  // boolean override must stay on permanently, and then it no longer protects
-  // production. A pin re-locks the moment DATABASE_URL changes.
   it('refuses a different database even though the override is set', () => {
     const pinnedToNeon = describeDatabaseTarget(neon)!;
     const decision = evaluateSeedTarget(supabase, pinnedToNeon);

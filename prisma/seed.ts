@@ -51,8 +51,6 @@ import {
 
 const prisma = new PrismaClient();
 
-// No fallbacks, deliberately. A hardcoded demo password is how known credentials
-// reach a real database: the operator sets these or the seed refuses to run.
 function requiredSeedEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -1297,31 +1295,17 @@ async function main() {
   }
 
   console.log('Seed complete.');
-  // No credentials in the output: seed logs reach CI transcripts and scrollback.
-  // The Programme Admin / Trainer / Reviewer lines are gone because those roles
-  // were removed in 20260620120000_remove_staff_roles — the seed had been
-  // advertising three accounts it has not created since June.
   console.log(`  Super Admin: ${SUPER_ADMIN_EMAIL}`);
   console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT}`);
   console.log('  All seeded accounts use the password in SEED_DEFAULT_PASSWORD.');
 }
 
-/**
- * Refuse to seed anything but a local database unless explicitly overridden.
- *
- * The seed creates a demo cohort whose accounts all share one password, and
- * generates assessment schedules that can lock people out of the portal — so
- * reaching a shared or live database with it is a real incident, not an
- * inconvenience. It has happened once already.
- */
 function assertSeedTargetAllowed(): void {
   const decision = evaluateSeedTarget(
     process.env.DATABASE_URL,
     process.env[SEED_REMOTE_OVERRIDE],
   );
 
-  // Always say which database is about to be written, so a mistake is visible
-  // in the log even on the allowed path.
   console.log(`Seeding database: ${decision.target}`);
 
   if (!decision.allowed) {
