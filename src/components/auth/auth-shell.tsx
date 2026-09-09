@@ -27,7 +27,7 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
       {/* ── Left: brand panel (desktop) ── */}
       <section
         aria-label={t('brandEyebrow')}
-        className="relative hidden overflow-hidden bg-blak-forest lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16"
+        className="relative hidden overflow-hidden bg-blak-forest lg:flex lg:flex-col lg:p-12 xl:p-14"
       >
         <AuthVisual />
 
@@ -41,11 +41,14 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* The message varies on /signup — a first-time visitor is beginning a
-            journey, not continuing one (PUBLIC_PAGES_MASTER_SPEC.md §7.5). */}
-        <div className="relative max-w-xl">
-          <AuthBrandCopy />
+            journey, not continuing one (PUBLIC_PAGES_MASTER_SPEC.md §7.5).
+            Centred in the remaining height rather than pinned to the bottom, so
+            it sits with the form across from it instead of trailing off-screen. */}
+        <div className="relative flex flex-1 items-center">
+          <div className="max-w-xl">
+            <AuthBrandCopy />
+          </div>
         </div>
-
       </section>
 
       {/* ── Right: form panel ── */}
@@ -67,7 +70,7 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         {/* A real `main` landmark. The auth pages previously had none, so the
             form — the entire point of the page — was not reachable by landmark
             navigation and the page's only h1 sat outside any landmark. */}
-        <main className="flex flex-1 items-center justify-center px-5 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-8 lg:px-10 lg:py-12">
+        <main className="flex flex-1 items-center justify-center px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8 lg:px-10 lg:py-4">
           {/* 460px is the readable optimum for a single-column form; wider makes
               the label→field relationship harder to scan, not easier. */}
           <div className="w-full max-w-[460px]">{children}</div>

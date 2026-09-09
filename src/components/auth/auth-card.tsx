@@ -14,7 +14,7 @@ export function AuthCard({ className, children }: { className?: string; children
   return (
     <div
       className={cn(
-        'rounded-[26px] border border-auth-border/70 bg-auth-surface p-7 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_60px_-24px_rgba(0,0,0,0.75)] sm:p-9',
+        'rounded-[26px] border border-auth-border/70 bg-auth-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_60px_-24px_rgba(0,0,0,0.75)] sm:p-7',
         className,
       )}
     >
@@ -41,11 +41,11 @@ export async function AuthHeader({
   const t = await getTranslations('auth');
 
   return (
-    <div className="mb-7">
+    <div className="mb-5">
       {/* The label and the switcher share a row only when there is room for
           both. At 320–390px "Français" was being clipped by the card edge, so
           below `sm` the switcher gets its own line. */}
-      <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <span className="whitespace-nowrap text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-auth-ink-2 sm:tracking-[0.14em]">
           {t('enterprisePortal')}
         </span>
@@ -55,7 +55,7 @@ export async function AuthHeader({
       <h1 className="font-display text-[1.75rem] font-extrabold leading-tight tracking-tight text-auth-ink">
         {heading}
       </h1>
-      {supporting ? <p className="mt-2.5 text-base leading-relaxed text-auth-ink-2">{supporting}</p> : null}
+      {supporting ? <p className="mt-2 text-base leading-relaxed text-auth-ink-2">{supporting}</p> : null}
     </div>
   );
 }
@@ -83,9 +83,9 @@ export async function AuthFooter({ showTrustNote = true }: { showTrustNote?: boo
     'inline-flex min-h-11 items-center text-blak-text-2 transition-colors hover:text-blak-text';
 
   return (
-    <footer className="mt-8 text-center">
+    <footer className="mt-4 text-center">
       {showTrustNote ? (
-        <p className="mx-auto max-w-[38ch] text-xs leading-relaxed text-blak-text-2">
+        <p className="mx-auto max-w-[54ch] text-xs leading-relaxed text-blak-text-2">
           {t('trustNote')}
         </p>
       ) : null}
