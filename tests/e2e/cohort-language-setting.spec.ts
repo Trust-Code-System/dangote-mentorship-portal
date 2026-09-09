@@ -31,6 +31,7 @@ for (const viewport of [
 
     const frenchSwitch = page.getByRole('switch', { name: /french|français/i });
     const switchTarget = page.locator('label[for="cohort-french-enabled"]');
+    const cohortForm = frenchSwitch.locator('xpath=ancestor::form');
 
     await expect(frenchSwitch).toBeChecked();
     await expect(switchTarget).toBeVisible();
@@ -41,12 +42,9 @@ for (const viewport of [
     await expect(frenchSwitch).not.toBeChecked();
     await expect
       .poll(() =>
-        page
-          .locator('form')
-          .first()
-          .evaluate((form) =>
-            new FormData(form as HTMLFormElement).getAll('languages').map(String),
-          ),
+        cohortForm.evaluate((form) =>
+          new FormData(form as HTMLFormElement).getAll('languages').map(String),
+        ),
       )
       .toEqual(['EN']);
 
@@ -54,12 +52,9 @@ for (const viewport of [
     await expect(frenchSwitch).toBeChecked();
     await expect
       .poll(() =>
-        page
-          .locator('form')
-          .first()
-          .evaluate((form) =>
-            new FormData(form as HTMLFormElement).getAll('languages').map(String),
-          ),
+        cohortForm.evaluate((form) =>
+          new FormData(form as HTMLFormElement).getAll('languages').map(String),
+        ),
       )
       .toEqual(['EN', 'FR']);
 
