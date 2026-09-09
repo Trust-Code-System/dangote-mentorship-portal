@@ -42,18 +42,13 @@ import {
 } from 'lucide-react';
 import { signOutAction } from '@/lib/auth/actions';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import type { AppLocale } from '@/i18n/config';
 import { BrandMark } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
 import { NavSpinner } from '@/components/shell/nav-spinner';
-import {
-  isNavItemCommitted,
-  resolveNavItemVisualState,
-} from '@/components/shell/nav-item-state';
-import {
-  fetchRecentNotifications,
-  fetchShellBadges,
-} from '@/lib/notifications/actions';
+import { isNavItemCommitted, resolveNavItemVisualState } from '@/components/shell/nav-item-state';
+import { fetchRecentNotifications, fetchShellBadges } from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
 
 /** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
@@ -218,6 +213,8 @@ export interface AppShellProps {
   unread?: number;
   /** When true, fetch notification/message badges after mount (non-blocking). */
   loadBadges?: boolean;
+  /** Interface languages available to this viewer's cohort. */
+  availableLocales?: readonly AppLocale[];
   labels: AppShellLabels;
   children: React.ReactNode;
 }
@@ -246,6 +243,7 @@ export function AppShell({
   user,
   unread: unreadProp = 0,
   loadBadges = false,
+  availableLocales,
   labels,
   children,
 }: AppShellProps) {
@@ -258,17 +256,15 @@ export function AppShell({
   const [pendingHref, setPendingHref] = React.useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [recent, setRecent] = React.useState<NotifItem[]>([]);
-  const [recentStatus, setRecentStatus] = React.useState<
-    'idle' | 'loading' | 'ready' | 'error'
-  >('idle');
+  const [recentStatus, setRecentStatus] = React.useState<'idle' | 'loading' | 'ready' | 'error'>(
+    'idle',
+  );
   const [unread, setUnread] = React.useState(unreadProp);
   const [unreadMessages, setUnreadMessages] = React.useState(0);
 
   const prefetchedRef = React.useRef(new Set<string>());
   const visitedRef = React.useRef(new Set<string>());
-  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshGenRef = React.useRef(0);
   const sidebarNavRef = React.useRef<HTMLElement>(null);
 
@@ -348,10 +344,7 @@ export function AppShell({
           setIsRefreshing(false);
           return;
         }
-        const remain = Math.max(
-          0,
-          REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt),
-        );
+        const remain = Math.max(0, REFRESH_INDICATOR_MIN_MS - (Date.now() - shownAt));
         timers.push(
           setTimeout(() => {
             if (refreshGenRef.current === gen) setIsRefreshing(false);
@@ -421,20 +414,22 @@ export function AppShell({
     if (!notifOpen) return;
 
     let cancelled = false;
-    void Promise.resolve().then(() => {
-      if (cancelled) return;
-      setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
-      return fetchRecentNotifications(6);
-    }).then((result) => {
-      if (!result) return;
-      if (cancelled) return;
-      if (result.ok) {
-        setRecent(result.data.items);
-        setRecentStatus('ready');
-      } else {
-        setRecentStatus((prev) => (prev === 'ready' ? prev : 'error'));
-      }
-    });
+    void Promise.resolve()
+      .then(() => {
+        if (cancelled) return;
+        setRecentStatus((prev) => (prev === 'ready' ? prev : 'loading'));
+        return fetchRecentNotifications(6);
+      })
+      .then((result) => {
+        if (!result) return;
+        if (cancelled) return;
+        if (result.ok) {
+          setRecent(result.data.items);
+          setRecentStatus('ready');
+        } else {
+          setRecentStatus((prev) => (prev === 'ready' ? prev : 'error'));
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -457,10 +452,7 @@ export function AppShell({
     }
   }
 
-  function onNavClick(
-    href: string,
-    event: React.MouseEvent<HTMLAnchorElement>,
-  ) {
+  function onNavClick(href: string, event: React.MouseEvent<HTMLAnchorElement>) {
     // Same destination already pending — ignore repeat clicks without blocking others.
     if (pendingHref === href) {
       event.preventDefault();
@@ -477,7 +469,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="bg-bg min-h-screen">
       {/* Thin top progress — visible only while a sidebar/tab nav is pending. */}
       <div
         aria-hidden={!navigating}
@@ -488,7 +480,7 @@ export function AppShell({
       >
         <div
           className={cn(
-            'h-full w-1/3 bg-green',
+            'bg-green h-full w-1/3',
             navigating && 'animate-pulse motion-reduce:animate-none',
           )}
         />
@@ -498,7 +490,7 @@ export function AppShell({
       {mobileOpen && (
         <div
           aria-hidden
-          className="fixed inset-0 z-40 bg-ink/30 lg:hidden"
+          className="bg-ink/30 fixed inset-0 z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -506,7 +498,7 @@ export function AppShell({
       {/* ── Sidebar ── */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-surface transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
+          'border-border bg-surface fixed inset-y-0 left-0 z-50 flex flex-col border-r transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
           collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[180px]',
           'w-[260px]', // mobile drawer width
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -526,11 +518,9 @@ export function AppShell({
               <span className="min-w-0 leading-tight">
                 <Wordmark
                   name={labels.brand}
-                  className="block max-w-[7.5rem] whitespace-normal font-display text-[0.72rem] font-bold leading-tight text-ink"
+                  className="font-display text-ink block max-w-[7.5rem] text-[0.72rem] leading-tight font-bold whitespace-normal"
                 />
-                <span className="mt-0.5 block text-[0.58rem] text-ink-3">
-                  {labels.subtitle}
-                </span>
+                <span className="text-ink-3 mt-0.5 block text-[0.58rem]">{labels.subtitle}</span>
               </span>
             )}
           </Link>
@@ -541,22 +531,18 @@ export function AppShell({
             onClick={() => setCollapsed((c) => !c)}
             aria-label={collapsed ? labels.expand : labels.collapse}
             className={cn(
-              'hidden rounded-md p-1.5 text-ink-3 transition-colors hover:bg-surface hover:text-ink lg:inline-flex',
+              'text-ink-3 hover:bg-surface hover:text-ink hidden rounded-md p-1.5 transition-colors lg:inline-flex',
               collapsed ? 'lg:mx-auto' : 'ml-auto',
             )}
           >
-            {collapsed ? (
-              <ChevronRight className="size-5" />
-            ) : (
-              <ChevronLeft className="size-5" />
-            )}
+            {collapsed ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
           </button>
 
           {/* Mobile drawer close */}
           <button
             type="button"
             aria-label={labels.closeMenu}
-            className="ml-auto rounded-md p-1.5 text-ink-2 hover:bg-surface lg:hidden"
+            className="text-ink-2 hover:bg-surface ml-auto rounded-md p-1.5 lg:hidden"
             onClick={() => setMobileOpen(false)}
           >
             <X className="size-5" />
@@ -580,9 +566,7 @@ export function AppShell({
         >
           {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
-              {section.label && !collapsed && (
-                <p className="sr-only">{section.label}</p>
-              )}
+              {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
                 const visual = resolveNavItemVisualState({
@@ -591,11 +575,7 @@ export function AppShell({
                   exact: item.exact,
                   pendingHref,
                 });
-                const committed = isNavItemCommitted(
-                  pathname,
-                  item.href,
-                  item.exact,
-                );
+                const committed = isNavItemCommitted(pathname, item.href, item.exact);
                 const active = visual === 'active';
                 const pending = visual === 'pending';
                 return (
@@ -611,15 +591,15 @@ export function AppShell({
                     onPointerEnter={() => prefetchHref(item.href)}
                     onFocus={() => prefetchHref(item.href)}
                     className={cn(
-                      'group flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-light/30 motion-reduce:transition-none',
+                      'group focus-visible:ring-green-light/30 flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none',
                       collapsed && 'lg:justify-center lg:px-0',
                       active &&
-                        'rounded-r-none border-r-2 border-green bg-green-soft/50 font-bold text-green-strong',
+                        'border-green bg-green-soft/50 text-green-strong rounded-r-none border-r-2 font-bold',
                       pending &&
-                        'border border-green/40 bg-green-soft/25 font-medium text-green-strong/90',
+                        'border-green/40 bg-green-soft/25 text-green-strong/90 border font-medium',
                       !active &&
                         !pending &&
-                        'font-medium text-ink-2 hover:bg-surface-2 hover:text-ink',
+                        'text-ink-2 hover:bg-surface-2 hover:text-ink font-medium',
                       pending && 'opacity-90',
                     )}
                   >
@@ -632,25 +612,17 @@ export function AppShell({
                       )}
                     />
                     {!collapsed && (
-                      <span
-                        className={cn(
-                          'flex-1 truncate',
-                          pending && 'opacity-80',
-                        )}
-                      >
+                      <span className={cn('flex-1 truncate', pending && 'opacity-80')}>
                         {item.label}
                       </span>
                     )}
                     {!collapsed && pending ? (
-                      <NavSpinner
-                        className="size-3.5"
-                        label={labels.navigating}
-                      />
+                      <NavSpinner className="size-3.5" label={labels.navigating} />
                     ) : null}
                     {!collapsed && !pending && item.badge ? (
                       <span
                         className={cn(
-                          'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-micro text-white',
+                          'text-micro inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-white',
                           active ? 'bg-green-strong' : 'bg-green',
                         )}
                       >
@@ -674,30 +646,25 @@ export function AppShell({
           >
             <Link
               href="/profile"
-              className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-green-soft text-micro font-bold text-green-strong"
+              className="bg-green-soft text-micro text-green-strong flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full font-bold"
               title={user.name}
             >
               <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
             {!collapsed && (
               <Link href="/profile" className="min-w-0 flex-1 leading-tight">
-                <span className="block truncate text-small font-bold text-ink">
-                  {user.name}
-                </span>
-                <span className="block truncate text-micro uppercase tracking-wider text-ink-3">
+                <span className="text-small text-ink block truncate font-bold">{user.name}</span>
+                <span className="text-micro text-ink-3 block truncate tracking-wider uppercase">
                   {user.roleLabel}
                 </span>
               </Link>
             )}
-            <form
-              action={signOutAction}
-              className={cn(collapsed && 'lg:hidden')}
-            >
+            <form action={signOutAction} className={cn(collapsed && 'lg:hidden')}>
               <button
                 type="submit"
                 aria-label={labels.signOut}
                 title={labels.signOut}
-                className="rounded-md p-1.5 text-ink-3 transition-colors hover:bg-surface hover:text-risk"
+                className="text-ink-3 hover:bg-surface hover:text-risk rounded-md p-1.5 transition-colors"
               >
                 <LogOut className="size-5" />
               </button>
@@ -714,34 +681,32 @@ export function AppShell({
         )}
       >
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-[52px] items-center gap-3 border-b border-border bg-surface px-4 sm:px-5">
+        <header className="border-border bg-surface sticky top-0 z-30 flex h-[52px] items-center gap-3 border-b px-4 sm:px-5">
           <button
             type="button"
             aria-label={labels.openMenu}
-            className="rounded-md p-2 text-ink-2 hover:bg-surface-2 lg:hidden"
+            className="text-ink-2 hover:bg-surface-2 rounded-md p-2 lg:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="size-5" />
           </button>
 
           {/* Global search — pages (client-side) + RBAC-scoped records (admins). */}
-          <GlobalSearch
-            navItems={allItems.map((i) => ({ label: i.label, href: i.href }))}
-          />
+          <GlobalSearch navItems={allItems.map((i) => ({ label: i.label, href: i.href }))} />
 
           <div className="ml-auto flex items-center gap-2">
-            <LocaleSwitcher />
+            <LocaleSwitcher availableLocales={availableLocales} />
             <div className="relative">
               <button
                 type="button"
                 aria-label={labels.notifications}
                 aria-expanded={notifOpen}
                 onClick={() => setNotifOpen((o) => !o)}
-                className="relative rounded-md p-2 text-ink-2 hover:bg-surface-2"
+                className="text-ink-2 hover:bg-surface-2 relative rounded-md p-2"
               >
                 <Bell className="size-5" />
                 {unread > 0 && (
-                  <span className="absolute right-1 top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-risk px-1 text-[0.625rem] font-semibold leading-none text-white">
+                  <span className="bg-risk absolute top-1 right-1 inline-flex min-w-4 items-center justify-center rounded-full px-1 text-[0.625rem] leading-none font-semibold text-white">
                     {unread > 9 ? '9+' : unread}
                   </span>
                 )}
@@ -755,45 +720,43 @@ export function AppShell({
                     className="fixed inset-0 z-40"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-surface">
-                    <div className="border-b border-border px-4 py-3">
-                      <p className="text-small font-semibold text-ink">
+                  <div className="border-border bg-surface absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border">
+                    <div className="border-border border-b px-4 py-3">
+                      <p className="text-small text-ink font-semibold">
                         {labels.notificationsTitle}
                       </p>
                     </div>
                     {recentStatus === 'loading' || recentStatus === 'idle' ? (
                       <div className="space-y-3 px-4 py-4" aria-busy="true">
-                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
-                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
-                        <div className="h-10 animate-pulse rounded-md bg-surface-2 motion-reduce:animate-none" />
+                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
                       </div>
                     ) : recentStatus === 'error' ? (
-                      <p className="px-4 py-6 text-center text-small text-ink-3">
+                      <p className="text-small text-ink-3 px-4 py-6 text-center">
                         {labels.noNotifications}
                       </p>
                     ) : recent.length === 0 ? (
-                      <p className="px-4 py-6 text-center text-small text-ink-3">
+                      <p className="text-small text-ink-3 px-4 py-6 text-center">
                         {labels.noNotifications}
                       </p>
                     ) : (
-                      <ul className="max-h-80 divide-y divide-border overflow-y-auto">
+                      <ul className="divide-border max-h-80 divide-y overflow-y-auto">
                         {recent.map((n) => {
                           const inner = (
                             <div className="flex items-start gap-2">
                               {!n.read && (
                                 <span
                                   aria-hidden
-                                  className="mt-1.5 size-2 shrink-0 rounded-full bg-green"
+                                  className="bg-green mt-1.5 size-2 shrink-0 rounded-full"
                                 />
                               )}
                               <div className={cn('min-w-0', n.read && 'pl-4')}>
-                                <p className="truncate text-small font-medium text-ink">
+                                <p className="text-small text-ink truncate font-medium">
                                   {n.title}
                                 </p>
                                 {n.body && (
-                                  <p className="line-clamp-2 text-micro text-ink-2">
-                                    {n.body}
-                                  </p>
+                                  <p className="text-micro text-ink-2 line-clamp-2">{n.body}</p>
                                 )}
                               </div>
                             </div>
@@ -801,10 +764,7 @@ export function AppShell({
                           return (
                             <li
                               key={n.id}
-                              className={cn(
-                                'px-4 py-3',
-                                !n.read && 'bg-green-soft/40',
-                              )}
+                              className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}
                             >
                               {n.link ? (
                                 <Link
@@ -828,7 +788,7 @@ export function AppShell({
                         setNotifOpen(false);
                         onNavClick('/notifications', e);
                       }}
-                      className="block border-t border-border px-4 py-3 text-center text-small font-medium text-green-strong hover:bg-surface-2"
+                      className="border-border text-small text-green-strong hover:bg-surface-2 block border-t px-4 py-3 text-center font-medium"
                     >
                       {labels.seeAll}
                     </Link>
@@ -839,7 +799,7 @@ export function AppShell({
             <Link
               href="/profile"
               aria-label={user.name}
-              className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full border border-border bg-green-soft text-small font-bold text-green-strong transition-colors hover:border-green-light"
+              className="border-border bg-green-soft text-small text-green-strong hover:border-green-light ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full border font-bold transition-colors"
             >
               <ShellAvatar imageUrl={user.imageUrl} initials={user.initials} />
             </Link>
@@ -852,7 +812,7 @@ export function AppShell({
             <div
               role="status"
               aria-live="polite"
-              className="pointer-events-none absolute right-4 top-5 z-10 flex items-center gap-1.5 text-micro text-ink-3 sm:right-5"
+              className="text-micro text-ink-3 pointer-events-none absolute top-5 right-4 z-10 flex items-center gap-1.5 sm:right-5"
             >
               <NavSpinner className="size-3.5" />
               <span>{labels.updating}</span>
@@ -863,7 +823,7 @@ export function AppShell({
       </div>
 
       {/* ── Mobile bottom tab bar ── */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-border bg-bg lg:hidden">
+      <nav className="border-border bg-bg fixed inset-x-0 bottom-0 z-30 flex border-t lg:hidden">
         {primary.map((item) => {
           const Icon = ICONS[item.icon];
           const visual = resolveNavItemVisualState({
@@ -887,8 +847,8 @@ export function AppShell({
               onPointerEnter={() => prefetchHref(item.href)}
               onFocus={() => prefetchHref(item.href)}
               className={cn(
-                'flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 text-micro transition-colors duration-150',
-                active && 'font-semibold text-green-strong',
+                'text-micro flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 transition-colors duration-150',
+                active && 'text-green-strong font-semibold',
                 pending && 'text-green-strong/85',
                 !active && !pending && 'text-ink-3',
               )}
@@ -897,21 +857,19 @@ export function AppShell({
                 <Icon className="size-5" />
                 {pending ? (
                   <NavSpinner
-                    className="absolute -right-2 -top-1 size-3"
+                    className="absolute -top-1 -right-2 size-3"
                     label={labels.navigating}
                   />
                 ) : null}
               </span>
-              <span className={cn('truncate', pending && 'opacity-80')}>
-                {item.label}
-              </span>
+              <span className={cn('truncate', pending && 'opacity-80')}>{item.label}</span>
             </Link>
           );
         })}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="flex flex-1 flex-col items-center gap-0.5 py-2 text-micro text-ink-3"
+          className="text-micro text-ink-3 flex flex-1 flex-col items-center gap-0.5 py-2"
         >
           <Menu className="size-5" />
           <span>{labels.more}</span>

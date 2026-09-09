@@ -400,6 +400,12 @@
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "languages": "Langues",
+    "programmeLanguages": "Langues de la cohorte",
+    "programmeLanguagesHelp": "L’anglais reste disponible. Activez le français uniquement si cette cohorte comprend des mentors ou mentorés francophones.",
+    "englishAlwaysOn": "Langue principale du programme",
+    "frenchAvailabilityHelp": "Formulaires, bulletins et exigences d’importation en français",
+    "languageOn": "Activé",
+    "languageOff": "Désactivé",
     "status": "Statut",
     "noProgrammes": "Aucun programme pour l’instant. Créez le premier.",
     "noCohorts": "Aucune cohorte pour l’instant.",
@@ -478,7 +484,13 @@
     "systemStatus": "État du système",
     "validationComplete": "Validation terminée",
     "generateAuditReport": "Générer le rapport d'audit complet",
-    "rowStatus": { "VALID": "Valide", "FLAGGED": "À vérifier", "FIXED": "Corrigé", "ACCEPTED": "Accepté", "REJECTED": "Rejeté" }
+    "rowStatus": {
+      "VALID": "Valide",
+      "FLAGGED": "À vérifier",
+      "FIXED": "Corrigé",
+      "ACCEPTED": "Accepté",
+      "REJECTED": "Rejeté"
+    }
   },
   "matching": {
     "title": "Moteur de jumelage",
@@ -1703,7 +1715,11 @@
     "integrationsTitle": "État des intégrations Microsoft",
     "integrationsDescription": "Seul l'état de configuration est affiché. Les secrets ne sont jamais révélés.",
     "missingVariables": "Variables d'environnement manquantes",
-    "integrationStatus": { "configured": "Configuré", "partial": "Incomplet", "disabled": "Désactivé" },
+    "integrationStatus": {
+      "configured": "Configuré",
+      "partial": "Incomplet",
+      "disabled": "Désactivé"
+    },
     "integration": {
       "entra": "Authentification Microsoft Entra",
       "entraDescription": "Connexion facultative avec le compte professionnel. La connexion par mot de passe reste disponible si elle est désactivée.",
@@ -2486,43 +2502,139 @@
     },
     "guides": {
       "programme": {
-        "meta": { "title": "Guide du programme — BLAK MOH", "description": "Une vue pratique du parcours de mentorat BLAK MOH sur neuf mois." },
-        "hero": { "eyebrow": "Guide du programme", "breadcrumb": "Guide du programme", "title": "Un programme.", "titleAccent": "Neuf étapes visibles.", "lede": "BLAK MOH accompagne chaque binôme du profil et de la formation jusqu'au jumelage, aux objectifs, aux séances, aux revues et à l'achèvement." },
-        "steps": {
-          "eyebrow": "Le parcours", "title": "Comment fonctionne le programme", "lede": "Chaque étape ouvre la suivante, tout en laissant les personnes concernées décider.",
-          "one": { "title": "Se préparer et se former", "body": "Les participants complètent leur profil et la formation du programme avant toute proposition de binôme." },
-          "two": { "title": "Examiner et accepter le jumelage", "body": "Le moteur classe les binômes compatibles sur la langue ; un administrateur valide, puis les deux participants répondent." },
-          "three": { "title": "Fixer des objectifs et se rencontrer", "body": "Le binôme signe les accords, définit des objectifs approuvés, planifie les réunions et consigne les séances." },
-          "four": { "title": "Faire le bilan et achever", "body": "Les revues de mi-parcours et finale retracent les progrès avant la délivrance du certificat aux participants admissibles." }
+        "meta": {
+          "title": "Guide du programme — BLAK MOH",
+          "description": "Une vue pratique du parcours de mentorat BLAK MOH sur neuf mois."
         },
-        "privacy": { "eyebrow": "Confidentialité", "title": "Les progrès sont visibles ; les échanges privés ne le sont pas.", "body": "Les administrateurs pilotent la cohorte sans lire les messages directs ni les journaux privés.", "detail": "La page Confidentialité explique ce que chaque participant, mentor et administrateur peut voir." },
-        "cta": { "title": "Prêt à poursuivre", "titleAccent": "votre parcours ?", "body": "Connectez-vous pour voir votre étape actuelle, ou consultez la FAQ pour plus de détails." }
+        "hero": {
+          "eyebrow": "Guide du programme",
+          "breadcrumb": "Guide du programme",
+          "title": "Un programme.",
+          "titleAccent": "Neuf étapes visibles.",
+          "lede": "BLAK MOH accompagne chaque binôme du profil et de la formation jusqu'au jumelage, aux objectifs, aux séances, aux revues et à l'achèvement."
+        },
+        "steps": {
+          "eyebrow": "Le parcours",
+          "title": "Comment fonctionne le programme",
+          "lede": "Chaque étape ouvre la suivante, tout en laissant les personnes concernées décider.",
+          "one": {
+            "title": "Se préparer et se former",
+            "body": "Les participants complètent leur profil et la formation du programme avant toute proposition de binôme."
+          },
+          "two": {
+            "title": "Examiner et accepter le jumelage",
+            "body": "Le moteur classe les binômes compatibles sur la langue ; un administrateur valide, puis les deux participants répondent."
+          },
+          "three": {
+            "title": "Fixer des objectifs et se rencontrer",
+            "body": "Le binôme signe les accords, définit des objectifs approuvés, planifie les réunions et consigne les séances."
+          },
+          "four": {
+            "title": "Faire le bilan et achever",
+            "body": "Les revues de mi-parcours et finale retracent les progrès avant la délivrance du certificat aux participants admissibles."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Confidentialité",
+          "title": "Les progrès sont visibles ; les échanges privés ne le sont pas.",
+          "body": "Les administrateurs pilotent la cohorte sans lire les messages directs ni les journaux privés.",
+          "detail": "La page Confidentialité explique ce que chaque participant, mentor et administrateur peut voir."
+        },
+        "cta": {
+          "title": "Prêt à poursuivre",
+          "titleAccent": "votre parcours ?",
+          "body": "Connectez-vous pour voir votre étape actuelle, ou consultez la FAQ pour plus de détails."
+        }
       },
       "mentor": {
-        "meta": { "title": "Guide du mentor — BLAK MOH", "description": "Conseils pratiques pour les mentors participant à BLAK MOH." },
-        "hero": { "eyebrow": "Guide du mentor", "breadcrumb": "Guide du mentor", "title": "Transmettre l'expérience.", "titleAccent": "Construire l'autonomie.", "lede": "Les mentors guident un parcours structuré de neuf mois ; chaque validation d'objectif, compte rendu de séance et décision reste humaine." },
-        "steps": {
-          "eyebrow": "Votre rôle", "title": "Ce que font les mentors", "lede": "Le portail rend la prochaine action visible sans remplacer la relation.",
-          "one": { "title": "Terminer la formation et examiner le jumelage", "body": "Suivez la formation requise, lisez la justification du jumelage et acceptez ou refusez le binôme proposé." },
-          "two": { "title": "Définir votre manière de travailler", "body": "Signez avec votre mentoré les accords de mentorat et de confidentialité avant de commencer." },
-          "three": { "title": "Examiner les objectifs et tenir les séances", "body": "Validez, commentez ou renvoyez les objectifs, puis planifiez les réunions et consignez les actions convenues." },
-          "four": { "title": "Soutenir les revues et l'achèvement", "body": "Complétez les revues de mi-parcours et finale et aidez le mentoré à démontrer ses progrès." }
+        "meta": {
+          "title": "Guide du mentor — BLAK MOH",
+          "description": "Conseils pratiques pour les mentors participant à BLAK MOH."
         },
-        "privacy": { "eyebrow": "Votre espace privé", "title": "Les messages directs et notes privées restent bien délimités.", "body": "Seuls les participants à la conversation lisent les messages directs, et les notes privées du mentor ne sont montrées ni au mentoré ni aux administrateurs.", "detail": "Les comptes rendus de séance et la progression des objectifs restent visibles lorsque le suivi du programme l'exige." },
-        "cta": { "title": "La prochaine étape du mentoré", "titleAccent": "commence par une action claire.", "body": "Connectez-vous pour consulter votre tableau de bord, les objectifs, les réunions et les messages." }
+        "hero": {
+          "eyebrow": "Guide du mentor",
+          "breadcrumb": "Guide du mentor",
+          "title": "Transmettre l'expérience.",
+          "titleAccent": "Construire l'autonomie.",
+          "lede": "Les mentors guident un parcours structuré de neuf mois ; chaque validation d'objectif, compte rendu de séance et décision reste humaine."
+        },
+        "steps": {
+          "eyebrow": "Votre rôle",
+          "title": "Ce que font les mentors",
+          "lede": "Le portail rend la prochaine action visible sans remplacer la relation.",
+          "one": {
+            "title": "Terminer la formation et examiner le jumelage",
+            "body": "Suivez la formation requise, lisez la justification du jumelage et acceptez ou refusez le binôme proposé."
+          },
+          "two": {
+            "title": "Définir votre manière de travailler",
+            "body": "Signez avec votre mentoré les accords de mentorat et de confidentialité avant de commencer."
+          },
+          "three": {
+            "title": "Examiner les objectifs et tenir les séances",
+            "body": "Validez, commentez ou renvoyez les objectifs, puis planifiez les réunions et consignez les actions convenues."
+          },
+          "four": {
+            "title": "Soutenir les revues et l'achèvement",
+            "body": "Complétez les revues de mi-parcours et finale et aidez le mentoré à démontrer ses progrès."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Votre espace privé",
+          "title": "Les messages directs et notes privées restent bien délimités.",
+          "body": "Seuls les participants à la conversation lisent les messages directs, et les notes privées du mentor ne sont montrées ni au mentoré ni aux administrateurs.",
+          "detail": "Les comptes rendus de séance et la progression des objectifs restent visibles lorsque le suivi du programme l'exige."
+        },
+        "cta": {
+          "title": "La prochaine étape du mentoré",
+          "titleAccent": "commence par une action claire.",
+          "body": "Connectez-vous pour consulter votre tableau de bord, les objectifs, les réunions et les messages."
+        }
       },
       "mentee": {
-        "meta": { "title": "Guide du mentoré — BLAK MOH", "description": "Conseils pratiques pour les mentorés participant à BLAK MOH." },
-        "hero": { "eyebrow": "Guide du mentoré", "breadcrumb": "Guide du mentoré", "title": "Porter l'objectif.", "titleAccent": "S'appuyer sur les conseils.", "lede": "Les mentorés façonnent leur objectif de développement, apportent le travail à chaque séance et conservent les preuves de progression." },
-        "steps": {
-          "eyebrow": "Votre rôle", "title": "Ce que font les mentorés", "lede": "Le programme apporte la structure ; vous restez responsable de la direction et du travail.",
-          "one": { "title": "Compléter votre profil et la formation", "body": "Tenez à jour votre expérience, vos objectifs, votre langue et vos disponibilités, puis terminez la formation." },
-          "two": { "title": "Examiner le jumelage et signer", "body": "Acceptez ou refusez le mentor proposé, puis signez les deux accords requis lorsque le binôme est accepté." },
-          "three": { "title": "Créer des objectifs et apporter des preuves", "body": "Rédigez des objectifs SMART, soumettez-les au mentor et joignez des preuves au fil de la progression." },
-          "four": { "title": "Réfléchir et achever", "body": "Consignez vos réflexions, complétez les deux revues et remplissez toutes les conditions du certificat." }
+        "meta": {
+          "title": "Guide du mentoré — BLAK MOH",
+          "description": "Conseils pratiques pour les mentorés participant à BLAK MOH."
         },
-        "privacy": { "eyebrow": "Votre espace privé", "title": "Vous choisissez ce qui quitte votre journal.", "body": "Les entrées du journal sont privées par défaut et peuvent être partagées individuellement avec votre mentor.", "detail": "Les messages directs restent entre les deux participants ; les administrateurs voient l'activité du programme, pas le contenu des messages." },
-        "cta": { "title": "Transformer la prochaine action", "titleAccent": "en progrès visible.", "body": "Connectez-vous pour voir votre étape actuelle, vos objectifs, vos réunions et vos messages." }
+        "hero": {
+          "eyebrow": "Guide du mentoré",
+          "breadcrumb": "Guide du mentoré",
+          "title": "Porter l'objectif.",
+          "titleAccent": "S'appuyer sur les conseils.",
+          "lede": "Les mentorés façonnent leur objectif de développement, apportent le travail à chaque séance et conservent les preuves de progression."
+        },
+        "steps": {
+          "eyebrow": "Votre rôle",
+          "title": "Ce que font les mentorés",
+          "lede": "Le programme apporte la structure ; vous restez responsable de la direction et du travail.",
+          "one": {
+            "title": "Compléter votre profil et la formation",
+            "body": "Tenez à jour votre expérience, vos objectifs, votre langue et vos disponibilités, puis terminez la formation."
+          },
+          "two": {
+            "title": "Examiner le jumelage et signer",
+            "body": "Acceptez ou refusez le mentor proposé, puis signez les deux accords requis lorsque le binôme est accepté."
+          },
+          "three": {
+            "title": "Créer des objectifs et apporter des preuves",
+            "body": "Rédigez des objectifs SMART, soumettez-les au mentor et joignez des preuves au fil de la progression."
+          },
+          "four": {
+            "title": "Réfléchir et achever",
+            "body": "Consignez vos réflexions, complétez les deux revues et remplissez toutes les conditions du certificat."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Votre espace privé",
+          "title": "Vous choisissez ce qui quitte votre journal.",
+          "body": "Les entrées du journal sont privées par défaut et peuvent être partagées individuellement avec votre mentor.",
+          "detail": "Les messages directs restent entre les deux participants ; les administrateurs voient l'activité du programme, pas le contenu des messages."
+        },
+        "cta": {
+          "title": "Transformer la prochaine action",
+          "titleAccent": "en progrès visible.",
+          "body": "Connectez-vous pour voir votre étape actuelle, vos objectifs, vos réunions et vos messages."
+        }
       }
     }
   },

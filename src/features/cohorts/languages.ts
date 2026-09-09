@@ -25,15 +25,16 @@ import { Language } from '@prisma/client';
 // exactly, because nothing here writes or clears data.
 //
 // Deliberately NOT gated on this setting, because each is about a *person's*
-// language rather than the cohort's, and the harm is asymmetric — hiding costs
-// someone an affordance they need, while leaving it costs a little clutter:
+// authored content rather than the cohort's operating language:
 //
-//   - the interface locale switcher (components/locale-switcher.tsx);
 //   - the content translate toggle (components/translate-toggle.tsx);
 //   - "what language did you write this in?" on journal entries and notes;
 //   - the certificate's EN/FR rendering, which is complete in both languages.
 //
-// Only *authoring* demands and *empty* fields belong here.
+// The authenticated participant locale switcher *is* cohort-scoped: an EN-only
+// participant does not see a French button, while public and admin surfaces stay
+// bilingual. Only programme authoring demands and participant chrome belong to
+// this setting; stored content and translation tools are never removed.
 // ──────────────────────────────────────────────────────────────────────────
 
 /** Canonical display/iteration order. EN first — it is the guaranteed fallback. */
@@ -71,9 +72,7 @@ export interface CohortLanguageSource {
  *     instead would demand French text for a cohort that claims no languages
  *     at all — the exact failure this module exists to remove.
  */
-export function cohortLanguages(
-  cohort: CohortLanguageSource | null | undefined,
-): Language[] {
+export function cohortLanguages(cohort: CohortLanguageSource | null | undefined): Language[] {
   if (!cohort) return [...DEFAULT_COHORT_LANGUAGES];
   const offered = LANGUAGE_ORDER.filter((language) => cohort.languages.includes(language));
   return offered.length > 0 ? offered : [...FALLBACK_COHORT_LANGUAGES];
