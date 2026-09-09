@@ -45,7 +45,7 @@ export default async function LoginPage({
 
         <LoginForm entraEnabled={isEntraConfigured()} />
 
-        <p className="mt-7 border-t border-auth-border pt-6 text-center text-sm text-auth-ink-2">
+        <p className="mt-4 border-t border-auth-border pt-4 text-center text-sm text-auth-ink-2">
           {t('noAccount')}{' '}
           <Link
             href="/signup"
