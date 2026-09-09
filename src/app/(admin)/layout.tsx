@@ -37,7 +37,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const labels: AppShellLabels = {
     brand: tCommon('appShortName'),
-    subtitle: tShell('enterprisePortal'),
     search: tShell('search'),
     notifications: tNav('notifications'),
     notificationsTitle: tNav('notifications'),

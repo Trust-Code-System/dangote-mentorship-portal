@@ -93,7 +93,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const labels: AppShellLabels = {
     brand: tCommon('appShortName'),
-    subtitle: tShell('enterprisePortal'),
     search: tShell('search'),
     notifications: tNav('notifications'),
     notificationsTitle: tNav('notifications'),

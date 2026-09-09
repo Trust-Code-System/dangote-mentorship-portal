@@ -20,7 +20,7 @@ const COPY = {
     official: 'Official programme certificate',
   },
   FR: {
-    eyebrow: 'Programme de Mentorat Dangote',
+    eyebrow: 'Dangote Mentorship Programme',
     title: 'Certificat d’achèvement',
     previewTitle: 'Aperçu du certificat',
     presentedTo: 'Ce certificat est fièrement décerné à',

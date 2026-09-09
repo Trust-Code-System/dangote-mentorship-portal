@@ -41,7 +41,7 @@ const COPY = {
     preview: 'PREVIEW - NOT YET ISSUED',
   },
   FR: {
-    eyebrow: 'PROGRAMME DE MENTORAT DANGOTE',
+    eyebrow: 'DANGOTE MENTORSHIP PROGRAMME',
     title: "Certificat d'achèvement",
     previewTitle: 'Aperçu du certificat',
     presentedTo: 'CE CERTIFICAT EST FIÈREMENT DÉCERNÉ À',

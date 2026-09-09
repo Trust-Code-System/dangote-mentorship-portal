@@ -41,7 +41,7 @@ const TEMPLATES: TemplateMap = {
       version: AGREEMENT_VERSION,
       title: 'Accord de mentorat',
       intro: [
-        "Cet accord définit la manière dont nous travaillerons ensemble pendant les 9 mois du Programme de Mentorat Dangote. Il s'agit d'un engagement partagé entre le mentor et le mentoré, conclu librement par les deux parties.",
+        "Cet accord définit la manière dont nous travaillerons ensemble pendant les 9 mois du Dangote Mentorship Programme. Il s'agit d'un engagement partagé entre le mentor et le mentoré, conclu librement par les deux parties.",
       ],
       commitments: [
         'Nous nous rencontrerons régulièrement — au moins une fois par mois — et nous nous préviendrons raisonnablement à l’avance lorsqu’une séance doit être reportée.',

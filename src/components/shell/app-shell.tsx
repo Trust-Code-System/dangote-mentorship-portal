@@ -173,7 +173,9 @@ export interface NavSection {
 
 export interface AppShellLabels {
   brand: string;
-  subtitle: string;
+  /** Optional line under the brand name. Omitted in the app shells: the
+   *  programme name already says what this is. */
+  subtitle?: string;
   search: string;
   notifications: string;
   notificationsTitle: string;
@@ -520,7 +522,9 @@ export function AppShell({
                   name={labels.brand}
                   className="font-display text-ink block max-w-[7.5rem] text-[0.72rem] leading-tight font-bold whitespace-normal"
                 />
-                <span className="text-ink-3 mt-0.5 block text-[0.58rem]">{labels.subtitle}</span>
+                {labels.subtitle ? (
+                  <span className="text-ink-3 mt-0.5 block text-[0.58rem]">{labels.subtitle}</span>
+                ) : null}
               </span>
             )}
           </Link>
