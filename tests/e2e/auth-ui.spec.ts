@@ -62,7 +62,7 @@ test.describe('authentication experience', () => {
     for (const path of [
       '/contact',
       '/faq',
-      '/',
+      '/welcome',
       '/signup',
       '/forgot-password',
     ]) {

@@ -140,7 +140,7 @@ export function PublicNav() {
           className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-blak-ivory/25 to-transparent"
         />
 
-        <Link href="/" aria-label={t('home')} className="shrink-0 rounded-md">
+        <Link href="/welcome" aria-label={t('home')} className="shrink-0 rounded-md">
           <PublicLockup />
         </Link>
 

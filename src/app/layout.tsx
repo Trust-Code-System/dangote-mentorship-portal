@@ -34,7 +34,7 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.AUTH_URL ?? 'http://localhost:3000'),
-  title: 'BLAK MOH',
+  title: 'Dangote Mentorship Programme',
   description: 'Learning and optimal wellbeing through intelligent, bilingual mentorship.',
   // Confidential internal portal — never index (production-readiness-report.md M5).
   robots: { index: false, follow: false },

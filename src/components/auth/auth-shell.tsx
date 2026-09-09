@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Languages, Sparkles, ShieldCheck } from 'lucide-react';
 import { BrandMark } from '@/components/brand-logo';
 import { AuthVisual } from './auth-visual';
 import { AuthBrandCopy } from './auth-brand-copy';
@@ -21,12 +20,7 @@ import { AuthBrandCopy } from './auth-brand-copy';
  */
 export async function AuthShell({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('auth');
-
-  const principles = [
-    { Icon: Languages, label: t('brandPointBilingual') },
-    { Icon: Sparkles, label: t('brandPointMatching') },
-    { Icon: ShieldCheck, label: t('brandPointPrivate') },
-  ];
+  const tc = await getTranslations('common');
 
   return (
     <div className="landing-root relative min-h-[100svh] w-full overflow-x-hidden bg-blak-black lg:grid lg:grid-cols-[55fr_45fr]">
@@ -38,11 +32,10 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         <AuthVisual />
 
         <div className="relative">
-          <Link href="/" className="inline-flex items-center gap-3 rounded-md">
+          <Link href="/welcome" className="inline-flex items-center gap-3 rounded-md">
             <BrandMark className="size-9" />
             <span className="font-display text-base font-extrabold tracking-tight text-blak-text">
-              BLAK <span className="text-blak-green">MOH</span>
-              <span className="text-blak-gold">.</span>
+              {tc('appName')}
             </span>
           </Link>
         </div>
@@ -53,16 +46,6 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
           <AuthBrandCopy />
         </div>
 
-        <ul className="relative space-y-4">
-          {principles.map(({ Icon, label }) => (
-            <li key={label} className="flex items-center gap-3.5">
-              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-blak-border/12 bg-blak-black/40 text-blak-green-soft">
-                <Icon className="size-4" aria-hidden />
-              </span>
-              <span className="text-sm text-blak-text-2">{label}</span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       {/* ── Right: form panel ── */}
@@ -70,11 +53,10 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         {/* Compact branded header — the brand panel's stand-in below `lg`. */}
         <header className="relative flex items-center justify-between overflow-hidden border-b border-blak-border/10 bg-blak-forest px-5 py-4 lg:hidden">
           <AuthVisual className="opacity-70" />
-          <Link href="/" className="relative inline-flex items-center gap-2.5 rounded-md">
+          <Link href="/welcome" className="relative inline-flex items-center gap-2.5 rounded-md">
             <BrandMark className="size-8" />
             <span className="font-display text-sm font-extrabold tracking-tight text-blak-text">
-              BLAK <span className="text-blak-green">MOH</span>
-              <span className="text-blak-gold">.</span>
+              {tc('appName')}
             </span>
           </Link>
           {/* No language switcher here: the form card carries one directly

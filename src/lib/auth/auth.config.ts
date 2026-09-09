@@ -37,7 +37,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 function isPublicPath(pathname: string): boolean {
-  if (pathname === '/' || pathname === '/login' || pathname === '/signup') return true;
+  // `/welcome` is the public marketing narrative. It used to live at `/`;
+  // the root is now the sign-in screen, so it needs listing in its own
+  // right or the whole public landing page sits behind a login wall.
+  if (pathname === '/' || pathname === '/welcome') return true;
+  if (pathname === '/login' || pathname === '/signup') return true;
   if (pathname.startsWith('/invite')) return true; // invite acceptance is public
   if (pathname === '/maintenance') return true; // maintenance holding page (gated server-side)
   // Password recovery is public (the token is the credential).

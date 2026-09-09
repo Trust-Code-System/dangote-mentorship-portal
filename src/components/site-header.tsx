@@ -18,7 +18,7 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
       <div className="container flex h-16 items-center justify-between gap-4">
-        <Link href="/" className="text-ink" aria-label={t('common.appName')}>
+        <Link href="/welcome" className="text-ink" aria-label={t('common.appName')}>
           <BrandLogo
             name={t('common.appName')}
             markClassName="size-8"

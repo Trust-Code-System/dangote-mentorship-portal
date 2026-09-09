@@ -20,7 +20,7 @@ export interface SendResult {
   skipped: number;
 }
 
-const PROGRAMME_NAME = 'BLAK MOH Mentorship Programme';
+const PROGRAMME_NAME = 'Dangote Mentorship Programme';
 
 function portalUrl(): string | null {
   const base = process.env.AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? null;

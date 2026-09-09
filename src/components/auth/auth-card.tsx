@@ -97,7 +97,9 @@ export async function AuthFooter({ showTrustNote = true }: { showTrustNote?: boo
         <Link href="/contact" className={linkClass}>
           {t('footerSupport')}
         </Link>
-        <Link href="/" className={linkClass}>
+        {/* The root is now the sign-in screen, so "back home" means the
+            marketing narrative at /welcome. */}
+        <Link href="/welcome" className={linkClass}>
           {t('footerBackHome')}
         </Link>
       </nav>
