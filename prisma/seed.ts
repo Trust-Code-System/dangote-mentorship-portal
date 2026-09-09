@@ -51,8 +51,18 @@ import {
 
 const prisma = new PrismaClient();
 
-const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD ?? 'ChangeMe!2026';
-const SUPER_ADMIN_EMAIL = (process.env.SEED_SUPER_ADMIN_EMAIL ?? 'admin@dangote.com').toLowerCase();
+function requiredSeedEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `Refusing to seed: ${name} must be set explicitly (there is no default). See .env.example.`,
+    );
+  }
+  return value;
+}
+
+const DEFAULT_PASSWORD = requiredSeedEnv('SEED_DEFAULT_PASSWORD');
+const SUPER_ADMIN_EMAIL = requiredSeedEnv('SEED_SUPER_ADMIN_EMAIL').toLowerCase();
 
 const GENERAL_COMPETENCIES = [
   'Leadership',
@@ -1285,29 +1295,17 @@ async function main() {
   }
 
   console.log('Seed complete.');
-  console.log(`  Super Admin:    ${SUPER_ADMIN_EMAIL} / ${DEFAULT_PASSWORD}`);
-  console.log('  Programme Admin: prog.admin@dangote.com');
-  console.log('  Trainer:         trainer@dangote.com');
-  console.log('  Reviewer:        reviewer@dangote.com');
-  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT} (all password: ${DEFAULT_PASSWORD})`);
+  console.log(`  Super Admin: ${SUPER_ADMIN_EMAIL}`);
+  console.log(`  Mentors: ${MENTOR_COUNT} · Mentees: ${MENTEE_COUNT}`);
+  console.log('  All seeded accounts use the password in SEED_DEFAULT_PASSWORD.');
 }
 
-/**
- * Refuse to seed anything but a local database unless explicitly overridden.
- *
- * The seed creates a demo cohort whose accounts all share one password, and
- * generates assessment schedules that can lock people out of the portal — so
- * reaching a shared or live database with it is a real incident, not an
- * inconvenience. It has happened once already.
- */
 function assertSeedTargetAllowed(): void {
   const decision = evaluateSeedTarget(
     process.env.DATABASE_URL,
-    process.env[SEED_REMOTE_OVERRIDE] === 'true',
+    process.env[SEED_REMOTE_OVERRIDE],
   );
 
-  // Always say which database is about to be written, so a mistake is visible
-  // in the log even on the allowed path.
   console.log(`Seeding database: ${decision.target}`);
 
   if (!decision.allowed) {

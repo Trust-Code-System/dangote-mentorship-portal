@@ -568,3 +568,8 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **All portal email can now use Resend.** A provider-backed transport sends newsletters, password resets and notification/digest emails through the same existing `sendEmail()` seam. `MAIL_PROVIDER=resend` makes the production choice explicit, while Microsoft Graph remains available as an alternative.
 - **Explicit mail configuration fails closed.** If Resend is selected without both `RESEND_API_KEY` and `RESEND_FROM_EMAIL`, delivery throws instead of silently using the log transport and marking a newsletter as sent.
 - **Admin integration health now includes Resend** and reports missing variable names without exposing secret values.
+
+## Security — seed credentials and database pinning
+
+- `SEED_ALLOW_REMOTE` accepts either `true` or a safer `host:port/database` pin. Missing and invalid database URLs remain blocked regardless of the override.
+- `SEED_DEFAULT_PASSWORD` and `SEED_SUPER_ADMIN_EMAIL` are required. Seed output no longer exposes the password or lists roles the seed does not create.

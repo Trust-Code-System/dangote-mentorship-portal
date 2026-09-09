@@ -38,6 +38,7 @@ yarn-error.log*
 
 # local object storage (lib/storage local provider)
 /.storage/
+/supabase/.temp/
 
 # vercel
 .vercel
