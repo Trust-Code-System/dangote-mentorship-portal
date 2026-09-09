@@ -14,7 +14,7 @@ export default async function NewFormPage() {
   const cohorts = await prisma.cohort.findMany({
     where: { deletedAt: null, status: { in: [CohortStatus.ACTIVE, CohortStatus.DRAFT] } },
     orderBy: { createdAt: 'desc' },
-    select: { id: true, name: true },
+    select: { id: true, name: true, languages: true },
   });
 
   if (cohorts.length === 0) {

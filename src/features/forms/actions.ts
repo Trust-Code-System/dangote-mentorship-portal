@@ -10,10 +10,15 @@ import { STANDARD_FORMS, validateStandardForm } from './catalogue';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
 import {
   createFormDefinitionSchema,
+  describeMissingFrenchLabels,
   formDefinitionIdSchema,
   installStandardFormsSchema,
+  missingFrenchLabels,
   updateFormDefinitionSchema,
+  type FormSchemaShape,
 } from './schema';
+import { asLanguageSource, getCohortLanguages } from '@/features/cohorts/language-data';
+import { requiresFrench } from '@/features/cohorts/languages';
 
 // Forms Builder mutations (CLAUDE.md §5 Reviews, §13). Admins author the
 // mid/end review question sets here; the reviews fill flow (later M3 item)
@@ -33,6 +38,26 @@ async function assertCohort(
   return null;
 }
 
+/**
+ * French labels are required only for a cohort that actually runs in French
+ * (CLAUDE.md §16 read precisely: don't force French *users* into English —
+ * which says nothing about demanding French for a cohort that has none).
+ *
+ * Checked server-side against the form's real cohort, never a client-submitted
+ * flag, so a tampered request cannot smuggle a French-less form into a
+ * bilingual cohort.
+ */
+async function assertFrenchLabels(
+  cohortId: string,
+  schema: FormSchemaShape,
+): Promise<ActionResult<never> | null> {
+  const languages = await getCohortLanguages(cohortId);
+  if (!requiresFrench(asLanguageSource(languages))) return null;
+  const missing = missingFrenchLabels(schema);
+  if (missing.length === 0) return null;
+  return fail({ code: 'VALIDATION', message: describeMissingFrenchLabels(missing) });
+}
+
 export async function createFormDefinition(
   formData: FormData,
 ): Promise<ActionResult<{ id: string }>> {
@@ -49,6 +74,9 @@ export async function createFormDefinition(
 
     const cohortError = await assertCohort(actor, data.cohortId);
     if (cohortError) return cohortError;
+
+    const frenchError = await assertFrenchLabels(data.cohortId, data.schema);
+    if (frenchError) return frenchError;
 
     const definition = await prisma.formDefinition.create({
       data: {
@@ -98,6 +126,13 @@ export async function updateFormDefinition(
     if (!existing) return fail({ code: 'NOT_FOUND', message: 'Form not found.' });
     // Check against the form's real cohort, not the client-submitted one.
     assertCohortAccess(actor, existing.cohortId);
+
+    // Against the form's own cohort, not `data.cohortId`: this update never
+    // moves a form between cohorts, so trusting the submitted id would let a
+    // request name an English-only cohort to dodge a bilingual cohort's
+    // French requirement.
+    const frenchError = await assertFrenchLabels(existing.cohortId, data.schema);
+    if (frenchError) return frenchError;
 
     await prisma.formDefinition.update({
       where: { id: data.id },

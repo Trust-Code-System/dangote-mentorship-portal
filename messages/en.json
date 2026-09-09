@@ -400,6 +400,12 @@
     "startDate": "Start date",
     "endDate": "End date",
     "languages": "Languages",
+    "programmeLanguages": "Cohort languages",
+    "programmeLanguagesHelp": "English stays available. Turn French on only when this cohort includes French-speaking mentors or mentees.",
+    "englishAlwaysOn": "Primary programme language",
+    "frenchAvailabilityHelp": "French forms, newsletters and import requirements",
+    "languageOn": "On",
+    "languageOff": "Off",
     "status": "Status",
     "noProgrammes": "No programmes yet. Create the first one.",
     "noCohorts": "No cohorts yet.",
@@ -478,7 +484,13 @@
     "systemStatus": "System status",
     "validationComplete": "Validation complete",
     "generateAuditReport": "Generate full audit report",
-    "rowStatus": { "VALID": "Valid", "FLAGGED": "Flagged", "FIXED": "Fixed", "ACCEPTED": "Accepted", "REJECTED": "Rejected" }
+    "rowStatus": {
+      "VALID": "Valid",
+      "FLAGGED": "Flagged",
+      "FIXED": "Fixed",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected"
+    }
   },
   "matching": {
     "title": "Matching engine",
@@ -1584,6 +1596,7 @@
     "editForm": "Edit form",
     "createForm": "Create form",
     "builderHelp": "Build the mid-term and final review questionnaires. Admins can edit these any time without a code change.",
+    "englishOnlyCohort": "This cohort runs in English only, so French text is not required. Tick French on the cohort to author it.",
     "emptyTitle": "No review forms yet",
     "emptyHelp": "Create a mid-term or final review form to start collecting responses.",
     "noActiveCohort": "No active cohort",
@@ -1702,7 +1715,11 @@
     "integrationsTitle": "Microsoft integration readiness",
     "integrationsDescription": "Configuration health only. Secrets are never displayed.",
     "missingVariables": "Missing environment variables",
-    "integrationStatus": { "configured": "Configured", "partial": "Incomplete", "disabled": "Disabled" },
+    "integrationStatus": {
+      "configured": "Configured",
+      "partial": "Incomplete",
+      "disabled": "Disabled"
+    },
     "integration": {
       "entra": "Microsoft Entra SSO",
       "entraDescription": "Optional work-account sign-in. Password sign-in remains available when disabled.",
@@ -2485,43 +2502,139 @@
     },
     "guides": {
       "programme": {
-        "meta": { "title": "Programme guide — BLAK MOH", "description": "A practical overview of the nine-month BLAK MOH mentorship journey." },
-        "hero": { "eyebrow": "Programme guide", "breadcrumb": "Programme guide", "title": "One programme.", "titleAccent": "Nine visible stages.", "lede": "BLAK MOH takes each pair from profile and training through matching, goals, sessions, reviews and completion." },
-        "steps": {
-          "eyebrow": "The journey", "title": "How the programme works", "lede": "Each stage unlocks the next while keeping the people involved in control.",
-          "one": { "title": "Prepare and train", "body": "Participants complete their profiles and programme training before a pairing is proposed." },
-          "two": { "title": "Review and accept the match", "body": "The engine ranks language-compatible pairings; an administrator approves and both participants respond." },
-          "three": { "title": "Set goals and meet", "body": "The pair signs the agreements, sets approved development goals, schedules meetings and records sessions." },
-          "four": { "title": "Review and complete", "body": "Mid-term and final reviews capture progress before eligible participants receive a completion certificate." }
+        "meta": {
+          "title": "Programme guide — BLAK MOH",
+          "description": "A practical overview of the nine-month BLAK MOH mentorship journey."
         },
-        "privacy": { "eyebrow": "Confidentiality", "title": "Progress is visible; private conversation is not.", "body": "Programme administrators can run the cohort without reading direct messages or private journals.", "detail": "The confidentiality page explains what each participant, mentor and administrator can see." },
-        "cta": { "title": "Ready to continue", "titleAccent": "your programme journey?", "body": "Sign in to see your current stage, or use the FAQ for detailed guidance." }
+        "hero": {
+          "eyebrow": "Programme guide",
+          "breadcrumb": "Programme guide",
+          "title": "One programme.",
+          "titleAccent": "Nine visible stages.",
+          "lede": "BLAK MOH takes each pair from profile and training through matching, goals, sessions, reviews and completion."
+        },
+        "steps": {
+          "eyebrow": "The journey",
+          "title": "How the programme works",
+          "lede": "Each stage unlocks the next while keeping the people involved in control.",
+          "one": {
+            "title": "Prepare and train",
+            "body": "Participants complete their profiles and programme training before a pairing is proposed."
+          },
+          "two": {
+            "title": "Review and accept the match",
+            "body": "The engine ranks language-compatible pairings; an administrator approves and both participants respond."
+          },
+          "three": {
+            "title": "Set goals and meet",
+            "body": "The pair signs the agreements, sets approved development goals, schedules meetings and records sessions."
+          },
+          "four": {
+            "title": "Review and complete",
+            "body": "Mid-term and final reviews capture progress before eligible participants receive a completion certificate."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Confidentiality",
+          "title": "Progress is visible; private conversation is not.",
+          "body": "Programme administrators can run the cohort without reading direct messages or private journals.",
+          "detail": "The confidentiality page explains what each participant, mentor and administrator can see."
+        },
+        "cta": {
+          "title": "Ready to continue",
+          "titleAccent": "your programme journey?",
+          "body": "Sign in to see your current stage, or use the FAQ for detailed guidance."
+        }
       },
       "mentor": {
-        "meta": { "title": "Mentor guide — BLAK MOH", "description": "Practical guidance for mentors taking part in BLAK MOH." },
-        "hero": { "eyebrow": "Mentor guide", "breadcrumb": "Mentor guide", "title": "Bring experience.", "titleAccent": "Build independence.", "lede": "Mentors guide a structured nine-month journey while every goal approval, session record and decision remains human-led." },
-        "steps": {
-          "eyebrow": "Your role", "title": "What mentors do", "lede": "The portal keeps the next action visible without replacing the relationship.",
-          "one": { "title": "Complete training and review the match", "body": "Finish the required training, read the match rationale and accept or decline the proposed pairing." },
-          "two": { "title": "Agree how you will work", "body": "Sign the mentoring and confidentiality agreements with your mentee before starting the working relationship." },
-          "three": { "title": "Review goals and hold sessions", "body": "Approve, comment on or return goals, then schedule meetings and record agreed actions after each session." },
-          "four": { "title": "Support reviews and completion", "body": "Complete the mid-term and final reviews and help the mentee evidence progress toward programme completion." }
+        "meta": {
+          "title": "Mentor guide — BLAK MOH",
+          "description": "Practical guidance for mentors taking part in BLAK MOH."
         },
-        "privacy": { "eyebrow": "Your private space", "title": "Direct messages and mentor notes stay scoped.", "body": "Only conversation participants can read direct messages, and mentor private notes are not shown to mentees or administrators.", "detail": "Session reports and goal progress remain visible where programme oversight requires them." },
-        "cta": { "title": "Your mentee's next step", "titleAccent": "starts with a clear action.", "body": "Sign in to review your dashboard, goals, meetings and messages." }
+        "hero": {
+          "eyebrow": "Mentor guide",
+          "breadcrumb": "Mentor guide",
+          "title": "Bring experience.",
+          "titleAccent": "Build independence.",
+          "lede": "Mentors guide a structured nine-month journey while every goal approval, session record and decision remains human-led."
+        },
+        "steps": {
+          "eyebrow": "Your role",
+          "title": "What mentors do",
+          "lede": "The portal keeps the next action visible without replacing the relationship.",
+          "one": {
+            "title": "Complete training and review the match",
+            "body": "Finish the required training, read the match rationale and accept or decline the proposed pairing."
+          },
+          "two": {
+            "title": "Agree how you will work",
+            "body": "Sign the mentoring and confidentiality agreements with your mentee before starting the working relationship."
+          },
+          "three": {
+            "title": "Review goals and hold sessions",
+            "body": "Approve, comment on or return goals, then schedule meetings and record agreed actions after each session."
+          },
+          "four": {
+            "title": "Support reviews and completion",
+            "body": "Complete the mid-term and final reviews and help the mentee evidence progress toward programme completion."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Your private space",
+          "title": "Direct messages and mentor notes stay scoped.",
+          "body": "Only conversation participants can read direct messages, and mentor private notes are not shown to mentees or administrators.",
+          "detail": "Session reports and goal progress remain visible where programme oversight requires them."
+        },
+        "cta": {
+          "title": "Your mentee's next step",
+          "titleAccent": "starts with a clear action.",
+          "body": "Sign in to review your dashboard, goals, meetings and messages."
+        }
       },
       "mentee": {
-        "meta": { "title": "Mentee guide — BLAK MOH", "description": "Practical guidance for mentees taking part in BLAK MOH." },
-        "hero": { "eyebrow": "Mentee guide", "breadcrumb": "Mentee guide", "title": "Own the goal.", "titleAccent": "Use the guidance.", "lede": "Mentees shape the development goal, bring the work to each session and keep evidence of progress throughout the programme." },
-        "steps": {
-          "eyebrow": "Your role", "title": "What mentees do", "lede": "The programme provides structure; you remain responsible for the direction and the work.",
-          "one": { "title": "Complete your profile and training", "body": "Keep your experience, goals, language and availability accurate, then complete programme training." },
-          "two": { "title": "Review the match and sign", "body": "Accept or decline the proposed mentor, then sign both required agreements when the pairing is accepted." },
-          "three": { "title": "Create goals and bring evidence", "body": "Draft SMART development goals, submit them for mentor approval and attach evidence as the work progresses." },
-          "four": { "title": "Reflect and complete", "body": "Record reflections, complete both programme reviews and meet every completion requirement for the certificate." }
+        "meta": {
+          "title": "Mentee guide — BLAK MOH",
+          "description": "Practical guidance for mentees taking part in BLAK MOH."
         },
-        "privacy": { "eyebrow": "Your private space", "title": "You choose what leaves your journal.", "body": "Journal entries are private by default and can be shared individually with your mentor.", "detail": "Direct messages stay between the two conversation participants; administrators see programme activity, not message content." },
-        "cta": { "title": "Turn the next action", "titleAccent": "into visible progress.", "body": "Sign in to see your current stage, goals, meetings and messages." }
+        "hero": {
+          "eyebrow": "Mentee guide",
+          "breadcrumb": "Mentee guide",
+          "title": "Own the goal.",
+          "titleAccent": "Use the guidance.",
+          "lede": "Mentees shape the development goal, bring the work to each session and keep evidence of progress throughout the programme."
+        },
+        "steps": {
+          "eyebrow": "Your role",
+          "title": "What mentees do",
+          "lede": "The programme provides structure; you remain responsible for the direction and the work.",
+          "one": {
+            "title": "Complete your profile and training",
+            "body": "Keep your experience, goals, language and availability accurate, then complete programme training."
+          },
+          "two": {
+            "title": "Review the match and sign",
+            "body": "Accept or decline the proposed mentor, then sign both required agreements when the pairing is accepted."
+          },
+          "three": {
+            "title": "Create goals and bring evidence",
+            "body": "Draft SMART development goals, submit them for mentor approval and attach evidence as the work progresses."
+          },
+          "four": {
+            "title": "Reflect and complete",
+            "body": "Record reflections, complete both programme reviews and meet every completion requirement for the certificate."
+          }
+        },
+        "privacy": {
+          "eyebrow": "Your private space",
+          "title": "You choose what leaves your journal.",
+          "body": "Journal entries are private by default and can be shared individually with your mentor.",
+          "detail": "Direct messages stay between the two conversation participants; administrators see programme activity, not message content."
+        },
+        "cta": {
+          "title": "Turn the next action",
+          "titleAccent": "into visible progress.",
+          "body": "Sign in to see your current stage, goals, meetings and messages."
+        }
       }
     }
   },

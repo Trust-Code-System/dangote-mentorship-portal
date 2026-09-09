@@ -9,6 +9,7 @@ import { reviewDraftKey } from '@/features/reviews/schema';
 import { submitReviewResponseForm, type ReviewFormState } from '@/features/reviews/actions';
 import { useFormDraft } from '@/components/use-form-draft';
 import { BilingualField } from '@/components/bilingual-field';
+import { pickLanguageText } from '@/features/cohorts/languages';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -100,7 +101,9 @@ export function ReviewForm({
       ) : null}
 
       {fields.map((field) => {
-        const label = lang === 'FR' ? field.labelFr : field.labelEn;
+        // Fall back rather than render a blank label: an English-only cohort's
+        // form carries no French text, and a francophone may still be reading it.
+        const label = pickLanguageText(lang, { EN: field.labelEn, FR: field.labelFr });
         const error = fieldErrors?.[field.id]?.[0];
         return (
           <FieldRenderer
@@ -302,7 +305,7 @@ function FieldRenderer({
                   onChange={() => toggle(option.value)}
                   className="mt-1 size-4 rounded border-border text-green focus:ring-2 focus:ring-green/30"
                 />
-                <span>{lang === 'FR' ? option.labelFr : option.labelEn}</span>
+                <span>{pickLanguageText(lang, { EN: option.labelEn, FR: option.labelFr })}</span>
               </label>
             );
           })}
@@ -327,7 +330,7 @@ function FieldRenderer({
         <SelectContent>
           {options.map((o) => (
             <SelectItem key={o.value} value={o.value}>
-              {lang === 'FR' ? o.labelFr : o.labelEn}
+              {pickLanguageText(lang, { EN: o.labelEn, FR: o.labelFr })}
             </SelectItem>
           ))}
         </SelectContent>

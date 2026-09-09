@@ -261,8 +261,11 @@ export const newsletterIdSchema = z.object({ newsletterId: z.string().cuid() });
 export const saveNewsletterSchema = z.object({
   newsletterId: z.string().cuid(),
   title: z.string().trim().min(2, 'Give this issue a name.').max(200),
-  subjectEn: z.string().trim().min(2, 'An English subject line is required.').max(200),
-  subjectFr: z.string().trim().min(2, 'A French subject line is required.').max(200),
+  // Both subjects are saved as drafts freely; the per-language requirement is
+  // enforced at approval against the cohort's own languages (see
+  // approveNewsletter), so an English-only cohort is never blocked on French.
+  subjectEn: z.string().trim().max(200).default(''),
+  subjectFr: z.string().trim().max(200).default(''),
   body: bodyJson,
 });
 

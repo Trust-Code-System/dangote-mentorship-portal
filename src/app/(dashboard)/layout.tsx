@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { RoleName } from '@prisma/client';
+import { Language, RoleName } from '@prisma/client';
 import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
@@ -11,6 +11,8 @@ import { AssessmentGateBanner } from '@/features/assessments/gate-banner';
 import { AppShell, type AppShellLabels } from '@/components/shell/app-shell';
 import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/sections';
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
+import { getViewerCohortLanguages } from '@/features/cohorts/language-data';
+import type { AppLocale } from '@/i18n/config';
 
 // Quick Actions (§1.9) shown across the authenticated participant area. Items are
 // filtered to what the user's role can actually do, shortest-path first.
@@ -74,11 +76,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   const isAdmin = hasAnyRole(user, ADMIN_ROLES);
-  const [tNav, tShell, tCommon] = await Promise.all([
+  const [tNav, tShell, tCommon, viewerLanguages] = await Promise.all([
     getTranslations('nav'),
     getTranslations('shell'),
     getTranslations('common'),
+    isAdmin ? Promise.resolve([Language.EN, Language.FR]) : getViewerCohortLanguages(user.id),
   ]);
+  const availableLocales = viewerLanguages.map<AppLocale>((language) =>
+    language === Language.FR ? 'fr' : 'en',
+  );
 
   // Badges start at 0; AppShell hydrates real counts via fetchShellBadges().
   const sections = isAdmin
@@ -108,6 +114,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       sections={sections}
       unread={0}
       loadBadges
+      availableLocales={availableLocales}
       user={{
         name: user.name ?? user.email,
         roleLabel: user.roles.map(roleLabelOf).join(' · '),

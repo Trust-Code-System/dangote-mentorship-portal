@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   cleanRow,
   hasBlockingErrors,
+  resolveRowLanguage,
   validateRow,
   validateRows,
   type CleanRow,
@@ -91,6 +92,40 @@ describe('validateRow golden cases', () => {
         message: 'This mentor has no language selected.',
       }),
     );
+  });
+
+  // Cohort.languages = [EN]: there is only one answer a missing language could
+  // have, so it is inferred rather than blocking the import (the FR half of the
+  // portal is switched off for this cohort, not removed from the product).
+  it('does not flag a missing language for a single-language cohort', () => {
+    const findings = validateRow(goodRow({ language: '' }), {
+      ...NO_CONTEXT,
+      soleLanguage: 'EN',
+    });
+    expect(findings.map((f) => f.code)).not.toContain('MISSING_LANGUAGE');
+  });
+
+  it('still flags a missing language for a bilingual cohort', () => {
+    const findings = validateRow(goodRow({ language: '' }), {
+      ...NO_CONTEXT,
+      soleLanguage: null,
+    });
+    expect(findings.map((f) => f.code)).toContain('MISSING_LANGUAGE');
+  });
+
+  it('an inferred language does not stop a blank row reading as incomplete', () => {
+    const findings = validateRow(
+      goodRow({
+        language: '',
+        department: '',
+        jobTitle: '',
+        careerGoals: '',
+        whyText: '',
+        fullName: '',
+      }),
+      { ...NO_CONTEXT, soleLanguage: 'EN' },
+    );
+    expect(findings.map((f) => f.code)).toContain('INCOMPLETE_RESPONSE');
   });
 
   it('"This mentee has no career goal."', () => {
@@ -198,5 +233,25 @@ describe('validateRows', () => {
     expect(results[3]!.findings).toContainEqual(expect.objectContaining({ code: 'EXPERIENCE_NO_COMPETENCY' }));
     expect(results[3]!.findings).toContainEqual(expect.objectContaining({ code: 'MISSING_DEPARTMENT' }));
     expect(results[4]!.findings).toContainEqual(expect.objectContaining({ code: 'MISSING_NAME' }));
+  });
+});
+
+// The commit path must record the same language the validator judged the row
+// against, or a row that passed without a language would be silently written as
+// English inside a French-only cohort.
+describe('resolveRowLanguage', () => {
+  it('prefers what the file said', () => {
+    expect(resolveRowLanguage('FR', 'EN')).toBe('FR');
+    expect(resolveRowLanguage('EN', 'FR')).toBe('EN');
+  });
+
+  it("infers the cohort's sole language when the row has none", () => {
+    expect(resolveRowLanguage('', 'FR')).toBe('FR');
+    expect(resolveRowLanguage('', 'EN')).toBe('EN');
+  });
+
+  it('falls back to English for a bilingual cohort', () => {
+    expect(resolveRowLanguage('', null)).toBe('EN');
+    expect(resolveRowLanguage('')).toBe('EN');
   });
 });

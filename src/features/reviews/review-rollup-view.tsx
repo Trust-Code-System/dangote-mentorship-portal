@@ -5,6 +5,7 @@ import { StatTile } from '@/components/ui/stat-tile';
 import { Progress } from '@/components/ui/progress';
 import { EmptyState } from '@/components/ui/empty-state';
 import { cn } from '@/lib/utils';
+import { pickLanguageText } from '@/features/cohorts/languages';
 import type { FieldAggregate } from './aggregate';
 import type { ReviewRollup, ReviewTypeSummary } from './rollup';
 
@@ -156,7 +157,7 @@ function AggregateCard({
   lang: Lang;
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
-  const label = lang === 'FR' ? agg.labelFr : agg.labelEn;
+  const label = pickLanguageText(lang, { EN: agg.labelEn, FR: agg.labelFr });
   return (
     <Card>
       <CardHeader>
@@ -187,7 +188,7 @@ function AggregateCard({
             {agg.counts.map((c) => (
               <BarRow
                 key={c.value}
-                label={lang === 'FR' ? c.labelFr : c.labelEn}
+                label={pickLanguageText(lang, { EN: c.labelEn, FR: c.labelFr })}
                 count={c.count}
                 total={agg.answered}
               />

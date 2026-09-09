@@ -8,6 +8,7 @@ import { getAiAdapter } from '@/lib/ai';
 import { getNewsletter, listCohortRecipients } from '@/features/newsletters/data';
 import { emptyNewsletterBody } from '@/features/newsletters/schema';
 import { NewsletterComposer } from '@/features/newsletters/composer';
+import { getCohortLanguages } from '@/features/cohorts/language-data';
 
 export default async function AdminNewsletterPage({
   params,
@@ -24,6 +25,7 @@ export default async function AdminNewsletterPage({
   if (!newsletter) notFound();
 
   const recipients = await listCohortRecipients(newsletter.cohortId);
+  const cohortLanguages = await getCohortLanguages(newsletter.cohortId);
 
   return (
     <section className="space-y-6">
@@ -54,6 +56,7 @@ export default async function AdminNewsletterPage({
         approvedByName={newsletter.approvedByName}
         aiEnabled={getAiAdapter().enabled}
         sentCount={newsletter.sentCount}
+        cohortLanguages={cohortLanguages}
       />
     </section>
   );
