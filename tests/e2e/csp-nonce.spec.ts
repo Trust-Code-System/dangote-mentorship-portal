@@ -20,7 +20,7 @@ import { test, expect } from '@playwright/test';
  *    `'strict-dynamic'` without first fixing that chunk, this fails loudly
  *    instead of shipping the outage again.
  */
-const PAGES = ['/', '/login', '/about'];
+const PAGES = ['/welcome', '/login', '/about'];
 
 for (const path of PAGES) {
   test(`CSP nonce covers the scripts that need it on ${path}`, async ({ page }) => {
@@ -77,7 +77,7 @@ test('no CSP violations fire while the landing page loads and hydrates', async (
     });
   });
 
-  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.goto('/welcome', { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500); // let hydration and deferred chunks settle
 
   const violations = await page.evaluate(

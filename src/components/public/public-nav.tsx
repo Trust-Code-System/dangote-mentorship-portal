@@ -54,7 +54,10 @@ export function PublicNav() {
   const [active, setActive] = useState<SectionId | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const onLanding = pathname === '/';
+  // The landing page moved from `/` to `/welcome`; the root is the sign-in
+  // screen now. Without this the nav silently drops every in-page section
+  // anchor on the one page those anchors exist for.
+  const onLanding = pathname === '/welcome';
 
   // Scrolled state — plain scroll listener, passive, no layout reads.
   useEffect(() => {
@@ -140,7 +143,7 @@ export function PublicNav() {
           className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-blak-ivory/25 to-transparent"
         />
 
-        <Link href="/" aria-label={t('home')} className="shrink-0 rounded-md">
+        <Link href="/welcome" aria-label={t('home')} className="shrink-0 rounded-md">
           <PublicLockup />
         </Link>
 

@@ -26,7 +26,7 @@ const TEMPLATES: TemplateMap = {
       version: AGREEMENT_VERSION,
       title: 'Mentoring Agreement',
       intro: [
-        'This agreement sets out how we will work together during the 9-month BLAK MOH mentorship programme. It is a shared commitment between mentor and mentee, entered into freely by both.',
+        'This agreement sets out how we will work together during the 9-month Dangote Mentorship Programme. It is a shared commitment between mentor and mentee, entered into freely by both.',
       ],
       commitments: [
         'We will meet regularly — at least once a month — and give each other reasonable notice when a session must be rescheduled.',
@@ -41,7 +41,7 @@ const TEMPLATES: TemplateMap = {
       version: AGREEMENT_VERSION,
       title: 'Accord de mentorat',
       intro: [
-        "Cet accord définit la manière dont nous travaillerons ensemble pendant les 9 mois du programme de mentorat BLAK MOH. Il s'agit d'un engagement partagé entre le mentor et le mentoré, conclu librement par les deux parties.",
+        "Cet accord définit la manière dont nous travaillerons ensemble pendant les 9 mois du Programme de Mentorat Dangote. Il s'agit d'un engagement partagé entre le mentor et le mentoré, conclu librement par les deux parties.",
       ],
       commitments: [
         'Nous nous rencontrerons régulièrement — au moins une fois par mois — et nous nous préviendrons raisonnablement à l’avance lorsqu’une séance doit être reportée.',

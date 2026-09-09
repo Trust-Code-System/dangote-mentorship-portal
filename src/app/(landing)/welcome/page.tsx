@@ -3,15 +3,15 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth/rbac';
 import { defaultDashboardPath } from '@/lib/auth/roles';
-import { LandingHero } from './sections/landing-hero';
-import { SectionProblem } from './sections/section-problem';
-import { SectionMatching } from './sections/section-matching';
-import { SectionJourney } from './sections/section-journey';
-import { SectionTools } from './sections/section-tools';
-import { SectionBilingual } from './sections/section-bilingual';
-import { SectionPrivacy } from './sections/section-privacy';
-import { SectionPrinciples } from './sections/section-principles';
-import { SectionTransformation } from './sections/section-transformation';
+import { LandingHero } from '../sections/landing-hero';
+import { SectionProblem } from '../sections/section-problem';
+import { SectionMatching } from '../sections/section-matching';
+import { SectionJourney } from '../sections/section-journey';
+import { SectionTools } from '../sections/section-tools';
+import { SectionBilingual } from '../sections/section-bilingual';
+import { SectionPrivacy } from '../sections/section-privacy';
+import { SectionPrinciples } from '../sections/section-principles';
+import { SectionTransformation } from '../sections/section-transformation';
 
 /**
  * Metadata for the landing page. Title/description follow the page locale.
@@ -28,12 +28,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    alternates: { canonical: '/' },
+    alternates: { canonical: '/welcome' },
     openGraph: {
       title: t('title'),
       description: t('description'),
       type: 'website',
-      url: '/',
+      url: '/welcome',
     },
     twitter: {
       card: 'summary_large_image',
@@ -45,6 +45,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * The public landing page — "The Mentorship Continuum".
+ *
+ * Served at `/welcome`, not `/`. The root is the sign-in screen: this is an
+ * invite-only, noindex portal with no self-service signup, so the first thing a
+ * participant needs is a password field, not a nine-section narrative. The
+ * narrative is still one click away — the sign-in footer's "back to home" and
+ * the public nav both point here.
  *
  * A server component: it does the auth bounce, then composes the narrative.
  * Each section is a client component so it can own its own motion, but the copy

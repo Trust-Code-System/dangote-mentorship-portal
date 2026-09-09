@@ -63,7 +63,7 @@ export async function requestPasswordReset(
     const link = `${resetBaseUrl(h)}/reset-password/${token}`;
     await sendEmail({
       to: email,
-      subject: 'Reset your BLAK MOH password',
+      subject: 'Reset your Dangote Mentorship Programme password',
       text: `We received a request to reset your password.\n\nReset it here (valid for ${PASSWORD_RESET_TTL_MINUTES} minutes):\n${link}\n\nIf you didn't request this, you can safely ignore this email.`,
     });
 
