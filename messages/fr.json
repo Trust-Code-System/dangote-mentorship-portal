@@ -1712,7 +1712,7 @@
     "disableButton": "Désactiver le mode maintenance",
     "confirmEnable": "Cela bloquera immédiatement tous les mentors, mentorés, formateurs et évaluateurs. Les administrateurs conservent l’accès. Continuer ?",
     "confirmEnableButton": "Oui, activer",
-    "integrationsTitle": "État des intégrations Microsoft",
+    "integrationsTitle": "État des intégrations",
     "integrationsDescription": "Seul l'état de configuration est affiché. Les secrets ne sont jamais révélés.",
     "missingVariables": "Variables d'environnement manquantes",
     "integrationStatus": {
@@ -1721,6 +1721,8 @@
       "disabled": "Désactivé"
     },
     "integration": {
+      "resend": "Courriel Resend",
+      "resendDescription": "Envoi des infolettres, réinitialisations de mot de passe, invitations et notifications depuis le domaine expéditeur vérifié.",
       "entra": "Authentification Microsoft Entra",
       "entraDescription": "Connexion facultative avec le compte professionnel. La connexion par mot de passe reste disponible si elle est désactivée.",
       "graphMail": "Courriel Microsoft Graph",

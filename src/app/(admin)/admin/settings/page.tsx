@@ -40,11 +40,12 @@ export default async function AdminSettingsPage() {
       <div className="space-y-3">
         <div>
           <h2 className="text-xl font-semibold">{t('integrationsTitle')}</h2>
-          <p className="text-sm text-muted-foreground">{t('integrationsDescription')}</p>
+          <p className="text-muted-foreground text-sm">{t('integrationsDescription')}</p>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {(
             [
+              ['resend', integrations.resend],
               ['entra', integrations.entra],
               ['graphMail', integrations.graphMail],
               ['graphCalendar', integrations.graphCalendar],
@@ -54,7 +55,9 @@ export default async function AdminSettingsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle>{t(`integration.${key}`)}</CardTitle>
-                  <Badge variant={item.configured ? 'ok' : item.mode === 'partial' ? 'warn' : 'neutral'}>
+                  <Badge
+                    variant={item.configured ? 'ok' : item.mode === 'partial' ? 'warn' : 'neutral'}
+                  >
                     {t(`integrationStatus.${item.mode}`)}
                   </Badge>
                 </div>
@@ -62,9 +65,15 @@ export default async function AdminSettingsPage() {
               </CardHeader>
               {!item.configured ? (
                 <CardContent>
-                  <p className="text-xs font-semibold uppercase text-muted-foreground">{t('missingVariables')}</p>
-                  <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                    {item.missing.map((name) => <li key={name}><code>{name}</code></li>)}
+                  <p className="text-muted-foreground text-xs font-semibold uppercase">
+                    {t('missingVariables')}
+                  </p>
+                  <ul className="text-muted-foreground mt-2 space-y-1 text-xs">
+                    {item.missing.map((name) => (
+                      <li key={name}>
+                        <code>{name}</code>
+                      </li>
+                    ))}
                   </ul>
                 </CardContent>
               ) : null}

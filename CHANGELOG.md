@@ -562,3 +562,9 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **No stored French is written, cleared or migrated.** Ticking French back on restores the bilingual behaviour exactly.
 - **Participant interface language now follows the cohort.** French disappears from the authenticated language switcher for an English-only participant, and an old French preference is safely moved to English. Public pages and admin screens remain bilingual. Stored content tools, the journal's "written in" picker, translation and EN/FR certificates remain available because turning French off never deletes content.
 - **Security dependency refresh.** The `sharp` override is updated to `0.35.4`, clearing the production `npm audit` advisory inherited through Next.js.
+
+## Email — Resend production transport
+
+- **All portal email can now use Resend.** A provider-backed transport sends newsletters, password resets and notification/digest emails through the same existing `sendEmail()` seam. `MAIL_PROVIDER=resend` makes the production choice explicit, while Microsoft Graph remains available as an alternative.
+- **Explicit mail configuration fails closed.** If Resend is selected without both `RESEND_API_KEY` and `RESEND_FROM_EMAIL`, delivery throws instead of silently using the log transport and marking a newsletter as sent.
+- **Admin integration health now includes Resend** and reports missing variable names without exposing secret values.
