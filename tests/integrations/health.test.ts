@@ -2,6 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { getIntegrationHealth, integrationDiagnosticLines } from '@/lib/integrations/health';
 
 describe('integration health', () => {
+  it('reports Resend independently of the Microsoft integrations switch', () => {
+    const health = getIntegrationHealth({
+      RESEND_API_KEY: 're_secret',
+      RESEND_FROM_EMAIL: 'Programme <notifications@mail.example.com>',
+    });
+
+    expect(health.resend.mode).toBe('configured');
+    expect(health.graphMail.mode).toBe('disabled');
+  });
+
   it('keeps Entra, Graph mail, and Graph calendar independently configurable', () => {
     const health = getIntegrationHealth({
       MICROSOFT_INTEGRATIONS_ENABLED: 'true',
@@ -99,7 +109,10 @@ describe('MICROSOFT_INTEGRATIONS_ENABLED tolerance', () => {
   });
 
   it('enables integrations despite surrounding spaces', () => {
-    const health = getIntegrationHealth({ MICROSOFT_INTEGRATIONS_ENABLED: '  true  ', ...mailVars });
+    const health = getIntegrationHealth({
+      MICROSOFT_INTEGRATIONS_ENABLED: '  true  ',
+      ...mailVars,
+    });
     expect(health.graphMail.configured).toBe(true);
   });
 
@@ -130,9 +143,6 @@ describe('MICROSOFT_INTEGRATIONS_ENABLED tolerance', () => {
       GRAPH_MAIL_CLIENT_ID: 'c',
     });
     expect(health.graphMail.mode).toBe('partial');
-    expect(health.graphMail.missing).toEqual([
-      'GRAPH_MAIL_CLIENT_SECRET',
-      'GRAPH_MAIL_SENDER',
-    ]);
+    expect(health.graphMail.missing).toEqual(['GRAPH_MAIL_CLIENT_SECRET', 'GRAPH_MAIL_SENDER']);
   });
 });

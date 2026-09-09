@@ -1712,7 +1712,7 @@
     "disableButton": "Turn off maintenance mode",
     "confirmEnable": "This will immediately lock out all mentors, mentees, trainers and reviewers. Admins keep access. Continue?",
     "confirmEnableButton": "Yes, turn it on",
-    "integrationsTitle": "Microsoft integration readiness",
+    "integrationsTitle": "Integration readiness",
     "integrationsDescription": "Configuration health only. Secrets are never displayed.",
     "missingVariables": "Missing environment variables",
     "integrationStatus": {
@@ -1721,6 +1721,8 @@
       "disabled": "Disabled"
     },
     "integration": {
+      "resend": "Resend email",
+      "resendDescription": "Newsletter, password reset, invitation and notification delivery through the verified sender domain.",
       "entra": "Microsoft Entra SSO",
       "entraDescription": "Optional work-account sign-in. Password sign-in remains available when disabled.",
       "graphMail": "Microsoft Graph mail",
