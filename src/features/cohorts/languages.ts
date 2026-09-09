@@ -15,10 +15,9 @@ import { Language } from '@prisma/client';
 //
 //   ✅ A cohort without FR stops *demanding* French content and stops offering
 //      French affordances that would be empty.
-//   ❌ It never strips French from a cohort that has it, never touches stored
-//      `labelFr` / `bodyFr` / `subjectFr` text, and never stops a francophone
-//      reading the *interface* in French — that is a personal preference served
-//      by the locale switcher, which is deliberately not cohort-scoped.
+//   ❌ It never strips French from a cohort that has it or touches stored
+//      `labelFr` / `bodyFr` / `subjectFr` text. Participant navigation follows
+//      the cohort setting; public and admin surfaces remain bilingual.
 //
 // So "French off" means "this cohort has no French participants", never
 // "French is unsupported". Ticking FR back on restores the bilingual behaviour
