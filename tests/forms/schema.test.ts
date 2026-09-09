@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   createFormDefinitionSchema,
+  describeMissingFrenchLabels,
   formSchemaShape,
+  missingFrenchLabels,
   type FormSchemaShape,
 } from '@/features/forms/schema';
 
@@ -38,9 +40,23 @@ describe('formSchemaShape', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires both EN and FR labels on every question', () => {
-    expect(formSchemaShape.safeParse({ fields: [field({ labelFr: '' })] }).success).toBe(false);
+  it('always requires an EN label on every question', () => {
     expect(formSchemaShape.safeParse({ fields: [field({ labelEn: '' })] }).success).toBe(false);
+  });
+
+  // FR is accepted-but-empty at this layer on purpose: whether French is
+  // actually required depends on the cohort, which this schema cannot see.
+  // `missingFrenchLabels` is the cohort-aware half (see below).
+  it('accepts an empty FR label, deferring the decision to the cohort', () => {
+    expect(formSchemaShape.safeParse({ fields: [field({ labelFr: '' })] }).success).toBe(true);
+  });
+
+  it('defaults a wholly absent FR label to an empty string', () => {
+    const result = formSchemaShape.safeParse({
+      fields: [{ id: 'q_one', labelEn: 'Only English', type: 'long_text', required: false }],
+    });
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.fields[0]?.labelFr).toBe('');
   });
 
   it('rejects a non-alphanumeric field id', () => {
@@ -143,5 +159,82 @@ describe('createFormDefinitionSchema', () => {
       isActive: 'true',
     });
     expect(result.success).toBe(false);
+  });
+});
+
+// The cohort-aware half of the French requirement. A cohort with FR still gets
+// every question checked; a cohort without it never reaches this code, so an
+// admin running an English-only programme is never asked to invent French.
+describe('missingFrenchLabels', () => {
+  const parse = (fields: unknown[]): FormSchemaShape => {
+    const result = formSchemaShape.safeParse({ fields });
+    if (!result.success) throw new Error('fixture failed to parse');
+    return result.data;
+  };
+
+  it('finds nothing when every question and option carries French', () => {
+    const shape = parse([
+      field(),
+      field({
+        id: 'q_two',
+        type: 'single_select',
+        options: [
+          { value: 'a', labelEn: 'A', labelFr: 'A-fr' },
+          { value: 'b', labelEn: 'B', labelFr: 'B-fr' },
+        ],
+      }),
+    ]);
+    expect(missingFrenchLabels(shape)).toEqual([]);
+  });
+
+  it('reports a question missing its French label', () => {
+    const shape = parse([field(), field({ id: 'q_two', labelFr: '' })]);
+    expect(missingFrenchLabels(shape)).toEqual([{ fieldIndex: 1, optionIndex: null }]);
+  });
+
+  it('reports an option missing its French label', () => {
+    const shape = parse([
+      field({
+        type: 'single_select',
+        options: [
+          { value: 'a', labelEn: 'A', labelFr: 'A-fr' },
+          { value: 'b', labelEn: 'B', labelFr: '   ' },
+        ],
+      }),
+    ]);
+    expect(missingFrenchLabels(shape)).toEqual([{ fieldIndex: 0, optionIndex: 1 }]);
+  });
+
+  it('reports the question and its options independently', () => {
+    const shape = parse([
+      field({
+        labelFr: '',
+        type: 'single_select',
+        options: [
+          { value: 'a', labelEn: 'A', labelFr: '' },
+          { value: 'b', labelEn: 'B', labelFr: 'B-fr' },
+        ],
+      }),
+    ]);
+    expect(missingFrenchLabels(shape)).toEqual([
+      { fieldIndex: 0, optionIndex: null },
+      { fieldIndex: 0, optionIndex: 0 },
+    ]);
+  });
+});
+
+describe('describeMissingFrenchLabels', () => {
+  it('names the questions in one-based terms an admin can find', () => {
+    const message = describeMissingFrenchLabels([
+      { fieldIndex: 0, optionIndex: null },
+      { fieldIndex: 2, optionIndex: 1 },
+    ]);
+    expect(message).toContain('question 1');
+    expect(message).toContain('question 3 option 2');
+  });
+
+  it('summarizes rather than listing every one', () => {
+    const many = Array.from({ length: 9 }, (_, i) => ({ fieldIndex: i, optionIndex: null }));
+    expect(describeMissingFrenchLabels(many)).toContain('and 5 more');
   });
 });

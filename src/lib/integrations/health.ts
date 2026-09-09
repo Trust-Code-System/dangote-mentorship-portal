@@ -36,9 +36,12 @@ function graphHealth(env: Environment, names: string[], legacyNames: string[]) {
 }
 
 export function getIntegrationHealth(env: Environment = process.env) {
+  const resend = groupHealth(env, ['RESEND_API_KEY', 'RESEND_FROM_EMAIL']);
+
   if (!microsoftIntegrationsEnabled(env)) {
     const disabled = { configured: false, mode: 'disabled' as const, missing: [] };
     return {
+      resend,
       entra: { ...disabled },
       graphMail: { ...disabled },
       graphCalendar: { ...disabled },
@@ -46,6 +49,7 @@ export function getIntegrationHealth(env: Environment = process.env) {
   }
 
   return {
+    resend,
     entra: groupHealth(env, [
       'AUTH_MICROSOFT_ENTRA_ID_ID',
       'AUTH_MICROSOFT_ENTRA_ID_SECRET',
@@ -53,8 +57,18 @@ export function getIntegrationHealth(env: Environment = process.env) {
     ]),
     graphMail: graphHealth(
       env,
-      ['GRAPH_MAIL_TENANT_ID', 'GRAPH_MAIL_CLIENT_ID', 'GRAPH_MAIL_CLIENT_SECRET', 'GRAPH_MAIL_SENDER'],
-      ['MAIL_GRAPH_TENANT_ID', 'MAIL_GRAPH_CLIENT_ID', 'MAIL_GRAPH_CLIENT_SECRET', 'MAIL_GRAPH_SENDER'],
+      [
+        'GRAPH_MAIL_TENANT_ID',
+        'GRAPH_MAIL_CLIENT_ID',
+        'GRAPH_MAIL_CLIENT_SECRET',
+        'GRAPH_MAIL_SENDER',
+      ],
+      [
+        'MAIL_GRAPH_TENANT_ID',
+        'MAIL_GRAPH_CLIENT_ID',
+        'MAIL_GRAPH_CLIENT_SECRET',
+        'MAIL_GRAPH_SENDER',
+      ],
     ),
     graphCalendar: graphHealth(
       env,
@@ -65,7 +79,8 @@ export function getIntegrationHealth(env: Environment = process.env) {
 }
 
 export function integrationDiagnosticLines(env: Environment = process.env): string[] {
-  return Object.entries(getIntegrationHealth(env)).map(([name, item]) =>
-    `[integration] ${name}=${item.mode}${item.missing.length ? ` missing=${item.missing.join(',')}` : ''}`,
+  return Object.entries(getIntegrationHealth(env)).map(
+    ([name, item]) =>
+      `[integration] ${name}=${item.mode}${item.missing.length ? ` missing=${item.missing.join(',')}` : ''}`,
   );
 }

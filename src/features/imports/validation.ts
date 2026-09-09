@@ -182,6 +182,15 @@ export interface ValidationContext {
   existingEmails: ReadonlySet<string>;
   /** Lower-cased emails seen earlier in this same file. */
   seenEmailsInFile: ReadonlySet<string>;
+  /**
+   * The one language this cohort runs in, or null when it runs in several.
+   *
+   * A single-language cohort has nothing to ask: a row with no language column
+   * can only be that language, so it is inferred instead of raising a blocking
+   * error the admin can only resolve by typing the same answer 300 times.
+   * Omitted (or null) keeps the original behaviour and still flags it.
+   */
+  soleLanguage?: 'EN' | 'FR' | null;
 }
 
 /**
@@ -235,7 +244,10 @@ export function validateRow(row: CleanRow, ctx: ValidationContext): Finding[] {
     }
   }
 
-  if (!row.language) {
+  // Only a genuinely ambiguous language is a problem. `resolveRowLanguage`
+  // below is the matching inference the commit uses, so the flag and the write
+  // can never disagree.
+  if (!row.language && !ctx.soleLanguage) {
     findings.push({
       code: 'MISSING_LANGUAGE',
       severity: 'ERROR',
@@ -298,7 +310,8 @@ export function validateRow(row: CleanRow, ctx: ValidationContext): Finding[] {
     });
   }
 
-  // Mostly-empty rows: flag as an incomplete response.
+  // Mostly-empty rows: flag as an incomplete response. Counts what the file
+  // actually said, so an inferred language never makes a blank row look answered.
   const filled = [
     row.fullName, row.email, row.language, row.department, row.jobTitle,
     row.careerGoals, row.whyText,
@@ -315,6 +328,22 @@ export function validateRow(row: CleanRow, ctx: ValidationContext): Finding[] {
   return findings;
 }
 
+/**
+ * The language to record for a row: what the file said, else the cohort's sole
+ * language, else English.
+ *
+ * English is the last resort only because the row got past validation, which
+ * blocks a missing language whenever the cohort is bilingual — so this arm is
+ * reached for a single-language cohort or a row an admin explicitly accepted.
+ */
+export function resolveRowLanguage(
+  rowLanguage: 'EN' | 'FR' | '',
+  soleLanguage?: 'EN' | 'FR' | null,
+): 'EN' | 'FR' {
+  if (rowLanguage) return rowLanguage;
+  return soleLanguage ?? 'EN';
+}
+
 /** ERRORs block committing a row; WARNINGs can be accepted as-is. */
 export function hasBlockingErrors(findings: Finding[]): boolean {
   return findings.some((f) => f.severity === 'ERROR');
@@ -326,7 +355,12 @@ export function hasBlockingErrors(findings: Finding[]): boolean {
  */
 export function validateRows(
   rawRows: Array<Record<string, unknown>>,
-  opts: { targetRole: TargetRole; existingEmails: ReadonlySet<string> },
+  opts: {
+    targetRole: TargetRole;
+    existingEmails: ReadonlySet<string>;
+    /** See ValidationContext.soleLanguage. */
+    soleLanguage?: 'EN' | 'FR' | null;
+  },
 ): Array<{ clean: CleanRow; findings: Finding[] }> {
   const seen = new Set<string>();
   const results: Array<{ clean: CleanRow; findings: Finding[] }> = [];
@@ -337,6 +371,7 @@ export function validateRows(
       targetRole: opts.targetRole,
       existingEmails: opts.existingEmails,
       seenEmailsInFile: seen,
+      soleLanguage: opts.soleLanguage,
     });
     if (clean.email && EMAIL_RE.test(clean.email)) seen.add(clean.email);
     results.push({ clean, findings });

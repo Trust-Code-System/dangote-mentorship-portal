@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CohortLanguageControl } from './cohort-language-control';
 
 type ProgrammeOption = { id: string; name: string };
 
@@ -20,7 +21,10 @@ export function CohortCreateForm({ programmes }: { programmes: ProgrammeOption[]
   const t = useTranslations('admin');
   const tc = useTranslations('common');
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState<CohortFormState, FormData>(createCohortForm, null);
+  const [state, action, pending] = useActionState<CohortFormState, FormData>(
+    createCohortForm,
+    null,
+  );
 
   useEffect(() => {
     if (state?.ok) formRef.current?.reset();
@@ -52,7 +56,7 @@ export function CohortCreateForm({ programmes }: { programmes: ProgrammeOption[]
         <Label htmlFor="name">{t('cohortName')}</Label>
         <Input id="name" name="name" required maxLength={160} />
         {state && !state.ok && state.error.fieldErrors?.name ? (
-          <p className="text-sm text-destructive">{state.error.fieldErrors.name[0]}</p>
+          <p className="text-destructive text-sm">{state.error.fieldErrors.name[0]}</p>
         ) : null}
       </div>
 
@@ -67,26 +71,17 @@ export function CohortCreateForm({ programmes }: { programmes: ProgrammeOption[]
         </div>
       </div>
 
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">{t('languages')}</legend>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="languages" value="EN" defaultChecked />
-            {tc('english')}
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="languages" value="FR" defaultChecked />
-            {tc('french')}
-          </label>
-        </div>
-        {state && !state.ok && state.error.fieldErrors?.languages ? (
-          <p className="text-sm text-destructive">{state.error.fieldErrors.languages[0]}</p>
-        ) : null}
-      </fieldset>
+      <CohortLanguageControl
+        error={
+          state && !state.ok && state.error.fieldErrors?.languages
+            ? state.error.fieldErrors.languages[0]
+            : undefined
+        }
+      />
 
-      {state?.ok ? <p className="text-sm text-primary">{t('createdCohort')}</p> : null}
+      {state?.ok ? <p className="text-primary text-sm">{t('createdCohort')}</p> : null}
       {state && !state.ok && !state.error.fieldErrors ? (
-        <p className="text-sm text-destructive">{tc('errorBody')}</p>
+        <p className="text-destructive text-sm">{tc('errorBody')}</p>
       ) : null}
 
       <Button type="submit" disabled={pending}>

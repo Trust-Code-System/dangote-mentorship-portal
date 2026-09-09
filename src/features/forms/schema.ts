@@ -27,12 +27,21 @@ export const FORM_FIELD_TYPES = [
 export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
 
 // Bilingual everywhere (CLAUDE.md §6 cross-cutting; design-system §6): every
-// question label and option carries EN + FR. French respondents are never
+// question label and option carries EN + FR, so a French respondent is never
 // forced into English.
+//
+// The FR half is optional *at this layer* only. Whether it is actually required
+// depends on the cohort the form belongs to, which this schema does not know:
+// a cohort with no French participants (Cohort.languages = [EN]) would
+// otherwise force an admin to invent French text for a form nobody will read in
+// French. The cohort-aware requirement is `missingFrenchLabels()` below, applied
+// by the server action once it has resolved the cohort. Stored French text is
+// never cleared by this — an empty submission for an EN-only cohort simply
+// carries no FR, and the renderers fall back to EN.
 const optionSchema = z.object({
   value: z.string().trim().min(1).max(80),
   labelEn: z.string().trim().min(1, 'Option label (EN) is required').max(160),
-  labelFr: z.string().trim().min(1, 'Option label (FR) is required').max(160),
+  labelFr: z.string().trim().max(160).default(''),
 });
 
 export const formFieldSchema = z
@@ -46,7 +55,8 @@ export const formFieldSchema = z
       .max(64)
       .regex(/^[a-zA-Z0-9_-]+$/, 'Field id must be alphanumeric'),
     labelEn: z.string().trim().min(1, 'Question (EN) is required').max(400),
-    labelFr: z.string().trim().min(1, 'Question (FR) is required').max(400),
+    // Optional here; required per-cohort via `missingFrenchLabels()`.
+    labelFr: z.string().trim().max(400).default(''),
     type: z.enum(FORM_FIELD_TYPES),
     required: z.boolean().default(false),
     // Rating scale upper bound (1..max). Only meaningful for `rating`.
@@ -106,6 +116,50 @@ export const formSchemaShape = z
   });
 
 export type FormSchemaShape = z.infer<typeof formSchemaShape>;
+
+/** Where a required French label is missing, for a per-field error message. */
+export interface MissingFrenchLabel {
+  /** 0-based question index, as shown in the builder. */
+  fieldIndex: number;
+  /** 0-based option index, or null when it is the question label itself. */
+  optionIndex: number | null;
+}
+
+/**
+ * Questions/options with no French text — the cohort-aware half of validation.
+ *
+ * Called by the server action only when the form's cohort actually offers
+ * French (`requiresFrench` in features/cohorts/languages.ts). For an
+ * English-only cohort it is never called, so the admin is never asked to invent
+ * French; ticking French back on makes the same forms require it again, with any
+ * French already stored still in place.
+ */
+export function missingFrenchLabels(shape: FormSchemaShape): MissingFrenchLabel[] {
+  const missing: MissingFrenchLabel[] = [];
+  shape.fields.forEach((field, fieldIndex) => {
+    if (field.labelFr.trim() === '') {
+      missing.push({ fieldIndex, optionIndex: null });
+    }
+    field.options?.forEach((option, optionIndex) => {
+      if (option.labelFr.trim() === '') {
+        missing.push({ fieldIndex, optionIndex });
+      }
+    });
+  });
+  return missing;
+}
+
+/** Human-readable summary of the first few missing French labels. */
+export function describeMissingFrenchLabels(missing: MissingFrenchLabel[]): string {
+  const parts = missing.slice(0, 4).map((m) =>
+    m.optionIndex === null
+      ? `question ${m.fieldIndex + 1}`
+      : `question ${m.fieldIndex + 1} option ${m.optionIndex + 1}`,
+  );
+  const more = missing.length - parts.length;
+  const list = more > 0 ? `${parts.join(', ')} and ${more} more` : parts.join(', ');
+  return `This cohort runs in French, so every question needs French text. Missing: ${list}.`;
+}
 
 // `schema` arrives from the client as a JSON string in a hidden field; parse
 // then validate against the canonical shape.

@@ -1,13 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { NewsletterStatus, Prisma } from '@prisma/client';
+import { Language, NewsletterStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { assertCohortAccess, requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { getAiAdapter } from '@/lib/ai';
 import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
+import { getCohortLanguages } from '@/features/cohorts/language-data';
 import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/result';
 import { buildNewsletterDigest } from './digest';
 import { buildDraftPrompt, mergeAssistantDraft, parseAssistantDraft } from './assistant';
@@ -214,10 +215,26 @@ export async function approveNewsletter(
     if (!newsletter.body || sendableSections(newsletter.body).length === 0) {
       return fail({ code: 'CONFLICT', message: 'Write some content before approving.' });
     }
-    if (!newsletter.subjectEn || !newsletter.subjectFr) {
+    // A subject line is required per language the cohort actually runs in. An
+    // English-only cohort is not blocked on a French subject nobody would read —
+    // and it is safe because both the send and the template already fall back
+    // EN↔FR in either direction, so no recipient ever gets an empty subject.
+    // Stored French subjects are left untouched; ticking French back on makes it
+    // required again.
+    const languages = await getCohortLanguages(newsletter.cohortId);
+    const hasSubject = (value: string | null) => (value ?? '').trim().length >= 2;
+    const missingSubjects = languages.filter((language) =>
+      language === Language.FR ? !hasSubject(newsletter.subjectFr) : !hasSubject(newsletter.subjectEn),
+    );
+    if (missingSubjects.length > 0) {
       return fail({
         code: 'CONFLICT',
-        message: 'Add both the English and French subject lines before approving.',
+        message:
+          missingSubjects.length > 1
+            ? 'Add both the English and French subject lines before approving.'
+            : missingSubjects[0] === Language.FR
+              ? 'Add the French subject line before approving.'
+              : 'Add the English subject line before approving.',
       });
     }
 

@@ -18,6 +18,8 @@ import { assertCohortAccess, requireRole } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 import { getStorageProvider } from '@/lib/storage';
+import { asLanguageSource, getCohortLanguages } from '@/features/cohorts/language-data';
+import { soleLanguage } from '@/features/cohorts/languages';
 import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
 import { detectSourceType, parseSheetBuffer } from './parse';
 import {
@@ -25,6 +27,7 @@ import {
   hasBlockingErrors,
   validateRows,
   validateRow,
+  resolveRowLanguage,
   type CleanRow,
   type Finding,
 } from './validation';
@@ -100,9 +103,13 @@ async function createValidatedImport(input: {
     return fail({ code: 'VALIDATION', message: 'The file contains no data rows.' });
   }
   const existing = await existingCohortEmails(input.cohortId, input.targetRole);
+  // A single-language cohort infers a missing language rather than flagging it:
+  // an English-only import needs no Language column at all.
+  const sole = soleLanguage(asLanguageSource(await getCohortLanguages(input.cohortId)));
   const validated = validateRows(parsed.rows, {
     targetRole: input.targetRole === RoleName.MENTOR ? 'MENTOR' : 'MENTEE',
     existingEmails: existing,
+    soleLanguage: sole,
   });
   const errorCount = validated.filter((v) => v.findings.length > 0).length;
   const imported = await prisma.import.create({
@@ -295,6 +302,9 @@ export async function fixImportRow(formData: FormData): Promise<ActionResult<{ i
       targetRole: row.import.targetRole === RoleName.MENTOR ? 'MENTOR' : 'MENTEE',
       existingEmails: existing,
       seenEmailsInFile: new Set(), // in-file duplicates were resolved at upload time
+      soleLanguage: soleLanguage(
+        asLanguageSource(await getCohortLanguages(row.import.cohortId)),
+      ),
     });
 
     await prisma.importRow.update({
@@ -371,8 +381,13 @@ export async function setImportRowStatus(formData: FormData): Promise<ActionResu
 
 const commitSchema = z.object({ importId: z.string().cuid() });
 
-function localeFromLanguage(lang: CleanRow['language']): Language {
-  return lang === 'FR' ? Language.FR : Language.EN;
+function localeFromLanguage(
+  lang: CleanRow['language'],
+  sole: 'EN' | 'FR' | null,
+): Language {
+  // Same rule the validator applied, so a row it let through without a language
+  // is written as the language it was judged against — not silently as English.
+  return resolveRowLanguage(lang, sole) === 'FR' ? Language.FR : Language.EN;
 }
 
 /**
@@ -407,6 +422,7 @@ export async function commitImport(formData: FormData): Promise<ActionResult<{ c
     });
 
     const role = await prisma.role.findUniqueOrThrow({ where: { name: imported.targetRole } });
+    const sole = soleLanguage(asLanguageSource(await getCohortLanguages(imported.cohortId)));
     let created = 0;
 
     for (const row of committable) {
@@ -416,7 +432,11 @@ export async function commitImport(formData: FormData): Promise<ActionResult<{ c
       const user = await prisma.user.upsert({
         where: { email: clean.email },
         update: {},
-        create: { email: clean.email, name: clean.fullName, locale: localeFromLanguage(clean.language) },
+        create: {
+          email: clean.email,
+          name: clean.fullName,
+          locale: localeFromLanguage(clean.language, sole),
+        },
       });
 
       const grant = await prisma.userRole.findFirst({
@@ -436,7 +456,7 @@ export async function commitImport(formData: FormData): Promise<ActionResult<{ c
         department: clean.department || null,
         jobTitle: clean.jobTitle || null,
         location: clean.location || null,
-        preferredLanguage: localeFromLanguage(clean.language),
+        preferredLanguage: localeFromLanguage(clean.language, sole),
         personality: clean.personality || null,
         trainingStatus: TrainingStatus.NOT_STARTED,
         matchingStatus: MatchingStatus.UNMATCHED,

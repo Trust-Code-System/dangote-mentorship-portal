@@ -59,11 +59,24 @@ function withFallback(primary: AiAdapter, fallback: AiAdapter): AiAdapter {
 
 let cached: AiAdapter | null = null;
 
+function aiFeaturesEnabled(): boolean {
+  const value = process.env.AI_FEATURES_ENABLED?.trim().toLowerCase();
+  return value !== 'false' && value !== '0' && value !== 'off';
+}
+
 // Provider selection (CLAUDE.md §2 — provider-agnostic). Anthropic is primary;
 // OpenAI is the fallback when its key is set. With only one key configured that
 // provider is used directly; with neither, AI degrades gracefully (disabled).
 export function getAiAdapter(): AiAdapter {
   if (cached) return cached;
+
+  // Operational kill switch: pause every assistant without deleting or rotating
+  // provider credentials. The existing disabled adapter keeps manual fallbacks
+  // available and prevents outbound AI requests.
+  if (!aiFeaturesEnabled()) {
+    cached = disabledAdapter;
+    return cached;
+  }
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;

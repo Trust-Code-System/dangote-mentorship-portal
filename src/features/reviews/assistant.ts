@@ -1,4 +1,5 @@
 import type { FieldAggregate } from './aggregate';
+import { pickLanguageText } from '@/features/cohorts/languages';
 
 // Pure AI Review Assistant logic (CLAUDE.md §9.4). No I/O: the prompt builder
 // and the defensive parser are unit-tested so the AI boundary is tested in
@@ -28,12 +29,14 @@ export interface ReviewReport {
 
 /** Render one aggregate as a compact, human-readable line for the prompt. */
 export function aggregateToLine(agg: FieldAggregate, lang: Lang): string {
-  const label = lang === 'FR' ? agg.labelFr : agg.labelEn;
+  const label = pickLanguageText(lang, { EN: agg.labelEn, FR: agg.labelFr });
   switch (agg.type) {
     case 'rating':
       return `${label}: average ${agg.average ?? 'n/a'}/${agg.max} (${agg.answered} responses)`;
     case 'single_select': {
-      const parts = agg.counts.map((c) => `${lang === 'FR' ? c.labelFr : c.labelEn}=${c.count}`);
+      const parts = agg.counts.map(
+        (c) => `${pickLanguageText(lang, { EN: c.labelEn, FR: c.labelFr })}=${c.count}`,
+      );
       return `${label}: ${parts.join(', ')}`;
     }
     case 'boolean':

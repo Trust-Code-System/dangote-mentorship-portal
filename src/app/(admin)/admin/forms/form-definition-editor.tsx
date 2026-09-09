@@ -3,13 +3,14 @@
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ReviewType, RoleName } from '@prisma/client';
+import { Language, ReviewType, RoleName } from '@prisma/client';
 import {
   createFormDefinitionForm,
   updateFormDefinitionForm,
   type FormDefinitionFormState,
 } from '@/features/forms/form-actions';
 import { FORM_FIELD_TYPES, type FormField, type FormFieldType } from '@/features/forms/schema';
+import { requiresFrench } from '@/features/cohorts/languages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type CohortOption = { id: string; name: string };
+type CohortOption = { id: string; name: string; languages: Language[] };
 
 // Radix Select has no empty-value item; "all roles" rides a sentinel that the
 // hidden input translates back to '' on the wire.
@@ -105,6 +106,15 @@ export function FormDefinitionEditor({
     initial && initial.fields.length > 0 ? initial.fields.map(toEditable) : [blankField()],
   );
   const [roleName, setRoleName] = useState<string>(initial?.roleName ?? '');
+  const [cohortId, setCohortId] = useState<string>(initial?.cohortId ?? cohorts[0]?.id ?? '');
+
+  // Whether this form needs French text follows the cohort it belongs to, not a
+  // blanket rule: an English-only cohort would otherwise force the admin to
+  // invent French for questions nobody will read in French. Any French already
+  // typed stays in `fields` and is submitted, so switching the cohort back to a
+  // bilingual one shows the same text again — nothing is cleared here, and the
+  // server re-checks against the real cohort either way.
+  const showFrench = requiresFrench(cohorts.find((c) => c.id === cohortId) ?? null);
 
   const action = isEdit ? updateFormDefinitionForm : createFormDefinitionForm;
   const [state, formAction, pending] = useActionState<FormDefinitionFormState, FormData>(action, null);
@@ -167,7 +177,8 @@ export function FormDefinitionEditor({
       <div className="grid gap-4 rounded-lg border border-border bg-surface p-6 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cohortId">{t('cohort')}</Label>
-          <Select name="cohortId" required defaultValue={initial?.cohortId ?? cohorts[0]?.id}>
+          <input type="hidden" name="cohortId" value={cohortId} />
+          <Select value={cohortId} onValueChange={setCohortId} required>
             <SelectTrigger id="cohortId">
               <SelectValue />
             </SelectTrigger>
@@ -242,6 +253,12 @@ export function FormDefinitionEditor({
           </Button>
         </div>
 
+        {!showFrench ? (
+          <p className="rounded-md border border-border bg-surface-2 p-3 text-sm text-ink-2">
+            {t('englishOnlyCohort')}
+          </p>
+        ) : null}
+
         {schemaError ? <p className="text-sm text-risk">{schemaError}</p> : null}
         {fields.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-ink-3">
@@ -298,15 +315,17 @@ export function FormDefinitionEditor({
                   maxLength={400}
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor={`${field.id}-fr`}>{t('labelFr')}</Label>
-                <Input
-                  id={`${field.id}-fr`}
-                  value={field.labelFr}
-                  onChange={(e) => patch(index, { labelFr: e.target.value })}
-                  maxLength={400}
-                />
-              </div>
+              {showFrench ? (
+                <div className="space-y-1">
+                  <Label htmlFor={`${field.id}-fr`}>{t('labelFr')}</Label>
+                  <Input
+                    id={`${field.id}-fr`}
+                    value={field.labelFr}
+                    onChange={(e) => patch(index, { labelFr: e.target.value })}
+                    maxLength={400}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
@@ -359,7 +378,10 @@ export function FormDefinitionEditor({
               <div className="space-y-2 rounded-md border border-border bg-bg p-3">
                 <p className="text-small text-ink-2">{t('options')}</p>
                 {field.options.map((opt, oi) => (
-                  <div key={oi} className="grid gap-2 sm:grid-cols-3">
+                  <div
+                    key={oi}
+                    className={showFrench ? 'grid gap-2 sm:grid-cols-3' : 'grid gap-2 sm:grid-cols-2'}
+                  >
                     <Input
                       aria-label={t('optionValue')}
                       placeholder={t('optionValue')}
@@ -372,12 +394,14 @@ export function FormDefinitionEditor({
                       value={opt.labelEn}
                       onChange={(e) => patchOption(index, oi, { labelEn: e.target.value })}
                     />
-                    <Input
-                      aria-label={t('optionLabelFr')}
-                      placeholder={t('optionLabelFr')}
-                      value={opt.labelFr}
-                      onChange={(e) => patchOption(index, oi, { labelFr: e.target.value })}
-                    />
+                    {showFrench ? (
+                      <Input
+                        aria-label={t('optionLabelFr')}
+                        placeholder={t('optionLabelFr')}
+                        value={opt.labelFr}
+                        onChange={(e) => patchOption(index, oi, { labelFr: e.target.value })}
+                      />
+                    ) : null}
                   </div>
                 ))}
                 <Button type="button" variant="ghost" size="sm" onClick={() => addOption(index)}>

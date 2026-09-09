@@ -552,7 +552,24 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **Preserved the current RGB-channel tokens** so Tailwind alpha modifiers and existing hand-written `rgb(var(--token) / alpha)` values continue to work. Tailwind 4 derives utility opacity through `color-mix`.
 - **PostCSS now uses `@tailwindcss/postcss`;** the standalone `autoprefixer` dependency is removed because Tailwind 4 handles vendor prefixing. The existing centered container behavior is retained as a CSS utility.
 
-## Security — seed credentials, and pinning the seed to one database
+## Feature — the cohort language setting now does something
+
+- **`Cohort.languages` is finally read.** It has been storable and admin-editable since M0 but nothing consumed it, so every screen demanded EN *and* FR regardless. The decision now lives in one pure, fully unit-tested helper (`src/features/cohorts/languages.ts`), with the server-side reads beside it in `language-data.ts`; the Forms Builder, newsletter approval and the import validator all derive from it rather than testing `languages` themselves.
+- **Forms Builder no longer demands French for an English-only cohort.** `labelFr` is optional in the Zod contract; the per-cohort requirement is `missingFrenchLabels()`, applied server-side against the form's *own* cohort (never the submitted id, so a request cannot name an EN-only cohort to dodge a bilingual one's requirement). The editor hides the French inputs and explains why. Renderers gained a `labelFr || labelEn` fallback, so a francophone reading an English-only form sees English rather than a blank label.
+- **Newsletter approval requires a subject per language the cohort runs in**, not always both. Safe because the send and the email template already fall back EN↔FR in either direction. The composer hides the French subject and the French heading/body boxes for a single-language cohort, and resubmits any stored French untouched.
+- **Import stops flagging a missing language when there is only one it could be.** `resolveRowLanguage()` is shared by the validator and the commit, so the flag and the written `preferredLanguage` can never disagree — an English-only import needs no Language column. A bilingual cohort still blocks on it.
+- **Admins now get one clear French on/off switch on each cohort.** English stays on as the programme baseline; the control explains exactly which cohort workflows it changes, has a 44px+ touch target, and is shared by the create and edit screens.
+- **No stored French is written, cleared or migrated.** Ticking French back on restores the bilingual behaviour exactly.
+- **Participant interface language now follows the cohort.** French disappears from the authenticated language switcher for an English-only participant, and an old French preference is safely moved to English. Public pages and admin screens remain bilingual. Stored content tools, the journal's "written in" picker, translation and EN/FR certificates remain available because turning French off never deletes content.
+- **Security dependency refresh.** The `sharp` override is updated to `0.35.4`, clearing the production `npm audit` advisory inherited through Next.js.
+
+## Email — Resend production transport
+
+- **All portal email can now use Resend.** A provider-backed transport sends newsletters, password resets and notification/digest emails through the same existing `sendEmail()` seam. `MAIL_PROVIDER=resend` makes the production choice explicit, while Microsoft Graph remains available as an alternative.
+- **Explicit mail configuration fails closed.** If Resend is selected without both `RESEND_API_KEY` and `RESEND_FROM_EMAIL`, delivery throws instead of silently using the log transport and marking a newsletter as sent.
+- **Admin integration health now includes Resend** and reports missing variable names without exposing secret values.
+
+## Security — seed credentials and database pinning
 
 - `SEED_ALLOW_REMOTE` accepts either `true` or a safer `host:port/database` pin. Missing and invalid database URLs remain blocked regardless of the override.
 - `SEED_DEFAULT_PASSWORD` and `SEED_SUPER_ADMIN_EMAIL` are required. Seed output no longer exposes the password or lists roles the seed does not create.
