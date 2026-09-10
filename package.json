@@ -26,7 +26,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "db:seed": "tsx --env-file=.env prisma/seed.ts",
     "postinstall": "prisma generate",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "admin:create": "tsx --env-file=.env scripts/create-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

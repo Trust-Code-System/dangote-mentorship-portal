@@ -535,7 +535,8 @@ Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside
 
 - The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
 - Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
-- 7 new tests pin it, including the exact shape production holds today (`'false
+- 7 new tests pin it, including the exact shape production holds today (`'false
+
 '`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
 
 Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
@@ -573,3 +574,9 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 
 - `SEED_ALLOW_REMOTE` accepts either `true` or a safer `host:port/database` pin. Missing and invalid database URLs remain blocked regardless of the override.
 - `SEED_DEFAULT_PASSWORD` and `SEED_SUPER_ADMIN_EMAIL` are required. Seed output no longer exposes the password or lists roles the seed does not create.
+
+## Ops — bootstrap a real Super Admin without the demo seed
+
+- `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
+- Idempotent: an existing email is reset and reactivated rather than duplicated — the same command rotates a compromised admin password.
+- Guards: rejects passwords under 12 chars and the public `ChangeMe!20xx` seed default; prints the target database (credentials stripped) and requires interactive confirmation, or `ADMIN_CONFIRM_TARGET="host/db"` to match, before any write. Writes an `audit_logs` row (`admin.bootstrap` / `admin.reset`).
