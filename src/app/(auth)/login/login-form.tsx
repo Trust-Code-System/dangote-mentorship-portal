@@ -54,7 +54,7 @@ export function LoginForm({ entraEnabled }: { entraEnabled: boolean }) {
         </>
       ) : null}
 
-      <form action={formAction} className="space-y-5" noValidate>
+      <form action={formAction} className="space-y-4" noValidate>
         <AuthField
           id="email"
           name="email"

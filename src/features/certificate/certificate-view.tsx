@@ -2,7 +2,7 @@ import type { CertificateData, CertificateLanguage } from './data';
 
 const COPY = {
   EN: {
-    eyebrow: 'BLAK MOH Mentorship Programme',
+    eyebrow: 'Dangote Mentorship Programme',
     title: 'Certificate of Completion',
     previewTitle: 'Certificate Preview',
     presentedTo: 'This certificate is proudly presented to',
@@ -20,7 +20,7 @@ const COPY = {
     official: 'Official programme certificate',
   },
   FR: {
-    eyebrow: 'Programme de mentorat BLAK MOH',
+    eyebrow: 'Dangote Mentorship Programme',
     title: 'Certificat d’achèvement',
     previewTitle: 'Aperçu du certificat',
     presentedTo: 'Ce certificat est fièrement décerné à',

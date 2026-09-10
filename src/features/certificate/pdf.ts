@@ -24,7 +24,7 @@ const BRAND = {
 
 const COPY = {
   EN: {
-    eyebrow: 'BLAK MOH MENTORSHIP PROGRAMME',
+    eyebrow: 'DANGOTE MENTORSHIP PROGRAMME',
     title: 'Certificate of Completion',
     previewTitle: 'Certificate Preview',
     presentedTo: 'THIS CERTIFICATE IS PROUDLY PRESENTED TO',
@@ -41,7 +41,7 @@ const COPY = {
     preview: 'PREVIEW - NOT YET ISSUED',
   },
   FR: {
-    eyebrow: 'PROGRAMME DE MENTORAT BLAK MOH',
+    eyebrow: 'DANGOTE MENTORSHIP PROGRAMME',
     title: "Certificat d'achèvement",
     previewTitle: 'Aperçu du certificat',
     presentedTo: 'CE CERTIFICAT EST FIÈREMENT DÉCERNÉ À',
@@ -171,11 +171,11 @@ export async function renderCertificatePdf(
   document.setTitle(
     `${data.earned ? 'Certificate' : 'Certificate preview'} - ${data.recipientName}`,
   );
-  document.setAuthor('BLAK MOH');
+  document.setAuthor('Dangote Mentorship Programme');
   document.setSubject(`${data.programmeName} - ${data.cohortName}`);
-  document.setKeywords(['BLAK MOH', 'mentorship', 'certificate']);
-  document.setCreator('BLAK MOH Mentorship Portal');
-  document.setProducer('BLAK MOH Mentorship Portal');
+  document.setKeywords(['Dangote', 'mentorship', 'certificate']);
+  document.setCreator('Dangote Mentorship Programme');
+  document.setProducer('Dangote Mentorship Programme');
 
   const page = document.addPage([PAGE.width, PAGE.height]);
   const serif = await document.embedFont(StandardFonts.TimesRoman);

@@ -30,6 +30,22 @@ test('unauthenticated visitors are redirected to login', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
 });
 
+// The root is the front door, not a brochure: this is an invite-only portal, so
+// a visitor at `/` gets the sign-in form rather than the marketing narrative.
+test('the root url serves the sign-in screen', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForURL('**/login**');
+  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+});
+
+// ...and the narrative is still reachable, one click from the sign-in footer.
+test('the marketing narrative is still served at /welcome', async ({ page }) => {
+  const response = await page.goto('/welcome');
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page).toHaveURL(/\/welcome$/);
+});
+
 test('readiness probe confirms the database is reachable', async ({ request }) => {
   const response = await request.get('/api/health');
   expect(response.status()).toBe(200);

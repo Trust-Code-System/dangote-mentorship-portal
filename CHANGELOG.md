@@ -535,8 +535,7 @@ Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside
 
 - The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
 - Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
-- 7 new tests pin it, including the exact shape production holds today (`'false
-
+- 7 new tests pin it, including the exact shape production holds today (`'false
 '`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
 
 Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
@@ -574,6 +573,31 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 
 - `SEED_ALLOW_REMOTE` accepts either `true` or a safer `host:port/database` pin. Missing and invalid database URLs remain blocked regardless of the override.
 - `SEED_DEFAULT_PASSWORD` and `SEED_SUPER_ADMIN_EMAIL` are required. Seed output no longer exposes the password or lists roles the seed does not create.
+
+## Feature — sign-in is the front door, and the programme is named Dangote
+
+- **The root URL now serves the sign-in screen.** This is an invite-only, `noindex` programme with no self-service signup, so a visitor at `/` is almost always a participant who wants to sign in. A signed-in visitor skips `/login` and lands on their own dashboard, so the common case is one redirect rather than two.
+- **The nine-section marketing narrative moved to `/welcome`,** not deleted — the sign-in footer's "back to home", the public nav and the breadcrumb all point there. `/about`, `/faq`, `/programme` and both guides are untouched.
+- **`/welcome` had to be added to the public path allowlist** in `lib/auth/auth.config.ts`. It inherited its public status from being `/`; without listing it the entire marketing page sat behind a login wall. Caught by loading the page, not by the build or the unit suite — both passed while the route was inaccessible.
+- **Removed the three brand bullets** from the authentication panel ("Bilingual English and French experience", "AI-assisted, human-approved matching", "Private mentorship workspaces"), along with their message keys and the icon imports that only fed them.
+- **Renamed the programme from BLAK MOH to Dangote Mentorship Programme** across the interface: the signed-in sidebar, the authentication panel, the public lockup, browser tab titles, the password-reset email subject, newsletter emails, exported reports, certificate text and PDF metadata, the mentoring agreement, and the Atlas copilot's system prompt. French copy reads "Programme de Mentorat Dangote" rather than the English name, since a brand-shaped descriptive name should not force a francophone into English (CLAUDE.md §16).
+- **The supplied BLAK MOH brand mark is deliberately unchanged** — only wordmark text was replaced. `PublicLockup` became a client component so its wordmark localizes; the mark beside it still renders `public/brand/blak-moh-mark.png`, and image `alt` text still describes that mark accurately.
+- Prose was rewritten per string rather than find-and-replaced, which would have produced "the Dangote Mentorship Programme is a nine-month bilingual mentorship programme".
+- E2E specs that assumed `/` was the landing page now target `/welcome` (landing, CSP-nonce canary, auth reachability), plus two new tests: the root serves sign-in, and `/welcome` still serves the narrative.
+- **A second route assumption, caught by E2E rather than by the build:** `PublicNav` decided whether to render the landing page's in-page section anchors (`#programme`, `#matching`, `#journey`, `#experience`) by comparing `pathname === '/'`. Moving the page silently stripped all four anchors from the one page they exist for. Now compares against `/welcome`. The platform-audit route list and its "public home" evidence screenshot were repointed too.
+
+## Chore — one brand name in both languages, and a tidier sidebar
+
+- **The programme name is now "Dangote Mentorship Programme" in French too**, replacing the translated "Programme de Mentorat Dangote" (28 strings in `fr.json`, plus the certificate eyebrow, certificate PDF metadata and the mentoring agreement). Owner's call: a single brand identifier rather than a translated one. The surrounding French copy is untouched, and the French articles already in the prose read correctly in front of an untranslated name.
+- **Dropped the "Enterprise Portal" subtitle from the signed-in sidebar.** It said nothing the brand line didn't now that the brand line reads "Dangote Mentorship Programme", and the longer name already wraps to two lines. `AppShellLabels.subtitle` became optional rather than being deleted, so the shell still supports one; the `enterprisePortal` message key stays because the sign-in card uses it as an eyebrow.
+
+## Fix — the sign-in page fits on one screen again
+
+- **Closed the void in the brand panel.** It was laid out `lg:justify-between` around three children — brand, headline, three feature bullets. Removing the bullets left the brand pinned to the top and the headline pinned to the very bottom with ~500px of nothing between them, so on a laptop the headline sat below the fold. The brand stays at the top; the headline now centres in the space the bullets used to occupy, so it reads across from the form instead of trailing off-screen.
+- **The form no longer needs scrolling.** `/login` measured 917px of content against a 900px viewport, which put "Request access" and the whole footer below the fold. Now 0 overflow at 1440×900, 1440×820 and 1366×768.
+- Height came from padding rather than from content: `main` 48→16px (it is `flex-1 items-center`, so that padding is a floor, not the real spacing — a tall screen still centres the card with plenty of air), card 36→28px, the header's two stacked gaps, the in-card rule above "Request access", the footer's top margin, and the form's field rhythm 20→16px. The trust note now wraps to two lines instead of three at a wider measure.
+- Footer nav links keep `min-h-11` — that is a pointer target size (WCAG 2.2 §2.5.8), not spare padding.
+- `/signup` improved from 132px to 100px of overflow at 1366×768 but still scrolls a little there: it presents two full option cards (redeem an invite code / request access), and compressing that further would cost more than the scroll does. It fits at 1440×900.
 
 ## Ops — bootstrap a real Super Admin without the demo seed
 

@@ -12,7 +12,7 @@ import { ImageResponse } from 'next/og';
  * there is no locale cookie to read, and a preview card is a single static
  * image rather than user-facing content the portal must mirror in French.
  */
-export const alt = 'BLAK MOH — Experience becomes direction';
+export const alt = 'Dangote Mentorship Programme — Experience becomes direction';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 

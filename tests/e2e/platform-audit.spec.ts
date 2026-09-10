@@ -20,7 +20,7 @@ const evidenceDir = path.join(
 );
 
 const publicRoutes = [
-  '/',
+  '/welcome',
   '/about',
   '/faq',
   '/confidentiality',
@@ -163,7 +163,7 @@ test.describe.serial('full platform route audit', () => {
     await page.context().addCookies([
       { name: 'NEXT_LOCALE', value: 'en', domain: 'localhost', path: '/' },
     ]);
-    await page.goto('/');
+    await page.goto('/welcome');
     await page.screenshot({
       path: path.join(evidenceDir, 'public-home-desktop.png'),
       fullPage: true,

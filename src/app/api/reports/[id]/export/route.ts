@@ -39,7 +39,7 @@ export async function GET(
   const formatter = await getFormatter();
   const meta = {
     title: report.title,
-    organisation: 'BLAK MOH Mentorship Programme',
+    organisation: 'Dangote Mentorship Programme',
     generatedOn: formatter.dateTime(new Date(), { dateStyle: 'long' }),
     author: report.authorName ?? user.email,
   };

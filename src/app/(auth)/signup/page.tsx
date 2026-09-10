@@ -27,28 +27,28 @@ export default async function SignupPage() {
         <AuthHeader heading={ta('requestHeading')} supporting={t('subtitle')} />
 
         {/* Have an invite code → redeem it */}
-        <section className="rounded-xl border border-auth-border bg-auth-field/60 p-5">
+        <section className="rounded-xl border border-auth-border bg-auth-field/60 p-4">
           <div className="flex items-center gap-2.5">
             <span className="inline-flex size-9 items-center justify-center rounded-lg bg-blak-green/15 text-[#0A6E13]">
               <Ticket className="size-4" aria-hidden />
             </span>
             <h2 className="text-base font-semibold text-auth-ink">{t('inviteTitle')}</h2>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-auth-ink-2">{t('inviteHint')}</p>
-          <div className="mt-4">
+          <p className="mt-2 text-sm leading-relaxed text-auth-ink-2">{t('inviteHint')}</p>
+          <div className="mt-3">
             <InviteCodeForm />
           </div>
         </section>
 
         {/* No invite yet → ask an administrator */}
-        <section className="mt-5 rounded-xl border border-auth-border bg-auth-field/60 p-5">
+        <section className="mt-4 rounded-xl border border-auth-border bg-auth-field/60 p-4">
           <div className="flex items-center gap-2.5">
             <span className="inline-flex size-9 items-center justify-center rounded-lg bg-blak-gold/20 text-[#7A5411]">
               <Mail className="size-4" aria-hidden />
             </span>
             <h2 className="text-base font-semibold text-auth-ink">{t('requestTitle')}</h2>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-auth-ink-2">{t('requestHint')}</p>
+          <p className="mt-2 text-sm leading-relaxed text-auth-ink-2">{t('requestHint')}</p>
           <a
             href={requestHref}
             className="mt-4 inline-flex h-[52px] w-full items-center justify-center rounded-xl border border-auth-border bg-auth-surface text-base font-semibold text-auth-ink transition-colors hover:bg-auth-border/40"
@@ -57,7 +57,7 @@ export default async function SignupPage() {
           </a>
         </section>
 
-        <p className="mt-7 border-t border-auth-border pt-6 text-center text-sm text-auth-ink-2">
+        <p className="mt-4 border-t border-auth-border pt-4 text-center text-sm text-auth-ink-2">
           {t('haveAccount')}{' '}
           <Link
             href="/login"

@@ -1,9 +1,17 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { BrandMark } from '@/components/brand-logo';
 import { cn } from '@/lib/utils';
 
 /**
- * The BLAK MOH lockup on a dark surface — the shared mark for every public
+ * The programme lockup on a dark surface — the shared mark for every public
  * surface: the landing page, the Knowledge Library pages and the auth chrome.
+ *
+ * The wordmark is the localized programme name from `common.appName`; the
+ * supplied BLAK MOH brand *mark* is deliberately unchanged beside it. Client
+ * component purely so the name localizes — two of the three call sites are
+ * server components, and NextIntlClientProvider wraps the whole app.
  *
  * Uses the **official supplied mark** (`public/brand/blak-moh-mark.png`, the
  * transparent "B/m") untouched, beside the wordmark set as live HTML text —
@@ -27,6 +35,9 @@ export function PublicLockup({
   markClassName?: string;
   wordmarkClassName?: string;
 }) {
+  const t = useTranslations('common');
+  const PROGRAMME_NAME = t('appName');
+
   return (
     <span className={cn('inline-flex min-w-0 items-center gap-2.5', className)}>
       <BrandMark className={cn('size-8', markClassName)} />
@@ -34,14 +45,13 @@ export function PublicLockup({
           to role generic, which prohibits a name, and support is inconsistent. */}
       <span
         role="img"
-        aria-label="BLAK MOH"
+        aria-label={PROGRAMME_NAME}
         className={cn(
           'font-display text-[0.95rem] font-extrabold tracking-tight text-blak-text',
           wordmarkClassName,
         )}
       >
-        BLAK <span className="text-blak-green">MOH</span>
-        <span className="text-blak-gold">.</span>
+        {PROGRAMME_NAME}
       </span>
     </span>
   );

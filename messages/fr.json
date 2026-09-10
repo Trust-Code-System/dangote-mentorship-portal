@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "BLAK MOH",
+    "appName": "Dangote Mentorship Programme",
     "loading": "Chargement…",
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -22,7 +22,7 @@
     "errorTitle": "Une erreur est survenue",
     "errorBody": "Veuillez réessayer. Si le problème persiste, contactez un administrateur.",
     "retry": "Réessayer",
-    "appShortName": "BLAK MOH"
+    "appShortName": "Dangote Mentorship Programme"
   },
   "nav": {
     "home": "Accueil",
@@ -68,7 +68,7 @@
     "navigating": "Chargement de la page"
   },
   "home": {
-    "eyebrow": "BLAK MOH 2026",
+    "eyebrow": "Dangote Mentorship Programme 2026",
     "title": "Un système de mentorat intelligent et bilingue",
     "heroTitleLead": "Un mentorat bilingue qui",
     "heroTitleAccent": "fait avancer les talents",
@@ -211,7 +211,7 @@
   },
   "auth": {
     "loginTitle": "Connexion",
-    "loginSubtitle": "Utilisez votre compte BLAK MOH ou votre e-mail et mot de passe.",
+    "loginSubtitle": "Utilisez votre compte du Dangote Mentorship Programme ou votre e-mail et mot de passe.",
     "entra": "Se connecter avec Microsoft",
     "or": "ou",
     "email": "E-mail",
@@ -242,20 +242,17 @@
     "privacyPolicy": "Confidentialité",
     "termsOfService": "Conditions d’utilisation",
     "supportLink": "Assistance",
-    "copyright": "© 2026 BLAK MOH. Tous droits réservés.",
+    "copyright": "© 2026 Dangote Mentorship Programme. Tous droits réservés.",
     "corporateEmail": "E-mail professionnel",
     "emailPlaceholder": "nom@blakmoh.com",
     "forgotShort": "Oublié ?",
-    "dangoteSso": "Connexion SSO BLAK MOH",
+    "dangoteSso": "Connexion SSO Dangote",
     "orCredentials": "Ou utiliser les identifiants",
     "backToHome": "Retour à l’accueil",
-    "brandEyebrow": "Programme de mentorat BLAK MOH",
+    "brandEyebrow": "Dangote Mentorship Programme",
     "brandHeadline": "Poursuivez votre",
     "brandHeadlineAccent": "parcours.",
     "brandBody": "Retrouvez vos objectifs, vos séances, vos échanges et les étapes du programme exactement là où vous les avez laissés.",
-    "brandPointBilingual": "Une expérience bilingue, en anglais et en français",
-    "brandPointMatching": "Un jumelage assisté par l'IA, validé par un humain",
-    "brandPointPrivate": "Des espaces de mentorat privés",
     "loginHeading": "Bon retour parmi nous",
     "loginSupporting": "Connectez-vous pour poursuivre votre parcours de mentorat.",
     "signingIn": "Connexion en cours…",
@@ -290,7 +287,7 @@
     "resetSuccessTitle": "Mot de passe mis à jour",
     "resetSuccessBody": "Vous pouvez désormais vous connecter avec votre nouveau mot de passe.",
     "inviteHeading": "Activer votre compte",
-    "inviteSupporting": "Définissez un mot de passe pour finaliser la création de votre compte BLAK MOH.",
+    "inviteSupporting": "Définissez un mot de passe pour finaliser la création de votre compte du Dangote Mentorship Programme.",
     "inviteEmailHelp": "C'est l'adresse à laquelle votre invitation a été envoyée.",
     "inviteExpiredTitle": "Cette invitation a expiré",
     "inviteExpiredBody": "Demandez à votre administrateur de programme de vous envoyer un nouveau lien d'invitation.",
@@ -1738,12 +1735,12 @@
   },
   "landing": {
     "meta": {
-      "title": "BLAK MOH — L'expérience devient une direction",
+      "title": "Dangote Mentorship Programme — L'expérience devient une direction",
       "description": "Un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré de neuf mois, piloté par des humains."
     },
     "nav": {
       "skip": "Aller au contenu",
-      "home": "BLAK MOH — accueil",
+      "home": "Dangote Mentorship Programme — accueil",
       "primaryLabel": "Navigation principale",
       "programme": "Programme",
       "matching": "Jumelage",
@@ -1761,7 +1758,7 @@
       "micro": "Programme de mentorat Dangote",
       "line1": "L'expérience devient une direction.",
       "line2": "L'ambition devient du leadership.",
-      "body": "BLAK MOH est un programme de mentorat bilingue, assisté par l'IA, qui relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré et piloté par des humains.",
+      "body": "Le Dangote Mentorship Programme est bilingue et assisté par l'IA ; il relie l'expérience, l'ambition et l'opportunité au fil d'un parcours structuré et piloté par des humains.",
       "ctaPrimary": "Entrer dans le portail",
       "ctaSecondary": "Découvrir le parcours",
       "partnershipLabel": "En collaboration avec",
@@ -1776,7 +1773,7 @@
       "line1": "Une expérience précieuse ne devrait pas disparaître.",
       "line2": "Les personnes ambitieuses ne devraient pas grandir seules.",
       "body": "Dans une grande organisation, des décennies de discernement durement acquis vivent dans la tête de quelques personnes — et partent avec elles. Pendant ce temps, celles et ceux qui en auraient le plus besoin avancent seuls, une erreur après l'autre.",
-      "close": "BLAK MOH existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible.",
+      "close": "Le Dangote Mentorship Programme existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible.",
       "experienceLabel": "Expérience",
       "ambitionLabel": "Ambition",
       "gapLabel": "La distance qui les sépare"
@@ -2014,7 +2011,7 @@
       "signIn": "Se connecter",
       "requestAccess": "Demander un accès",
       "languageLabel": "Langue",
-      "copyright": "© {year} BLAK MOH. Programme interne confidentiel.",
+      "copyright": "© {year} Dangote Mentorship Programme. Programme interne confidentiel.",
       "confidential": "Les messages directs restent privés entre participants.",
       "confidentiality": "Confidentialité",
       "languageHint": "Changer de langue vous laisse sur cette page — rien n'est perdu."
@@ -2033,15 +2030,15 @@
     },
     "about": {
       "meta": {
-        "title": "À propos du programme — BLAK MOH",
-        "description": "BLAK MOH est un programme de mentorat bilingue de neuf mois : des étapes structurées, un jumelage assisté par l'IA et un humain qui valide chaque décision importante."
+        "title": "À propos du programme — Dangote Mentorship Programme",
+        "description": "Le Dangote Mentorship Programme se déroule sur neuf mois, en anglais et en français : des étapes structurées, un jumelage assisté par l'IA et un humain qui valide chaque décision importante."
       },
       "hero": {
         "eyebrow": "Le programme",
         "breadcrumb": "À propos du programme",
         "title": "Un mentorat conçu pour",
         "titleAccent": "faire avancer les personnes.",
-        "lede": "BLAK MOH est un programme de mentorat bilingue de neuf mois. Il repose sur un parcours structuré que chaque binôme suit ensemble, appuyé par des outils intelligents qui proposent et expliquent — et par des personnes qui décident."
+        "lede": "Le Dangote Mentorship Programme se déroule sur neuf mois, en anglais et en français. Il repose sur un parcours structuré que chaque binôme suit ensemble, appuyé par des outils intelligents qui proposent et expliquent — et par des personnes qui décident."
       },
       "why": {
         "eyebrow": "Pourquoi ce programme existe",
@@ -2049,7 +2046,7 @@
         "titleAccent": "partir avec celui qui la détient.",
         "statement": "Une expérience précieuse ne devrait pas disparaître. Les personnes ambitieuses ne devraient pas grandir seules.",
         "p1": "Dans une grande organisation, des décennies de discernement durement acquis vivent dans la tête de quelques personnes — et partent avec elles. Pendant ce temps, celles et ceux qui en auraient le plus besoin avancent seuls, une erreur après l'autre.",
-        "p2": "BLAK MOH existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible. Non comme une initiative qui dure un trimestre, mais comme un parcours aux étapes nommées, aux progrès consignés, et qui se termine par un certificat."
+        "p2": "Le Dangote Mentorship Programme existe pour réduire cette distance de façon délibérée, et pour rendre cette réduction visible. Non comme une initiative qui dure un trimestre, mais comme un parcours aux étapes nommées, aux progrès consignés, et qui se termine par un certificat."
       },
       "different": {
         "eyebrow": "Ce qui le distingue",
@@ -2138,7 +2135,7 @@
     },
     "faq": {
       "meta": {
-        "title": "Aide et FAQ — BLAK MOH",
+        "title": "Aide et FAQ — Dangote Mentorship Programme",
         "description": "Réponses sur l'accès, le jumelage, les objectifs, les séances, la confidentialité, la langue et l'assistance du programme."
       },
       "hero": {
@@ -2184,7 +2181,7 @@
       },
       "items": {
         "what-is": {
-          "q": "Qu'est-ce que BLAK MOH ?",
+          "q": "Qu'est-ce que le Dangote Mentorship Programme ?",
           "a": "Un programme de mentorat bilingue de neuf mois. Mentors et mentorés sont jumelés, signent une convention de mentorat et un accord de confidentialité, définissent des objectifs de développement, se rencontrent et consignent leurs séances, complètent une revue à mi-parcours puis une revue finale, et terminent avec un certificat d'achèvement."
         },
         "who-takes-part": {
@@ -2303,8 +2300,8 @@
     },
     "confidentiality": {
       "meta": {
-        "title": "Confidentialité — BLAK MOH",
-        "description": "Comment BLAK MOH protège la relation de mentorat : ce qui reste privé, ce que voient les administrateurs, et comment les assistants utilisent les contenus."
+        "title": "Confidentialité — Dangote Mentorship Programme",
+        "description": "Comment le Dangote Mentorship Programme protège la relation de mentorat : ce qui reste privé, ce que voient les administrateurs, et comment les assistants utilisent les contenus."
       },
       "hero": {
         "eyebrow": "Confidentialité",
@@ -2417,8 +2414,8 @@
     },
     "contact": {
       "meta": {
-        "title": "Assistance — BLAK MOH",
-        "description": "Où obtenir de l'aide sur BLAK MOH : connexion, invitations, questions sur le programme, et la voie privée réservée aux participants."
+        "title": "Assistance — Dangote Mentorship Programme",
+        "description": "Où obtenir de l'aide sur le Dangote Mentorship Programme : connexion, invitations, questions sur le programme, et la voie privée réservée aux participants."
       },
       "hero": {
         "eyebrow": "Assistance",
@@ -2505,15 +2502,15 @@
     "guides": {
       "programme": {
         "meta": {
-          "title": "Guide du programme — BLAK MOH",
-          "description": "Une vue pratique du parcours de mentorat BLAK MOH sur neuf mois."
+          "title": "Guide du programme — Dangote Mentorship Programme",
+          "description": "Une vue pratique du parcours de mentorat Dangote sur neuf mois."
         },
         "hero": {
           "eyebrow": "Guide du programme",
           "breadcrumb": "Guide du programme",
           "title": "Un programme.",
           "titleAccent": "Neuf étapes visibles.",
-          "lede": "BLAK MOH accompagne chaque binôme du profil et de la formation jusqu'au jumelage, aux objectifs, aux séances, aux revues et à l'achèvement."
+          "lede": "Le Dangote Mentorship Programme accompagne chaque binôme du profil et de la formation jusqu'au jumelage, aux objectifs, aux séances, aux revues et à l'achèvement."
         },
         "steps": {
           "eyebrow": "Le parcours",
@@ -2550,8 +2547,8 @@
       },
       "mentor": {
         "meta": {
-          "title": "Guide du mentor — BLAK MOH",
-          "description": "Conseils pratiques pour les mentors participant à BLAK MOH."
+          "title": "Guide du mentor — Dangote Mentorship Programme",
+          "description": "Conseils pratiques pour les mentors participant au Dangote Mentorship Programme."
         },
         "hero": {
           "eyebrow": "Guide du mentor",
@@ -2595,8 +2592,8 @@
       },
       "mentee": {
         "meta": {
-          "title": "Guide du mentoré — BLAK MOH",
-          "description": "Conseils pratiques pour les mentorés participant à BLAK MOH."
+          "title": "Guide du mentoré — Dangote Mentorship Programme",
+          "description": "Conseils pratiques pour les mentorés participant au Dangote Mentorship Programme."
         },
         "hero": {
           "eyebrow": "Guide du mentoré",

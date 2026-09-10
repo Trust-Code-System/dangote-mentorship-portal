@@ -35,7 +35,7 @@ test.describe('landing page', () => {
   test('renders one h1, the hero copy and both CTAs, with no console errors', async ({ page }) => {
     const errors = collectPageErrors(page);
 
-    await page.goto('/');
+    await page.goto('/welcome');
 
     const headings = page.locator('main h1');
     await expect(headings).toHaveCount(1);
@@ -57,7 +57,7 @@ test.describe('landing page', () => {
   });
 
   test('every navigation and CTA destination resolves', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/welcome');
 
     // Real routes only — a link to a page that does not exist is the single
     // most embarrassing bug a marketing page can ship.
@@ -68,7 +68,7 @@ test.describe('landing page', () => {
   });
 
   test('anchor links move the visitor to the matching section', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/welcome', { waitUntil: 'networkidle' });
     // The journey chapter calls ScrollTrigger.refresh() shortly after mount,
     // which can cancel a smooth scroll that is already in flight. Let the page
     // settle before navigating so the test measures the behaviour rather than
@@ -95,7 +95,7 @@ test.describe('landing page', () => {
   });
 
   test('the skip link is the first focusable element and targets main', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/welcome');
 
     // Assert the document's focus order directly. Relying on an initial Tab is
     // flaky in headless browsers because the browser viewport does not always
@@ -109,7 +109,7 @@ test.describe('landing page', () => {
   });
 
   test('the matching demo is operable from the keyboard', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/welcome');
 
     const firstTab = page.getByRole('tab', { name: /Competency match/ });
     await firstTab.scrollIntoViewIfNeeded();
@@ -127,7 +127,7 @@ test.describe('landing page', () => {
   test('switching to French translates the page and keeps the visitor in place', async ({
     page,
   }) => {
-    await page.goto('/');
+    await page.goto('/welcome');
 
     // Move down the page first: the language switch is a cookie write inside a
     // transition, not a navigation, so scroll position must survive it.
@@ -146,7 +146,7 @@ test.describe('landing page', () => {
 
   test('has no horizontal overflow at 320px', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 720 });
-    await page.goto('/');
+    await page.goto('/welcome');
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -159,7 +159,7 @@ test.describe('landing page', () => {
   }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('/welcome');
 
     // No pinning, no scroll choreography — every stage is present and readable.
     const stages = page.locator('#journey li');

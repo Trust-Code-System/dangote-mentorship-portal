@@ -12,7 +12,7 @@ export default function Loading() {
     <div
       role="status"
       aria-busy="true"
-      aria-label="BLAK MOH"
+      aria-label="Dangote Mentorship Programme"
       className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg"
     >
       <BrandMark className="brand-splash-mark size-20" />

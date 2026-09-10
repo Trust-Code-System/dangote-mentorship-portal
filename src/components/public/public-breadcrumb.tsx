@@ -17,7 +17,7 @@ export async function PublicBreadcrumb({ label }: { label: string }) {
       <ol className="flex flex-wrap items-center gap-1.5 text-sm text-blak-text-2">
         <li>
           <Link
-            href="/"
+            href="/welcome"
             className="inline-flex min-h-11 items-center transition-colors hover:text-blak-text"
           >
             {t('home')}
