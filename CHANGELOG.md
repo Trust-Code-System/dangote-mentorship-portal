@@ -598,3 +598,9 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - Height came from padding rather than from content: `main` 48→16px (it is `flex-1 items-center`, so that padding is a floor, not the real spacing — a tall screen still centres the card with plenty of air), card 36→28px, the header's two stacked gaps, the in-card rule above "Request access", the footer's top margin, and the form's field rhythm 20→16px. The trust note now wraps to two lines instead of three at a wider measure.
 - Footer nav links keep `min-h-11` — that is a pointer target size (WCAG 2.2 §2.5.8), not spare padding.
 - `/signup` improved from 132px to 100px of overflow at 1366×768 but still scrolls a little there: it presents two full option cards (redeem an invite code / request access), and compressing that further would cost more than the scroll does. It fits at 1440×900.
+
+## Ops — bootstrap a real Super Admin without the demo seed
+
+- `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
+- Idempotent: an existing email is reset and reactivated rather than duplicated — the same command rotates a compromised admin password.
+- Guards: rejects passwords under 12 chars and the public `ChangeMe!20xx` seed default; prints the target database (credentials stripped) and requires interactive confirmation, or `ADMIN_CONFIRM_TARGET="host/db"` to match, before any write. Writes an `audit_logs` row (`admin.bootstrap` / `admin.reset`).
