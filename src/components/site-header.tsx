@@ -21,7 +21,7 @@ export async function SiteHeader() {
         <Link href="/welcome" className="text-ink" aria-label={t('common.appName')}>
           <BrandLogo
             name={t('common.appName')}
-            markClassName="size-8"
+            markClassName="h-8 w-auto"
             wordmarkClassName="hidden sm:inline"
           />
         </Link>

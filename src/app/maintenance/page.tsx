@@ -6,7 +6,7 @@ import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
 import { signOutAction } from '@/lib/auth/actions';
 import { Button } from '@/components/ui/button';
-import { BrandMark } from '@/components/brand-logo';
+import { BrandPlate } from '@/components/brand-logo';
 
 // Holding page shown to participants while maintenance mode is on. It re-derives
 // state so it can't be used as a dead-end: if the window has ended, or an admin
@@ -25,7 +25,7 @@ export default async function MaintenancePage() {
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md space-y-6 rounded-xl border bg-card p-8 text-center shadow-sm">
         <div className="flex justify-center">
-          <BrandMark />
+          <BrandPlate className="h-9" />
         </div>
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Wrench className="h-6 w-6" aria-hidden />

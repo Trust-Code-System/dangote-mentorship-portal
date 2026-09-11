@@ -57,7 +57,7 @@ export async function PublicFooter() {
       <div className="relative mx-auto w-full max-w-[1280px]">
         <div className="grid gap-12 md:grid-cols-[1.7fr_1fr_1fr_1fr] md:gap-8">
           <div className="max-w-md">
-            <PublicLockup markClassName="size-9" wordmarkClassName="text-base" />
+            <PublicLockup markClassName="h-9 w-auto" wordmarkClassName="text-base" />
             <p className="mt-5 text-sm leading-relaxed text-blak-text-2">{t('statement')}</p>
           </div>
 

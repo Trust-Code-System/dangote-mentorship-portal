@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { InviteStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { hashInviteToken } from '@/lib/auth/invite';
-import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthCard, AuthHeader } from '@/components/auth/auth-card';
 import { AuthAlert } from '@/components/auth/auth-controls';
 import { PasswordRequirements } from '@/components/auth/password-requirements';
 import { acceptInvite } from './actions';
@@ -64,8 +64,6 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
             </Link>
           </div>
         </AuthCard>
-
-        <AuthFooter showTrustNote={false} />
       </div>
     );
   }
@@ -82,8 +80,6 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
           requirements={<PasswordRequirements />}
         />
       </AuthCard>
-
-      <AuthFooter showTrustNote={false} />
     </div>
   );
 }

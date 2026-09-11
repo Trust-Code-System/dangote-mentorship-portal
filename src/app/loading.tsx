@@ -1,4 +1,4 @@
-import { BrandMark } from '@/components/brand-logo';
+import { BrandPlate } from '@/components/brand-logo';
 
 // Root Suspense fallback. This boundary sits *outside* every route-group layout,
 // so it only appears on initial/full page loads or when a layout itself is still
@@ -15,7 +15,7 @@ export default function Loading() {
       aria-label="Dangote Mentorship Programme"
       className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg"
     >
-      <BrandMark className="brand-splash-mark size-20" />
+      <BrandPlate className="brand-splash-mark h-12" />
       <div className="h-1 w-40 overflow-hidden rounded-full bg-surface-2">
         <div className="brand-splash-bar h-full w-1/3 rounded-full bg-green" />
       </div>

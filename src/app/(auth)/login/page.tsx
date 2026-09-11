@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth/rbac';
 import { defaultDashboardPath } from '@/lib/auth/roles';
 import { isEntraConfigured } from '@/lib/auth/entra';
-import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthCard, AuthHeader } from '@/components/auth/auth-card';
 import { AuthAlert } from '@/components/auth/auth-controls';
 import { LoginForm } from './login-form';
 
@@ -55,8 +55,6 @@ export default async function LoginPage({
           </Link>
         </p>
       </AuthCard>
-
-      <AuthFooter />
     </div>
   );
 }

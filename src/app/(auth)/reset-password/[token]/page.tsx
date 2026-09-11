@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { hashToken } from '@/lib/auth/token';
-import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthCard, AuthHeader } from '@/components/auth/auth-card';
 import { AuthAlert } from '@/components/auth/auth-controls';
 import { PasswordRequirements } from '@/components/auth/password-requirements';
 import { resetPassword } from './actions';
@@ -55,8 +55,6 @@ export default async function ResetPasswordPage({
             </Link>
           </div>
         </AuthCard>
-
-        <AuthFooter showTrustNote={false} />
       </div>
     );
   }
@@ -69,8 +67,6 @@ export default async function ResetPasswordPage({
         <AuthHeader heading={t('resetHeading')} supporting={t('resetSupporting')} />
         <ResetPasswordForm action={boundAction} requirements={<PasswordRequirements />} />
       </AuthCard>
-
-      <AuthFooter showTrustNote={false} />
     </div>
   );
 }
