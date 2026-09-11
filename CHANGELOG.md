@@ -604,3 +604,11 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
 - Idempotent: an existing email is reset and reactivated rather than duplicated — the same command rotates a compromised admin password.
 - Guards: rejects passwords under 12 chars and the public `ChangeMe!20xx` seed default; prints the target database (credentials stripped) and requires interactive confirmation, or `ADMIN_CONFIRM_TARGET="host/db"` to match, before any write. Writes an `audit_logs` row (`admin.bootstrap` / `admin.reset`).
+
+## Ops — detect when a database falls behind the migrations in the repo
+
+- `scripts/check-migration-drift.ts` (`npm run db:check-drift`) compares `prisma/migrations` against the `_prisma_migrations` rows in whatever database `DATABASE_URL` points at. Read-only — one SELECT, no writes — and exits 1 on drift so it can gate a release step.
+- Found the reason it was needed: production was two migrations behind (`monthly_meeting_form`, `engagement_report`), so it lacked `assessment_windows.form_type`, `assessment_windows.gates_access`, `ReviewType.MONTHLY` and `ReportKind.ENGAGEMENT`. Neither migration creates a *table*, so all 62 tables were present and nothing noticed.
+- It also reports the case that caused the freeze: a `_prisma_migrations` row with `finished_at = NULL` is how Prisma records a migration that started and failed, and it makes `prisma migrate deploy` refuse to run until resolved. Production had one such row left behind by a hand-written `migrate resolve --applied`, alongside a second successful row for the same migration.
+- Deliberately not wired into the Vercel build. `next build` never ran `prisma migrate deploy`, which is how the drift happened, but making a bad migration fail a deploy is a different decision — this reports loudly instead.
+- `evaluateMigrationDrift` is pure and unit-tested (14 cases), including a golden case reproducing production's exact state on 2026-09-10.
