@@ -106,3 +106,47 @@ export function clientIpFromHeaders(forwardedFor: string | null, realIp: string 
   const first = forwardedFor?.split(',')[0]?.trim();
   return first || realIp?.trim() || 'unknown';
 }
+
+/** The slice of a Redis-like client the shared limiter needs. Kept here, with
+ * the rest of the pure logic, so it can be unit-tested without `server-only`. */
+export interface CounterClient {
+  incr(key: string): Promise<number>;
+  ttl(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<unknown>;
+}
+
+/**
+ * One hit against a fixed window held in a shared counter.
+ *
+ * The expiry is re-asserted whenever the key has none, rather than only on the
+ * hit that happens to see `count === 1`. That matters because Redis `INCR`
+ * creates a missing key with NO TTL: if the single `expire` call meant to
+ * follow it failed (network blip, throttling), the key would live forever,
+ * every later hit would increment it, and once it passed the limit that
+ * ip+email pair was locked out permanently — surfacing to the user as
+ * "Invalid email or password" with no way back, since waiting cannot expire a
+ * key that has no expiry. Checking the TTL on every hit both prevents that and
+ * repairs any key already stuck in that state.
+ */
+export async function applyFixedWindow(
+  client: CounterClient,
+  key: string,
+  limit: number,
+  windowSeconds: number,
+): Promise<RateLimitResult> {
+  const count = await client.incr(key);
+
+  // -1 = key exists with no expiry, -2 = key is already gone. Either way there
+  // is no live window, so start one.
+  let ttl = await client.ttl(key);
+  if (ttl < 0) {
+    await client.expire(key, windowSeconds);
+    ttl = windowSeconds;
+  }
+
+  const retryAfterSeconds = ttl > 0 ? ttl : windowSeconds;
+  if (count > limit) {
+    return { ok: false, remaining: 0, retryAfterSeconds };
+  }
+  return { ok: true, remaining: limit - count, retryAfterSeconds };
+}

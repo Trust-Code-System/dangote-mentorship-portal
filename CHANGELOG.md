@@ -604,3 +604,11 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
 - Idempotent: an existing email is reset and reactivated rather than duplicated — the same command rotates a compromised admin password.
 - Guards: rejects passwords under 12 chars and the public `ChangeMe!20xx` seed default; prints the target database (credentials stripped) and requires interactive confirmation, or `ADMIN_CONFIRM_TARGET="host/db"` to match, before any write. Writes an `audit_logs` row (`admin.bootstrap` / `admin.reset`).
+
+## Fix — a failed Redis expiry could lock a user out of sign-in permanently
+
+- The shared rate limiter ran `INCR` then set the expiry only on the hit that saw `count === 1`. Redis creates a missing key with **no TTL**, so if that one `expire` call failed — a blip, throttling, anything the surrounding `catch` swallowed — the key lived forever. Every later attempt incremented it, `count === 1` never came round again, and once the count passed the limit that `ip:email` pair was locked out **permanently**.
+- The symptom was indistinguishable from a wrong password: `authorize()` returns `null` for a rate-limit block and for a bad password alike, so the user is told "Invalid email or password" — and waiting cannot help, because a key with no expiry never expires.
+- The expiry is now re-asserted whenever the key has no TTL (`-1`) or has vanished (`-2`), which both prevents the state and **repairs keys already stuck in it** on the next attempt.
+- Only ever reachable in production: Upstash is configured there, while local and CI use the per-process in-memory limiter. That is also why no test caught it — the shared path had no coverage at all.
+- `applyFixedWindow` now lives in `rate-limit.ts` alongside the rest of the pure logic (the module documents itself as runtime-free and unit-testable) and takes a small `CounterClient` seam, so the Redis behaviour is testable without `server-only`. 7 new cases, including the stuck-key regression and its recovery.
