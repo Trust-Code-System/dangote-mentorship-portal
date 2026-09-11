@@ -619,3 +619,10 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **Widened the signed-in rail from 180px to 240px** (`lg:w-[240px]`, with `lg:pl-[240px]` on the content in lockstep). The rail was sized for the old two-word brand; "Dangote Mentorship Programme" left the wordmark roughly 51px of the 120px it asked for, so the brand link's `overflow-hidden` clipped it mid-word — "Mentorsl", "Program" — and the profile name below truncated to "Super A...". Both came from the same width.
 - **The wordmark now takes the space the rail actually has** (`flex-1 min-w-0`) instead of asking for a fixed `max-w-[7.5rem]` it never received, so a longer programme name degrades by wrapping rather than clipping. Bumped 0.72rem → 0.78rem now that there is room to read it.
 - Measured against a faithful replica of the real markup at 240px: the wordmark wraps to two clean lines with no clipping, and "Super Admin" / "SUPER ADMIN" both fit without truncation. The collapsed rail (4.5rem) is untouched, as is the 260px mobile drawer.
+
+## Fix — auth panel credit placement
+
+- **The programme name no longer sits beside the logo** on the sign-in panel. The Dangote mark alone owns the top corner; the name is still the accessible label on that link, and the card's own heading area carries it in text.
+- **"Powered by BLAK MOH" moved to the panel footer** and lost the BLAK MOH brand mark, so Dangote is the only logo mark on the screen. Wordmark only, where a build credit conventionally goes.
+- **"In collaboration with Kennedia Consulting" moved down to sit with the body copy** it belongs to, rather than competing with the brand lockup at the top. Wording follows the owner and the landing page's existing partner label — `auth.inPartnershipWith` became `auth.inCollaborationWith` ("En collaboration avec" in French).
+- `AuthAttribution` split into `CollaborationCredit` and `PoweredByCredit` so the two can be placed independently. The mobile strip below the card carries both, stacked, since the brand panel is hidden there.

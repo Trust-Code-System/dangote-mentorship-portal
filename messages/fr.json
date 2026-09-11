@@ -211,7 +211,7 @@
   },
   "auth": {
     "poweredBy": "Propulsé par",
-    "inPartnershipWith": "En partenariat avec",
+    "inCollaborationWith": "En collaboration avec",
     "loginTitle": "Connexion",
     "loginSubtitle": "Utilisez votre compte du Dangote Mentorship Programme ou votre e-mail et mot de passe.",
     "entra": "Se connecter avec Microsoft",
