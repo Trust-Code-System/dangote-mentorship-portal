@@ -27,7 +27,8 @@
     "db:seed": "tsx --env-file=.env prisma/seed.ts",
     "postinstall": "prisma generate",
     "prepare": "husky || true",
-    "admin:create": "tsx --env-file=.env scripts/create-admin.ts"
+    "admin:create": "tsx --env-file=.env scripts/create-admin.ts",
+    "db:check-drift": "tsx --env-file=.env scripts/check-migration-drift.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
