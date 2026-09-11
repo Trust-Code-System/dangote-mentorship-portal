@@ -501,7 +501,7 @@ export function AppShell({
       <aside
         className={cn(
           'border-border bg-surface fixed inset-y-0 left-0 z-50 flex flex-col border-r transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
-          collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[180px]',
+          collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[240px]',
           'w-[260px]', // mobile drawer width
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
@@ -517,10 +517,10 @@ export function AppShell({
           >
             <BrandPlate className="h-7 shrink-0" />
             {!collapsed && (
-              <span className="min-w-0 leading-tight">
+              <span className="min-w-0 flex-1 leading-tight">
                 <Wordmark
                   name={labels.brand}
-                  className="font-display text-ink block max-w-[7.5rem] text-[0.72rem] leading-tight font-bold whitespace-normal"
+                  className="font-display text-ink block text-[0.78rem] leading-tight font-bold whitespace-normal"
                 />
                 {labels.subtitle ? (
                   <span className="text-ink-3 mt-0.5 block text-[0.58rem]">{labels.subtitle}</span>
@@ -681,7 +681,7 @@ export function AppShell({
       <div
         className={cn(
           'flex min-h-screen flex-col transition-[padding] duration-200 ease-out motion-reduce:transition-none',
-          collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[180px]',
+          collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[240px]',
         )}
       >
         {/* Top bar */}
