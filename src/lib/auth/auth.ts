@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import { AuthError } from 'next-auth';
+import { AuthError, CredentialsSignin } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
@@ -11,9 +11,21 @@ import { verifyPassword } from './password';
 import { authConfig } from './auth.config';
 import { clientIpFromHeaders } from './rate-limit';
 import { checkRateLimit } from './rate-limit-shared';
+import {
+  LOGIN_LIMIT,
+  LOGIN_RATE_LIMITED_CODE,
+  LOGIN_WINDOW_MS,
+  loginRateLimitKey,
+} from './login-throttle';
 
-const LOGIN_LIMIT = 5;
-const LOGIN_WINDOW_MS = 60_000;
+/**
+ * Thrown instead of returning null when the throttle trips, so the sign-in form
+ * can say "wait a minute" rather than "wrong password". Auth.js carries `code`
+ * through to the caller; the credentials themselves are never revealed by it.
+ */
+class LoginRateLimited extends CredentialsSignin {
+  override code = LOGIN_RATE_LIMITED_CODE;
+}
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -83,11 +95,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           request.headers.get('x-real-ip'),
         );
         const limit = await checkRateLimit(
-          `login:${ip}:${email.toLowerCase()}`,
+          loginRateLimitKey(ip, email),
           LOGIN_LIMIT,
           LOGIN_WINDOW_MS,
         );
-        if (!limit.ok) return null;
+        // Throw rather than `return null`: null is indistinguishable from a bad
+        // password, which is what made a throttled-but-correct sign-in report
+        // "Invalid email or password".
+        if (!limit.ok) throw new LoginRateLimited();
 
         const user = await prisma.user.findFirst({
           where: { email: email.toLowerCase(), deletedAt: null, isActive: true },

@@ -626,3 +626,10 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - **"Powered by BLAK MOH" moved to the panel footer** and lost the BLAK MOH brand mark, so Dangote is the only logo mark on the screen. Wordmark only, where a build credit conventionally goes.
 - **"In collaboration with Kennedia Consulting" moved down to sit with the body copy** it belongs to, rather than competing with the brand lockup at the top. Wording follows the owner and the landing page's existing partner label — `auth.inPartnershipWith` became `auth.inCollaborationWith` ("En collaboration avec" in French).
 - `AuthAttribution` split into `CollaborationCredit` and `PoweredByCredit` so the two can be placed independently. The mobile strip below the card carries both, stacked, since the brand panel is hidden there.
+
+## Fix — a throttled sign-in no longer claims the password is wrong
+
+- **`authorize()` returned `null` when the login rate limit tripped**, which Auth.js reports as `CredentialsSignin` — byte-for-byte the same outcome as a bad password. The sign-in action turned every `AuthError` into "Invalid email or password", so a user with *correct* credentials who had just mistyped five times within a minute was told their password was wrong. The `rate_limited` copy existed in both locales and was never once reachable.
+- It now throws a `CredentialsSignin` carrying a `rate_limited` code, which Auth.js passes through to the caller, and the action classifies on that. No re-reading of the counter, which would have consumed another attempt or needed a second, subtly different threshold.
+- The budget, the bucket key and the classifier moved into `lib/auth/login-throttle.ts` so the action and `authorize` share one definition. Pure and unit-tested (9 cases): unrecognised errors fall back to "invalid" so a wrong guess stays indistinguishable from an unknown account, and the key stays IP + lower-cased email so one office cannot lock out a building and nobody can lock a colleague out by guessing their address.
+- The window is fixed rather than sliding, so waiting it out always clears the block.

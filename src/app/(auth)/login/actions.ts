@@ -2,6 +2,7 @@
 
 import { AuthError } from 'next-auth';
 import { signIn } from '@/lib/auth/auth';
+import { classifyLoginError } from '@/lib/auth/login-throttle';
 
 export type LoginState = { error?: 'invalid' | 'rate_limited' };
 
@@ -24,7 +25,11 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return {};
   } catch (error) {
     if (error instanceof AuthError) {
-      return { error: 'invalid' };
+      // A throttled attempt and a wrong password both arrive as
+      // CredentialsSignin; only the code tells them apart, and collapsing both
+      // into 'invalid' is what told users with correct credentials that their
+      // password was wrong.
+      return { error: classifyLoginError(error) };
     }
     throw error;
   }
