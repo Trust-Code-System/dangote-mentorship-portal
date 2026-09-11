@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { BrandMark } from '@/components/brand-logo';
 import { AuthVisual } from './auth-visual';
 import { AuthBrandCopy } from './auth-brand-copy';
-import { AuthAttribution } from './auth-attribution';
+import { CollaborationCredit, PoweredByCredit } from './auth-attribution';
 
 /**
  * The Threshold — the shared frame behind every authentication page
@@ -33,13 +33,9 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         <AuthVisual />
 
         <div className="relative">
-          <Link href="/welcome" className="inline-flex items-center gap-3 rounded-md">
-            <BrandMark className="h-9 w-auto" />
-            <span className="font-display text-base font-extrabold tracking-tight text-blak-text">
-              {tc('appName')}
-            </span>
+          <Link href="/welcome" className="inline-flex items-center rounded-md" aria-label={tc('appName')}>
+            <BrandMark className="h-10 w-auto" />
           </Link>
-          <AuthAttribution className="mt-4" />
         </div>
 
         {/* The message varies on /signup — a first-time visitor is beginning a
@@ -49,8 +45,12 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         <div className="relative flex flex-1 items-center">
           <div className="max-w-xl">
             <AuthBrandCopy />
+            <CollaborationCredit className="mt-7" />
           </div>
         </div>
+
+        {/* Build credit, in the panel footer where one conventionally goes. */}
+        <PoweredByCredit className="relative" />
       </section>
 
       {/* ── Right: form panel ── */}
@@ -58,11 +58,12 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         {/* Compact branded header — the brand panel's stand-in below `lg`. */}
         <header className="relative flex items-center justify-between overflow-hidden border-b border-blak-border/10 bg-blak-forest px-5 py-4 lg:hidden">
           <AuthVisual className="opacity-70" />
-          <Link href="/welcome" className="relative inline-flex items-center gap-2.5 rounded-md">
+          <Link
+            href="/welcome"
+            className="relative inline-flex items-center rounded-md"
+            aria-label={tc('appName')}
+          >
             <BrandMark className="h-8 w-auto" />
-            <span className="font-display text-sm font-extrabold tracking-tight text-blak-text">
-              {tc('appName')}
-            </span>
           </Link>
           {/* No language switcher here: the form card carries one directly
               above the fields, and two controls for the same setting on one
@@ -78,8 +79,9 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
           <div className="w-full max-w-[460px]">{children}</div>
         </main>
 
-        <div className="relative overflow-hidden border-t border-blak-border/10 bg-blak-forest px-5 py-4 lg:hidden">
-          <AuthAttribution className="justify-center text-center" />
+        <div className="relative flex flex-col items-center gap-2 overflow-hidden border-t border-blak-border/10 bg-blak-forest px-5 py-4 lg:hidden">
+          <CollaborationCredit className="justify-center" />
+          <PoweredByCredit className="justify-center" />
         </div>
       </div>
     </div>
