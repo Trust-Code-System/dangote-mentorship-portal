@@ -43,7 +43,7 @@ import {
 import { signOutAction } from '@/lib/auth/actions';
 import { LocaleSwitcher } from '@/components/locale-switcher';
 import type { AppLocale } from '@/i18n/config';
-import { BrandMark } from '@/components/brand-logo';
+import { BrandPlate } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
 import { NavSpinner } from '@/components/shell/nav-spinner';
@@ -515,7 +515,7 @@ export function AppShell({
               collapsed && 'lg:hidden', // narrow rail shows only the collapse chevron
             )}
           >
-            <BrandMark className="size-7 shrink-0" />
+            <BrandPlate className="h-7 shrink-0" />
             {!collapsed && (
               <span className="min-w-0 leading-tight">
                 <Wordmark

@@ -40,7 +40,7 @@ export function PublicLockup({
 
   return (
     <span className={cn('inline-flex min-w-0 items-center gap-2.5', className)}>
-      <BrandMark className={cn('size-8', markClassName)} />
+      <BrandMark className={cn('h-8 w-auto', markClassName)} />
       {/* role="img" so the aria-label is actually permitted here: a bare span maps
           to role generic, which prohibits a name, and support is inconsistent. */}
       <span

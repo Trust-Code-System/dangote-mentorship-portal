@@ -210,6 +210,8 @@
     "helpCta": "Sign in"
   },
   "auth": {
+    "poweredBy": "Powered by",
+    "inPartnershipWith": "In partnership with",
     "loginTitle": "Sign in",
     "loginSubtitle": "Use your Dangote Mentorship Programme account or email and password.",
     "entra": "Sign in with Microsoft",
@@ -242,7 +244,6 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "supportLink": "Support",
-    "copyright": "© 2026 Dangote Mentorship Programme. All rights reserved.",
     "corporateEmail": "Corporate email",
     "emailPlaceholder": "name@blakmoh.com",
     "forgotShort": "Forgot?",
@@ -265,7 +266,6 @@
     "sessionExpiredBody": "Sign in again to continue where you left off.",
     "authErrorTitle": "We could not complete sign-in",
     "authErrorBody": "Something went wrong on the way back from the sign-in provider. Please try again.",
-    "trustNote": "Your account and mentorship activity are protected by role-based access, enforced on every request.",
     "fullName": "Full name",
     "fullNamePlaceholder": "As it should appear in the programme",
     "confirmPassword": "Confirm password",
@@ -297,9 +297,6 @@
     "inviteInvalidBody": "The link may not have been copied in full. Ask your programme administrator for a new one.",
     "requestHeading": "Request programme access",
     "requestSupporting": "Accounts are created by your programme administrator.",
-    "footerPrivacy": "Confidentiality",
-    "footerSupport": "Support",
-    "footerBackHome": "Back to home",
     "requestBrandHeadline": "Begin your mentorship",
     "requestBrandHeadlineAccent": "journey.",
     "requestBrandBody": "Accounts are created by your programme administrator. Activate yours with the invitation you were sent, or ask your administrator for one."

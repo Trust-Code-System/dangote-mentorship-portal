@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthCard, AuthHeader } from '@/components/auth/auth-card';
 import { ForgotPasswordForm } from './forgot-password-form';
 
 export default async function ForgotPasswordPage() {
@@ -11,8 +11,6 @@ export default async function ForgotPasswordPage() {
         <AuthHeader heading={t('forgotHeading')} supporting={t('forgotSupporting')} />
         <ForgotPasswordForm />
       </AuthCard>
-
-      <AuthFooter showTrustNote={false} />
     </div>
   );
 }

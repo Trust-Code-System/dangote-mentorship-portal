@@ -210,6 +210,8 @@
     "helpCta": "Se connecter"
   },
   "auth": {
+    "poweredBy": "Propulsé par",
+    "inPartnershipWith": "En partenariat avec",
     "loginTitle": "Connexion",
     "loginSubtitle": "Utilisez votre compte du Dangote Mentorship Programme ou votre e-mail et mot de passe.",
     "entra": "Se connecter avec Microsoft",
@@ -242,7 +244,6 @@
     "privacyPolicy": "Confidentialité",
     "termsOfService": "Conditions d’utilisation",
     "supportLink": "Assistance",
-    "copyright": "© 2026 Dangote Mentorship Programme. Tous droits réservés.",
     "corporateEmail": "E-mail professionnel",
     "emailPlaceholder": "nom@blakmoh.com",
     "forgotShort": "Oublié ?",
@@ -265,7 +266,6 @@
     "sessionExpiredBody": "Reconnectez-vous pour reprendre là où vous vous étiez arrêté.",
     "authErrorTitle": "Impossible de finaliser la connexion",
     "authErrorBody": "Un problème est survenu au retour du fournisseur d'identité. Veuillez réessayer.",
-    "trustNote": "Votre compte et votre activité de mentorat sont protégés par un contrôle d'accès selon le rôle, appliqué à chaque requête.",
     "fullName": "Nom complet",
     "fullNamePlaceholder": "Tel qu'il doit apparaître dans le programme",
     "confirmPassword": "Confirmer le mot de passe",
@@ -297,9 +297,6 @@
     "inviteInvalidBody": "Le lien n'a peut-être pas été copié en entier. Demandez-en un nouveau à votre administrateur de programme.",
     "requestHeading": "Demander l'accès au programme",
     "requestSupporting": "Les comptes sont créés par votre administrateur de programme.",
-    "footerPrivacy": "Confidentialité",
-    "footerSupport": "Assistance",
-    "footerBackHome": "Retour à l'accueil",
     "requestBrandHeadline": "Commencez votre parcours",
     "requestBrandHeadlineAccent": "de mentorat.",
     "requestBrandBody": "Les comptes sont créés par l'administrateur de votre programme. Activez le vôtre avec l'invitation reçue, ou demandez-en une à votre administrateur."

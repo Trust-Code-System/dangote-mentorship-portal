@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { Ticket, Mail } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth/rbac';
 import { defaultDashboardPath } from '@/lib/auth/roles';
-import { AuthCard, AuthHeader, AuthFooter } from '@/components/auth/auth-card';
+import { AuthCard, AuthHeader } from '@/components/auth/auth-card';
 import { InviteCodeForm } from './invite-code-form';
 
 // Request-access page (invite-only model, CLAUDE.md §2). No self-service account
@@ -67,8 +67,6 @@ export default async function SignupPage() {
           </Link>
         </p>
       </AuthCard>
-
-      <AuthFooter showTrustNote={false} />
     </div>
   );
 }

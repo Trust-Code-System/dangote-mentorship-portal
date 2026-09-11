@@ -49,15 +49,17 @@ test.describe('authentication experience', () => {
     expect(errors).toEqual([]);
   });
 
-  test('every footer destination is reachable while signed out', async ({
+  // The auth footer (trust note, Confidentiality / Support / Back to home, and
+  // the copyright line) was removed at the owner's request, so there are no
+  // footer links left to assert on. These routes still have to work for a
+  // signed-out visitor, though — /contact especially, since it is the only
+  // public support path — so the reachability sweep stays.
+  test('public routes stay reachable while signed out', async ({
     page,
   }) => {
     await page.goto('/login');
 
-    // Support must not point at the authenticated /support workflow: signed-out
-    // users use the dedicated public contact page.
-    const support = page.getByRole('link', { name: 'Support' });
-    await expect(support).toHaveAttribute('href', '/contact');
+    await expect(page.getByRole('link', { name: 'Support' })).toHaveCount(0);
 
     for (const path of [
       '/contact',

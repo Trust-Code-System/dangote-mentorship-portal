@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { BrandMark } from '@/components/brand-logo';
+import { BrandMark, BrandPlate } from '@/components/brand-logo';
 import { cn } from '@/lib/utils';
 
 /**
@@ -41,7 +41,11 @@ export function BrandedRouteLoader({
       {/* Decorative: the accessible name comes from the status text below, so the
           mark's own alt text would just be a second, less useful announcement. */}
       <span aria-hidden="true" className="contents">
-        <BrandMark className="brand-splash-mark size-16" />
+        {tone === 'dark' ? (
+          <BrandMark className="brand-splash-mark h-11 w-auto" />
+        ) : (
+          <BrandPlate className="brand-splash-mark h-11" />
+        )}
       </span>
       <div
         aria-hidden="true"

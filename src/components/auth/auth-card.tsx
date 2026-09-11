@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { AuthLanguageSwitcher } from './auth-language-switcher';
@@ -57,54 +56,5 @@ export async function AuthHeader({
       </h1>
       {supporting ? <p className="mt-2 text-base leading-relaxed text-auth-ink-2">{supporting}</p> : null}
     </div>
-  );
-}
-
-/**
- * Footer beneath the card: the trust note, then only links that actually work
- * for a signed-out visitor.
- *
- * Both links now point at real public pages. Previously "Confidentiality" went
- * to `/faq` (no confidentiality page existed) and "Support" was a `mailto:`
- * (the `/support` route lives in `(dashboard)` and is auth-gated, so clicking
- * it while locked out bounced straight back to `/login`). The public Knowledge
- * Library supplies both destinations: `/confidentiality`, and `/contact` — the
- * public support page, which routes a locked-out visitor to password reset,
- * invitation help or the FAQ.
- *
- * **Terms of Service** stays omitted: no route and no approved copy exist, so
- * pointing it at an unrelated page would be worse than leaving it out
- * (PUBLIC_PAGES_MASTER_SPEC.md §12).
- */
-export async function AuthFooter({ showTrustNote = true }: { showTrustNote?: boolean }) {
-  const t = await getTranslations('auth');
-
-  const linkClass =
-    'inline-flex min-h-11 items-center text-blak-text-2 transition-colors hover:text-blak-text';
-
-  return (
-    <footer className="mt-4 text-center">
-      {showTrustNote ? (
-        <p className="mx-auto max-w-[54ch] text-xs leading-relaxed text-blak-text-2">
-          {t('trustNote')}
-        </p>
-      ) : null}
-
-      <nav className="mt-2 flex flex-wrap items-center justify-center gap-x-6 text-sm">
-        <Link href="/confidentiality" className={linkClass}>
-          {t('footerPrivacy')}
-        </Link>
-        <Link href="/contact" className={linkClass}>
-          {t('footerSupport')}
-        </Link>
-        {/* The root is now the sign-in screen, so "back home" means the
-            marketing narrative at /welcome. */}
-        <Link href="/welcome" className={linkClass}>
-          {t('footerBackHome')}
-        </Link>
-      </nav>
-
-      <p className="mt-1 text-xs text-blak-text-2/70">{t('copyright')}</p>
-    </footer>
   );
 }

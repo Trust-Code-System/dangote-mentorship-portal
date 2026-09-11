@@ -86,7 +86,7 @@ export async function SectionTransformation() {
 
         <ScrollReveal delay={0.2}>
           <div className="mt-24 flex justify-center">
-            <PublicLockup markClassName="size-10" wordmarkClassName="text-lg" />
+            <PublicLockup markClassName="h-10 w-auto" wordmarkClassName="text-lg" />
           </div>
         </ScrollReveal>
       </div>
