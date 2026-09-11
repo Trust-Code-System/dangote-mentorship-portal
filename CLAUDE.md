@@ -241,3 +241,13 @@ See docs/experience-layer.md. Tier 1 items are part of the M2–M4 Definitions o
 
 ## 19. Design System — See docs/design-system.md. This governs ALL UI. Build the token file and shared component library FIRST, before any feature screen. No raw shadcn defaults; every component is themed to these tokens.
 
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

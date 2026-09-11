@@ -599,6 +599,12 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - Footer nav links keep `min-h-11` — that is a pointer target size (WCAG 2.2 §2.5.8), not spare padding.
 - `/signup` improved from 132px to 100px of overflow at 1366×768 but still scrolls a little there: it presents two full option cards (redeem an invite code / request access), and compressing that further would cost more than the scroll does. It fits at 1440×900.
 
+## Ops — bootstrap a real Super Admin without the demo seed
+
+- `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
+- Idempotent: an existing email is reset and reactivated rather than duplicated — the same command rotates a compromised admin password.
+- Guards: rejects passwords under 12 chars and the public `ChangeMe!20xx` seed default; prints the target database (credentials stripped) and requires interactive confirmation, or `ADMIN_CONFIRM_TARGET="host/db"` to match, before any write. Writes an `audit_logs` row (`admin.bootstrap` / `admin.reset`).
+
 ## Feature — Dangote brand mark, partner attribution, no auth footer
 
 - **The brand mark is now the Dangote logo** everywhere it appears: the participant and admin sidebars, the sign-in and sign-up screens, the splash and route-transition loaders, the maintenance page, and the public lockup.
