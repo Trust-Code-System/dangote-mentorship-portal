@@ -1,9 +1,12 @@
 import { cache } from 'react';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { RoleName } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { auth } from './auth';
 import { type AdminCohortScope, cohortFilterFor, scopeAllows } from './scope';
 import { ADMIN_ROLES } from './roles';
+import { getGoalSetupGate } from '@/features/goals/onboarding';
 
 // Authorization errors. Server actions translate these into typed results
 // (CLAUDE.md §3: every mutation authenticates → authorizes → validates …).
@@ -85,9 +88,21 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 }
 
 /** Asserts the request is authenticated and returns the user. */
-export async function requireUser(): Promise<SessionUser> {
+export async function requireUser(
+  options: { allowGoalSetup?: boolean } = {},
+): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) throw new UnauthenticatedError();
+  if (!options.allowGoalSetup && (await getGoalSetupGate(user)).locked) {
+    const requestHeaders = await headers();
+    // Page children can render alongside their layout. Redirect here too, so
+    // their auth checks never replace the setup redirect with an error screen.
+    // Server actions receive a typed denial before any mutation is performed.
+    if (requestHeaders.get('x-pathname') && !requestHeaders.has('next-action')) {
+      redirect('/goals');
+    }
+    throw new ForbiddenError('Set your first goal before continuing in the portal.');
+  }
   return user;
 }
 

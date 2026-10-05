@@ -851,6 +851,9 @@
     "selectBody": "Le programme, la cohorte, le rôle, la langue, l’état d’achèvement et l’identifiant du certificat apparaîtront ici."
   },
   "goals": {
+    "setupRequired": "Bienvenue ! Définissez votre premier objectif de développement pour continuer. Enregistrez-le pour accéder au reste du portail.",
+    "setupNoCohort": "L’équipe du programme doit vous ajouter à une cohorte avant que vous puissiez définir votre objectif. Veuillez contacter votre administrateur de programme.",
+    "saveAndContinue": "Enregistrer l’objectif et continuer",
     "title": "Objectifs",
     "subtitle": "Définissez des objectifs de développement SMART, faites-les approuver par votre mentor et suivez vos progrès.",
     "myGoals": "Mes objectifs",

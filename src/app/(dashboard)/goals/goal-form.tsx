@@ -39,12 +39,12 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
         style={{ width: `calc((100% - 2rem) * ${SMART_STEPS.length > 1 ? filledCount / (SMART_STEPS.length - 1) : 0})` }}
         aria-hidden
       />
-      <ol className="relative flex justify-between">
+      <ol className="relative grid grid-cols-5">
         {SMART_STEPS.map((s, i) => {
           const isDone = done(s.field);
           const isCurrent = i === currentIndex;
           return (
-            <li key={s.key} className="flex flex-col items-center gap-1.5">
+            <li key={s.key} aria-current={isCurrent ? 'step' : undefined} className="flex min-w-0 flex-col items-center gap-1.5">
               <span
                 className={cn(
                   'flex size-8 items-center justify-center rounded-full border-2 bg-surface text-small font-bold transition-colors',
@@ -59,7 +59,7 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
               </span>
               <span
                 className={cn(
-                  'text-micro uppercase tracking-wider',
+                  'sr-only text-micro uppercase tracking-wider sm:not-sr-only',
                   isDone || isCurrent ? 'font-bold text-green-strong' : 'text-ink-3',
                 )}
               >
@@ -96,12 +96,14 @@ export function GoalForm({
   cohortId,
   initial,
   enableDraft = false,
+  onboarding = false,
 }: {
   mode: 'create' | 'edit';
   goalId?: string;
   cohortId?: string;
   initial?: GoalDraftFields;
   enableDraft?: boolean;
+  onboarding?: boolean;
 }) {
   const t = useTranslations('goals');
   const tc = useTranslations('common');
@@ -128,6 +130,11 @@ export function GoalForm({
   useEffect(() => {
     if (!state?.ok) return;
     if (enableDraft) void clear();
+    if (onboarding) {
+      router.replace('/dashboard');
+      router.refresh();
+      return;
+    }
     router.refresh();
     if (mode !== 'create') return;
     let cancelled = false;
@@ -263,9 +270,9 @@ export function GoalForm({
         </p>
       ) : null}
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
         <Button type="button" variant="ghost" disabled={activeStep === 0} onClick={() => setActiveStep((s) => Math.max(0, s - 1))}>
-          {activeStep === 0 ? td('saved') : 'Back'}
+          {tc('back')}
         </Button>
         {activeStep < SMART_STEPS.length - 1 ? (
           <Button type="button" onClick={() => setActiveStep((s) => Math.min(SMART_STEPS.length - 1, s + 1))}>
@@ -273,7 +280,7 @@ export function GoalForm({
           </Button>
         ) : (
           <Button type="submit" disabled={pending}>
-            {pending ? tc('loading') : mode === 'create' ? t('createGoal') : t('save')}
+            {pending ? tc('loading') : onboarding ? t('saveAndContinue') : mode === 'create' ? t('createGoal') : t('save')}
           </Button>
         )}
       </div>

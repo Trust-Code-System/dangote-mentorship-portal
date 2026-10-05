@@ -852,6 +852,9 @@
   },
   "goals": {
     "title": "Goals",
+    "setupRequired": "Welcome! Set your first development goal to continue. Saving your goal unlocks the rest of the portal.",
+    "setupNoCohort": "The programme team needs to add you to a cohort before you can set your goal. Please contact your programme administrator.",
+    "saveAndContinue": "Save goal and continue",
     "subtitle": "Set SMART development goals, get them approved by your mentor, and track your progress.",
     "myGoals": "My goals",
     "newGoal": "Set a new goal",
