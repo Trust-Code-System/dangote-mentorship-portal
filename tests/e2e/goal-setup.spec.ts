@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { CohortStatus, PrismaClient, RoleName } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 // This fixture belongs only in the disposable local/CI database. Never create
 // test participants against a deployed portal's database.
@@ -40,7 +40,7 @@ test.beforeAll(async () => {
     data: {
       email,
       name: 'Goal setup participant',
-      passwordHash: await hash(password, 12),
+      passwordHash: await bcrypt.hash(password, 12),
       userRoles: { create: { roleId: role.id, cohortId } },
       menteeProfile: { create: { cohortId, fullName: 'Goal setup participant', email } },
     },
