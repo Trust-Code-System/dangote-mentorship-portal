@@ -1,5 +1,5 @@
 // Provider-agnostic mail transport (mirrors the lib/ai adapter pattern). A real
-// provider — Resend or Microsoft Graph (CLAUDE.md §2) — is wired when its
+// provider — Resend, SMTP or Microsoft Graph — is wired when its
 // credentials exist; until then the log transport keeps flows shippable "dark".
 export interface SendEmailInput {
   to: string;

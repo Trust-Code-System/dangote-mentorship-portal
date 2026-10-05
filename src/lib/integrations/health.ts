@@ -37,11 +37,13 @@ function graphHealth(env: Environment, names: string[], legacyNames: string[]) {
 
 export function getIntegrationHealth(env: Environment = process.env) {
   const resend = groupHealth(env, ['RESEND_API_KEY', 'RESEND_FROM_EMAIL']);
+  const smtp = groupHealth(env, ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM']);
 
   if (!microsoftIntegrationsEnabled(env)) {
     const disabled = { configured: false, mode: 'disabled' as const, missing: [] };
     return {
       resend,
+      smtp,
       entra: { ...disabled },
       graphMail: { ...disabled },
       graphCalendar: { ...disabled },
@@ -50,6 +52,7 @@ export function getIntegrationHealth(env: Environment = process.env) {
 
   return {
     resend,
+    smtp,
     entra: groupHealth(env, [
       'AUTH_MICROSOFT_ENTRA_ID_ID',
       'AUTH_MICROSOFT_ENTRA_ID_SECRET',

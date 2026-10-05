@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { getIntegrationHealth, integrationDiagnosticLines } from '@/lib/integrations/health';
 
 describe('integration health', () => {
+  it('reports SMTP independently of Microsoft Graph and never prints credentials', () => {
+    const env = {
+      SMTP_HOST: 'smtp.office365.com',
+      SMTP_USER: 'sender@example.com',
+      SMTP_PASS: 'private-password',
+      SMTP_FROM: 'sender@example.com',
+    };
+    expect(getIntegrationHealth(env).smtp.mode).toBe('configured');
+    expect(getIntegrationHealth(env).graphMail.mode).toBe('disabled');
+    expect(getIntegrationHealth({ SMTP_HOST: env.SMTP_HOST }).smtp.mode).toBe('partial');
+    expect(integrationDiagnosticLines(env).join('\n')).not.toContain(env.SMTP_PASS);
+  });
+
   it('reports Resend independently of the Microsoft integrations switch', () => {
     const health = getIntegrationHealth({
       RESEND_API_KEY: 're_secret',

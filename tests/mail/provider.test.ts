@@ -9,6 +9,43 @@ afterEach(() => {
 });
 
 describe('mail provider selection', () => {
+  it('selects SMTP explicitly even when Resend is also configured', () => {
+    vi.stubEnv('MAIL_PROVIDER', ' smtp\r\n ');
+    vi.stubEnv('SMTP_HOST', 'smtp.office365.com');
+    vi.stubEnv('SMTP_USER', 'sender@example.com');
+    vi.stubEnv('SMTP_PASS', 'test-password');
+    vi.stubEnv('SMTP_FROM', 'sender@example.com');
+    vi.stubEnv('RESEND_API_KEY', 're_secret');
+    vi.stubEnv('RESEND_FROM_EMAIL', 'notifications@mail.example.com');
+    expect(getMailTransport().id).toBe('smtp');
+  });
+
+  it('fails closed when SMTP is explicitly selected but incomplete', async () => {
+    vi.stubEnv('MAIL_PROVIDER', 'smtp');
+    vi.stubEnv('SMTP_PASS', '');
+    vi.stubEnv('RESEND_API_KEY', 're_secret');
+    vi.stubEnv('RESEND_FROM_EMAIL', 'notifications@mail.example.com');
+    const transport = getMailTransport();
+    expect(transport.id).toBe('smtp-misconfigured');
+    await expect(
+      transport.send({
+        to: 'participant@example.com',
+        subject: 'Update',
+        text: 'Body',
+      }),
+    ).rejects.toThrow('smtp mail is selected');
+  });
+
+  it('selects configured SMTP before the log fallback', () => {
+    vi.stubEnv('MAIL_PROVIDER', '');
+    vi.stubEnv('RESEND_API_KEY', '');
+    vi.stubEnv('SMTP_HOST', 'smtp.office365.com');
+    vi.stubEnv('SMTP_USER', 'sender@example.com');
+    vi.stubEnv('SMTP_PASS', 'test-password');
+    vi.stubEnv('SMTP_FROM', 'sender@example.com');
+    expect(getMailTransport().id).toBe('smtp');
+  });
+
   it('selects Resend when explicitly configured', () => {
     vi.stubEnv('MAIL_PROVIDER', 'resend');
     vi.stubEnv('RESEND_API_KEY', 're_secret');
