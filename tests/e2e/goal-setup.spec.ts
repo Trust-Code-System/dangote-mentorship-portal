@@ -63,10 +63,20 @@ test.afterAll(async () => {
 });
 
 test('a new mentee must save a goal before accessing the portal', async ({ page }) => {
+  page.on('pageerror', (error) => console.log(`[goal-setup] browser error: ${error.message}`));
   await page.setViewportSize({ width: 320, height: 900 });
   await signIn(page);
   await page.waitForURL('**/goals');
-  await expect(page.getByText(/Set your first development goal to continue/)).toBeVisible();
+  try {
+    await expect(page.getByText(/Set your first development goal to continue/)).toBeVisible();
+  } catch (error) {
+    console.log(
+      `[goal-setup] initial page at ${page.url()}: ${await page.locator('body').innerText()}`,
+    );
+    await page.reload();
+    console.log(`[goal-setup] after reload: ${await page.locator('body').innerText()}`);
+    throw error;
+  }
   await expect(page.locator('aside')).toHaveCount(0);
 
   for (const route of ['/dashboard', '/profile', '/messages']) {
