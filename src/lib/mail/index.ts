@@ -2,6 +2,7 @@ import 'server-only';
 import type { MailTransport, SendEmailInput } from './types';
 import { createGraphMailTransport, isGraphMailConfigured } from './graph';
 import { createResendMailTransport, isResendMailConfigured } from './resend';
+import { createSmtpMailTransport, isSmtpMailConfigured } from './smtp';
 
 export type { MailTransport, SendEmailInput } from './types';
 
@@ -36,7 +37,7 @@ function unavailableTransport(provider: string): MailTransport {
 }
 
 // MAIL_PROVIDER makes the production choice explicit. Without it, Resend wins
-// when configured, then Graph, then the development log transport. An explicit
+// when configured, then SMTP, then Graph, then the development log transport. An explicit
 // but incomplete provider fails closed so a newsletter is never marked sent
 // when no real delivery was attempted.
 export function getMailTransport(): MailTransport {
@@ -47,6 +48,8 @@ export function getMailTransport(): MailTransport {
     cached = isResendMailConfigured()
       ? createResendMailTransport()
       : unavailableTransport('resend');
+  } else if (selected === 'smtp') {
+    cached = isSmtpMailConfigured() ? createSmtpMailTransport() : unavailableTransport('smtp');
   } else if (selected === 'microsoft-graph' || selected === 'graph') {
     cached = isGraphMailConfigured()
       ? createGraphMailTransport()
@@ -57,6 +60,8 @@ export function getMailTransport(): MailTransport {
     cached = unavailableTransport(selected);
   } else if (isResendMailConfigured()) {
     cached = createResendMailTransport();
+  } else if (isSmtpMailConfigured()) {
+    cached = createSmtpMailTransport();
   } else {
     cached = isGraphMailConfigured() ? createGraphMailTransport() : logTransport;
   }
