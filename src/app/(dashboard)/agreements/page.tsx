@@ -17,7 +17,7 @@ export default async function AgreementsPage() {
   if (!ctx.eligible) {
     return (
       <section className="space-y-3">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
         <p className="text-muted-foreground">{t('notEligible')}</p>
       </section>
     );
@@ -32,7 +32,7 @@ export default async function AgreementsPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## UI fault fixes (long text, layout polish)
+
+- Messages: a long unbroken message now wraps inside its bubble instead of widening the thread under the pair panel (bubble `overflow-wrap:anywhere` + `min-w-0`, grid track `minmax(0,1fr)`). Same fix for the Atlas copilot bubbles.
+- Global safety net in `globals.css`: body-text elements (p, headings, li, dt/dd, td/th, label, blockquote, figcaption) use `overflow-wrap:anywhere`, so pasted strings and URLs can no longer push a page sideways.
+- Goals: long titles, badges and SMART fields wrap inside the card; the mentee two-column layout uses `minmax(0,…)` tracks so the page no longer scrolls horizontally. Admin goals table cells wrap and status badges stay on one line.
+- Goals SMART stepper: labels no longer run together. In a narrow card only the current step label is shown under the rail; at the `@lg` container width every step shows its own label.
+- Quick-action "+" button: page content gets bottom padding on every breakpoint so the last row scrolls clear of the button; the button respects the iOS safe-area inset.
+- Page titles: one H1 style (`font-display text-h1 font-bold`) across dashboard and admin pages (was a mix of `text-2xl` and `text-display`).
+- Login / forgot-password email placeholder now reads `name@dangote.com` / `nom@dangote.com` (was `@blakmoh.com`).
+
 ## M0 — Foundations
 
 - Next.js (App Router) + TypeScript strict, Tailwind CSS, shadcn-style UI primitives.

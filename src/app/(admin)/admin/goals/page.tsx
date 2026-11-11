@@ -44,10 +44,10 @@ export default async function AdminGoalsPage() {
                     (g.menteeName ?? '—')
                   )}
                 </TableCell>
-                <TableCell>{g.title}</TableCell>
-                <TableCell>{g.competency ?? '—'}</TableCell>
+                <TableCell className="min-w-48 max-w-md">{g.title}</TableCell>
+                <TableCell className="min-w-32 max-w-xs">{g.competency ?? '—'}</TableCell>
                 <TableCell>
-                  <Badge variant={g.status === 'APPROVED' || g.status === 'COMPLETED' ? 'default' : 'outline'}>
+                  <Badge className="whitespace-nowrap" variant={g.status === 'APPROVED' || g.status === 'COMPLETED' ? 'default' : 'outline'}>
                     {g.status}
                   </Badge>
                 </TableCell>

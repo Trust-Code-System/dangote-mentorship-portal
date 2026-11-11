@@ -35,7 +35,7 @@ export default async function PreparePage({ params }: { params: Promise<{ id: st
         <Link href="/meetings" className="text-sm text-muted-foreground hover:underline">
           ← {t('backToMeetings')}
         </Link>
-        <h1 className="mt-1 text-2xl font-bold">{t('title')}</h1>
+        <h1 className="mt-1 font-display text-h1 font-bold text-ink">{t('title')}</h1>
         <p className="text-muted-foreground">
           {context.meetingTitle}
           {view.meeting.startsAt ? ` · ${view.meeting.startsAt.toISOString().slice(0, 16).replace('T', ' ')}` : ''}

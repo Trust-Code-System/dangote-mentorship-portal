@@ -121,7 +121,7 @@ export function AtlasCopilot({
               >
                 <div
                   className={cn(
-                    'max-w-[85%] whitespace-pre-line rounded-2xl px-3 py-2 text-small',
+                    'min-w-0 max-w-[85%] whitespace-pre-line rounded-2xl px-3 py-2 text-small [overflow-wrap:anywhere]',
                     m.role === 'user'
                       ? 'bg-green text-white'
                       : 'bg-surface-2 text-ink',

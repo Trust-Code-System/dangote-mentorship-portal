@@ -47,7 +47,10 @@ export default async function GoalsPage() {
             className={
               setup.locked
                 ? 'mx-auto max-w-2xl'
-                : 'grid items-start gap-5 lg:grid-cols-[1.1fr_.9fr]'
+                : // minmax(0, …) so a goal with a very long unbroken string can't
+                  // stretch its column past the viewport (plain `fr` has an
+                  // `auto` minimum, which grows to the content's min-width).
+                  'grid items-start gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]'
             }
           >
             <Card className="self-start">
@@ -66,7 +69,7 @@ export default async function GoalsPage() {
             </Card>
 
             {!setup.locked ? (
-              <section className="space-y-4">
+              <section className="min-w-0 space-y-4">
                 <h2 className="font-display text-h2 text-ink">{t('myGoals')}</h2>
                 {menteeGoals.length === 0 ? (
                   <p className="text-ink-3">{t('noGoalsMentee')}</p>

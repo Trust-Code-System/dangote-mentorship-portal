@@ -35,7 +35,7 @@ export default async function JournalPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 

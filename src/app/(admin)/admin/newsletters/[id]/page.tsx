@@ -38,7 +38,7 @@ export default async function AdminNewsletterPage({
       </Link>
 
       <div>
-        <h1 className="font-display text-display text-ink">{newsletter.title}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{newsletter.title}</h1>
         <p className="text-small text-ink-2">{t('composerSubtitle')}</p>
       </div>
 

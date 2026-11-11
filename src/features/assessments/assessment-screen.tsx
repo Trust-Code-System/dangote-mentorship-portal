@@ -159,7 +159,7 @@ function Screen({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-display text-ink">{title}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{title}</h1>
         <p className="text-body text-ink-2">{subtitle}</p>
       </div>
       {children}

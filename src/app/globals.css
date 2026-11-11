@@ -380,6 +380,29 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Long unbroken strings (pasted text, URLs, "aaaa…") must wrap instead of
+   * widening their card and making the whole page scroll sideways. `anywhere`
+   * (unlike `break-word`) also shrinks the element's min-content size, which is
+   * what stops flex/grid parents from being stretched. Normal words are never
+   * split mid-word; only a string too long for its box is broken. */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  li,
+  dt,
+  dd,
+  td,
+  th,
+  label,
+  blockquote,
+  figcaption {
+    overflow-wrap: anywhere;
+  }
+
   /* Themed scrollbars (§1) — subtle branded bar: thin thumb, soft track, no
    * native up/down arrow buttons. Firefox uses scrollbar-width/color;
    * Chromium/WebKit use the pseudo elements. */

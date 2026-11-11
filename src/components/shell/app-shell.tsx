@@ -811,7 +811,9 @@ export function AppShell({
         </header>
 
         {/* Content — shell stays mounted; only this region swaps / refreshes. */}
-        <main className="relative mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+        {/* Bottom padding clears the fixed quick-action "+" button (56px + 24px offset)
+            so the last row of every page can scroll out from under it. */}
+        <main className="relative mx-auto w-full min-w-0 max-w-[1180px] flex-1 px-4 py-5 pb-28 sm:px-5 lg:pb-28">
           {isRefreshing ? (
             <div
               role="status"

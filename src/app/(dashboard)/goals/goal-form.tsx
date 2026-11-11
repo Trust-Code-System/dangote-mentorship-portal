@@ -31,8 +31,15 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
   const filledCount = SMART_STEPS.filter((s) => done(s.field)).length;
   const currentIndex = SMART_STEPS.findIndex((s) => !done(s.field));
 
+  // In a narrow card (the "Set a new goal" column) five uppercase labels cannot
+  // sit side by side without running together, so below the @lg container width
+  // only the current step's label is shown, centred under the rail. At @lg and
+  // up every step carries its own label in its own column.
+  const captionIndex = currentIndex === -1 ? SMART_STEPS.length - 1 : currentIndex;
+  const captionStep = SMART_STEPS[captionIndex]!;
+
   return (
-    <div className="relative py-2">
+    <div className="@container relative py-2">
       <div className="absolute left-4 right-4 top-[1.35rem] h-0.5 bg-surface-2" aria-hidden />
       <div
         className="absolute left-4 top-[1.35rem] h-0.5 rounded-full bg-green transition-[width] duration-500"
@@ -59,7 +66,7 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
               </span>
               <span
                 className={cn(
-                  'sr-only text-micro uppercase tracking-wider sm:not-sr-only',
+                  'sr-only text-center text-micro uppercase tracking-wide @lg:not-sr-only @lg:px-1',
                   isDone || isCurrent ? 'font-bold text-green-strong' : 'text-ink-3',
                 )}
               >
@@ -69,6 +76,12 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
           );
         })}
       </ol>
+      <p
+        aria-hidden
+        className="mt-2 text-center text-micro font-bold uppercase tracking-wide text-green-strong @lg:hidden"
+      >
+        {labelFor(captionStep.key)}
+      </p>
     </div>
   );
 }
