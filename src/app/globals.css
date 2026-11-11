@@ -1127,6 +1127,18 @@ html:has(.landing-root)::-webkit-scrollbar {
 :root {
   --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
+html[data-input-modality='pointer'] :is(input, textarea, select, button, a, [tabindex]):focus {
+  outline: none !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+}
+html[data-input-modality='keyboard']
+  :is(input, textarea, select, button, a, [tabindex]):focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+  --tw-ring-offset-width: 0px;
+}
 .soft-panel {
   transition:
     opacity 320ms var(--motion-soft),

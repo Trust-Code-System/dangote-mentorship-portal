@@ -272,6 +272,7 @@ export function AppShell({
   const refreshGenRef = React.useRef(0);
   const sidebarNavRef = React.useRef<HTMLElement>(null);
   const sidebarRef = React.useRef<HTMLElement>(null);
+  const notificationTriggerRef = React.useRef<HTMLButtonElement>(null);
 
   React.useLayoutEffect(() => {
     const desktop = window.matchMedia('(min-width: 1024px)');
@@ -771,13 +772,26 @@ export function AppShell({
 
           <div className="ml-auto flex items-center gap-2">
             <LocaleSwitcher availableLocales={availableLocales} />
-            <div className="relative">
+            <div
+              className="relative"
+              onKeyDown={(event) => {
+                if (event.key === 'Escape' && notifOpen) {
+                  event.stopPropagation();
+                  setNotifOpen(false);
+                  notificationTriggerRef.current?.focus();
+                }
+              }}
+            >
               <button
+                ref={notificationTriggerRef}
                 type="button"
                 aria-label={labels.notifications}
                 aria-expanded={notifOpen}
                 onClick={() => setNotifOpen((o) => !o)}
-                className="text-ink-2 hover:bg-surface-2 relative rounded-md p-2"
+                className={cn(
+                  'text-ink-2 hover:bg-surface-2 relative rounded-md p-2',
+                  notifOpen && 'z-50',
+                )}
               >
                 <Bell className="size-5" />
                 {unread > 0 && (
