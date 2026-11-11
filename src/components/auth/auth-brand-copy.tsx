@@ -29,11 +29,11 @@ export function AuthBrandCopy() {
 
   return (
     <>
-      <p className="text-blak-label uppercase text-blak-green-soft">{eyebrow}</p>
-      <h2 className="mt-5 text-blak-statement text-blak-text">
-        {headline} <span className="font-serif font-normal italic text-blak-gold">{accent}</span>
+      <p className="text-small text-ink-2 font-medium">{eyebrow}</p>
+      <h2 className="text-ink mt-5 text-[clamp(2.5rem,3.8vw,3.75rem)] leading-[1.08] font-medium tracking-[-0.05em]">
+        {headline} <span className="text-green">{accent}</span>
       </h2>
-      <p className="mt-6 max-w-lg text-blak-body text-blak-text-2">{body}</p>
+      <p className="text-ink-2 mt-5 max-w-md text-base leading-relaxed">{body}</p>
     </>
   );
 }

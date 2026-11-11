@@ -30,7 +30,7 @@ export async function ReportsScreen({ basePath }: { basePath: string }) {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="font-display text-display text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-body text-ink-2">{t('subtitle')}</p>
       </div>
 

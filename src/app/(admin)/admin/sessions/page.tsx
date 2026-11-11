@@ -20,7 +20,7 @@ export default async function AdminSessionsPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{tList('sessionsTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{tList('sessionsTitle')}</h1>
         <p className="text-body text-ink-2">{tList('sessionsSubtitle')}</p>
       </div>
 

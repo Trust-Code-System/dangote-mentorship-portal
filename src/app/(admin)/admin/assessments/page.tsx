@@ -51,7 +51,7 @@ export default async function AdminAssessmentsPage({
   if (!cohort) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('adminTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('adminTitle')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -61,7 +61,7 @@ export default async function AdminAssessmentsPage({
   if (!overview) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('adminTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('adminTitle')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -84,7 +84,7 @@ export default async function AdminAssessmentsPage({
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="font-display text-display text-ink">
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">
           {isMonthly ? t('adminMonthlyTitle') : t('adminTitle')}
         </h1>
         <p className="text-small text-ink-2">
@@ -127,7 +127,7 @@ export default async function AdminAssessmentsPage({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={t('statMentees')} value={String(overview.menteeCount)} />
         <StatTile label={t('statSubmitted')} value={`${submitted}/${completion.length}`} />
         {isMonthly ? (

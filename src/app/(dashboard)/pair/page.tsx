@@ -20,7 +20,7 @@ export default async function PairIndexPage() {
   if (!isMentor && !isMentee) {
     return (
       <div className="space-y-4">
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-ink-2">{t('noAccess')}</p>
       </div>
     );
@@ -31,7 +31,7 @@ export default async function PairIndexPage() {
   if (pairs.length === 0) {
     return (
       <div className="space-y-4">
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-ink-2">{t('noPair')}</p>
       </div>
     );
@@ -44,7 +44,7 @@ export default async function PairIndexPage() {
     if (!workspace) {
       return (
         <div className="space-y-4">
-          <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
           <p className="text-ink-2">{t('noPair')}</p>
         </div>
       );
@@ -55,7 +55,7 @@ export default async function PairIndexPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-ink-2">{t('pickMentee')}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">

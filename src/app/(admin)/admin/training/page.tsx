@@ -3,6 +3,7 @@ import { RoleName } from '@prisma/client';
 import { getTranslations } from 'next-intl/server';
 import { getTrainingOverview } from '@/features/admin/overview-data';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { StatTile } from '@/components/ui/stat-tile';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -10,20 +11,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 // "Training completed" tile). Read-only; admin-gated by the area layout (§4). The
 // editable training-batch tooling (attendance/assessments) lands with M3.
 export default async function AdminTrainingPage() {
-  const [t, tPeople] = await Promise.all([
+  const [t, tPeople, tStatus] = await Promise.all([
     getTranslations('adminLists'),
     getTranslations('people'),
+    getTranslations('statusLabel'),
   ]);
   const overview = await getTrainingOverview();
 
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{t('trainingTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('trainingTitle')}</h1>
         <p className="text-body text-ink-2">{t('trainingSubtitle')}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile
           label={t('mentorsTrained')}
           value={`${overview.mentorsTrained} / ${overview.mentorsTotal}`}
@@ -61,13 +63,13 @@ export default async function AdminTrainingPage() {
                     {r.name}
                   </Link>
                 </TableCell>
-                <TableCell>{r.role}</TableCell>
+                <TableCell>{tStatus(r.role)}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{r.language}</Badge>
                 </TableCell>
                 <TableCell>{r.department ?? '—'}</TableCell>
                 <TableCell>
-                  <Badge variant={r.status === 'COMPLETED' ? 'default' : 'outline'}>{r.status}</Badge>
+                  <StatusBadge status={r.status} />
                 </TableCell>
                 <TableCell>{r.cohortName}</TableCell>
               </TableRow>

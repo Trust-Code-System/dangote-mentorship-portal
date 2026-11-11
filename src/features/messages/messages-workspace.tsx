@@ -85,7 +85,7 @@ export async function MessagesWorkspace({
   conversations = await listConversations(userId);
 
   return (
-    <section className="grid min-h-[calc(100vh-6.5rem)] overflow-hidden rounded-lg border border-border bg-surface shadow-elevation lg:grid-cols-[17rem_1fr] xl:grid-cols-[17rem_1fr_15rem]">
+    <section className="grid min-h-[calc(100vh-6.5rem)] overflow-hidden rounded-lg border border-border bg-surface shadow-elevation lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_15rem]">
       <div className="hidden lg:block">
         <ConversationList
           items={conversations}

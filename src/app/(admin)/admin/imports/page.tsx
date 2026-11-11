@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { CohortStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { UploadForm } from './upload-form';
@@ -26,7 +26,7 @@ export default async function ImportsPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
 
       <UploadForm cohorts={cohorts} />
 
@@ -54,9 +54,7 @@ export default async function ImportsPage() {
                   {imp.rowCount} · {imp.errorCount} {t('flagged')}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={imp.status === 'COMMITTED' ? 'default' : 'secondary'}>
-                    {imp.status}
-                  </Badge>
+                  <StatusBadge status={imp.status} />
                 </TableCell>
                 <TableCell>
                   <Button asChild size="sm" variant="outline">

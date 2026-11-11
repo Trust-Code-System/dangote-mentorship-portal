@@ -9,17 +9,14 @@ import { AuthLanguageSwitcher } from './auth-language-switcher';
  * page instead of as a system dialog, and warm rather than cool so it sits with
  * the gold half of the palette. Ink on this surface is 17.4:1.
  */
-export function AuthCard({ className, children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <div
-      className={cn(
-        'rounded-[26px] border border-auth-border/70 bg-auth-surface p-6 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_60px_-24px_rgba(0,0,0,0.75)] sm:p-7',
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
+export function AuthCard({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return <div className={cn('bg-auth-surface py-2', className)}>{children}</div>;
 }
 
 /**
@@ -45,16 +42,18 @@ export async function AuthHeader({
           both. At 320–390px "Français" was being clipped by the card edge, so
           below `sm` the switcher gets its own line. */}
       <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <span className="whitespace-nowrap text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-auth-ink-2 sm:tracking-[0.14em]">
+        <span className="text-auth-ink-2 text-[0.75rem] font-medium whitespace-nowrap">
           {t('enterprisePortal')}
         </span>
         <AuthLanguageSwitcher />
       </div>
 
-      <h1 className="font-display text-[1.75rem] font-extrabold leading-tight tracking-tight text-auth-ink">
+      <h1 className="font-display text-auth-ink text-[2rem] leading-tight font-semibold tracking-tight">
         {heading}
       </h1>
-      {supporting ? <p className="mt-2 text-base leading-relaxed text-auth-ink-2">{supporting}</p> : null}
+      {supporting ? (
+        <p className="text-auth-ink-2 mt-2 text-base leading-relaxed">{supporting}</p>
+      ) : null}
     </div>
   );
 }

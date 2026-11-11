@@ -46,7 +46,7 @@ export default async function AdminEngagementPage({
   if (!cohort) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -56,7 +56,7 @@ export default async function AdminEngagementPage({
   if (!engagement) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -88,7 +88,7 @@ export default async function AdminEngagementPage({
     <section className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-display text-ink">{t('title')}</h1>
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
           <p className="text-small text-ink-2">
             {t('subtitle', { cohort: engagement.cohortName })}
           </p>
@@ -98,7 +98,7 @@ export default async function AdminEngagementPage({
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={t('statNeedsAttention')} value={String(summary.needsAttention)} tone="risk" />
         <StatTile
           label={t('statInactive', { days: thresholds.inactiveAfterDays })}

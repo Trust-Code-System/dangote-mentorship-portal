@@ -61,7 +61,7 @@ export default async function CertificatePage({
       <section className="mx-auto max-w-4xl space-y-6">
         <header className="space-y-2">
           <Badge variant="outline">{t('statusLocked')}</Badge>
-          <h1 className="font-display text-h1 font-bold text-ink">
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">
             {t('title')}
           </h1>
           <p className="max-w-2xl text-ink-2">{t('noPairing')}</p>
@@ -99,7 +99,7 @@ export default async function CertificatePage({
               {data.certificateId}
             </span>
           </div>
-          <h1 className="font-display text-h1 font-bold text-ink">
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">
             {t('title')}
           </h1>
           <p className="text-small text-ink-2">

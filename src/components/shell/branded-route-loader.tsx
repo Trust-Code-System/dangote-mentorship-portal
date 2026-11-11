@@ -1,28 +1,14 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { BrandMark, BrandPlate } from '@/components/brand-logo';
 import { cn } from '@/lib/utils';
 
-/**
- * The loading state for every route in the app.
- *
- * Content skeletons used to stand in for each page's layout, on the theory that
- * holding the shape in place reads as faster. In practice they read as a screen
- * of empty grey boxes — most visibly on routes that had no skeleton of their own
- * and inherited the *dashboard's* stat-card shape instead. The brand mark says
- * "working" more clearly than a grey approximation of the wrong page does, and
- * one loader across the app means loading always looks like the same thing.
- *
- * Reuses the root splash's `brand-splash-*` animations so the pre-shell splash
- * (`app/loading.tsx`) and this in-shell loader read as one system. Those
- * keyframes are already disabled under `prefers-reduced-motion` in globals.css.
- *
- * `tone` picks the track colour, because the app runs two token systems: the
- * portal's light `--surface-*` scale and the dark `--blak-*` scale used by the
- * landing, the Knowledge Library and the auth frame. The mark and the green bar
- * are legible on both; only the track behind the bar needs to change.
- */
+function Line({ className }: { className?: string }) {
+  return <div className={cn('route-skeleton h-3', className)} />;
+}
+
+/** Keep the workspace stable while the incoming route streams its content. */
 export function BrandedRouteLoader({
   tone = 'portal',
   className,
@@ -31,32 +17,95 @@ export function BrandedRouteLoader({
   className?: string;
 }) {
   const t = useTranslations('common');
-
+  const pathname = usePathname() ?? '/';
+  const isForm =
+    /\/(profile|settings|assessment|monthly-form|mid-term-review|final-review|imports|invites|agreements)(\/|$)/.test(
+      pathname,
+    );
+  const isDashboard = /\/(dashboard|admin)$|\/dashboard\/(mentor|mentee)$/.test(pathname);
+  const isMessages = pathname.startsWith('/messages');
+  const isCalendar = pathname.startsWith('/calendar');
   return (
     <div
       role="status"
       aria-busy="true"
-      className={cn('flex min-h-[60vh] flex-col items-center justify-center gap-6', className)}
+      className={cn(
+        'min-h-[50vh] space-y-7 py-1',
+        tone === 'dark' && '[--border:60_60_64] [--ink:244_244_245] [--surface:24_24_27]',
+        className,
+      )}
     >
-      {/* Decorative: the accessible name comes from the status text below, so the
-          mark's own alt text would just be a second, less useful announcement. */}
-      <span aria-hidden="true" className="contents">
-        {tone === 'dark' ? (
-          <BrandMark className="brand-splash-mark h-11 w-auto" />
-        ) : (
-          <BrandPlate className="brand-splash-mark h-11" />
-        )}
-      </span>
-      <div
-        aria-hidden="true"
-        className={cn(
-          'h-1 w-32 overflow-hidden rounded-full',
-          tone === 'dark' ? 'bg-blak-ivory/10' : 'bg-surface-2',
-        )}
-      >
-        <div className="brand-splash-bar h-full w-1/3 rounded-full bg-green" />
-      </div>
       <span className="sr-only">{t('loading')}</span>
+      <div aria-hidden="true" className="space-y-7">
+        <div className="space-y-3">
+          <Line className="h-7 w-48" />
+          <Line className="w-64 max-w-full" />
+        </div>
+        {isDashboard ? (
+          <>
+            <div className="border-border grid grid-cols-2 gap-5 rounded-lg border p-5 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="space-y-4">
+                  <Line className="w-24" />
+                  <Line className="h-8 w-16" />
+                  <Line className="w-28" />
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-5 lg:grid-cols-[2fr_1fr]">
+              <Line className="h-64" />
+              <Line className="h-64" />
+            </div>
+          </>
+        ) : isForm ? (
+          <div className="border-border bg-surface max-w-3xl space-y-7 rounded-lg border p-6">
+            <Line className="h-5 w-36" />
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="space-y-2">
+                <Line className="w-24" />
+                <Line className={i === 2 ? 'h-24' : 'h-11'} />
+              </div>
+            ))}
+            <Line className="ml-auto h-10 w-28" />
+          </div>
+        ) : isMessages ? (
+          <div className="grid h-[50vh] grid-cols-[minmax(100px,1fr)_3fr] gap-5">
+            <Line className="h-full" />
+            <div className="flex flex-col gap-5 py-4">
+              <Line className="w-2/3" />
+              <Line className="ml-auto h-12 w-2/3" />
+              <Line className="h-16 w-1/2" />
+              <Line className="mt-auto h-11" />
+            </div>
+          </div>
+        ) : isCalendar ? (
+          <div className="border-border bg-border grid grid-cols-7 gap-px overflow-hidden rounded-lg border">
+            {Array.from({ length: 35 }, (_, i) => (
+              <div key={i} className="bg-surface h-20 p-2">
+                <Line className="h-2 w-4" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border-border bg-surface overflow-hidden rounded-lg border">
+            <div className="border-border flex gap-3 border-b p-4">
+              <Line className="h-8 w-40" />
+              <Line className="ml-auto h-8 w-24" />
+            </div>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div
+                key={i}
+                className="border-border/60 flex items-center gap-5 border-b p-4 last:border-0"
+              >
+                <Line className="size-8 shrink-0 rounded-full" />
+                <Line className="w-1/3" />
+                <Line className="ml-auto w-1/5" />
+                <Line className="hidden w-16 sm:block" />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

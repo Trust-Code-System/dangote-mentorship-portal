@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { PublicNav } from './public-nav';
 import { PublicFooter } from './public-footer';
-import { FilmGrain } from '@/app/(landing)/visuals/film-grain';
 
 /**
  * The frame behind every Knowledge Library page — /about, /faq,
@@ -27,7 +26,7 @@ export async function PublicPageShell({ children }: { children: React.ReactNode 
     <div className="landing-root relative min-h-screen overflow-x-hidden">
       <a
         href="#public-main"
-        className="sr-only rounded-full bg-blak-green px-5 py-3 text-sm font-semibold text-blak-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70]"
+        className="bg-blak-green text-blak-black sr-only rounded-full px-5 py-3 text-sm font-semibold focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[70]"
       >
         {t('skip')}
       </a>
@@ -37,7 +36,6 @@ export async function PublicPageShell({ children }: { children: React.ReactNode 
       <main id="public-main">{children}</main>
 
       <PublicFooter />
-      <FilmGrain />
     </div>
   );
 }

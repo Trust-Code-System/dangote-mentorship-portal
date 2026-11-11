@@ -32,7 +32,7 @@ export default async function GoalsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-body text-ink-2">{t('subtitle')}</p>
       </div>
 
@@ -41,7 +41,7 @@ export default async function GoalsPage() {
         !pairing ? (
           <p className="text-ink-3">{t('notEligible')}</p>
         ) : (
-          <div className="grid items-start gap-5 lg:grid-cols-[1.1fr_.9fr]">
+          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
             <Card className="self-start">
               <CardHeader>
                 <CardTitle className="text-h2">{t('newGoal')}</CardTitle>
@@ -56,7 +56,7 @@ export default async function GoalsPage() {
               </CardContent>
             </Card>
 
-            <section className="space-y-4">
+            <section className="min-w-0 space-y-4">
               <h2 className="font-display text-h2 text-ink">{t('myGoals')}</h2>
               {menteeGoals.length === 0 ? (
                 <p className="text-ink-3">{t('noGoalsMentee')}</p>

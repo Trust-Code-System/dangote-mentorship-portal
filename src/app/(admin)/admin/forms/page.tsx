@@ -4,13 +4,15 @@ import { CohortStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
-import { listFormDefinitions } from '@/features/forms/data';
+import { listFormDefinitions } from '@/features/forms/data';
+
 import { STANDARD_FORMS } from '@/features/forms/catalogue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import { FormRowActions } from './form-row-actions';
+import { FormRowActions } from './form-row-actions';
+
 import { InstallStandardForms } from './install-standard-forms';
 
 export default async function FormsPage() {
@@ -28,7 +30,7 @@ export default async function FormsPage() {
   if (!cohort) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -47,7 +49,7 @@ export default async function FormsPage() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-display text-ink">{t('title')}</h1>
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
           <p className="text-small text-ink-2">{t('subtitle', { cohort: cohort.name })}</p>
         </div>
         <Button asChild>

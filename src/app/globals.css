@@ -71,19 +71,19 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-serif: var(--font-serif), Georgia, serif;
 
-  --text-display: 2.25rem;
+  --text-display: 2rem;
   --text-display--line-height: 2.75rem;
   --text-display--font-weight: 800;
-  --text-h1: 1.75rem;
+  --text-h1: 1.875rem;
   --text-h1--line-height: 2.25rem;
   --text-h1--font-weight: 700;
-  --text-h2: 1.25rem;
+  --text-h2: 1.125rem;
   --text-h2--line-height: 1.75rem;
   --text-h2--font-weight: 700;
   --text-h3: 1rem;
   --text-h3--line-height: 1.5rem;
   --text-h3--font-weight: 600;
-  --text-body: 0.9375rem;
+  --text-body: 0.875rem;
   --text-body--line-height: 1.5rem;
   --text-small: 0.8125rem;
   --text-small--line-height: 1.25rem;
@@ -109,11 +109,11 @@
   --text-blak-label--font-weight: 600;
 
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 6px);
-  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: 0.5rem;
+  --radius-sm: 0.375rem;
 
-  --shadow-elevation: 0 1px 2px rgba(16, 42, 26, 0.04), 0 8px 24px -6px rgba(16, 42, 26, 0.08);
-  --shadow-elevation-lg: 0 2px 4px rgba(16, 42, 26, 0.05), 0 18px 40px -10px rgba(16, 42, 26, 0.13);
+  --shadow-elevation: 0 1px 2px rgb(24 32 42 / 0.035), 0 3px 8px -4px rgb(24 32 42 / 0.05);
+  --shadow-elevation-lg: 0 2px 4px rgb(24 32 42 / 0.04), 0 12px 32px -12px rgb(24 32 42 / 0.12);
   --shadow-glow: 0 6px 16px -4px rgba(40, 133, 68, 0.45);
 }
 
@@ -146,22 +146,22 @@
      * the VALUES changed green → teal. The PAGE is a light cool grey-green and
      * SURFACES (cards, sidebar) are pure white, so white cards "float" above the
      * canvas with the soft layered shadow (§3). Stored as RGB channels. */
-    --bg: 248 250 249; /* #F8FAF9 page canvas (M3 surface/background) */
+    --bg: 247 248 250; /* #F8FAF9 page canvas (M3 surface/background) */
     --surface: 255 255 255; /* #FFFFFF cards, sidebar, raised panels (container-lowest) */
-    --surface-2: 242 244 244; /* #F2F4F4 nested panels, table headers, hovers (container-low) */
-    --border: 226 232 240; /* #E2E8F0 hairlines, dividers, input borders */
-    --ink: 25 28 28; /* #191C1C primary text (on-surface) */
-    --ink-2: 64 72 73; /* #404849 secondary text, labels (on-surface-variant) */
-    --ink-3: 111 120 120; /* #6F7878 muted text, placeholders (outline) — 4.5:1 on white (WCAG AA) */
+    --surface-2: 244 245 247; /* #F2F4F4 nested panels, table headers, hovers (container-low) */
+    --border: 229 231 235; /* #E2E8F0 hairlines, dividers, input borders */
+    --ink: 28 32 36; /* #191C1C primary text (on-surface) */
+    --ink-2: 82 89 98; /* #404849 secondary text, labels (on-surface-variant) */
+    --ink-3: 105 113 123; /* #6F7878 muted text, placeholders (outline) — 4.5:1 on white (WCAG AA) */
 
     /* Brand green ramp, derived from the BLAK MOH logo green (#10b91f). The vivid
      * logo green is too light for white text, so the ramp keeps a bright accent
      * (icons/links/charts/focus) and darker shades for any surface carrying WHITE
      * text (buttons, filled pills, badges). All checked for WCAG AA. */
-    --green-light: 12 133 23; /* #0C8517 brand accent — icons, links, charts (4.79:1 on white) */
-    --green: 10 110 19; /* #0A6E13 PRIMARY — buttons, filled pills, active nav, white text (6.46:1) */
-    --green-strong: 6 83 14; /* #06530E hover/pressed, active nav text (9.33:1) */
-    --green-soft: 217 243 220; /* #D9F3DC selected rows, soft fills, chips */
+    --green-light: 42 112 83; /* #0C8517 brand accent — icons, links, charts (4.79:1 on white) */
+    --green: 31 91 70; /* #0A6E13 PRIMARY — buttons, filled pills, active nav, white text (6.46:1) */
+    --green-strong: 23 67 51; /* #06530E hover/pressed, active nav text (9.33:1) */
+    --green-soft: 234 243 237; /* #D9F3DC selected rows, soft fills, chips */
     --gold: 100 56 26; /* #64381A recognition / weekly-tip / certificates (M3 tertiary) */
 
     /* Status — functional, not decorative (§1) */
@@ -187,11 +187,11 @@
     --accent-foreground: var(--green-strong);
     --destructive: var(--risk);
     --destructive-foreground: 255 255 255;
-    --input: var(--border);
+    --input: 137 147 158;
     --ring: var(--green-light);
 
     /* ── Radii (§3): 16px cards, 10px controls, 999px pills (modern/3D) ── */
-    --radius: 1rem; /* 16px — cards (rounded-lg) */
+    --radius: 0.75rem; /* 16px — cards (rounded-lg) */
 
     /* ── BLAK MOH cinematic landing tokens (LANDING_PAGE_MASTER_SPEC.md §3) ──
      * ADDITIVE ONLY. These sit alongside the portal palette above and are used
@@ -224,11 +224,11 @@
      * Ivory rather than white, so it reads as paper rather than as a dialog,
      * and warm rather than cool so it sits with the gold side of the palette.
      * Ink on this surface is --blak-forest (17.4:1); muted ink is 7.6:1. */
-    --auth-surface: 244 241 234; /* #F4F1EA card */
-    --auth-field: 234 230 220; /* #EAE6DC input fill — one step warmer/darker */
-    --auth-border: 214 207 190; /* #D6CFBE hairline */
-    --auth-ink: 6 26 14; /* #061A0E primary ink on ivory */
-    --auth-ink-2: 74 90 80; /* #4A5A50 secondary ink on ivory */
+    --auth-surface: 255 255 255; /* #F4F1EA card */
+    --auth-field: 255 255 255; /* #EAE6DC input fill — one step warmer/darker */
+    --auth-border: 137 147 158; /* #D6CFBE hairline */
+    --auth-ink: 28 32 36; /* #061A0E primary ink on ivory */
+    --auth-ink-2: 95 104 115; /* #4A5A50 secondary ink on ivory */
   }
 }
 
@@ -378,6 +378,29 @@
   /* Tabular figures for stat tiles so numbers don't jitter (§2). */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Long unbroken strings (pasted text, URLs, "aaaa…") must wrap instead of
+   * widening their card and making the whole page scroll sideways. `anywhere`
+   * (unlike `break-word`) also shrinks the element's min-content size, which is
+   * what stops flex/grid parents from being stretched. Normal words are never
+   * split mid-word; only a string too long for its box is broken. */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  li,
+  dt,
+  dd,
+  td,
+  th,
+  label,
+  blockquote,
+  figcaption {
+    overflow-wrap: anywhere;
   }
 
   /* Themed scrollbars (§1) — subtle branded bar: thin thumb, soft track, no
@@ -841,5 +864,272 @@ html:has(.landing-root)::-webkit-scrollbar {
   }
   .landing-root .landing-stream {
     stroke-dashoffset: 0 !important;
+  }
+}
+
+/* Reference-led workspace system. Keep marketing's separate brand tokens. */
+.portal-shell {
+  color-scheme: light;
+}
+.portal-shell h1,
+.portal-shell h2,
+.portal-shell h3 {
+  letter-spacing: -0.035em;
+}
+.portal-content {
+  min-width: 0;
+}
+.portal-content > :first-child {
+  min-width: 0;
+}
+.portal-content table:not([data-visualization]) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.portal-content table:not([data-visualization]) th {
+  background: rgb(var(--surface-2) / 0.8);
+  color: rgb(var(--ink-2));
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.portal-content table:not([data-visualization]) :is(th, td) {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgb(var(--border) / 0.7);
+  text-align: start;
+}
+.portal-content table:not([data-visualization]) tbody tr {
+  transition: background-color 160ms ease;
+}
+.portal-content table:not([data-visualization]) tbody tr:hover {
+  background: rgb(var(--surface-2) / 0.7);
+}
+.portal-content form:not(:has(button[aria-label])) {
+  scroll-margin-top: 5rem;
+}
+.portal-content label {
+  line-height: 1.5;
+}
+.portal-content input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.portal-content textarea {
+  box-shadow: 0 1px 2px rgb(24 32 42 / 0.025);
+}
+.portal-content input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  padding-right: 0.75rem;
+  border-right: 1px solid rgb(var(--border));
+}
+.workspace-section {
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius);
+  background: rgb(var(--surface));
+  box-shadow: var(--shadow-elevation);
+}
+.workspace-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgb(var(--border) / 0.75);
+}
+.workspace-section-heading h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.workspace-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(var(--ink-2));
+}
+.workspace-link:hover {
+  color: rgb(var(--green));
+}
+.workspace-metric {
+  position: relative;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
+.workspace-metric + .workspace-metric {
+  border-left: 1px solid rgb(var(--border));
+}
+.workspace-progress-track {
+  display: flex;
+  gap: 3px;
+  height: 18px;
+}
+.workspace-progress-track > i {
+  flex: 1;
+  border-radius: 2px;
+  background: rgb(var(--border));
+}
+.workspace-progress-track > i[data-filled='true'] {
+  background: rgb(var(--green) / 0.75);
+}
+.route-skeleton {
+  background: rgb(var(--ink) / 0.055);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.375rem;
+}
+.route-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--surface) / 0.7), transparent);
+  animation: workspace-shimmer 1.8s ease-in-out infinite;
+}
+.route-progress {
+  animation: workspace-travel 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes workspace-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes workspace-travel {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(410%);
+  }
+}
+.startup-dot {
+  animation: startup-dot 1.1s ease-in-out infinite;
+}
+.startup-dot:nth-child(2) {
+  animation-delay: 120ms;
+}
+.startup-dot:nth-child(3) {
+  animation-delay: 240ms;
+}
+@keyframes startup-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.25;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+.auth-workspace {
+  --blak-green: var(--green);
+  --blak-green-soft: var(--green-strong);
+  --blak-text: var(--ink);
+  --blak-text-2: var(--ink-2);
+  --blak-gold: var(--green);
+}
+.auth-workspace input {
+  box-shadow: 0 1px 2px rgb(24 32 42 / 0.03);
+}
+.auth-workspace .auth-submit {
+  color: white;
+}
+@media (max-width: 639px) {
+  .workspace-metric {
+    padding: 1rem;
+  }
+  .workspace-metric + .workspace-metric {
+    border-left: 0;
+  }
+  .workspace-section-heading {
+    padding: 1rem;
+  }
+  .portal-content table:not([data-visualization]) :is(th, td) {
+    padding: 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-skeleton::after,
+  .route-progress,
+  .startup-dot {
+    animation: none;
+  }
+  .portal-content table:not([data-visualization]) tbody tr {
+    transition: none;
+  }
+}
+
+/* Public pages retain the programme identity with calmer, sharper material. */
+.landing-root {
+  --blak-black: 17 21 21;
+  --blak-forest: 22 30 27;
+  --blak-forest-2: 27 37 33;
+  --blak-green: 154 201 171;
+  --blak-green-soft: 195 225 204;
+  --blak-green-deep: 98 145 115;
+}
+.landing-root h1,
+.landing-root h2 {
+  text-wrap: balance;
+}
+.landing-root .landing-bloom,
+.landing-root .landing-rays {
+  opacity: 0.3;
+}
+.portal-content form.rounded-lg {
+  padding: 1.5rem;
+  background: rgb(var(--surface));
+}
+.portal-content :is(input, textarea, button, a):focus-visible {
+  outline-offset: 3px;
+}
+@media (max-width: 639px) {
+  .portal-content form.rounded-lg {
+    padding: 1rem;
+  }
+}
+
+/* Stat band: a row of StatTiles reads as one connected strip with hairline
+ * dividers (Samir/Akanksha metric band), matching the dashboard MetricBand. */
+.stat-band {
+  display: grid;
+}
+.stat-band > * {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 0;
+}
+.stat-band > * + * {
+  border-top: 1px solid rgb(var(--border));
+}
+@media (min-width: 640px) {
+  .stat-band {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .stat-band > * + * {
+    border-top: 0;
+    border-left: 1px solid rgb(var(--border));
+  }
+}
+
+/* Keep small forms readable instead of stretching fields across the workspace. */
+.portal-content form.rounded-lg {
+  max-width: 52rem;
+}
+.portal-content a:focus-visible {
+  outline: 2px solid rgb(var(--green));
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .workspace-metric:nth-child(n + 3) {
+    border-top: 1px solid rgb(var(--border));
+  }
+  .workspace-metric:nth-child(even) {
+    border-left: 1px solid rgb(var(--border));
+  }
+  .workspace-metric:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }

@@ -7,7 +7,12 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('rounded-lg border border-border bg-card text-foreground shadow-elevation', className)}
+      className={cn(
+        'rounded-lg border border-border bg-card text-foreground shadow-elevation',
+        // A Table inside a card drops its own frame (the card already is one).
+        '[&_.table-frame]:rounded-none [&_.table-frame]:border-0 [&_.table-frame]:bg-transparent [&_.table-frame]:shadow-none',
+        className,
+      )}
       {...props}
     />
   ),

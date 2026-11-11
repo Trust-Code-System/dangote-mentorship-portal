@@ -104,7 +104,7 @@ export default async function MatchingPage() {
     <section className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
           <p className="text-body text-ink-2">
             {t('reviewing')} <span className="font-bold text-ink">{cohort.name}</span>
           </p>

@@ -16,7 +16,7 @@ export function PairWorkspaceView({ pair }: { pair: PairWorkspace }) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-micro text-ink-3">Dashboard / Mentorship pair</p>
-          <h1 className="mt-1 font-display text-h1 text-ink">Mentorship Master Agreement</h1>
+          <h1 className="mt-1 font-display text-h1 font-semibold tracking-tight text-ink">Mentorship Master Agreement</h1>
           <p className="text-small text-ink-2">
             Strategic partnership for leadership development and institutional growth.
           </p>

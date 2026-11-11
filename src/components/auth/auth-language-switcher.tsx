@@ -51,10 +51,10 @@ export function AuthLanguageSwitcher({
       role="group"
       aria-label={ta('languageLabel')}
       className={cn(
-        'inline-flex items-center rounded-full p-1',
+        'inline-flex items-center rounded-lg p-1',
         onDark
-          ? 'border border-blak-border/[0.05] bg-blak-black/30'
-          : 'border border-auth-border bg-auth-field',
+          ? 'border-blak-border/[0.05] bg-blak-black/30 border'
+          : 'border-auth-border/50 bg-surface-2 border',
         pending && 'opacity-70',
         className,
       )}
@@ -69,11 +69,11 @@ export function AuthLanguageSwitcher({
             disabled={pending}
             aria-pressed={isActive}
             className={cn(
-              'inline-flex items-center justify-center rounded-full text-sm font-semibold transition-colors',
+              'inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors',
               // 44px total target height even in the compact variant.
-              compact ? 'min-h-9 px-3' : 'min-h-11 px-5',
+              compact ? 'min-h-9 px-3' : 'min-h-11 px-3',
               isActive
-                ? 'bg-blak-green text-blak-black'
+                ? 'text-ink bg-white shadow-sm'
                 : onDark
                   ? 'text-blak-text-2 hover:text-blak-text'
                   : 'text-auth-ink-2 hover:text-auth-ink',

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getProgrammeGoals } from '@/features/admin/overview-data';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Programme-wide goals drill-down (reached from the admin dashboard "Goals
@@ -14,7 +14,7 @@ export default async function AdminGoalsPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{t('goalsTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('goalsTitle')}</h1>
         <p className="text-body text-ink-2">{t('goalsSubtitle')}</p>
       </div>
 
@@ -44,12 +44,10 @@ export default async function AdminGoalsPage() {
                     (g.menteeName ?? '—')
                   )}
                 </TableCell>
-                <TableCell>{g.title}</TableCell>
-                <TableCell>{g.competency ?? '—'}</TableCell>
+                <TableCell className="min-w-48 max-w-md">{g.title}</TableCell>
+                <TableCell className="min-w-32 max-w-xs">{g.competency ?? '—'}</TableCell>
                 <TableCell>
-                  <Badge variant={g.status === 'APPROVED' || g.status === 'COMPLETED' ? 'default' : 'outline'}>
-                    {g.status}
-                  </Badge>
+                  <StatusBadge status={g.status} />
                 </TableCell>
                 <TableCell>{g.cohortName}</TableCell>
                 <TableCell>{g.createdAt.toISOString().slice(0, 10)}</TableCell>
