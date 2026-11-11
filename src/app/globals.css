@@ -1381,43 +1381,6 @@ html:has(.landing-root)::-webkit-scrollbar {
   }
 }
 
-/* Native form selects retain their browser semantics; modern Chromium lets
- * their picker share the same soft opening/closing treatment. */
-@supports (appearance: base-select) {
-  .portal-shell select,
-  .portal-shell select::picker(select) {
-    appearance: base-select;
-  }
-  .portal-shell select::picker(select) {
-    margin-block: 6px;
-    border: 1px solid rgb(var(--border));
-    border-radius: 8px;
-    background: white;
-    padding: 4px;
-    box-shadow: var(--shadow-elevation-lg);
-    opacity: 0;
-    translate: 0 -6px;
-    transition:
-      opacity 320ms var(--motion-soft),
-      translate 380ms var(--motion-soft),
-      display 380ms allow-discrete,
-      overlay 380ms allow-discrete;
-  }
-  .portal-shell select:open::picker(select) {
-    opacity: 1;
-    translate: 0 0;
-  }
-  @starting-style {
-    .portal-shell select:open::picker(select) {
-      opacity: 0;
-      translate: 0 -6px;
-    }
-  }
-  .portal-shell select option {
-    padding: 8px 10px;
-    border-radius: 4px;
-  }
-}
 @supports (interpolate-size: allow-keywords) {
   .portal-shell details {
     interpolate-size: allow-keywords;
@@ -1437,7 +1400,6 @@ html:has(.landing-root)::-webkit-scrollbar {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .portal-shell select::picker(select),
   .portal-shell details::details-content {
     transition: none;
   }

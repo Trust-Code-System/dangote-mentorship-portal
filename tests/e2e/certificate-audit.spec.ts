@@ -45,9 +45,11 @@ test.describe.serial('certificate experience audit', () => {
     await expect(page.getByRole('heading', { name: 'Certificate management' })).toBeVisible();
 
     const participant = page.getByLabel('Participant');
-    const options = await participant.locator('option').all();
-    expect(options.length).toBeGreaterThan(1);
-    const value = await options[1]!.getAttribute('value');
+    await participant.click();
+    const options = page.getByRole('option');
+    expect(await options.count()).toBeGreaterThan(0);
+    await options.first().click();
+    const value = await page.locator('select[name="participant"]').inputValue();
     expect(value).toBeTruthy();
     const parsedParticipant = value!.split(':');
     if (!parsedParticipant[0] || !parsedParticipant[1]) {
@@ -56,7 +58,6 @@ test.describe.serial('certificate experience audit', () => {
     matchId = parsedParticipant[0];
     role = parsedParticipant[1];
 
-    await participant.selectOption(value!);
     await Promise.all([
       page.waitForURL('**/admin/certificates?participant=**'),
       page.getByRole('button', { name: 'Generate preview' }).click(),

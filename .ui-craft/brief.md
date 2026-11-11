@@ -32,8 +32,7 @@ The root remains sign-in, with no public-page detour or auth logo linking to `/w
 - React Bits Animated Content: https://reactbits.dev/animations/animated-content — adapted mount reveal, 10px distance / 550ms / 55ms stagger, visible server HTML.
 - React Bits Count Up: https://reactbits.dev/text-animations/count-up — adapted numeric metric interpolation over 800ms, final values always available to assistive technology.
 - React Bits Staggered Menu: https://reactbits.dev/components/staggered-menu — section staggering and smooth opening/closing principles applied to the existing accessible navigation.
-- Native select progressive enhancement follows https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select .
-
+- Certificate form selects use the same shared animated Radix primitive, preserving named form values and keyboard support.
 Shared popovers use 380ms entry / 280ms exit; sidebar 480ms; page content 550ms. Menus stay mounted through exit and become inert immediately on close. Dialog/select primitives retain their Radix focus and keyboard behaviour. Reduced motion removes transitions and reveals immediately. These timings supersede the earlier 160–220ms collapse and no-entrance direction.
 
 Control borders are quieter. Pointer interaction leaves no persistent green ring; keyboard users retain a neutral slate focus indicator. Application authentication, role grants and rate limiting remain unchanged.
