@@ -28,7 +28,7 @@ export default async function FormsPage() {
   if (!cohort) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -47,7 +47,7 @@ export default async function FormsPage() {
     <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-display text-ink">{t('title')}</h1>
+          <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
           <p className="text-small text-ink-2">{t('subtitle', { cohort: cohort.name })}</p>
         </div>
         <Button asChild>

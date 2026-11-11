@@ -73,7 +73,7 @@ export default async function ProfilePage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <h1 className="font-display text-h1 font-bold text-ink">{t('title')}</h1>
 
       {/* Account — shown to every user, regardless of mentorship role. */}
       <Card>

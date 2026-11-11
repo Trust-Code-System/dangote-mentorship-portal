@@ -39,7 +39,7 @@ export function QuickActions({ items }: { items: QuickActionItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div ref={ref} className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+    <div ref={ref} className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-6 z-40 flex flex-col items-end gap-2">
       {open ? (
         <div
           role="menu"

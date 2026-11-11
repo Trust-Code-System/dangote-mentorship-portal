@@ -24,7 +24,7 @@ export type SaveDraftInput = z.infer<typeof saveSchema>;
 
 export async function saveDraft(input: SaveDraftInput): Promise<ActionResult<{ savedAt: string }>> {
   try {
-    const user = await requireUser();
+    const user = await requireUser({ allowGoalSetup: input?.formKey === 'goal:new' });
     const { formKey, cohortId, data } = saveSchema.parse(input);
 
     await prisma.formDraft.upsert({
@@ -43,7 +43,7 @@ const clearSchema = z.object({ formKey: z.string().trim().min(1).max(120) });
 
 export async function clearDraft(input: { formKey: string }): Promise<ActionResult<{ cleared: boolean }>> {
   try {
-    const user = await requireUser();
+    const user = await requireUser({ allowGoalSetup: input?.formKey === 'goal:new' });
     const { formKey } = clearSchema.parse(input);
     const result = await prisma.formDraft.deleteMany({ where: { userId: user.id, formKey } });
     return ok({ cleared: result.count > 0 });

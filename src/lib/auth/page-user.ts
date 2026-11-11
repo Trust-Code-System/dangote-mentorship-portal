@@ -1,6 +1,7 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { getCurrentUser, type SessionUser } from '@/lib/auth/rbac';
+import { getGoalSetupGate } from '@/features/goals/onboarding';
 
 /**
  * Page-level auth: redirect to login instead of throwing UnauthenticatedError.
@@ -10,5 +11,6 @@ import { getCurrentUser, type SessionUser } from '@/lib/auth/rbac';
 export async function requirePageUser(): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
+  if ((await getGoalSetupGate(user)).locked) redirect('/goals');
   return user;
 }

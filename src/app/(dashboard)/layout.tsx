@@ -13,6 +13,12 @@ import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/se
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
 import { getViewerCohortLanguages } from '@/features/cohorts/language-data';
 import type { AppLocale } from '@/i18n/config';
+import { getGoalSetupGate } from '@/features/goals/onboarding';
+import { isGoalSetupPath } from '@/features/goals/setup-path';
+import { GoalSetupBoundary } from '@/features/goals/setup-boundary';
+import { LocaleSwitcher } from '@/components/locale-switcher';
+import { signOutAction } from '@/lib/auth/actions';
+import { Button } from '@/components/ui/button';
 
 // Quick Actions (§1.9) shown across the authenticated participant area. Items are
 // filtered to what the user's role can actually do, shortest-path first.
@@ -63,6 +69,34 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!hasAnyRole(user, ADMIN_ROLES) && (await isMaintenanceMode())) {
     redirect('/maintenance');
+  }
+
+  const goalSetup = await getGoalSetupGate(user);
+  if (goalSetup.locked) {
+    const pathname = (await headers()).get('x-pathname') ?? '';
+    if (!isGoalSetupPath(pathname)) redirect('/goals');
+    const t = await getTranslations('common');
+    // No sidebar, search, notifications or quick actions before the first goal.
+    return (
+      <GoalSetupBoundary>
+        <div className="bg-bg text-ink min-h-screen">
+          <header className="border-border bg-surface border-b">
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+              <span className="font-display font-bold">{t('appShortName')}</span>
+              <div className="flex items-center gap-3">
+                <LocaleSwitcher />
+                <form action={signOutAction}>
+                  <Button type="submit" variant="ghost" size="sm">
+                    {t('signOut')}
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </header>
+          <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">{children}</main>
+        </div>
+      </GoalSetupBoundary>
+    );
   }
 
   // Quarterly assessment gate: a mentee whose assessment is overdue past its

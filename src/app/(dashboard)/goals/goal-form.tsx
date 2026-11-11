@@ -31,20 +31,27 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
   const filledCount = SMART_STEPS.filter((s) => done(s.field)).length;
   const currentIndex = SMART_STEPS.findIndex((s) => !done(s.field));
 
+  // In a narrow card (the "Set a new goal" column) five uppercase labels cannot
+  // sit side by side without running together, so below the @lg container width
+  // only the current step's label is shown, centred under the rail. At @lg and
+  // up every step carries its own label in its own column.
+  const captionIndex = currentIndex === -1 ? SMART_STEPS.length - 1 : currentIndex;
+  const captionStep = SMART_STEPS[captionIndex]!;
+
   return (
-    <div className="relative py-2">
+    <div className="@container relative py-2">
       <div className="absolute left-4 right-4 top-[1.35rem] h-0.5 bg-surface-2" aria-hidden />
       <div
         className="absolute left-4 top-[1.35rem] h-0.5 rounded-full bg-green transition-[width] duration-500"
         style={{ width: `calc((100% - 2rem) * ${SMART_STEPS.length > 1 ? filledCount / (SMART_STEPS.length - 1) : 0})` }}
         aria-hidden
       />
-      <ol className="relative flex justify-between">
+      <ol className="relative grid grid-cols-5">
         {SMART_STEPS.map((s, i) => {
           const isDone = done(s.field);
           const isCurrent = i === currentIndex;
           return (
-            <li key={s.key} className="flex flex-col items-center gap-1.5">
+            <li key={s.key} aria-current={isCurrent ? 'step' : undefined} className="flex min-w-0 flex-col items-center gap-1.5">
               <span
                 className={cn(
                   'flex size-8 items-center justify-center rounded-full border-2 bg-surface text-small font-bold transition-colors',
@@ -59,7 +66,7 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
               </span>
               <span
                 className={cn(
-                  'text-micro uppercase tracking-wider',
+                  'sr-only text-center text-micro uppercase tracking-wide @lg:not-sr-only @lg:px-1',
                   isDone || isCurrent ? 'font-bold text-green-strong' : 'text-ink-3',
                 )}
               >
@@ -69,6 +76,12 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
           );
         })}
       </ol>
+      <p
+        aria-hidden
+        className="mt-2 text-center text-micro font-bold uppercase tracking-wide text-green-strong @lg:hidden"
+      >
+        {labelFor(captionStep.key)}
+      </p>
     </div>
   );
 }
@@ -96,12 +109,14 @@ export function GoalForm({
   cohortId,
   initial,
   enableDraft = false,
+  onboarding = false,
 }: {
   mode: 'create' | 'edit';
   goalId?: string;
   cohortId?: string;
   initial?: GoalDraftFields;
   enableDraft?: boolean;
+  onboarding?: boolean;
 }) {
   const t = useTranslations('goals');
   const tc = useTranslations('common');
@@ -128,6 +143,11 @@ export function GoalForm({
   useEffect(() => {
     if (!state?.ok) return;
     if (enableDraft) void clear();
+    if (onboarding) {
+      router.replace('/dashboard');
+      router.refresh();
+      return;
+    }
     router.refresh();
     if (mode !== 'create') return;
     let cancelled = false;
@@ -263,9 +283,9 @@ export function GoalForm({
         </p>
       ) : null}
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
         <Button type="button" variant="ghost" disabled={activeStep === 0} onClick={() => setActiveStep((s) => Math.max(0, s - 1))}>
-          {activeStep === 0 ? td('saved') : 'Back'}
+          {tc('back')}
         </Button>
         {activeStep < SMART_STEPS.length - 1 ? (
           <Button type="button" onClick={() => setActiveStep((s) => Math.min(SMART_STEPS.length - 1, s + 1))}>
@@ -273,7 +293,7 @@ export function GoalForm({
           </Button>
         ) : (
           <Button type="submit" disabled={pending}>
-            {pending ? tc('loading') : mode === 'create' ? t('createGoal') : t('save')}
+            {pending ? tc('loading') : onboarding ? t('saveAndContinue') : mode === 'create' ? t('createGoal') : t('save')}
           </Button>
         )}
       </div>

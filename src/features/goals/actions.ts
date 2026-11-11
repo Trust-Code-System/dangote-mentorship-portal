@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
-import { GoalStage, GoalStatus } from '@prisma/client';
+import { GoalStage, GoalStatus, RoleName } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
 import { requirePortalAccess } from '@/features/assessments/guard';
@@ -19,6 +19,7 @@ import { getMenteePairing, isMentorOfGoal } from './data';
 import { menteeAdvanceTransition, reviewTransition, type ReviewDecision } from './stage';
 import { coachGoal, type CoachResult } from './coach';
 import type { GoalDraftFields } from './smart';
+import { resolveGoalCohortId } from './onboarding';
 
 // All goal mutations follow the CLAUDE.md §3 pipeline:
 // authenticate → authorize → validate (Zod) → execute → audit → typed result.
@@ -54,10 +55,10 @@ export async function requestGoalCoach(
   input: GoalDraftFields,
 ): Promise<ActionResult<CoachResult>> {
   try {
-    const user = await requireUser();
+    const user = await requireUser({ allowGoalSetup: true });
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
-    await requirePortalAccess(user);
+    await requirePortalAccess(user, { allowGoalSetup: true });
     const fields = coachSchema.parse(input);
     // Throttle the AI endpoint per user (production-readiness-report.md M1).
     if (!(await checkRateLimit(`ai:goal-coach:${user.id}`, 10, 60_000)).ok) {
@@ -106,15 +107,18 @@ function saveDataFrom(form: FormData) {
 
 /**
  * Create or update the mentee's own goal while it is still editable (DRAFT or a
- * REJECTED goal being revised). The cohort is taken from the mentee's accepted
- * pairing — a goal needs a mentor who can approve it.
+ * REJECTED goal being revised). The cohort is taken from the mentee's
+ * cohort membership, so the first goal can be saved before mentor matching.
  */
 export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireUser();
+    const user = await requireUser({ allowGoalSetup: true });
+    if (!user.roles.includes(RoleName.MENTEE)) {
+      return fail({ code: 'FORBIDDEN', message: 'Only mentees can create their own goals.' });
+    }
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
-    await requirePortalAccess(user);
+    await requirePortalAccess(user, { allowGoalSetup: true });
     const data = saveSchema.parse(saveDataFrom(formData));
 
     const fields = {
@@ -146,16 +150,16 @@ export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: s
       });
       goalId = goal.id;
     } else {
-      const pairing = await getMenteePairing(user.id);
-      if (!pairing) {
+      const cohortId = await resolveGoalCohortId(user.id);
+      if (!cohortId) {
         return fail({
           code: 'FORBIDDEN',
-          message: 'Goals unlock once you and your mentor have accepted your match.',
+          message: 'Ask the programme team to add you to a cohort before setting your goal.',
         });
       }
       const created = await prisma.goal.create({
         data: {
-          cohortId: pairing.cohortId,
+          cohortId,
           menteeId: user.id,
           status: GoalStatus.DRAFT,
           stage: GoalStage.DRAFTED,
@@ -173,6 +177,8 @@ export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: s
     });
 
     revalidatePath('/goals');
+    // Refresh the shared shell and its setup gate after the first successful save.
+    revalidatePath('/', 'layout');
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
