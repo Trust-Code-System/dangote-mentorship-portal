@@ -1380,6 +1380,7 @@ html[data-input-modality='keyboard']
   .soft-sidebar,
   .soft-panel *,
   .soft-sidebar * {
+    animation: none !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
   }
