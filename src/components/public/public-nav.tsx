@@ -108,10 +108,20 @@ export function PublicNav() {
 
   const links: { id: string; href: string; label: string; current: boolean }[] = onLanding
     ? [
-        { id: 'programme', href: '#programme', label: t('programme'), current: active === 'programme' },
+        {
+          id: 'programme',
+          href: '#programme',
+          label: t('programme'),
+          current: active === 'programme',
+        },
         { id: 'matching', href: '#matching', label: t('matching'), current: active === 'matching' },
         { id: 'journey', href: '#journey', label: t('journey'), current: active === 'journey' },
-        { id: 'experience', href: '#experience', label: t('experience'), current: active === 'experience' },
+        {
+          id: 'experience',
+          href: '#experience',
+          label: t('experience'),
+          current: active === 'experience',
+        },
         { id: 'faq', href: '/faq', label: t('faq'), current: false },
       ]
     : LIBRARY.map((link) => ({
@@ -140,15 +150,15 @@ export function PublicNav() {
         {/* Internal top highlight — a light catching the glass edge. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-blak-ivory/25 to-transparent"
+          className="via-blak-ivory/25 pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent to-transparent"
         />
 
         <Link href="/welcome" aria-label={t('home')} className="shrink-0 rounded-md">
-          <PublicLockup />
+          <PublicLockup wordmarkClassName="hidden max-w-[160px] whitespace-normal text-[13px] leading-tight font-semibold xl:block" />
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden items-center gap-1 lg:flex">
+        <ul className="hidden items-center gap-1 xl:flex">
           {links.map((link) => (
             <li key={link.id}>
               <Link
@@ -166,7 +176,7 @@ export function PublicNav() {
                 <span
                   aria-hidden
                   className={cn(
-                    'absolute inset-x-3 -bottom-0.5 h-px origin-left bg-blak-green transition-transform duration-300',
+                    'bg-blak-green absolute inset-x-3 -bottom-0.5 h-px origin-left transition-transform duration-300',
                     link.current
                       ? 'scale-x-100'
                       : 'scale-x-0 group-hover:scale-x-100 group-focus-visible:scale-x-100',
@@ -183,14 +193,14 @@ export function PublicNav() {
 
           <Link
             href="/login"
-            className="rounded-full px-3 py-2 text-sm font-semibold text-blak-text transition-colors hover:text-blak-green"
+            className="text-blak-text hover:text-blak-green rounded-full px-3 py-2 text-sm font-semibold transition-colors"
           >
             {t('signIn')}
           </Link>
 
           <Link
             href="/signup"
-            className="hidden items-center gap-1.5 rounded-full bg-blak-green px-4 py-2 text-sm font-semibold text-blak-black transition-colors hover:bg-blak-green-soft sm:inline-flex"
+            className="bg-blak-green text-blak-black hover:bg-blak-green-soft hidden items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors sm:inline-flex"
           >
             {t('requestAccess')}
             <ArrowRight className="size-4" aria-hidden />
@@ -201,10 +211,14 @@ export function PublicNav() {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="public-mobile-menu"
-            className="inline-flex size-11 items-center justify-center rounded-full border border-blak-border/15 text-blak-text lg:hidden"
+            className="border-blak-border/15 text-blak-text inline-flex size-11 items-center justify-center rounded-full border xl:hidden"
           >
             <span className="sr-only">{menuOpen ? t('closeMenu') : t('openMenu')}</span>
-            {menuOpen ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
+            {menuOpen ? (
+              <X className="size-5" aria-hidden />
+            ) : (
+              <Menu className="size-5" aria-hidden />
+            )}
           </button>
         </div>
       </nav>
@@ -214,9 +228,9 @@ export function PublicNav() {
       {menuOpen && (
         <div
           id="public-mobile-menu"
-          className="mx-auto mt-2 max-h-[70vh] w-full max-w-[1280px] overflow-y-auto rounded-[20px] border border-blak-border/15 bg-blak-glass/95 p-4 backdrop-blur-xl lg:hidden"
+          className="border-blak-border/15 bg-blak-glass/95 mx-auto mt-2 max-h-[70vh] w-full max-w-[1280px] overflow-y-auto rounded-[20px] border p-4 backdrop-blur-xl xl:hidden"
         >
-          <p className="px-2 pb-2 text-blak-label uppercase text-blak-text-2">{t('menuTitle')}</p>
+          <p className="text-blak-label text-blak-text-2 px-2 pb-2 uppercase">{t('menuTitle')}</p>
           <ul className="flex flex-col">
             {links.map((link) => (
               <li key={link.id}>
@@ -225,7 +239,7 @@ export function PublicNav() {
                   onClick={() => setMenuOpen(false)}
                   aria-current={link.current && !onLanding ? 'page' : undefined}
                   className={cn(
-                    'flex min-h-11 items-center rounded-lg px-2 py-3 text-base font-medium hover:bg-blak-ivory/10',
+                    'hover:bg-blak-ivory/10 flex min-h-11 items-center rounded-lg px-2 py-3 text-base font-medium',
                     link.current ? 'text-blak-green-soft' : 'text-blak-text',
                   )}
                 >
@@ -234,12 +248,12 @@ export function PublicNav() {
               </li>
             ))}
           </ul>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-blak-border/12 pt-4">
+          <div className="border-blak-border/12 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
             <PublicLocaleToggle />
             <Link
               href="/signup"
               onClick={() => setMenuOpen(false)}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blak-green px-4 py-2.5 text-sm font-semibold text-blak-black"
+              className="bg-blak-green text-blak-black inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold"
             >
               {t('requestAccess')}
               <ArrowRight className="size-4" aria-hidden />

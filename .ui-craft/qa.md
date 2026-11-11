@@ -7,7 +7,7 @@
 - Optimized build: passed. Existing local-storage tracing warnings and Sentry import deprecation remain.
 - Reference detector (dashboard components): baseline 2 errors / 3 warnings; after redesign 0 errors / 3 warnings. Remaining warnings concern a heatmap that already has horizontal scrolling and focus styles supplied by the shared workspace stylesheet.
 - Browser checks: admin, mentor and mentee dashboards; desktop sign-in; admin invite form; phone dashboard at an exact 390 px viewport; mobile drawer focus, Escape and focus restoration; long goal-title wrapping. Checked against real seeded/demo records without changing their content.
-- Corrected during review: mobile heatmap overflow, hidden mobile navigation focusability, partner-logo contrast, language-selector contrast, truncated-data KPI labels, goal KPI destination and consistent UTC session labels.
+- Corrected during review: mobile heatmap overflow, hidden mobile navigation focusability, partner-logo contrast, language-selector contrast, truncated-data KPI labels, goal KPI destination consistent UTC session labels, public mobile header crowding and public hero fold height.
 - Preserved: existing routes, role grants, data/actions, bilingual labels and original logos. No database migration or production deployment is part of this UI change.
 
 | Before | After | Reason |

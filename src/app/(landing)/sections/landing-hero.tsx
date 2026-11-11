@@ -15,11 +15,11 @@ export function LandingHero() {
     { key: 'sessions', Icon: MessageSquare },
   ];
   return (
-    <section className="border-blak-border/10 relative isolate overflow-hidden border-b px-5 pt-36 pb-16 sm:px-8 sm:pb-24 lg:pt-44">
+    <section className="border-blak-border/10 relative isolate overflow-hidden border-b px-5 pt-36 pb-16 sm:px-8 sm:pb-24 lg:pt-36">
       <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[1.15fr_.85fr] lg:gap-20">
         <div>
           <p className="text-blak-green-soft text-sm font-medium">{t('micro')}</p>
-          <h1 className="text-blak-text mt-6 text-[clamp(2.75rem,5.5vw,5.5rem)] leading-[1.02] font-medium tracking-[-.055em]">
+          <h1 className="text-blak-text mt-6 text-[clamp(2.75rem,4.5vw,3.75rem)] leading-[1.02] font-medium tracking-[-.055em]">
             <span className="block">{t('line1')}</span>
             <span className="text-blak-green block">{t('line2')}</span>
           </h1>
