@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Search, Loader2 } from 'lucide-react';
 import { searchPortal, type SearchHit } from '@/features/search/actions';
 import { cn } from '@/lib/utils';
+import { SoftPanel } from '@/components/motion/soft-panel';
 
 export interface SearchNavItem {
   label: string;
@@ -98,50 +99,53 @@ export function GlobalSearch({ navItems }: { navItems: SearchNavItem[] }) {
       {showDropdown && (
         <>
           <div aria-hidden className="fixed inset-0 z-40" onClick={close} />
-          <div className="border-border bg-surface shadow-elevation-lg absolute right-0 left-0 z-50 mt-2 max-h-[28rem] overflow-y-auto rounded-xl border py-2">
-            {visiblyPending && (
-              <div className="text-small text-ink-3 flex items-center gap-2 px-4 py-2">
-                <Loader2 className="size-4 animate-spin" />
-                {t('searching')}
-              </div>
-            )}
-
-            {pageHits.length > 0 && (
-              <Group label={t('pages')}>
-                {pageHits.map((p) => (
-                  <ResultLink
-                    key={p.href}
-                    href={p.href}
-                    label={p.label}
-                    sublabel={null}
-                    tag={null}
-                    onNavigate={close}
-                  />
-                ))}
-              </Group>
-            )}
-
-            {visibleHits.length > 0 && (
-              <Group label={t('records')}>
-                {visibleHits.map((h, i) => (
-                  <ResultLink
-                    key={`${h.kind}-${h.href}-${i}`}
-                    href={h.href}
-                    label={h.label}
-                    sublabel={h.sublabel}
-                    tag={t(`kind.${h.kind}`)}
-                    onNavigate={close}
-                  />
-                ))}
-              </Group>
-            )}
-
-            {!visiblyPending && !hasResults && q.length >= 2 && (
-              <p className="text-small text-ink-3 px-4 py-3">{t('noResults')}</p>
-            )}
-          </div>
         </>
       )}
+      <SoftPanel
+        open={showDropdown}
+        className="border-border bg-surface shadow-elevation-lg absolute right-0 left-0 z-50 mt-2 max-h-[28rem] origin-top overflow-y-auto rounded-xl border py-2"
+      >
+        {visiblyPending && (
+          <div className="text-small text-ink-3 flex items-center gap-2 px-4 py-2">
+            <Loader2 className="size-4 animate-spin" />
+            {t('searching')}
+          </div>
+        )}
+
+        {pageHits.length > 0 && (
+          <Group label={t('pages')}>
+            {pageHits.map((p) => (
+              <ResultLink
+                key={p.href}
+                href={p.href}
+                label={p.label}
+                sublabel={null}
+                tag={null}
+                onNavigate={close}
+              />
+            ))}
+          </Group>
+        )}
+
+        {visibleHits.length > 0 && (
+          <Group label={t('records')}>
+            {visibleHits.map((h, i) => (
+              <ResultLink
+                key={`${h.kind}-${h.href}-${i}`}
+                href={h.href}
+                label={h.label}
+                sublabel={h.sublabel}
+                tag={t(`kind.${h.kind}`)}
+                onNavigate={close}
+              />
+            ))}
+          </Group>
+        )}
+
+        {!visiblyPending && !hasResults && q.length >= 2 && (
+          <p className="text-small text-ink-3 px-4 py-3">{t('noResults')}</p>
+        )}
+      </SoftPanel>
     </div>
   );
 }

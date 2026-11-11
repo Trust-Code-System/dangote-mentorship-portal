@@ -187,7 +187,7 @@
     --accent-foreground: var(--green-strong);
     --destructive: var(--risk);
     --destructive-foreground: 255 255 255;
-    --input: 137 147 158;
+    --input: 178 186 193;
     --ring: var(--green-light);
 
     /* ── Radii (§3): 16px cards, 10px controls, 999px pills (modern/3D) ── */
@@ -1118,8 +1118,329 @@ html:has(.landing-root)::-webkit-scrollbar {
   max-width: 52rem;
 }
 .portal-content a:focus-visible {
-  outline: 2px solid rgb(var(--green));
+  outline: 2px solid #64748b;
   outline-offset: 3px;
+}
+
+/* Shared motion vocabulary: React Bits reveal/stagger principles, tuned for
+ * an operational workspace. Close stays mounted until its soft exit finishes. */
+:root {
+  --motion-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.soft-panel {
+  transition:
+    opacity 320ms var(--motion-soft),
+    transform 380ms var(--motion-soft),
+    visibility 0s;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+}
+.soft-panel[data-open='false'] {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.985);
+  pointer-events: none;
+  visibility: hidden;
+  transition-delay: 0s, 0s, 380ms;
+}
+.soft-scrim,
+.soft-scrim[data-open='false'] {
+  transform: none;
+}
+.soft-popover {
+  transform-origin: var(--radix-select-content-transform-origin, top center);
+}
+.soft-popover[data-state='open'] {
+  animation: soft-open 380ms var(--motion-soft);
+}
+.soft-popover[data-state='closed'] {
+  animation: soft-close 280ms var(--motion-soft);
+}
+.soft-overlay[data-state='open'] {
+  animation: soft-fade-in 380ms ease;
+}
+.soft-overlay[data-state='closed'] {
+  animation: soft-fade-out 280ms ease;
+}
+.soft-tooltip[data-state='delayed-open'],
+.soft-tooltip[data-state='instant-open'] {
+  animation: soft-open 320ms var(--motion-soft);
+}
+.soft-tooltip[data-state='closed'] {
+  animation: soft-close 240ms var(--motion-soft);
+}
+.soft-dialog[data-state='open'] {
+  animation: soft-open 420ms var(--motion-soft);
+}
+.soft-dialog[data-state='closed'] {
+  animation: soft-close 300ms var(--motion-soft);
+}
+@keyframes soft-open {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+    scale: 0.985;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes soft-close {
+  from {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -4px;
+    scale: 0.985;
+  }
+}
+@keyframes soft-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes soft-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.soft-sidebar {
+  transition:
+    width 480ms var(--motion-soft),
+    transform 480ms var(--motion-soft),
+    visibility 0s;
+}
+@media (max-width: 1023px) {
+  .soft-sidebar[data-mobile-open='false'] {
+    visibility: hidden;
+    transition-delay: 0s, 0s, 480ms;
+  }
+  .soft-sidebar[data-mobile-open='true'] nav > div {
+    animation: soft-open 500ms var(--motion-soft) both;
+  }
+  .soft-sidebar[data-mobile-open='true'] nav > div:nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .soft-sidebar[data-mobile-open='true'] nav > div:nth-child(3) {
+    animation-delay: 90ms;
+  }
+}
+.portal-page,
+.portal-page > * {
+  min-width: 0;
+}
+.portal-page > :first-child > header:first-child {
+  margin-bottom: 1.25rem;
+}
+.workspace-progress-track > i {
+  animation: soft-fade-in 650ms ease both;
+}
+.portal-shell [role='tabpanel'][data-state='active'] {
+  animation: soft-open 380ms var(--motion-soft);
+}
+
+/* Quiet borders and a neutral focus indicator. A pointer-restored select must
+ * not keep the old green ring after its popup closes. */
+:is(.portal-shell, .auth-workspace) :is(input, textarea, select, button, a, [tabindex]):focus {
+  --tw-ring-color: transparent;
+  --tw-ring-offset-width: 0px;
+}
+:is(.portal-shell, .auth-workspace)
+  :is(input, textarea, select, button, a, [tabindex]):focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
+  --tw-ring-color: transparent;
+}
+:is(.portal-shell, .auth-workspace) :is(input, textarea, select, button):focus:not(:focus-visible) {
+  outline: none;
+}
+:is(.portal-shell, .auth-workspace) :is(input, textarea, select):focus {
+  border-color: rgb(var(--input));
+}
+.soft-popover [role='option'][data-highlighted] {
+  background: #f0f3f2;
+  color: rgb(var(--ink));
+}
+
+/* A composed identity panel: architectural growth forms and connected steps,
+ * inspired by split authentication references, with the supplied brand marks. */
+.auth-identity {
+  background: #153b30;
+}
+.auth-identity::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 85% 45%, #42776370, transparent 65%);
+}
+.auth-identity [class*='text-blak-text'] {
+  color: #d3ded8;
+}
+.auth-identity [class*='text-blak-green'] {
+  color: #c4e6a6;
+}
+.auth-contours {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.2;
+  pointer-events: none;
+}
+.auth-contours svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #b7d6bd;
+  stroke-width: 0.65;
+}
+.auth-arch {
+  position: absolute;
+  width: 145px;
+  height: 205px;
+  bottom: 0;
+  border-radius: 100px 100px 8px 8px;
+  transform: rotate(22deg);
+  box-shadow:
+    inset 1px 1px 0 #ffffff70,
+    inset -16px -8px 30px #06261f40,
+    12px 18px 26px #001c1930;
+}
+.auth-arch-back {
+  left: 32%;
+  background: linear-gradient(115deg, #cce8aa, #88ab76 65%, #537654);
+}
+.auth-arch-front {
+  left: 49%;
+  bottom: -8px;
+  width: 130px;
+  height: 160px;
+  background: linear-gradient(110deg, #e7efdc, #a8c0aa 62%, #527a67);
+  transform: rotate(-18deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-arch-back {
+    animation: auth-settle 1.2s var(--motion-soft) both;
+  }
+  .auth-arch-front {
+    animation: auth-settle 1.4s var(--motion-soft) both;
+  }
+  .auth-connection {
+    animation: auth-card-in 900ms 100ms var(--motion-soft) both;
+  }
+  .auth-goal {
+    animation: auth-card-in 900ms 220ms var(--motion-soft) both;
+  }
+}
+@keyframes auth-settle {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes auth-card-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soft-panel,
+  .soft-sidebar,
+  .soft-panel *,
+  .soft-sidebar * {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+  .soft-popover,
+  .soft-overlay,
+  .soft-dialog,
+  .soft-tooltip,
+  .portal-shell [role='tabpanel'],
+  .workspace-progress-track > i {
+    animation: none !important;
+  }
+}
+
+/* Native form selects retain their browser semantics; modern Chromium lets
+ * their picker share the same soft opening/closing treatment. */
+@supports (appearance: base-select) {
+  .portal-shell select,
+  .portal-shell select::picker(select) {
+    appearance: base-select;
+  }
+  .portal-shell select::picker(select) {
+    margin-block: 6px;
+    border: 1px solid rgb(var(--border));
+    border-radius: 8px;
+    background: white;
+    padding: 4px;
+    box-shadow: var(--shadow-elevation-lg);
+    opacity: 0;
+    translate: 0 -6px;
+    transition:
+      opacity 320ms var(--motion-soft),
+      translate 380ms var(--motion-soft),
+      display 380ms allow-discrete,
+      overlay 380ms allow-discrete;
+  }
+  .portal-shell select:open::picker(select) {
+    opacity: 1;
+    translate: 0 0;
+  }
+  @starting-style {
+    .portal-shell select:open::picker(select) {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+  .portal-shell select option {
+    padding: 8px 10px;
+    border-radius: 4px;
+  }
+}
+@supports (interpolate-size: allow-keywords) {
+  .portal-shell details {
+    interpolate-size: allow-keywords;
+  }
+  .portal-shell details::details-content {
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      block-size 420ms var(--motion-soft),
+      opacity 320ms ease,
+      content-visibility 420ms allow-discrete;
+  }
+  .portal-shell details[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-shell select::picker(select),
+  .portal-shell details::details-content {
+    transition: none;
+  }
 }
 
 @media (max-width: 639px) {

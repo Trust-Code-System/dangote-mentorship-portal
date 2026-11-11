@@ -18,14 +18,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'border-input bg-surface text-body text-ink data-[placeholder]:text-ink-3 focus:ring-green/30 focus:ring-offset-bg flex h-11 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+      'border-input bg-surface text-body text-ink data-[placeholder]:text-ink-3 flex h-11 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&[data-state=open]>svg]:rotate-180',
       className,
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="text-ink-3 size-4" />
+      <ChevronDown className="text-ink-3 size-4 transition-transform duration-300" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -39,7 +39,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'border-border bg-surface text-ink shadow-elevation-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border',
+        'soft-popover border-border bg-surface text-ink shadow-elevation-lg relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-lg border',
         position === 'popper' && 'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
         className,
       )}

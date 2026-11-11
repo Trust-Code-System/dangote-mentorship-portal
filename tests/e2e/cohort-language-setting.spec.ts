@@ -1,14 +1,11 @@
+import { signInForAudit } from './helpers/session';
 import { expect, test, type Page } from '@playwright/test';
 
 const adminEmail = process.env.SEED_SUPER_ADMIN_EMAIL ?? 'admin@dangote.com';
 const password = process.env.SEED_DEFAULT_PASSWORD ?? 'ChangeMe123!';
 
 async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByLabel(/email/i).fill(adminEmail);
-  await page.getByLabel(/^(password|mot de passe)$/i).fill(password);
-  await page.getByRole('button', { name: /sign in|se connecter/i }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 45_000 });
+  await signInForAudit(page, adminEmail, password);
 }
 
 async function openActiveCohort(page: Page) {

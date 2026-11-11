@@ -18,3 +18,12 @@
 | Raw uppercase enum labels | Translated dot-status labels and shared table frames | Makes dense operational screens easier to scan |
 
 Craft read: bilingual enterprise mentorship workspace; light neutral surfaces, forest accent, restrained motion, variance 5; signature detail is the inset active navigation state and segmented progress.
+
+## Motion refinement verification
+- Sign-in remains the root route; auth branding now returns to sign-in rather than the public introduction.
+- Adapted React Bits AnimatedContent and CountUp, with retained license in `docs/licenses/react-bits.md`; existing menu/drawer semantics receive a shared soft transition system.
+- Menus close visually while becoming inert immediately. Reduced-motion overrides cover reveal, numeric, popup, drawer, tooltip and progress effects.
+- Workspace header-to-content spacing reduced to 20px; authentication form is top-aligned near its header.
+- Shared select mouse focus no longer retains a green ring. Keyboard focus uses a neutral slate indicator.
+- Updated browser assertions for the new admin title and settled root redirect. Route audits reuse real authentication cookies to stay within the existing five-attempt/minute login throttle.
+- Search dismissal tests now check accessible visibility and inertness during exit rather than requiring immediate DOM removal.

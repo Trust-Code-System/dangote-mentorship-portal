@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { CountUp } from '@/components/motion/count-up';
 
 export function MetricBand({
   items,
@@ -20,7 +21,7 @@ export function MetricBand({
             <ArrowUpRight className="text-ink-3/60 size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" />
           </div>
           <p className="text-ink mt-4 text-[32px] leading-none font-semibold tracking-[-.045em] tabular-nums">
-            {item.value}
+            {typeof item.value === 'number' ? <CountUp value={item.value} /> : item.value}
           </p>
           {item.progress !== undefined ? (
             <div aria-hidden="true" className="workspace-progress-track mt-4">

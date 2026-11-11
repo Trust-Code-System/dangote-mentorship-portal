@@ -50,6 +50,8 @@ import { NavSpinner } from '@/components/shell/nav-spinner';
 import { isNavItemCommitted, resolveNavItemVisualState } from '@/components/shell/nav-item-state';
 import { fetchRecentNotifications, fetchShellBadges } from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
+import { SoftPanel } from '@/components/motion/soft-panel';
+import { AnimatedContent } from '@/components/motion/animated-content';
 
 /** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
 const PENDING_NAV_TIMEOUT_MS = 12_000;
@@ -270,6 +272,16 @@ export function AppShell({
   const refreshGenRef = React.useRef(0);
   const sidebarNavRef = React.useRef<HTMLElement>(null);
   const sidebarRef = React.useRef<HTMLElement>(null);
+
+  React.useLayoutEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const updateInert = () => {
+      if (sidebarRef.current) sidebarRef.current.inert = !desktop.matches && !mobileOpen;
+    };
+    updateInert();
+    desktop.addEventListener('change', updateInert);
+    return () => desktop.removeEventListener('change', updateInert);
+  }, [mobileOpen]);
 
   // The mobile rail is a modal drawer: keep keyboard focus inside it and return
   // focus to its opener when it closes. The desktop rail stays ordinary nav.
@@ -536,13 +548,12 @@ export function AppShell({
       </div>
 
       {/* ── Mobile backdrop ── */}
-      {mobileOpen && (
-        <div
-          aria-hidden
-          className="bg-ink/30 fixed inset-0 z-40 lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <SoftPanel
+        open={mobileOpen}
+        aria-hidden
+        className="soft-scrim bg-ink/30 fixed inset-0 z-40 lg:hidden"
+        onClick={() => setMobileOpen(false)}
+      />
 
       {/* ── Sidebar ── */}
       <aside
@@ -550,13 +561,12 @@ export function AppShell({
         role={mobileOpen ? 'dialog' : undefined}
         aria-modal={mobileOpen || undefined}
         aria-label={mobileOpen ? labels.brand : undefined}
+        data-mobile-open={mobileOpen}
         className={cn(
-          'border-border fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-[#f3f4f6] transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
+          'soft-sidebar border-border fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-[#f3f4f6]',
           collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[232px]',
           'w-[260px]', // mobile drawer width
-          mobileOpen
-            ? 'visible translate-x-0'
-            : 'invisible -translate-x-full lg:visible lg:translate-x-0',
+          mobileOpen ? 'visible translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >
         {/* Brand */}
@@ -733,7 +743,7 @@ export function AppShell({
       {/* ── Main column ── */}
       <div
         className={cn(
-          'flex min-h-screen flex-col transition-[padding] duration-200 ease-out motion-reduce:transition-none',
+          'flex min-h-screen flex-col transition-[padding] duration-500 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none',
           collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[232px]',
         )}
       >
@@ -785,81 +795,77 @@ export function AppShell({
                     className="fixed inset-0 z-40"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="border-border bg-surface absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border">
-                    <div className="border-border border-b px-4 py-3">
-                      <p className="text-small text-ink font-semibold">
-                        {labels.notificationsTitle}
-                      </p>
-                    </div>
-                    {recentStatus === 'loading' || recentStatus === 'idle' ? (
-                      <div className="space-y-3 px-4 py-4" aria-busy="true">
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                      </div>
-                    ) : recentStatus === 'error' ? (
-                      <p className="text-small text-ink-3 px-4 py-6 text-center">
-                        {labels.noNotifications}
-                      </p>
-                    ) : recent.length === 0 ? (
-                      <p className="text-small text-ink-3 px-4 py-6 text-center">
-                        {labels.noNotifications}
-                      </p>
-                    ) : (
-                      <ul className="divide-border max-h-80 divide-y overflow-y-auto">
-                        {recent.map((n) => {
-                          const inner = (
-                            <div className="flex items-start gap-2">
-                              {!n.read && (
-                                <span
-                                  aria-hidden
-                                  className="bg-green mt-1.5 size-2 shrink-0 rounded-full"
-                                />
-                              )}
-                              <div className={cn('min-w-0', n.read && 'pl-4')}>
-                                <p className="text-small text-ink truncate font-medium">
-                                  {n.title}
-                                </p>
-                                {n.body && (
-                                  <p className="text-micro text-ink-2 line-clamp-2">{n.body}</p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                          return (
-                            <li
-                              key={n.id}
-                              className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}
-                            >
-                              {n.link ? (
-                                <Link
-                                  href={n.link}
-                                  onClick={() => setNotifOpen(false)}
-                                  className="block hover:opacity-80"
-                                >
-                                  {inner}
-                                </Link>
-                              ) : (
-                                inner
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                    <Link
-                      href="/notifications"
-                      onClick={(e) => {
-                        setNotifOpen(false);
-                        onNavClick('/notifications', e);
-                      }}
-                      className="border-border text-small text-green-strong hover:bg-surface-2 block border-t px-4 py-3 text-center font-medium"
-                    >
-                      {labels.seeAll}
-                    </Link>
-                  </div>
                 </>
               )}
+              <SoftPanel
+                open={notifOpen}
+                className="border-border bg-surface shadow-elevation-lg absolute right-0 z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-xl border"
+              >
+                <div className="border-border border-b px-4 py-3">
+                  <p className="text-small text-ink font-semibold">{labels.notificationsTitle}</p>
+                </div>
+                {recentStatus === 'loading' || recentStatus === 'idle' ? (
+                  <div className="space-y-3 px-4 py-4" aria-busy="true">
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                  </div>
+                ) : recentStatus === 'error' ? (
+                  <p className="text-small text-ink-3 px-4 py-6 text-center">
+                    {labels.noNotifications}
+                  </p>
+                ) : recent.length === 0 ? (
+                  <p className="text-small text-ink-3 px-4 py-6 text-center">
+                    {labels.noNotifications}
+                  </p>
+                ) : (
+                  <ul className="divide-border max-h-80 divide-y overflow-y-auto">
+                    {recent.map((n) => {
+                      const inner = (
+                        <div className="flex items-start gap-2">
+                          {!n.read && (
+                            <span
+                              aria-hidden
+                              className="bg-green mt-1.5 size-2 shrink-0 rounded-full"
+                            />
+                          )}
+                          <div className={cn('min-w-0', n.read && 'pl-4')}>
+                            <p className="text-small text-ink truncate font-medium">{n.title}</p>
+                            {n.body && (
+                              <p className="text-micro text-ink-2 line-clamp-2">{n.body}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                      return (
+                        <li key={n.id} className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}>
+                          {n.link ? (
+                            <Link
+                              href={n.link}
+                              onClick={() => setNotifOpen(false)}
+                              className="block hover:opacity-80"
+                            >
+                              {inner}
+                            </Link>
+                          ) : (
+                            inner
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <Link
+                  href="/notifications"
+                  onClick={(e) => {
+                    setNotifOpen(false);
+                    onNavClick('/notifications', e);
+                  }}
+                  className="border-border text-small text-green-strong hover:bg-surface-2 block border-t px-4 py-3 text-center font-medium"
+                >
+                  {labels.seeAll}
+                </Link>
+              </SoftPanel>
             </div>
             <Link
               href="/profile"
@@ -872,7 +878,7 @@ export function AppShell({
         </header>
 
         {/* Content — shell stays mounted; only this region swaps / refreshes. */}
-        <main className="portal-content relative mx-auto w-full max-w-[1440px] flex-1 px-4 py-7 pb-28 sm:px-7 lg:px-9 lg:py-8 lg:pb-28">
+        <main className="portal-content relative mx-auto w-full max-w-[1440px] flex-1 px-4 pt-5 pb-28 sm:px-7 lg:px-8 lg:pt-5 lg:pb-28">
           {isRefreshing ? (
             <div
               role="status"
@@ -883,7 +889,9 @@ export function AppShell({
               <span>{labels.updating}</span>
             </div>
           ) : null}
-          {children}
+          <AnimatedContent key={pathname} className="portal-page">
+            {children}
+          </AnimatedContent>
         </main>
       </div>
 

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { CountUp } from '@/components/motion/count-up';
 
 // StatTile (§19 §3/§8) — the admin "stat tiles row". A big tabular number under
 // a micro eyebrow, optional status tone + delta hint. Numbers use Inter tabular
@@ -76,7 +77,7 @@ function StatTile({
           toneClass[effectiveTone],
         )}
       >
-        {value}
+        {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
       {hint && <div className="text-small text-ink-2 mt-1">{hint}</div>}
     </div>
