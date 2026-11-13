@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 // radius. Status colors are functional only: green=ok, amber=warn, red=risk,
 // blue=info, gold=recognition. `neutral`/`outline` carry non-status labels.
 const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-micro uppercase transition-colors',
+  'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium leading-4 transition-colors',
   {
     variants: {
       variant: {
@@ -28,8 +28,7 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />;

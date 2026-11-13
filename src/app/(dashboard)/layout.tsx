@@ -13,6 +13,7 @@ import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/se
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
 import { getViewerCohortLanguages } from '@/features/cohorts/language-data';
 import type { AppLocale } from '@/i18n/config';
+import { CohortLocaleGuard } from '@/components/cohort-locale-guard';
 
 // Quick Actions (§1.9) shown across the authenticated participant area. Items are
 // filtered to what the user's role can actually do, shortest-path first.
@@ -113,7 +114,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       sections={sections}
       unread={0}
       loadBadges
-      availableLocales={availableLocales}
       user={{
         name: user.name ?? user.email,
         roleLabel: user.roles.map(roleLabelOf).join(' · '),
@@ -122,6 +122,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }}
       labels={labels}
     >
+      <CohortLocaleGuard availableLocales={availableLocales} />
       <AssessmentGateBanner gate={gate} />
       {children}
       <QuickActions items={quickActionsFor(user.roles)} />

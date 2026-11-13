@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, ShieldAlert, Sparkles } from 'lucide-react';
 import { RevealText } from '../motion/reveal-text';
@@ -59,20 +59,19 @@ const SUGGESTIONS: Record<DemoLanguage, { mentor: string; mentee: string; score:
  * The AI-assisted matching chapter.
  *
  * A controlled, simulated demonstration (brief §11): visitors switch the
- * programme language and the scoring criterion and watch the network respond —
+ * scoring criterion and watch the network respond in the current locale —
  * cross-language pairings vanish, the remaining ones are scored, one is
  * proposed, and nothing becomes active until a human approves it.
  *
  * It is fully keyboard operable: the criteria are a real tablist with roving
- * focus and arrow-key navigation, and the language control is a labelled
- * pressed-button pair. The language rejection is never communicated by colour
+ * focus and arrow-key navigation. The language rejection is never communicated by colour
  * alone — ineligible nodes are also struck through and carry explicit text.
  */
 export function SectionMatching() {
   const t = useTranslations('landing.matching');
   const reduced = useReducedMotion();
 
-  const [language, setLanguage] = useState<DemoLanguage>('EN');
+  const language: DemoLanguage = useLocale() === 'fr' ? 'FR' : 'EN';
   const [criterion, setCriterion] = useState<CriterionKey>('competency');
   const [approved, setApproved] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -90,11 +89,6 @@ export function SectionMatching() {
     () => MENTEES.filter((mentee) => mentee.language === language).map((mentee) => mentee.id),
     [language],
   );
-
-  function switchLanguage(next: DemoLanguage) {
-    setLanguage(next);
-    setApproved(false);
-  }
 
   function onTabKeyDown(event: React.KeyboardEvent, index: number) {
     const last = CRITERIA.length - 1;
@@ -170,29 +164,6 @@ export function SectionMatching() {
                 <p className="mt-2 max-w-md text-sm text-blak-text-2">{t('demoHint')}</p>
               </div>
 
-              <fieldset className="shrink-0">
-                <legend className="mb-2 text-blak-label uppercase text-blak-text-2">
-                  {t('languageLabel')}
-                </legend>
-                <div className="inline-flex rounded-full border border-blak-border/15 p-1">
-                  {(['EN', 'FR'] as const).map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => switchLanguage(code)}
-                      aria-pressed={language === code}
-                      className={cn(
-                        'rounded-full px-5 py-2 text-sm font-semibold transition-colors',
-                        language === code
-                          ? 'bg-blak-green text-blak-black'
-                          : 'text-blak-text-2 hover:text-blak-text',
-                      )}
-                    >
-                      {code === 'EN' ? t('languageEn') : t('languageFr')}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
             </div>
 
             {/* Criteria tablist */}
@@ -422,7 +393,6 @@ function MatchNetwork({
               key={mentor.id}
               ref={registerNode(mentor.id)}
               label={t(`profiles.${mentor.id}`)}
-              language={mentor.language}
               eligible={eligibleMentors.includes(mentor.id)}
               rejectedLabel={t('rejectedLabel')}
               reduced={reduced}
@@ -436,7 +406,6 @@ function MatchNetwork({
               key={mentee.id}
               ref={registerNode(mentee.id)}
               label={t(`profiles.${mentee.id}`)}
-              language={mentee.language}
               eligible={eligibleMentees.includes(mentee.id)}
               rejectedLabel={t('rejectedLabel')}
               reduced={reduced}
@@ -491,12 +460,11 @@ const ProfileNode = forwardRef<
   HTMLLIElement,
   {
     label: string;
-    language: DemoLanguage;
     eligible: boolean;
     rejectedLabel: string;
     reduced: boolean;
   }
->(function ProfileNode({ label, language, eligible, rejectedLabel, reduced }, ref) {
+>(function ProfileNode({ label, eligible, rejectedLabel, reduced }, ref) {
   return (
     <motion.li
       ref={ref}
@@ -509,19 +477,9 @@ const ProfileNode = forwardRef<
           : 'border-blak-border/10 bg-blak-black/60',
       )}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            'rounded px-1.5 py-0.5 text-[0.65rem] font-bold tracking-wider',
-            eligible ? 'bg-blak-green/20 text-blak-green-soft' : 'bg-blak-ivory/10 text-blak-text-2',
-          )}
-        >
-          {language}
-        </span>
-      </div>
       <p
         className={cn(
-          'mt-1.5 text-xs leading-snug sm:text-sm',
+          'text-xs leading-snug sm:text-sm',
           eligible ? 'text-blak-text' : 'text-blak-text-2 line-through decoration-blak-text-2/50',
         )}
       >

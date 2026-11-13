@@ -17,7 +17,7 @@ export async function TrainerDashboardView({ data, lang }: { data: TrainerDashbo
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={t('batches')} value={data.totals.batches} icon={<Layers className="size-5" />} />
         <StatTile
           label={t('participants')}

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getUpcomingMeetings } from '@/features/admin/overview-data';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Programme-wide upcoming-meetings drill-down (reached from the admin dashboard
@@ -13,7 +13,7 @@ export default async function AdminMeetingsPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{t('meetingsTitle')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('meetingsTitle')}</h1>
         <p className="text-body text-ink-2">{t('meetingsSubtitle')}</p>
       </div>
 
@@ -39,7 +39,7 @@ export default async function AdminMeetingsPage() {
                 </TableCell>
                 <TableCell>{m.title}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{m.type}</Badge>
+                  <StatusBadge status={m.type} tone="neutral" />
                 </TableCell>
                 <TableCell>
                   {m.mentorProfileId ? (

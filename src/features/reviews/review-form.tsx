@@ -167,7 +167,6 @@ function FieldRenderer({
           id={`f-${field.id}`}
           name={`f-${field.id}`}
           label={label}
-          lang={lang}
           as={field.type === 'short_text' ? 'input' : 'textarea'}
           value={single}
           onChange={onChange}

@@ -27,7 +27,7 @@ export async function ReviewRollupView({
   return (
     <div className="space-y-8">
       {/* Completion tiles */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile
           label={t('eligible')}
           value={rollup.eligibleParticipants}
@@ -66,7 +66,7 @@ export async function ReviewRollupView({
       {/* Language + department participation */}
       <section className="space-y-3">
         <h2 className="font-display text-h1 text-ink">{t('participationTitle')}</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="workspace-section stat-band overflow-hidden">
           <StatTile label="EN" value={rollup.language.en} hint={t('participantsEn')} icon={<Flag className="size-5" />} />
           <StatTile label="FR" value={rollup.language.fr} hint={t('participantsFr')} icon={<Flag className="size-5" />} />
         </div>

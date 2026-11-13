@@ -13,7 +13,7 @@ export default async function PairPage({ params }: { params: Promise<{ menteeId:
   if (!pair) {
     return (
       <div className="space-y-4">
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-ink-2">{t('noPair')}</p>
       </div>
     );

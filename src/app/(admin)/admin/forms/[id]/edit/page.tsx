@@ -47,7 +47,7 @@ export default async function EditFormPage({ params }: { params: Promise<{ id: s
         <Link href="/admin/forms" className="text-small text-ink-2 hover:text-ink">
           ← {t('title')}
         </Link>
-        <h1 className="font-display text-display text-ink">{t('editForm')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('editForm')}</h1>
         <p className="text-small text-ink-2">{t('builderHelp')}</p>
       </div>
       <FormDefinitionEditor cohorts={cohorts} initial={initial} />

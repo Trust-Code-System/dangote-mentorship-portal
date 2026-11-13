@@ -6,9 +6,7 @@ import { defaultDashboardPath } from '@/lib/auth/roles';
 //
 // This is an invite-only, `noindex` internal programme: nobody can sign
 // themselves up, so a visitor at `/` is almost always a participant who wants
-// to sign in. They get the sign-in screen directly. The nine-section marketing
-// narrative still exists — it moved to `/welcome`, and the sign-in footer links
-// to it.
+// to sign in. They get the sign-in screen directly, with no marketing detour.
 //
 // A signed-in visitor skips `/login` entirely and lands on their own dashboard,
 // so the common case is one redirect rather than two.

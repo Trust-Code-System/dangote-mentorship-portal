@@ -64,14 +64,24 @@ export function EvidenceUpload({ goalId }: { goalId: string }) {
         router.refresh();
       }
     } catch (error) {
-      setState({ ok: false, error: { code: 'UNKNOWN', message: error instanceof Error ? error.message : 'Upload failed.' } });
+      setState({
+        ok: false,
+        error: {
+          code: 'UNKNOWN',
+          message: error instanceof Error ? error.message : 'Upload failed.',
+        },
+      });
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <form ref={formRef} onSubmit={(event) => void submit(event)} className="space-y-2 border-t pt-3">
+    <form
+      ref={formRef}
+      onSubmit={(event) => void submit(event)}
+      className="space-y-4 border-t pt-4"
+    >
       <input type="hidden" name="goalId" value={goalId} />
       <div className="space-y-1">
         <Label htmlFor={fileId}>{t('evidenceFile')}</Label>
@@ -82,7 +92,7 @@ export function EvidenceUpload({ goalId }: { goalId: string }) {
           required
           accept=".pdf,.png,.jpg,.jpeg,.docx,.pptx,.txt"
         />
-        <p className="text-xs text-muted-foreground">{t('evidenceHint')}</p>
+        <p className="text-muted-foreground text-xs">{t('evidenceHint')}</p>
       </div>
       <div className="space-y-1">
         <Label htmlFor={noteId}>{t('evidenceNote')}</Label>
@@ -90,10 +100,10 @@ export function EvidenceUpload({ goalId }: { goalId: string }) {
       </div>
 
       {state && !state.ok ? (
-        <p className="text-sm text-destructive">{state.error.message || tc('errorBody')}</p>
+        <p className="text-destructive text-sm">{state.error.message || tc('errorBody')}</p>
       ) : null}
 
-      <Button type="submit" size="sm" variant="outline" disabled={pending}>
+      <Button type="submit" variant="outline" disabled={pending}>
         {pending ? tc('loading') : t('uploadEvidence')}
       </Button>
     </form>

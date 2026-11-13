@@ -41,8 +41,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { signOutAction } from '@/lib/auth/actions';
-import { LocaleSwitcher } from '@/components/locale-switcher';
-import type { AppLocale } from '@/i18n/config';
 import { BrandPlate } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
@@ -50,6 +48,8 @@ import { NavSpinner } from '@/components/shell/nav-spinner';
 import { isNavItemCommitted, resolveNavItemVisualState } from '@/components/shell/nav-item-state';
 import { fetchRecentNotifications, fetchShellBadges } from '@/lib/notifications/actions';
 import { cn } from '@/lib/utils';
+import { SoftPanel } from '@/components/motion/soft-panel';
+import { AnimatedContent } from '@/components/motion/animated-content';
 
 /** Clear stuck pending chrome if the URL never commits (cancelled / failed nav). */
 const PENDING_NAV_TIMEOUT_MS = 12_000;
@@ -216,7 +216,6 @@ export interface AppShellProps {
   /** When true, fetch notification/message badges after mount (non-blocking). */
   loadBadges?: boolean;
   /** Interface languages available to this viewer's cohort. */
-  availableLocales?: readonly AppLocale[];
   labels: AppShellLabels;
   children: React.ReactNode;
 }
@@ -245,7 +244,6 @@ export function AppShell({
   user,
   unread: unreadProp = 0,
   loadBadges = false,
-  availableLocales,
   labels,
   children,
 }: AppShellProps) {
@@ -269,6 +267,64 @@ export function AppShell({
   const pendingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const refreshGenRef = React.useRef(0);
   const sidebarNavRef = React.useRef<HTMLElement>(null);
+  const sidebarRef = React.useRef<HTMLElement>(null);
+  const notificationTriggerRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useLayoutEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const updateInert = () => {
+      if (sidebarRef.current) sidebarRef.current.inert = !desktop.matches && !mobileOpen;
+    };
+    updateInert();
+    desktop.addEventListener('change', updateInert);
+    return () => desktop.removeEventListener('change', updateInert);
+  }, [mobileOpen]);
+
+  // The mobile rail is a modal drawer: keep keyboard focus inside it and return
+  // focus to its opener when it closes. The desktop rail stays ordinary nav.
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    sidebar.querySelector<HTMLElement>('[data-drawer-close]')?.focus();
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const onDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(
+        sidebar.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]'),
+      ).filter(
+        (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden',
+      );
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    desktop.addEventListener('change', onDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      desktop.removeEventListener('change', onDesktop);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [mobileOpen]);
 
   // Restore sidebar scroll after layout remounts (e.g. /admin → /notifications).
   // sessionStorage so it survives the unmount; useLayoutEffect avoids a top→saved flash.
@@ -471,7 +527,7 @@ export function AppShell({
   }
 
   return (
-    <div className="bg-bg min-h-screen">
+    <div className="portal-shell bg-bg min-h-screen">
       {/* Thin top progress — visible only while a sidebar/tab nav is pending. */}
       <div
         aria-hidden={!navigating}
@@ -482,32 +538,36 @@ export function AppShell({
       >
         <div
           className={cn(
-            'bg-green h-full w-1/3',
-            navigating && 'animate-pulse motion-reduce:animate-none',
+            'route-progress bg-green h-full w-1/4',
+            navigating && 'motion-reduce:animate-none',
           )}
         />
       </div>
 
       {/* ── Mobile backdrop ── */}
-      {mobileOpen && (
-        <div
-          aria-hidden
-          className="bg-ink/30 fixed inset-0 z-40 lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <SoftPanel
+        open={mobileOpen}
+        aria-hidden
+        className="soft-scrim bg-ink/30 fixed inset-0 z-40 lg:hidden"
+        onClick={() => setMobileOpen(false)}
+      />
 
       {/* ── Sidebar ── */}
       <aside
+        ref={sidebarRef}
+        role={mobileOpen ? 'dialog' : undefined}
+        aria-modal={mobileOpen || undefined}
+        aria-label={mobileOpen ? labels.brand : undefined}
+        data-mobile-open={mobileOpen}
         className={cn(
-          'border-border bg-surface fixed inset-y-0 left-0 z-50 flex flex-col border-r transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
-          collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[240px]',
+          'soft-sidebar border-border fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-[#f3f4f6]',
+          collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[232px]',
           'w-[260px]', // mobile drawer width
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          mobileOpen ? 'visible translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >
         {/* Brand */}
-        <div className="flex h-[72px] items-center gap-2 px-4">
+        <div className="border-border/70 flex h-[84px] items-center gap-2 border-b px-4">
           <Link
             href="/"
             className={cn(
@@ -515,7 +575,7 @@ export function AppShell({
               collapsed && 'lg:hidden', // narrow rail shows only the collapse chevron
             )}
           >
-            <BrandPlate className="h-7 shrink-0" />
+            <BrandPlate className="h-8 shrink-0" />
             {!collapsed && (
               <span className="min-w-0 flex-1 leading-tight">
                 <Wordmark
@@ -545,6 +605,7 @@ export function AppShell({
           {/* Mobile drawer close */}
           <button
             type="button"
+            data-drawer-close
             aria-label={labels.closeMenu}
             className="text-ink-2 hover:bg-surface ml-auto rounded-md p-1.5 lg:hidden"
             onClick={() => setMobileOpen(false)}
@@ -556,7 +617,7 @@ export function AppShell({
         {/* Nav — thin near-invisible scrollbar; scroll position persisted across layout remounts */}
         <nav
           ref={sidebarNavRef}
-          className="shell-sidebar-nav flex-1 space-y-3 overflow-y-auto px-2 py-2"
+          className="shell-sidebar-nav flex-1 space-y-5 overflow-y-auto px-3 py-5"
           onScroll={(event) => {
             try {
               window.sessionStorage.setItem(
@@ -570,7 +631,9 @@ export function AppShell({
         >
           {navSections.map((section, si) => (
             <div key={section.label ?? si} className="space-y-1">
-              {section.label && !collapsed && <p className="sr-only">{section.label}</p>}
+              {section.label && !collapsed && (
+                <p className="text-ink-3 px-3 pb-2 text-[11px] font-medium">{section.label}</p>
+              )}
               {section.items.map((item) => {
                 const Icon = ICONS[item.icon];
                 const visual = resolveNavItemVisualState({
@@ -595,12 +658,11 @@ export function AppShell({
                     onPointerEnter={() => prefetchHref(item.href)}
                     onFocus={() => prefetchHref(item.href)}
                     className={cn(
-                      'group focus-visible:ring-green-light/30 flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[0.72rem] transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none',
+                      'group focus-visible:ring-green-light/30 flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2 text-[13px] transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none lg:min-h-9',
                       collapsed && 'lg:justify-center lg:px-0',
                       active &&
-                        'border-green bg-green-soft/50 text-green-strong rounded-r-none border-r-2 font-bold',
-                      pending &&
-                        'border-green/40 bg-green-soft/25 text-green-strong/90 border font-medium',
+                        'text-ink bg-white font-semibold shadow-[0_1px_3px_rgb(24_32_42/0.08),0_0_0_1px_rgb(24_32_42/0.04)]',
+                      pending && 'text-ink-2 bg-white/60 font-medium',
                       !active &&
                         !pending &&
                         'text-ink-2 hover:bg-surface-2 hover:text-ink font-medium',
@@ -641,10 +703,10 @@ export function AppShell({
         </nav>
 
         {/* Profile card + sign out (Stitch bottom-of-rail profile) */}
-        <div className="p-3">
+        <div className="border-border/70 border-t p-3">
           <div
             className={cn(
-              'flex items-center gap-2 rounded-md p-1.5',
+              'border-border flex items-center gap-2 rounded-lg border bg-white p-2',
               collapsed && 'lg:justify-center lg:bg-transparent lg:p-0',
             )}
           >
@@ -658,9 +720,7 @@ export function AppShell({
             {!collapsed && (
               <Link href="/profile" className="min-w-0 flex-1 leading-tight">
                 <span className="text-small text-ink block truncate font-bold">{user.name}</span>
-                <span className="text-micro text-ink-3 block truncate tracking-wider uppercase">
-                  {user.roleLabel}
-                </span>
+                <span className="text-ink-3 block truncate text-[11px]">{user.roleLabel}</span>
               </Link>
             )}
             <form action={signOutAction} className={cn(collapsed && 'lg:hidden')}>
@@ -680,12 +740,12 @@ export function AppShell({
       {/* ── Main column ── */}
       <div
         className={cn(
-          'flex min-h-screen flex-col transition-[padding] duration-200 ease-out motion-reduce:transition-none',
-          collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[240px]',
+          'flex min-h-screen flex-col transition-[padding] duration-500 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none',
+          collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[232px]',
         )}
       >
         {/* Top bar */}
-        <header className="border-border bg-surface sticky top-0 z-30 flex h-[52px] items-center gap-3 border-b px-4 sm:px-5">
+        <header className="border-border/75 sticky top-0 z-30 flex h-[64px] items-center gap-3 border-b bg-white/95 px-4 backdrop-blur-sm sm:px-7">
           <button
             type="button"
             aria-label={labels.openMenu}
@@ -695,18 +755,38 @@ export function AppShell({
             <Menu className="size-5" />
           </button>
 
+          <div className="text-small mr-auto hidden min-w-0 items-center gap-2 md:flex">
+            <span className="text-ink-3">{user.roleLabel}</span>
+            <ChevronRight className="text-ink-3/60 size-3" aria-hidden />
+            <span className="text-ink truncate font-medium">
+              {allItems.find((item) => isNavItemCommitted(pathname, item.href, item.exact))
+                ?.label ?? labels.brand}
+            </span>
+          </div>
           {/* Global search — pages (client-side) + RBAC-scoped records (admins). */}
           <GlobalSearch navItems={allItems.map((i) => ({ label: i.label, href: i.href }))} />
 
           <div className="ml-auto flex items-center gap-2">
-            <LocaleSwitcher availableLocales={availableLocales} />
-            <div className="relative">
+            <div
+              className="relative"
+              onKeyDown={(event) => {
+                if (event.key === 'Escape' && notifOpen) {
+                  event.stopPropagation();
+                  setNotifOpen(false);
+                  notificationTriggerRef.current?.focus();
+                }
+              }}
+            >
               <button
+                ref={notificationTriggerRef}
                 type="button"
                 aria-label={labels.notifications}
                 aria-expanded={notifOpen}
                 onClick={() => setNotifOpen((o) => !o)}
-                className="text-ink-2 hover:bg-surface-2 relative rounded-md p-2"
+                className={cn(
+                  'text-ink-2 hover:bg-surface-2 relative rounded-md p-2',
+                  notifOpen && 'z-50',
+                )}
               >
                 <Bell className="size-5" />
                 {unread > 0 && (
@@ -724,81 +804,77 @@ export function AppShell({
                     className="fixed inset-0 z-40"
                     onClick={() => setNotifOpen(false)}
                   />
-                  <div className="border-border bg-surface absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border">
-                    <div className="border-border border-b px-4 py-3">
-                      <p className="text-small text-ink font-semibold">
-                        {labels.notificationsTitle}
-                      </p>
-                    </div>
-                    {recentStatus === 'loading' || recentStatus === 'idle' ? (
-                      <div className="space-y-3 px-4 py-4" aria-busy="true">
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                        <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
-                      </div>
-                    ) : recentStatus === 'error' ? (
-                      <p className="text-small text-ink-3 px-4 py-6 text-center">
-                        {labels.noNotifications}
-                      </p>
-                    ) : recent.length === 0 ? (
-                      <p className="text-small text-ink-3 px-4 py-6 text-center">
-                        {labels.noNotifications}
-                      </p>
-                    ) : (
-                      <ul className="divide-border max-h-80 divide-y overflow-y-auto">
-                        {recent.map((n) => {
-                          const inner = (
-                            <div className="flex items-start gap-2">
-                              {!n.read && (
-                                <span
-                                  aria-hidden
-                                  className="bg-green mt-1.5 size-2 shrink-0 rounded-full"
-                                />
-                              )}
-                              <div className={cn('min-w-0', n.read && 'pl-4')}>
-                                <p className="text-small text-ink truncate font-medium">
-                                  {n.title}
-                                </p>
-                                {n.body && (
-                                  <p className="text-micro text-ink-2 line-clamp-2">{n.body}</p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                          return (
-                            <li
-                              key={n.id}
-                              className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}
-                            >
-                              {n.link ? (
-                                <Link
-                                  href={n.link}
-                                  onClick={() => setNotifOpen(false)}
-                                  className="block hover:opacity-80"
-                                >
-                                  {inner}
-                                </Link>
-                              ) : (
-                                inner
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                    <Link
-                      href="/notifications"
-                      onClick={(e) => {
-                        setNotifOpen(false);
-                        onNavClick('/notifications', e);
-                      }}
-                      className="border-border text-small text-green-strong hover:bg-surface-2 block border-t px-4 py-3 text-center font-medium"
-                    >
-                      {labels.seeAll}
-                    </Link>
-                  </div>
                 </>
               )}
+              <SoftPanel
+                open={notifOpen}
+                className="border-border bg-surface shadow-elevation-lg absolute right-0 z-50 mt-2 w-[min(20rem,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-xl border"
+              >
+                <div className="border-border border-b px-4 py-3">
+                  <p className="text-small text-ink font-semibold">{labels.notificationsTitle}</p>
+                </div>
+                {recentStatus === 'loading' || recentStatus === 'idle' ? (
+                  <div className="space-y-3 px-4 py-4" aria-busy="true">
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                    <div className="bg-surface-2 h-10 animate-pulse rounded-md motion-reduce:animate-none" />
+                  </div>
+                ) : recentStatus === 'error' ? (
+                  <p className="text-small text-ink-3 px-4 py-6 text-center">
+                    {labels.noNotifications}
+                  </p>
+                ) : recent.length === 0 ? (
+                  <p className="text-small text-ink-3 px-4 py-6 text-center">
+                    {labels.noNotifications}
+                  </p>
+                ) : (
+                  <ul className="divide-border max-h-80 divide-y overflow-y-auto">
+                    {recent.map((n) => {
+                      const inner = (
+                        <div className="flex items-start gap-2">
+                          {!n.read && (
+                            <span
+                              aria-hidden
+                              className="bg-green mt-1.5 size-2 shrink-0 rounded-full"
+                            />
+                          )}
+                          <div className={cn('min-w-0', n.read && 'pl-4')}>
+                            <p className="text-small text-ink truncate font-medium">{n.title}</p>
+                            {n.body && (
+                              <p className="text-micro text-ink-2 line-clamp-2">{n.body}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                      return (
+                        <li key={n.id} className={cn('px-4 py-3', !n.read && 'bg-green-soft/40')}>
+                          {n.link ? (
+                            <Link
+                              href={n.link}
+                              onClick={() => setNotifOpen(false)}
+                              className="block hover:opacity-80"
+                            >
+                              {inner}
+                            </Link>
+                          ) : (
+                            inner
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <Link
+                  href="/notifications"
+                  onClick={(e) => {
+                    setNotifOpen(false);
+                    onNavClick('/notifications', e);
+                  }}
+                  className="border-border text-small text-green-strong hover:bg-surface-2 block border-t px-4 py-3 text-center font-medium"
+                >
+                  {labels.seeAll}
+                </Link>
+              </SoftPanel>
             </div>
             <Link
               href="/profile"
@@ -811,7 +887,7 @@ export function AppShell({
         </header>
 
         {/* Content — shell stays mounted; only this region swaps / refreshes. */}
-        <main className="relative mx-auto w-full max-w-[1180px] flex-1 px-4 py-5 pb-24 sm:px-5 lg:pb-8">
+        <main className="portal-content relative mx-auto w-full max-w-[1440px] flex-1 px-4 pt-5 pb-28 sm:px-7 lg:px-8 lg:pt-5 lg:pb-28">
           {isRefreshing ? (
             <div
               role="status"
@@ -822,7 +898,9 @@ export function AppShell({
               <span>{labels.updating}</span>
             </div>
           ) : null}
-          {children}
+          <AnimatedContent key={pathname} className="portal-page">
+            {children}
+          </AnimatedContent>
         </main>
       </div>
 
@@ -851,7 +929,7 @@ export function AppShell({
               onPointerEnter={() => prefetchHref(item.href)}
               onFocus={() => prefetchHref(item.href)}
               className={cn(
-                'text-micro flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 transition-colors duration-150',
+                'text-micro flex min-h-11 min-w-0 flex-1 flex-col items-center gap-0.5 py-2 transition-colors duration-150',
                 active && 'text-green-strong font-semibold',
                 pending && 'text-green-strong/85',
                 !active && !pending && 'text-ink-3',
@@ -866,14 +944,16 @@ export function AppShell({
                   />
                 ) : null}
               </span>
-              <span className={cn('truncate', pending && 'opacity-80')}>{item.label}</span>
+              <span className={cn('w-full truncate text-center', pending && 'opacity-80')}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="text-micro text-ink-3 flex flex-1 flex-col items-center gap-0.5 py-2"
+          className="text-micro text-ink-3 flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2"
         >
           <Menu className="size-5" />
           <span>{labels.more}</span>

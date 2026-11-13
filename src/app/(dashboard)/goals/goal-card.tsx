@@ -42,8 +42,8 @@ export async function GoalCard({
     <Card>
       <CardHeader className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="text-base">{goal.title}</CardTitle>
-          <div className="flex flex-wrap gap-1">
+          <CardTitle className="min-w-0 max-w-full text-base [overflow-wrap:anywhere]">{goal.title}</CardTitle>
+          <div className="flex max-w-full min-w-0 flex-wrap gap-1 [&>*]:max-w-full [&>*]:[overflow-wrap:anywhere]">
             <Badge variant={goal.status === GoalStatus.APPROVED || goal.status === GoalStatus.COMPLETED ? 'default' : 'secondary'}>
               {t(`status.${goal.status}`)}
             </Badge>
@@ -153,9 +153,9 @@ export async function GoalCard({
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="text-xs font-medium uppercase text-muted-foreground">{label}</dt>
-      <dd className="whitespace-pre-wrap">{value}</dd>
+      <dd className="whitespace-pre-wrap [overflow-wrap:anywhere]">{value}</dd>
     </div>
   );
 }

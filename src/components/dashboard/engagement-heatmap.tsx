@@ -32,15 +32,15 @@ export async function EngagementHeatmap({ timeline }: { timeline: PairsTimeline 
   const rows = timeline.pairs.slice(0, 8); // keep the card scannable
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-6 shadow-elevation">
+    <section className="border-border bg-surface shadow-elevation min-w-0 rounded-lg border p-5">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-h2 text-ink">{t('engagementHeatmap')}</h2>
-        <div className="flex items-center gap-1.5 text-micro uppercase tracking-wider text-ink-3">
+        <div className="text-micro text-ink-3 flex items-center gap-1.5 tracking-wider uppercase">
           {t('less')}
-          <span className="size-3 rounded-sm bg-surface-2" />
-          <span className="size-3 rounded-sm bg-green-soft" />
-          <span className="size-3 rounded-sm bg-green-light/60" />
-          <span className="size-3 rounded-sm bg-green" />
+          <span className="bg-surface-2 size-3 rounded-sm" />
+          <span className="bg-green-soft size-3 rounded-sm" />
+          <span className="bg-green-light/60 size-3 rounded-sm" />
+          <span className="bg-green size-3 rounded-sm" />
           {t('more')}
         </div>
       </div>
@@ -48,8 +48,11 @@ export async function EngagementHeatmap({ timeline }: { timeline: PairsTimeline 
       {rows.length === 0 ? (
         <p className="text-small text-ink-3">{t('noEngagementYet')}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-separate border-spacing-1">
+        <div className="max-w-full overflow-x-auto">
+          <table
+            data-visualization="engagement"
+            className="w-full min-w-[640px] border-separate border-spacing-1"
+          >
             <thead>
               <tr>
                 <th className="w-40" />
@@ -57,7 +60,7 @@ export async function EngagementHeatmap({ timeline }: { timeline: PairsTimeline 
                   <th
                     key={i}
                     className={cn(
-                      'px-1 text-center text-micro font-bold uppercase tracking-wider',
+                      'text-micro px-1 text-center font-bold tracking-wider uppercase',
                       i === timeline.currentMonthIndex ? 'text-green-strong' : 'text-ink-3',
                     )}
                   >
@@ -71,10 +74,10 @@ export async function EngagementHeatmap({ timeline }: { timeline: PairsTimeline 
                 <tr key={p.matchId}>
                   <td className="pr-3">
                     <span className="flex items-center gap-2">
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-green-soft text-micro font-bold text-green-strong">
+                      <span className="bg-green-soft text-micro text-green-strong flex size-7 shrink-0 items-center justify-center rounded-full font-bold">
                         {initials(p.mentorName)}
                       </span>
-                      <span className="truncate text-small text-ink">
+                      <span className="text-small text-ink truncate whitespace-nowrap">
                         {p.mentorName} · {p.menteeName}
                       </span>
                     </span>
@@ -86,7 +89,7 @@ export async function EngagementHeatmap({ timeline }: { timeline: PairsTimeline 
                         className={cn(
                           'block h-7 rounded-sm',
                           cellClass(count, peak),
-                          i === timeline.currentMonthIndex && 'ring-1 ring-green-strong/40',
+                          i === timeline.currentMonthIndex && 'ring-green-strong/40 ring-1',
                         )}
                       />
                     </td>

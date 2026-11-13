@@ -18,15 +18,15 @@ export async function WeeklyTip({ className }: { className?: string }) {
   return (
     <div
       className={
-        'flex h-full flex-col rounded-lg bg-gold p-6 text-white shadow-elevation ' +
+        'border-border bg-surface-2/70 text-ink flex h-full flex-col rounded-lg border p-5 ' +
         (className ?? '')
       }
     >
       <div className="mb-3 flex items-center gap-2">
-        <Lightbulb className="size-5" aria-hidden />
-        <h3 className="text-micro font-bold uppercase tracking-widest">{t('weeklyTip')}</h3>
+        <Lightbulb className="size-4" aria-hidden />
+        <h3 className="text-small font-semibold">{t('weeklyTip')}</h3>
       </div>
-      <p className="text-body leading-relaxed text-white/95">{t(`tips.tip${i}`)}</p>
+      <p className="text-small text-ink-2 leading-relaxed">{t(`tips.tip${i}`)}</p>
     </div>
   );
 }

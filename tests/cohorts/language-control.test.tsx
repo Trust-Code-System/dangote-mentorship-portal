@@ -2,7 +2,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CohortLanguageControl } from '@/app/(admin)/admin/cohorts/cohort-language-control';
-import { LocaleSwitcher } from '@/components/locale-switcher';
+import { CohortLocaleGuard } from '@/components/cohort-locale-guard';
 
 const localeState = vi.hoisted(() => ({ active: 'en' }));
 const setLocaleMock = vi.hoisted(() => vi.fn(async () => undefined));
@@ -72,23 +72,24 @@ describe('cohort language controls', () => {
     expect(new FormData(form).getAll('languages')).toEqual(['EN', 'FR']);
   });
 
-  it('hides the language switcher for an English-only participant', async () => {
-    await render(<LocaleSwitcher availableLocales={['en']} />);
-    expect(container.querySelector('[role="group"]')).toBeNull();
+  it('renders no language controls for an English-only participant', async () => {
+    await render(<CohortLocaleGuard availableLocales={['en']} />);
+    expect(container.childElementCount).toBe(0);
+    expect(setLocaleMock).not.toHaveBeenCalled();
   });
 
-  it('keeps both choices for bilingual participants and programme admins', async () => {
-    await render(<LocaleSwitcher availableLocales={['en', 'fr']} />);
-    expect(
-      Array.from(container.querySelectorAll('button')).map((button) => button.textContent),
-    ).toEqual(['en', 'fr']);
+  it('renders no language controls for bilingual participants and programme admins', async () => {
+    localeState.active = 'fr';
+    await render(<CohortLocaleGuard availableLocales={['en', 'fr']} />);
+    expect(container.childElementCount).toBe(0);
+    expect(setLocaleMock).not.toHaveBeenCalled();
   });
 
   it('moves a participant off French when their cohort no longer offers it', async () => {
     localeState.active = 'fr';
-    await render(<LocaleSwitcher availableLocales={['en']} />);
+    await render(<CohortLocaleGuard availableLocales={['en']} />);
 
     expect(setLocaleMock).toHaveBeenCalledWith('en');
-    expect(container.querySelector('button')?.textContent).toBe('en');
+    expect(container.childElementCount).toBe(0);
   });
 });

@@ -1,3 +1,4 @@
+import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { requireRole } from '@/lib/auth/rbac';
 import { RoleName } from '@/lib/auth/roles';
 import { MenteeSummary } from '@/components/dashboard/mentee-summary';
@@ -14,13 +15,14 @@ export default async function MenteeDashboardPage() {
     getMenteeDashboard(user.id),
   ]);
   return (
-    <div className="space-y-6">
-      <JourneyRail result={journey} />
-      <NextActionButton />
+    <div className="space-y-7">
+      <DashboardHeader titleKey="mentee" userName={user.name} roles={user.roles} />
       {/* Pending/accepted pairings with accept/confirm (CLAUDE.md §4: mentees
           accept/confirm their own). */}
-      <MatchPanel userId={user.id} role="mentee" />
+      <MatchPanel userId={user.id} role="mentee" hideAccepted />
       <MenteeSummary data={dashboard} />
+      <JourneyRail result={journey} />
+      <NextActionButton />
     </div>
   );
 }

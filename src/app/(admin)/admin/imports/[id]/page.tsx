@@ -50,7 +50,7 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-micro text-ink-3">{t('breadcrumb')}</p>
-          <h1 className="mt-1 font-display text-h1 font-bold text-ink">{t('reviewTitle')}</h1>
+          <h1 className="mt-1 font-display text-h1 font-semibold tracking-tight text-ink">{t('reviewTitle')}</h1>
           <p className="text-small text-ink-2">{t('reviewSubtitle')}</p>
         </div>
         <div className="flex gap-2">
@@ -61,7 +61,7 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
         </div>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={t('totalRows')} value={total} />
         <StatTile label={t('valid')} value={valid} tone="ok" />
         <StatTile label={t('flaggedCount')} value={flagged} tone={flagged ? 'risk' : 'default'} />
@@ -71,7 +71,7 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ i
       <WorkflowProgress committed={committed} labels={[t('stepUpload'), t('stepMapping'), t('stepValidation'), t('stepReview'), t('stepCommit')]} />
 
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_270px]">
-        <section className="overflow-hidden rounded-lg border border-border bg-surface shadow-elevation">
+        <section className="overflow-hidden rounded-lg border border-border bg-surface shadow-elevation [&_.table-frame]:rounded-none [&_.table-frame]:border-0 [&_.table-frame]:shadow-none">
           <div className="flex items-center justify-between border-b border-border px-5 py-4"><h2 className="text-h3">{t('importedRecords')}</h2><span className="text-micro text-ink-3">{imported.fileName}</span></div>
           <Table>
             <TableHeader><TableRow><TableHead>{t('statusLabel')}</TableHead><TableHead>{t('fullName')}</TableHead><TableHead>{t('role')}</TableHead><TableHead>{t('email')}</TableHead><TableHead /></TableRow></TableHeader>

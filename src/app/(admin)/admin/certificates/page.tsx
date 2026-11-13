@@ -1,11 +1,5 @@
 import Link from 'next/link';
-import {
-  Download,
-  FileBadge2,
-  Languages,
-  RefreshCw,
-  Search,
-} from 'lucide-react';
+import { Download, FileBadge2, Languages, RefreshCw, Search } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
@@ -16,6 +10,13 @@ import {
 } from '@/features/certificate/data';
 import { CertificateView } from '@/features/certificate/certificate-view';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
 function parseSelection(
@@ -27,10 +28,7 @@ function parseSelection(
   return { matchId, role };
 }
 
-function language(
-  value: string | undefined,
-  fallback: CertificateLanguage,
-): CertificateLanguage {
+function language(value: string | undefined, fallback: CertificateLanguage): CertificateLanguage {
   if (value?.toUpperCase() === 'FR') return 'FR';
   if (value?.toUpperCase() === 'EN') return 'EN';
   return fallback;
@@ -54,8 +52,7 @@ export default async function AdminCertificatesPage({
   const selection = parseSelection(params.participant);
   const selected = selection
     ? (candidates.find(
-        (item) =>
-          item.matchId === selection.matchId && item.role === selection.role,
+        (item) => item.matchId === selection.matchId && item.role === selection.role,
       ) ?? null)
     : null;
   const lang = language(params.lang, selected?.recipientLocale ?? 'EN');
@@ -67,52 +64,49 @@ export default async function AdminCertificatesPage({
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <div className="flex items-center gap-2 text-green">
+        <div className="text-green flex items-center gap-2">
           <FileBadge2 className="size-5" />
-          <span className="text-micro font-bold uppercase tracking-widest">
-            {t('eyebrow')}
-          </span>
+          <span className="text-micro font-bold tracking-widest uppercase">{t('eyebrow')}</span>
         </div>
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
-        <p className="max-w-3xl text-body text-ink-2">{t('subtitle')}</p>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">{t('title')}</h1>
+        <p className="text-body text-ink-2 max-w-3xl">{t('subtitle')}</p>
       </header>
 
       <form
         method="get"
-        className="grid gap-4 rounded-xl border border-border bg-surface p-5 shadow-elevation sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
+        className="border-border bg-surface shadow-elevation grid gap-4 rounded-xl border p-5 sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
       >
-        <label className="space-y-2 text-small font-medium text-ink">
-          <span>{t('participant')}</span>
-          <select
-            name="participant"
-            defaultValue={selectionValue}
-            required
-            className="h-11 w-full rounded-md border border-border bg-white px-3 text-body text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green"
-          >
-            <option value="">{t('selectParticipant')}</option>
-            {candidates.map((candidate) => (
-              <option
-                key={`${candidate.matchId}:${candidate.role}`}
-                value={`${candidate.matchId}:${candidate.role}`}
-              >
-                {candidate.recipientName} ·{' '}
-                {candidate.role === 'mentor' ? t('mentor') : t('mentee')} ·{' '}
-                {candidate.cohortName}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2 text-small font-medium text-ink">
-          <span>{t('language')}</span>
-          <select
-            name="lang"
-            defaultValue={lang}
-            className="h-11 w-full rounded-md border border-border bg-white px-3 text-body text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green"
-          >
-            <option value="EN">English</option>
-            <option value="FR">Français</option>
-          </select>
-        </label>
+        <div className="text-small text-ink space-y-2 font-medium">
+          <label htmlFor="certificate-participant">{t('participant')}</label>
+          <Select name="participant" defaultValue={selectionValue || undefined} required>
+            <SelectTrigger id="certificate-participant">
+              <SelectValue placeholder={t('selectParticipant')} />
+            </SelectTrigger>
+            <SelectContent>
+              {candidates.map((candidate) => (
+                <SelectItem
+                  key={`${candidate.matchId}:${candidate.role}`}
+                  value={`${candidate.matchId}:${candidate.role}`}
+                >
+                  {candidate.recipientName} ·{' '}
+                  {candidate.role === 'mentor' ? t('mentor') : t('mentee')} · {candidate.cohortName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="text-small text-ink space-y-2 font-medium">
+          <label htmlFor="certificate-language">{t('language')}</label>
+          <Select name="lang" defaultValue={lang}>
+            <SelectTrigger id="certificate-language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="EN">English</SelectItem>
+              <SelectItem value="FR">Français</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Button type="submit">
           <Search className="mr-2 size-4" />
           {t('generate')}
@@ -120,27 +114,23 @@ export default async function AdminCertificatesPage({
       </form>
 
       {candidates.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-ink-2">
-          <FileBadge2 className="mx-auto size-10 text-ink-3" />
-          <p className="mt-3 font-medium text-ink">{t('emptyTitle')}</p>
-          <p className="mt-1 text-small">{t('emptyBody')}</p>
+        <div className="border-border bg-surface text-ink-2 rounded-xl border border-dashed p-8 text-center">
+          <FileBadge2 className="text-ink-3 mx-auto size-10" />
+          <p className="text-ink mt-3 font-medium">{t('emptyTitle')}</p>
+          <p className="text-small mt-1">{t('emptyBody')}</p>
         </div>
       ) : selected ? (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface p-4">
+          <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={selected.earned ? 'default' : 'outline'}>
                 {selected.earned ? t('eligible') : t('ineligible')}
               </Badge>
-              <span className="text-small font-medium text-ink">
-                {selected.recipientName}
-              </span>
+              <span className="text-small text-ink font-medium">{selected.recipientName}</span>
               <span className="text-small text-ink-3">
                 {selected.programmeName} · {selected.cohortName}
               </span>
-              <span className="font-mono text-micro text-ink-3">
-                {selected.certificateId}
-              </span>
+              <span className="text-micro text-ink-3 font-mono">{selected.certificateId}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" size="sm">
@@ -178,23 +168,23 @@ export default async function AdminCertificatesPage({
           {!selected.earned ? (
             <p
               role="alert"
-              className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-small text-ink"
+              className="border-warning/30 bg-warning/10 text-small text-ink rounded-lg border p-3"
             >
               {t('ineligibleWarning')}
             </p>
           ) : null}
 
-          <div className="overflow-x-auto rounded-xl border border-border bg-surface-2 p-3 shadow-elevation sm:p-7">
+          <div className="border-border bg-surface-2 shadow-elevation overflow-x-auto rounded-xl border p-3 sm:p-7">
             <div className="min-w-[680px]">
               <CertificateView data={selected} lang={lang} />
             </div>
           </div>
         </>
       ) : (
-        <div className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-ink-2">
-          <FileBadge2 className="mx-auto size-10 text-ink-3" />
-          <p className="mt-3 font-medium text-ink">{t('selectTitle')}</p>
-          <p className="mt-1 text-small">{t('selectBody')}</p>
+        <div className="border-border bg-surface text-ink-2 rounded-xl border border-dashed p-8 text-center">
+          <FileBadge2 className="text-ink-3 mx-auto size-10" />
+          <p className="text-ink mt-3 font-medium">{t('selectTitle')}</p>
+          <p className="text-small mt-1">{t('selectBody')}</p>
         </div>
       )}
     </section>

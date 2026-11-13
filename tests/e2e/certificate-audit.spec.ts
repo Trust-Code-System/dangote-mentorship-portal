@@ -1,3 +1,4 @@
+import { signInForAudit } from './helpers/session';
 import { expect, test, type Page } from '@playwright/test';
 
 function requiredEnv(name: string): string {
@@ -16,11 +17,7 @@ const unrelatedMenteeEmail = 'mentee.ifeoma.sow.1@dangote.com';
 test.setTimeout(180_000);
 
 async function signIn(page: Page, email: string) {
-  await page.goto('/login');
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(password);
-  await page.getByRole('button', { name: /sign in/i }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith('/login'));
+  await signInForAudit(page, email, password);
 }
 
 test.describe.serial('certificate experience audit', () => {
@@ -45,14 +42,14 @@ test.describe.serial('certificate experience audit', () => {
 
     await signIn(page, adminEmail);
     await page.goto('/admin/certificates');
-    await expect(
-      page.getByRole('heading', { name: 'Certificate management' }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Certificate management' })).toBeVisible();
 
     const participant = page.getByLabel('Participant');
-    const options = await participant.locator('option').all();
-    expect(options.length).toBeGreaterThan(1);
-    const value = await options[1]!.getAttribute('value');
+    await participant.click();
+    const options = page.getByRole('option');
+    expect(await options.count()).toBeGreaterThan(0);
+    await options.first().click();
+    const value = await page.locator('select[name="participant"]').inputValue();
     expect(value).toBeTruthy();
     const parsedParticipant = value!.split(':');
     if (!parsedParticipant[0] || !parsedParticipant[1]) {
@@ -61,7 +58,6 @@ test.describe.serial('certificate experience audit', () => {
     matchId = parsedParticipant[0];
     role = parsedParticipant[1];
 
-    await participant.selectOption(value!);
     await Promise.all([
       page.waitForURL('**/admin/certificates?participant=**'),
       page.getByRole('button', { name: 'Generate preview' }).click(),
@@ -78,9 +74,7 @@ test.describe.serial('certificate experience audit', () => {
     );
     expect(previewResponse.status()).toBe(200);
     expect(previewResponse.headers()['content-type']).toBe('application/pdf');
-    expect((await previewResponse.body()).subarray(0, 4).toString()).toBe(
-      '%PDF',
-    );
+    expect((await previewResponse.body()).subarray(0, 4).toString()).toBe('%PDF');
 
     const officialResponse = await page.request.get(
       `/api/certificates/${matchId}/pdf?role=${role}&lang=EN`,
@@ -89,9 +83,7 @@ test.describe.serial('certificate experience audit', () => {
     expect(errors).toEqual([]);
   });
 
-  test('mobile admin preview remains operable and contained', async ({
-    page,
-  }) => {
+  test('mobile admin preview remains operable and contained', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await signIn(page, adminEmail);
     await page.goto(
@@ -100,9 +92,7 @@ test.describe.serial('certificate experience audit', () => {
     await expect(page.locator('#certificate')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('link', { name: 'English' })).toBeVisible();
     const documentOverflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth,
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(documentOverflow).toBeLessThanOrEqual(0);
     await page.screenshot({
@@ -117,23 +107,17 @@ test.describe.serial('certificate experience audit', () => {
     await signIn(page, matchedMenteeEmail);
     await page.goto('/certificate?lang=FR');
     await expect(page.locator('#certificate')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('#certificate')).toContainText(
-      'Aperçu du certificat',
-    );
+    await expect(page.locator('#certificate')).toContainText('Aperçu du certificat');
     await page.screenshot({
       path: 'certificate-evidence/participant-certificate-fr.png',
       fullPage: true,
     });
 
-    const response = await page.request.get(
-      `/api/certificates/${matchId}/pdf?role=mentee&lang=FR`,
-    );
+    const response = await page.request.get(`/api/certificates/${matchId}/pdf?role=mentee&lang=FR`);
     expect(response.status()).toBe(409);
   });
 
-  test('an unrelated participant cannot access a certificate by direct URL', async ({
-    page,
-  }) => {
+  test('an unrelated participant cannot access a certificate by direct URL', async ({ page }) => {
     await signIn(page, unrelatedMenteeEmail);
     const response = await page.request.get(
       `/api/certificates/${matchId}/pdf?role=mentee&lang=EN&preview=1`,

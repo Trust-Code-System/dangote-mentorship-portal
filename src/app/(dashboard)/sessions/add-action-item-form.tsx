@@ -35,9 +35,16 @@ export function AddActionItemForm({ sessionLogId }: { sessionLogId: string }) {
   return (
     <form ref={formRef} action={action} className="flex flex-wrap items-end gap-2">
       <input type="hidden" name="sessionLogId" value={sessionLogId} />
-      <Input name="title" required maxLength={300} placeholder={t('taskPlaceholder')} className="min-w-[12rem] flex-1" aria-label={t('task')} />
+      <Input
+        name="title"
+        required
+        maxLength={300}
+        placeholder={t('taskPlaceholder')}
+        className="min-w-[12rem] flex-1"
+        aria-label={t('task')}
+      />
       <Select name="assignee" defaultValue="mentee">
-        <SelectTrigger aria-label={t('owner')} className="h-10 w-auto">
+        <SelectTrigger aria-label={t('owner')} className="w-auto">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -47,7 +54,7 @@ export function AddActionItemForm({ sessionLogId }: { sessionLogId: string }) {
         </SelectContent>
       </Select>
       <Input type="date" name="due" aria-label={t('dueDate')} className="w-auto" />
-      <Button type="submit" size="sm" variant="outline" disabled={pending}>
+      <Button type="submit" variant="outline" disabled={pending}>
         {t('addActionItem')}
       </Button>
     </form>

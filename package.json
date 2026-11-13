@@ -34,9 +34,9 @@
   },
   "overrides": {
     "postcss": "$postcss",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "minimatch@^10": {
-      "brace-expansion": "^5.0.9"
+      "brace-expansion": "^5.0.12"
     },
     "nanoid": "^3.3.18"
   },
@@ -56,7 +56,7 @@
     "@radix-ui/react-toast": "^1.2.23",
     "@radix-ui/react-tooltip": "^1.2.16",
     "@react-three/fiber": "^9.7.0",
-    "@sentry/nextjs": "^10.73.0",
+    "@sentry/nextjs": "^10.78.0",
     "@supabase/supabase-js": "^2.115.0",
     "@upstash/redis": "^1.38.4",
     "@vercel/analytics": "^1.6.1",
@@ -68,10 +68,10 @@
     "gsap": "^3.15.0",
     "lucide-react": "^0.577.0",
     "motion": "^12.43.0",
-    "next": "^16.3.4",
+    "next": "^16.4.6",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.14.2",
-    "nodemailer": "^10.0.15",
+    "nodemailer": "^10.5.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -83,7 +83,7 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.185.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zod": "^4.5.4"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
