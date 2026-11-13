@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { PublicLockup } from './public-lockup';
-import { PublicLocaleToggle } from './public-locale-toggle';
 import { useReducedMotion } from '@/app/(landing)/hooks/use-reduced-motion';
 import { cn } from '@/lib/utils';
 
@@ -189,8 +188,6 @@ export function PublicNav() {
 
         {/* Right cluster */}
         <div className="flex shrink-0 items-center gap-2">
-          <PublicLocaleToggle className="hidden sm:inline-flex" />
-
           <Link
             href="/login"
             className="text-blak-text hover:text-blak-green rounded-full px-3 py-2 text-sm font-semibold transition-colors"
@@ -249,7 +246,6 @@ export function PublicNav() {
             ))}
           </ul>
           <div className="border-blak-border/12 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-            <PublicLocaleToggle />
             <Link
               href="/signup"
               onClick={() => setMenuOpen(false)}

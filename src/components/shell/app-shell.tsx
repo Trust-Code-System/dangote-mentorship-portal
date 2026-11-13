@@ -41,8 +41,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { signOutAction } from '@/lib/auth/actions';
-import { LocaleSwitcher } from '@/components/locale-switcher';
-import type { AppLocale } from '@/i18n/config';
 import { BrandPlate } from '@/components/brand-logo';
 import { Wordmark } from '@/components/wordmark';
 import { GlobalSearch } from '@/components/shell/global-search';
@@ -218,7 +216,6 @@ export interface AppShellProps {
   /** When true, fetch notification/message badges after mount (non-blocking). */
   loadBadges?: boolean;
   /** Interface languages available to this viewer's cohort. */
-  availableLocales?: readonly AppLocale[];
   labels: AppShellLabels;
   children: React.ReactNode;
 }
@@ -247,7 +244,6 @@ export function AppShell({
   user,
   unread: unreadProp = 0,
   loadBadges = false,
-  availableLocales,
   labels,
   children,
 }: AppShellProps) {
@@ -771,7 +767,6 @@ export function AppShell({
           <GlobalSearch navItems={allItems.map((i) => ({ label: i.label, href: i.href }))} />
 
           <div className="ml-auto flex items-center gap-2">
-            <LocaleSwitcher availableLocales={availableLocales} />
             <div
               className="relative"
               onKeyDown={(event) => {

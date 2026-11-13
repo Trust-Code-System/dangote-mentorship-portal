@@ -93,22 +93,10 @@ test.describe('authentication experience', () => {
     ).toBeVisible();
   });
 
-  test('the language switcher translates the page without clearing a typed email', async ({
-    page,
-  }) => {
+  test('authentication pages no longer expose English/French switchers', async ({ page }) => {
     await page.goto('/login');
-
-    await page.getByLabel('Corporate email').fill('someone@blakmoh.com');
-    await page.getByRole('button', { name: 'Français' }).click();
-
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-    await expect(page.locator('h1')).toHaveText('Bon retour parmi nous');
-
-    // Switching language is a cookie write in a transition, not a navigation —
-    // a half-completed form must survive it.
-    await expect(page.getByLabel('E-mail professionnel')).toHaveValue(
-      'someone@blakmoh.com',
-    );
+    await expect(page.getByRole('button', { name: /^(en|fr|english|français)$/i })).toHaveCount(0);
+    await expect(page.getByRole('group', { name: 'Interface language' })).toHaveCount(0);
   });
 
   test('a failed sign-in keeps the email, clears the password, and stays generic', async ({

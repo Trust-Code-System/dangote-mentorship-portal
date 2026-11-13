@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
-import { AuthLanguageSwitcher } from './auth-language-switcher';
 
 /**
  * The warm ivory form surface (AUTH_UI_SPEC.md §2).
@@ -20,8 +19,7 @@ export function AuthCard({
 }
 
 /**
- * Card header: the "Enterprise Portal" label and language control on one row,
- * then the heading and its supporting line.
+ * Card header: the "Enterprise Portal" label, heading and supporting line.
  *
  * The full logo lockup is deliberately not repeated here — it is already
  * prominent in the brand panel on desktop and in the mobile header strip, and
@@ -38,15 +36,7 @@ export async function AuthHeader({
 
   return (
     <div className="mb-5">
-      {/* The label and the switcher share a row only when there is room for
-          both. At 320–390px "Français" was being clipped by the card edge, so
-          below `sm` the switcher gets its own line. */}
-      <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <span className="text-auth-ink-2 text-[0.75rem] font-medium whitespace-nowrap">
-          {t('enterprisePortal')}
-        </span>
-        <AuthLanguageSwitcher />
-      </div>
+      <p className="text-auth-ink-2 mb-4 text-[0.75rem] font-medium">{t('enterprisePortal')}</p>
 
       <h1 className="font-display text-auth-ink text-[2rem] leading-tight font-semibold tracking-tight">
         {heading}
