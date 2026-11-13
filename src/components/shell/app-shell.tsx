@@ -929,7 +929,7 @@ export function AppShell({
               onPointerEnter={() => prefetchHref(item.href)}
               onFocus={() => prefetchHref(item.href)}
               className={cn(
-                'text-micro flex min-h-11 flex-1 flex-col items-center gap-0.5 py-2 transition-colors duration-150',
+                'text-micro flex min-h-11 min-w-0 flex-1 flex-col items-center gap-0.5 py-2 transition-colors duration-150',
                 active && 'text-green-strong font-semibold',
                 pending && 'text-green-strong/85',
                 !active && !pending && 'text-ink-3',
@@ -944,14 +944,16 @@ export function AppShell({
                   />
                 ) : null}
               </span>
-              <span className={cn('truncate', pending && 'opacity-80')}>{item.label}</span>
+              <span className={cn('w-full truncate text-center', pending && 'opacity-80')}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="text-micro text-ink-3 flex flex-1 flex-col items-center gap-0.5 py-2"
+          className="text-micro text-ink-3 flex min-w-0 flex-1 flex-col items-center gap-0.5 py-2"
         >
           <Menu className="size-5" />
           <span>{labels.more}</span>
