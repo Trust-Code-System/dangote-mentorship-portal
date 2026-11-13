@@ -132,9 +132,7 @@ export function NewsletterComposer({
           {t('goesTo', { count: recipientCount, cohort: cohortName })}
         </span>
         {approvedByName ? (
-          <span className="text-small text-ink-3">
-            {t('approvedBy', { name: approvedByName })}
-          </span>
+          <span className="text-small text-ink-3">{t('approvedBy', { name: approvedByName })}</span>
         ) : null}
         {isSent ? (
           <span className="text-small text-green-strong">{t('sentTo', { count: sentCount })}</span>
@@ -237,13 +235,13 @@ export function NewsletterComposer({
           <Card key={section.kind}>
             <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
               <CardTitle className="text-h3">{t(sectionKey(section.kind))}</CardTitle>
-              <label className="flex items-center gap-2 text-small text-ink-2">
+              <label className="text-small text-ink-2 flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={section.enabled}
                   onChange={(event) => updateSection(index, { enabled: event.target.checked })}
                   disabled={isSent}
-                  className="size-4 rounded border-border text-green focus:ring-green/30"
+                  className="border-border text-green focus:ring-green/30 size-4 rounded"
                 />
                 {t('includeSection')}
               </label>
@@ -338,7 +336,7 @@ export function NewsletterComposer({
             {!isApproved ? (
               <form action={approveAction} className="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="newsletterId" value={newsletterId} />
-                <div className="space-y-1.5">
+                <div className="max-w-full min-w-0 space-y-1.5">
                   <Label htmlFor="sendAt">{t('fieldSendAt')}</Label>
                   <Input
                     id="sendAt"
@@ -346,13 +344,16 @@ export function NewsletterComposer({
                     type="datetime-local"
                     value={sendAt}
                     onChange={(event) => setSendAt(event.target.value)}
-                    className="w-60"
+                    className="w-full sm:w-60"
+                    aria-describedby="sendAt-hint"
                   />
-                  <p className="text-small text-ink-3">{t('fieldSendAtHint')}</p>
                 </div>
                 <Button type="submit" disabled={approvePending}>
                   {approvePending ? tc('loading') : t('approve')}
                 </Button>
+                <p id="sendAt-hint" className="text-small text-ink-3 w-full">
+                  {t('fieldSendAtHint')}
+                </p>
                 {approveState && !approveState.ok ? (
                   <p className="text-small text-risk" role="alert">
                     {approveState.error.message}

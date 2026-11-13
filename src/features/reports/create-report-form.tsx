@@ -52,10 +52,10 @@ export function CreateReportForm({
           <input type="hidden" name="subjectUserId" value={needsMentee ? menteeId : ''} />
           <input type="hidden" name="periodMonths" value={months === 'all' ? '' : months} />
 
-          <div className="space-y-1.5">
+          <div className="min-w-0 flex-[1_1_16rem] space-y-1.5">
             <Label htmlFor="report-kind">{t('fieldKind')}</Label>
             <Select value={kind} onValueChange={(value) => setKind(value as ReportKind)}>
-              <SelectTrigger id="report-kind" className="w-64">
+              <SelectTrigger id="report-kind">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -69,10 +69,10 @@ export function CreateReportForm({
           </div>
 
           {needsMentee ? (
-            <div className="space-y-1.5">
+            <div className="min-w-0 flex-[1_1_14rem] space-y-1.5">
               <Label htmlFor="report-mentee">{t('fieldMentee')}</Label>
               <Select value={menteeId} onValueChange={setMenteeId}>
-                <SelectTrigger id="report-mentee" className="w-56">
+                <SelectTrigger id="report-mentee">
                   <SelectValue placeholder={t('noMentees')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -86,10 +86,10 @@ export function CreateReportForm({
             </div>
           ) : null}
 
-          <div className="space-y-1.5">
+          <div className="min-w-0 flex-[1_1_12rem] space-y-1.5">
             <Label htmlFor="report-period">{t('fieldPeriod')}</Label>
             <Select value={months} onValueChange={setMonths}>
-              <SelectTrigger id="report-period" className="w-48">
+              <SelectTrigger id="report-period">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
