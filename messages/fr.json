@@ -2715,7 +2715,9 @@
     "stateCLEAR": "Terminée",
     "stateDUE": "Ouverte",
     "stateGRACE": "En retard",
-    "stateLOCKED": "Accès bloqué"
+    "stateLOCKED": "Accès bloqué",
+    "disabledTitle": "Les évaluations trimestrielles sont désactivées",
+    "disabledBody": "Cette promotion utilise les formulaires mensuels et les bilans de mi-parcours et finaux. Les évaluations trimestrielles ne s’appliquent pas."
   },
   "reports": {
     "kindEngagement": "Rapport d'engagement",

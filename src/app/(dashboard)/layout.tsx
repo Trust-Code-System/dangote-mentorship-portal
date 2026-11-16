@@ -5,7 +5,8 @@ import { Language, RoleName } from '@prisma/client';
 import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
-import { getAssessmentGate } from '@/features/assessments/data';
+import { getAssessmentGate, resolveParticipantCohortId } from '@/features/assessments/data';
+import { quarterlyAssessmentsEnabled } from '@/features/assessments/policy';
 import { isAllowedWhileLocked } from '@/features/assessments/gate';
 import { AssessmentGateBanner } from '@/features/assessments/gate-banner';
 import { AppShell, type AppShellLabels } from '@/components/shell/app-shell';
@@ -88,10 +89,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     language === Language.FR ? 'fr' : 'en',
   );
 
+  const participantCohort = isAdmin ? null : await resolveParticipantCohortId(user.id);
+  const quarterlyEnabled = participantCohort
+    ? await quarterlyAssessmentsEnabled(participantCohort)
+    : true;
   // Badges start at 0; AppShell hydrates real counts via fetchShellBadges().
   const sections = isAdmin
     ? await buildAdminNavSections(0, user.roles)
-    : await buildParticipantNavSections(user.roles, 0, 0);
+    : await buildParticipantNavSections(user.roles, 0, 0, quarterlyEnabled);
   if ((await confidentialReviewCohorts(user.id)).length) {
     sections.push({
       label: 'Programme coordination',

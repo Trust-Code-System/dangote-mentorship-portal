@@ -2715,7 +2715,9 @@
     "stateCLEAR": "Done",
     "stateDUE": "Open",
     "stateGRACE": "Overdue",
-    "stateLOCKED": "Locked out"
+    "stateLOCKED": "Locked out",
+    "disabledTitle": "Quarterly assessments are disabled",
+    "disabledBody": "This stream uses monthly forms, mid-term reviews and final reviews. Quarterly assessments do not apply."
   },
   "reports": {
     "kindEngagement": "Engagement report",
