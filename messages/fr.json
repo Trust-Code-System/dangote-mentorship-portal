@@ -340,7 +340,7 @@
     "pendingReviews": "Objectifs à évaluer",
     "review": "Évaluer",
     "pendingReviewsHint": "Objectifs soumis en attente de votre évaluation.",
-    "logsAwaiting": "Comptes rendus à compléter",
+    "logsAwaiting": "Comptes rendus des mentorés attendus",
     "logNow": "Saisir",
     "logsAwaitingHint": "Rencontres ayant eu lieu sans compte rendu de séance.",
     "nextMeetings": "Prochaines rencontres",
@@ -923,13 +923,13 @@
   },
   "sessions": {
     "title": "Comptes rendus de séance",
-    "subtitle": "Notez vos échanges, capturez les actions à mener et réfléchissez — l'IA peut structurer vos notes brutes.",
+    "subtitle": "Les mentorés consignent chaque séance et ses actions ; les mentors ajoutent leur réflexion.",
     "noPairings": "Vous n'avez pas encore de mentoré accepté.",
     "logSession": "Enregistrer une séance",
-    "noLogsYet": "Aucune séance enregistrée pour l'instant.",
+    "noLogsYet": "Votre mentoré n’a pas encore consigné de séance.",
     "mySessions": "Mes séances",
     "notEligible": "Les comptes rendus apparaissent une fois que vous et votre mentor avez accepté votre jumelage.",
-    "noLogsMentee": "Votre mentor n'a pas encore enregistré de séance.",
+    "noLogsMentee": "Aucune séance consignée. Enregistrez votre première séance ci-dessus.",
     "noAccess": "Les comptes rendus sont réservés aux mentors et aux mentorés.",
     "mentee": "Mentoré",
     "meetingType": "Type de rencontre",
@@ -974,7 +974,7 @@
     "synced": "Enregistré",
     "offlineQueued": "Enregistré localement — sera synchronisé une fois de retour en ligne.",
     "aiSummary": "Résumé IA",
-    "menteeReflection": "Réflexion du mentoré",
+    "menteeReflection": "Réflexion du mentoré (ancien fonctionnement)",
     "yourReflection": "Votre réflexion",
     "reflectionHint": "Qu'avez-vous retenu ? Que ferez-vous ensuite ?",
     "saveReflection": "Enregistrer la réflexion",
@@ -993,7 +993,10 @@
       "BLOCKED": "Bloqué"
     },
     "loggingSession": "Enregistrement de la séance",
-    "complete": "complété"
+    "complete": "complété",
+    "mentor": "Mentor",
+    "mentorWorkflow": "Vos mentorés consignent les séances. Consultez chaque compte rendu et ajoutez votre réflexion de mentor.",
+    "mentorReflection": "Réflexion du mentor"
   },
   "messages": {
     "title": "Messages",
@@ -1572,6 +1575,11 @@
         "label": "Rapport d'engagement",
         "title": "Le rapport d'engagement de la semaine est prêt",
         "body": "{cohort} — semaine {week}. Il indique qui s’est fait discret et ce qui reste à faire."
+      },
+      "session_recorded": {
+        "label": "Séance consignée",
+        "title": "Nouveau compte rendu de séance",
+        "body": "{menteeName} a consigné votre dernière séance. Ajoutez votre réflexion de mentor."
       }
     },
     "emptyHint": "Aucun élément en attente pour le moment."
@@ -1666,7 +1674,7 @@
     "notScheduled": "Non planifié",
     "navSessions": "Comptes rendus",
     "sessionsTitle": "Comptes rendus de séance",
-    "sessionsSubtitle": "Chaque séance rapportée par un mentor dans le programme, la plus récente en premier. En lecture seule ; les notes privées du mentor ne sont pas affichées.",
+    "sessionsSubtitle": "Comptes rendus partagés et réflexions des mentors pour le programme.",
     "noSessions": "Aucun compte rendu de séance n'a encore été déposé.",
     "sessionEmpty": "Cette séance a été consignée sans autre détail."
   },

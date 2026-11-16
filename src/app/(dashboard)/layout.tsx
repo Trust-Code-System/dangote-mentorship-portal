@@ -26,14 +26,14 @@ function quickActionsFor(roles: RoleName[]): QuickActionItem[] {
   if (isMentor || isMentee) {
     items.push({ labelKey: 'scheduleMeeting', href: '/meetings' });
   }
-  if (isMentor) {
+  if (isMentee) {
     items.push({ labelKey: 'addSessionLog', href: '/sessions' });
   }
   if (isMentee) {
     items.push({ labelKey: 'submitGoal', href: '/goals' });
   }
   if (isMentor || isMentee) {
-    items.push({ labelKey: 'addReflection', href: '/journal' });
+    items.push({ labelKey: 'addReflection', href: isMentor ? '/sessions' : '/journal' });
     items.push({ labelKey: 'requestSupport', href: '/support' });
   }
   return items;

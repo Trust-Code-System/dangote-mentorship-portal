@@ -293,8 +293,9 @@ model User {
   mentorMeetings    Meeting[]    @relation("MeetingMentor")
   menteeMeetings    Meeting[]    @relation("MeetingMentee")
 
-  mentorSessionLogs SessionLog[] @relation("SessionLogMentor")
-  menteeSessionLogs SessionLog[] @relation("SessionLogMentee")
+  mentorSessionLogs   SessionLog[] @relation("SessionLogMentor")
+  menteeSessionLogs   SessionLog[] @relation("SessionLogMentee")
+  recordedSessionLogs SessionLog[] @relation("SessionLogRecorder")
 
   assignedActionItems ActionItem[] @relation("ActionItemAssignee")
   createdActionItems  ActionItem[] @relation("ActionItemCreatedBy")
@@ -1080,12 +1081,16 @@ model SessionLog {
   nextMeetingDate     DateTime?    @map("next_meeting_date")
   mentorNotes         String?      @map("mentor_notes")
   menteeReflection    String?      @map("mentee_reflection")
+  // Separate from historical mentee reflections; never relabel their author.
+  mentorReflection    String?      @map("mentor_reflection")
+  recordedById        String?      @map("recorded_by_id")
   aiSummary           String?      @map("ai_summary")
 
   cohort            Cohort                   @relation(fields: [cohortId], references: [id])
   meeting           Meeting?                 @relation(fields: [meetingId], references: [id])
   mentor            User                     @relation("SessionLogMentor", fields: [mentorId], references: [id])
   mentee            User                     @relation("SessionLogMentee", fields: [menteeId], references: [id])
+  recordedBy        User?                    @relation("SessionLogRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
   actionItems       ActionItem[]
   reflectionEntries ReflectionJournalEntry[]
 

@@ -41,7 +41,7 @@ export interface SessionLogReminderInput {
 /**
  * A meeting whose time has passed (beyond a short grace) with no session log and
  * which was not a confirmed no-show is due a "session_log_due" nudge to the
- * mentor (mentors own logs — CLAUDE.md §4). A cancelled or already-logged meeting
+ * mentee (mentees record logs). A cancelled or already-logged meeting
  * is not. didHappen === false (a recorded no-show) is excluded; true and null
  * (unconfirmed) both still want a log.
  */
