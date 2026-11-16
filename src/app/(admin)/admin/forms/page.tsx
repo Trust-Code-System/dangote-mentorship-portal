@@ -10,7 +10,7 @@ import { listFormDefinitions } from '@/features/forms/data';
 import { STANDARD_FORMS } from '@/features/forms/catalogue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FormRowActions } from './form-row-actions';
 
@@ -125,7 +125,7 @@ export default async function FormsPage({
             <Card key={d.id}>
               <CardHeader className="flex flex-row items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <CardTitle className="text-h2">{d.title}</CardTitle>
+                  <h2 className="text-h2 text-foreground">{d.title}</h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={badgeVariantForType(d.type)}>{t(typeLabelKey(d.type))}</Badge>
                     <Badge variant="outline">

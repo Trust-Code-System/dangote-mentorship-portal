@@ -56,7 +56,11 @@ export function BilingualField({
     <div className={cn('space-y-1.5', className)}>
       <Label htmlFor={id}>
         {label}
-        {required && <span className="text-risk ml-0.5">*</span>}
+        {required && (
+          <span aria-hidden="true" className="text-risk ml-0.5">
+            *
+          </span>
+        )}
       </Label>
       {as === 'input' ? (
         <Input
