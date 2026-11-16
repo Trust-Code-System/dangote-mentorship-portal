@@ -340,7 +340,7 @@
     "pendingReviews": "Goals to review",
     "review": "Review",
     "pendingReviewsHint": "Submitted goals awaiting your review.",
-    "logsAwaiting": "Logs to complete",
+    "logsAwaiting": "Mentee logs pending",
     "logNow": "Log now",
     "logsAwaitingHint": "Meetings that happened with no session log yet.",
     "nextMeetings": "Next meetings",
@@ -923,13 +923,13 @@
   },
   "sessions": {
     "title": "Session logs",
-    "subtitle": "Record what you discussed, capture action items, and reflect — the AI can structure your rough notes for you.",
+    "subtitle": "Mentees record each session and its action items; mentors add their reflection.",
     "noPairings": "You don't have any accepted mentees yet.",
     "logSession": "Log a session",
-    "noLogsYet": "No sessions logged yet.",
+    "noLogsYet": "Your mentee has not logged a session yet.",
     "mySessions": "My sessions",
     "notEligible": "Session logs appear once you and your mentor have accepted your match.",
-    "noLogsMentee": "Your mentor hasn't logged a session yet.",
+    "noLogsMentee": "No sessions logged yet. Record your first session above.",
     "noAccess": "Session logs are for mentors and mentees.",
     "mentee": "Mentee",
     "meetingType": "Meeting type",
@@ -974,7 +974,7 @@
     "synced": "Saved",
     "offlineQueued": "Saved locally — will sync when you're back online.",
     "aiSummary": "AI summary",
-    "menteeReflection": "Mentee reflection",
+    "menteeReflection": "Mentee reflection (earlier workflow)",
     "yourReflection": "Your reflection",
     "reflectionHint": "What did you take away? What will you do next?",
     "saveReflection": "Save reflection",
@@ -993,7 +993,10 @@
       "BLOCKED": "Blocked"
     },
     "loggingSession": "Logging session",
-    "complete": "complete"
+    "complete": "complete",
+    "mentor": "Mentor",
+    "mentorWorkflow": "Your mentees record the sessions. Review each shared log and add your mentor reflection.",
+    "mentorReflection": "Mentor reflection"
   },
   "messages": {
     "title": "Messages",
@@ -1572,6 +1575,11 @@
         "label": "Engagement report",
         "title": "This week’s engagement report is ready",
         "body": "{cohort} — week {week}. It lists who has gone quiet and what is outstanding."
+      },
+      "session_recorded": {
+        "label": "Session recorded",
+        "title": "New session log",
+        "body": "{menteeName} recorded your recent session. Add your mentor reflection."
       }
     },
     "emptyHint": "No pending items right now."
@@ -1666,7 +1674,7 @@
     "notScheduled": "Not scheduled",
     "navSessions": "Session logs",
     "sessionsTitle": "Session logs",
-    "sessionsSubtitle": "Every session a mentor has reported across the programme, newest first. Read-only; the mentor's private notes are not shown.",
+    "sessionsSubtitle": "Shared session records and mentor reflections across the programme.",
     "noSessions": "No session logs have been filed yet.",
     "sessionEmpty": "This session was logged without further detail."
   },

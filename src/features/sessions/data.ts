@@ -35,7 +35,7 @@ export async function getPairSessionLogs(
 
 export type MentorSessionGroup = { mentee: MentorPairing; logs: SessionLogWithDetail[] };
 
-/** Every session log this mentor has authored, grouped per paired mentee. */
+/** Current accepted pairs' shared records, grouped for mentor reflection. */
 export async function getMentorSessionGroups(userId: string): Promise<MentorSessionGroup[]> {
   const pairings = await getMentorPairings(userId);
   if (pairings.length === 0) return [];
@@ -48,17 +48,19 @@ export async function getMentorSessionGroups(userId: string): Promise<MentorSess
 
   return pairings.map((mentee) => ({
     mentee,
-    logs: logs.filter((l) => l.menteeId === mentee.menteeId),
+    logs: logs.filter((l) => l.menteeId === mentee.menteeId && l.cohortId === mentee.cohortId),
   }));
 }
 
 /** Session logs visible to a mentee (their own pair's), newest first. */
 export async function getMenteeSessionLogs(userId: string): Promise<SessionLogWithDetail[]> {
-  return prisma.sessionLog.findMany({
+  const logs = await prisma.sessionLog.findMany({
     where: { menteeId: userId, deletedAt: null },
     orderBy: { date: 'desc' },
     include: logInclude,
   });
+  // Old private mentor scratchpads must not enter the mentee's view model.
+  return logs.map((log) => ({ ...log, mentorNotes: null }));
 }
 
 /** Approved/active goal titles for a pair — context for the Session Assistant. */
