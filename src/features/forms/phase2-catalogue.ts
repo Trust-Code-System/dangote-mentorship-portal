@@ -1,5 +1,5 @@
 import { ReviewType, RoleName } from '@prisma/client';
-import sourceForms from './phase2-2026-2027.json';
+import sourceForms from './phase2-2026-2027.json' with { type: 'json' };
 import { formSchemaShape } from './schema';
 import { STANDARD_FORMS } from './catalogue';
 
