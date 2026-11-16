@@ -30,7 +30,7 @@ const askSchema = z.object({
 
 // How Atlas can help (kept terse so the grounding prompt stays small). These are
 // real portal destinations so Atlas can point users to the right screen.
-const PORTAL_MAP = `Key destinations: Dashboard (role home); Profile; My Mentor / My Mentee; Goals (set + AI Goal Coach, mentee submits, mentor approves); Session logs (mentor logs, AI summary); Meetings/Calendar (schedule); Mid-Term & Final Review; Clinics; Forum; Messages; Notifications; Support. Admins also have: Cohorts, Import data, Matching engine, Forms builder, Mentors/Mentees lists (click a name for full profile + progress), Training, Reports/AI Insights, User management, Audit logs.`;
+const PORTAL_MAP = `Key destinations: Dashboard (role home); Profile; My Mentor / My Mentee; Goals (set + AI Goal Coach, mentee submits, mentor approves); Session logs (mentee records the session with optional AI suggestions, mentor adds the session reflection); Meetings/Calendar (schedule); Mid-Term & Final Review; Clinics; Forum; Messages; Notifications; Support. Admins also have: Cohorts, Import data, Matching engine, Forms builder, Mentors/Mentees lists (click a name for full profile + progress), Training, Reports/AI Insights, User management, Audit logs.`;
 
 function buildSystem(userName: string, roles: string, lang: 'EN' | 'FR'): string {
   return [
