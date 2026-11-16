@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { GoalSettingFields } from './goal-setting-fields';
 
 // SMART step rail (Stitch "Create SMART Goal" header). The five dimensions light
 // up green as the matching fields are filled, so it's a real progress indicator —
@@ -25,7 +26,13 @@ const SMART_STEPS: { key: SmartDimension; field: keyof Values | (keyof Values)[]
   { key: 'timeBound', field: 'endDate' },
 ];
 
-function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDimension) => string }) {
+function SmartRail({
+  values,
+  labelFor,
+}: {
+  values: Values;
+  labelFor: (d: SmartDimension) => string;
+}) {
   const done = (f: keyof Values | (keyof Values)[]) =>
     (Array.isArray(f) ? f : [f]).every((k) => values[k].trim().length > 0);
   const filledCount = SMART_STEPS.filter((s) => done(s.field)).length;
@@ -40,10 +47,12 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
 
   return (
     <div className="@container relative py-2">
-      <div className="absolute left-4 right-4 top-[1.35rem] h-0.5 bg-surface-2" aria-hidden />
+      <div className="bg-surface-2 absolute top-[1.35rem] right-4 left-4 h-0.5" aria-hidden />
       <div
-        className="absolute left-4 top-[1.35rem] h-0.5 rounded-full bg-green transition-[width] duration-500"
-        style={{ width: `calc((100% - 2rem) * ${SMART_STEPS.length > 1 ? filledCount / (SMART_STEPS.length - 1) : 0})` }}
+        className="bg-green absolute top-[1.35rem] left-4 h-0.5 rounded-full transition-[width] duration-500"
+        style={{
+          width: `calc((100% - 2rem) * ${SMART_STEPS.length > 1 ? filledCount / (SMART_STEPS.length - 1) : 0})`,
+        }}
         aria-hidden
       />
       <ol className="relative flex justify-between">
@@ -54,7 +63,7 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
             <li key={s.key} className="flex flex-col items-center gap-1.5">
               <span
                 className={cn(
-                  'flex size-8 items-center justify-center rounded-full border-2 bg-surface text-small font-bold transition-colors',
+                  'bg-surface text-small flex size-8 items-center justify-center rounded-full border-2 font-bold transition-colors',
                   isDone
                     ? 'border-green bg-green text-white'
                     : isCurrent
@@ -66,8 +75,8 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
               </span>
               <span
                 className={cn(
-                  'sr-only text-center text-micro uppercase tracking-wide @lg:not-sr-only @lg:px-1',
-                  isDone || isCurrent ? 'font-bold text-green-strong' : 'text-ink-3',
+                  'text-micro sr-only text-center tracking-wide uppercase @lg:not-sr-only @lg:px-1',
+                  isDone || isCurrent ? 'text-green-strong font-bold' : 'text-ink-3',
                 )}
               >
                 {labelFor(s.key)}
@@ -78,7 +87,7 @@ function SmartRail({ values, labelFor }: { values: Values; labelFor: (d: SmartDi
       </ol>
       <p
         aria-hidden
-        className="mt-2 text-center text-micro font-bold uppercase tracking-wide text-green-strong @lg:hidden"
+        className="text-micro text-green-strong mt-2 text-center font-bold tracking-wide uppercase @lg:hidden"
       >
         {labelFor(captionStep.key)}
       </p>
@@ -98,6 +107,7 @@ const EMPTY: Values = {
   successMeasure: '',
   startDate: '',
   endDate: '',
+  settingDetails: '',
 };
 
 // Mentee goal form (CLAUDE.md §7). Autosaves a draft so work is never lost
@@ -109,12 +119,16 @@ export function GoalForm({
   cohortId,
   initial,
   enableDraft = false,
+  extended = false,
+  preview = false,
 }: {
   mode: 'create' | 'edit';
   goalId?: string;
   cohortId?: string;
   initial?: GoalDraftFields;
   enableDraft?: boolean;
+  extended?: boolean;
+  preview?: boolean;
 }) {
   const t = useTranslations('goals');
   const tc = useTranslations('common');
@@ -130,7 +144,7 @@ export function GoalForm({
     formKey,
     values,
     cohortId,
-    enabled: enableDraft,
+    enabled: enableDraft && !preview,
   });
 
   const [coachPending, startCoach] = useTransition();
@@ -158,6 +172,7 @@ export function GoalForm({
   }
 
   function runCoach() {
+    if (preview) return;
     setCoach(null);
     startCoach(async () => {
       const res = await requestGoalCoach(values);
@@ -177,7 +192,11 @@ export function GoalForm({
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form
+      action={preview ? undefined : action}
+      onSubmit={preview ? (event) => event.preventDefault() : undefined}
+      className="space-y-5"
+    >
       {goalId ? <input type="hidden" name="goalId" value={goalId} /> : null}
       {Object.entries(values).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
@@ -187,105 +206,200 @@ export function GoalForm({
       <SmartRail values={values} labelFor={(d) => t(`smart.${d}`)} />
 
       {enableDraft && draftStatus === 'saved' ? (
-        <p className="text-xs text-ink-3">{td('saved')}</p>
+        <p className="text-ink-3 text-xs">{td('saved')}</p>
       ) : null}
 
       {activeStep === 0 ? (
         <div className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor={`${formKey}-title`}>{t('titleField')}</Label>
-            <Input id={`${formKey}-title`} required minLength={3} maxLength={200} value={values.title} onChange={(e) => set('title', e.target.value)} />
+            <Input
+              id={`${formKey}-title`}
+              required
+              minLength={3}
+              maxLength={200}
+              value={values.title}
+              onChange={(e) => set('title', e.target.value)}
+            />
           </div>
-          <Field id={`${formKey}-competency`} label={t('competency')} name="competencyVisible" value={values.competency} onChange={(v) => set('competency', v)} />
+          <Field
+            id={`${formKey}-competency`}
+            label={t('competency')}
+            name="competencyVisible"
+            value={values.competency}
+            onChange={(v) => set('competency', v)}
+          />
         </div>
       ) : null}
       {activeStep === 1 ? (
-        <TextField id={`${formKey}-successMeasure`} label={t('successMeasure')} name="successMeasureVisible" value={values.successMeasure} onChange={(v) => set('successMeasure', v)} />
+        <TextField
+          id={`${formKey}-successMeasure`}
+          label={t('successMeasure')}
+          name="successMeasureVisible"
+          value={values.successMeasure}
+          onChange={(v) => set('successMeasure', v)}
+        />
       ) : null}
       {activeStep === 2 ? (
         <div className="space-y-4">
-          <TextField id={`${formKey}-learningActivity`} label={t('learningActivity')} name="learningActivityVisible" value={values.learningActivity} onChange={(v) => set('learningActivity', v)} />
+          <TextField
+            id={`${formKey}-learningActivity`}
+            label={extended ? 'Key actions — list the steps you will take' : t('learningActivity')}
+            name="learningActivityVisible"
+            value={values.learningActivity}
+            onChange={(v) => set('learningActivity', v)}
+          />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field id={`${formKey}-currentLevel`} label={t('currentLevel')} name="currentLevelVisible" value={values.currentLevel} onChange={(v) => set('currentLevel', v)} />
-            <Field id={`${formKey}-desiredLevel`} label={t('desiredLevel')} name="desiredLevelVisible" value={values.desiredLevel} onChange={(v) => set('desiredLevel', v)} />
+            <Field
+              id={`${formKey}-currentLevel`}
+              label={t('currentLevel')}
+              name="currentLevelVisible"
+              value={values.currentLevel}
+              onChange={(v) => set('currentLevel', v)}
+            />
+            <Field
+              id={`${formKey}-desiredLevel`}
+              label={t('desiredLevel')}
+              name="desiredLevelVisible"
+              value={values.desiredLevel}
+              onChange={(v) => set('desiredLevel', v)}
+            />
           </div>
         </div>
       ) : null}
       {activeStep === 3 ? (
-        <TextField id={`${formKey}-whyMatters`} label={t('whyMatters')} name="whyMattersVisible" value={values.whyMatters} onChange={(v) => set('whyMatters', v)} />
+        <TextField
+          id={`${formKey}-whyMatters`}
+          label={t('whyMatters')}
+          name="whyMattersVisible"
+          value={values.whyMatters}
+          onChange={(v) => set('whyMatters', v)}
+        />
       ) : null}
       {activeStep === 4 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field id={`${formKey}-startDate`} label={t('startDate')} name="startDateVisible" type="date" value={values.startDate} onChange={(v) => set('startDate', v)} />
-          <Field id={`${formKey}-endDate`} label={t('endDate')} name="endDateVisible" type="date" value={values.endDate} onChange={(v) => set('endDate', v)} />
+        <div className="space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              id={`${formKey}-startDate`}
+              label={t('startDate')}
+              name="startDateVisible"
+              type="date"
+              value={values.startDate}
+              onChange={(v) => set('startDate', v)}
+            />
+            <Field
+              id={`${formKey}-endDate`}
+              label={t('endDate')}
+              name="endDateVisible"
+              type="date"
+              value={values.endDate}
+              onChange={(v) => set('endDate', v)}
+            />
+          </div>
+          {extended ? (
+            <GoalSettingFields
+              prefix={formKey}
+              value={values.settingDetails}
+              onChange={(value) => set('settingDetails', value)}
+            />
+          ) : null}
         </div>
       ) : null}
 
       {/* Goal Coach — advisory; suggestion is editable before anything saves.
           Indigo AI container (Stitch "AI Suggested Metrics"). */}
-      {activeStep === 1 ? <div className="space-y-2 rounded-md border border-dashed border-info/40 bg-info/[0.07] p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="flex items-center gap-2 text-h3 text-info">
-            <span className="inline-flex size-6 items-center justify-center rounded-full bg-info/15">
-              <Sparkles className="size-3.5" />
-            </span>
-            {t('coachTitle')}
-          </p>
-          <Button type="button" size="sm" variant="outline" onClick={runCoach} disabled={coachPending || !values.title.trim()}>
-            {coachPending ? t('coaching') : t('askCoach')}
-          </Button>
-        </div>
-        <p className="text-small text-ink-2">{t('coachIntro')}</p>
-
-        {coach ? (
-          <div className="space-y-2 text-small">
-            <p className="text-ink">
-              {t('smartScore')}: <span className="font-bold text-info">{coach.assessment.score}%</span>
+      {activeStep === 1 ? (
+        <div className="border-info/40 bg-info/[0.07] space-y-2 rounded-md border border-dashed p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-h3 text-info flex items-center gap-2">
+              <span className="bg-info/15 inline-flex size-6 items-center justify-center rounded-full">
+                <Sparkles className="size-3.5" />
+              </span>
+              {t('coachTitle')}
             </p>
-            {coach.assessment.missing.length > 0 ? (
-              <p className="text-ink-2">
-                {t('coachMissing')}:{' '}
-                {coach.assessment.missing.map((d: SmartDimension) => t(`smart.${d}`)).join(', ')}
-              </p>
-            ) : null}
-
-            {coach.suggestion ? (
-              <div className="space-y-1 rounded-md border border-info/20 bg-surface p-3">
-                {coach.suggestion.rationale ? (
-                  <p className="text-small italic text-ink-2">{coach.suggestion.rationale}</p>
-                ) : null}
-                {coach.suggestion.title ? <p className="text-ink"><strong>{t('titleField')}:</strong> {coach.suggestion.title}</p> : null}
-                {coach.suggestion.successMeasure ? <p className="text-ink"><strong>{t('successMeasure')}:</strong> {coach.suggestion.successMeasure}</p> : null}
-                {coach.suggestion.learningActivity ? <p className="text-ink"><strong>{t('learningActivity')}:</strong> {coach.suggestion.learningActivity}</p> : null}
-                <Button type="button" size="sm" variant="secondary" onClick={applySuggestion}>
-                  {t('applySuggestion')}
-                </Button>
-              </div>
-            ) : (
-              <p className="text-small text-ink-2">
-                {coach.aiEnabled ? t('coachNoSuggestion') : t('coachUnavailable')}
-              </p>
-            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={runCoach}
+              disabled={preview || coachPending || !values.title.trim()}
+            >
+              {coachPending ? t('coaching') : t('askCoach')}
+            </Button>
           </div>
-        ) : null}
-      </div> : null}
+          <p className="text-small text-ink-2">{t('coachIntro')}</p>
+
+          {coach ? (
+            <div className="text-small space-y-2">
+              <p className="text-ink">
+                {t('smartScore')}:{' '}
+                <span className="text-info font-bold">{coach.assessment.score}%</span>
+              </p>
+              {coach.assessment.missing.length > 0 ? (
+                <p className="text-ink-2">
+                  {t('coachMissing')}:{' '}
+                  {coach.assessment.missing.map((d: SmartDimension) => t(`smart.${d}`)).join(', ')}
+                </p>
+              ) : null}
+
+              {coach.suggestion ? (
+                <div className="border-info/20 bg-surface space-y-1 rounded-md border p-3">
+                  {coach.suggestion.rationale ? (
+                    <p className="text-small text-ink-2 italic">{coach.suggestion.rationale}</p>
+                  ) : null}
+                  {coach.suggestion.title ? (
+                    <p className="text-ink">
+                      <strong>{t('titleField')}:</strong> {coach.suggestion.title}
+                    </p>
+                  ) : null}
+                  {coach.suggestion.successMeasure ? (
+                    <p className="text-ink">
+                      <strong>{t('successMeasure')}:</strong> {coach.suggestion.successMeasure}
+                    </p>
+                  ) : null}
+                  {coach.suggestion.learningActivity ? (
+                    <p className="text-ink">
+                      <strong>{t('learningActivity')}:</strong> {coach.suggestion.learningActivity}
+                    </p>
+                  ) : null}
+                  <Button type="button" size="sm" variant="secondary" onClick={applySuggestion}>
+                    {t('applySuggestion')}
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-small text-ink-2">
+                  {coach.aiEnabled ? t('coachNoSuggestion') : t('coachUnavailable')}
+                </p>
+              )}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {state && !state.ok ? (
-        <p className="text-sm text-destructive">
+        <p className="text-destructive text-sm">
           {state.error.code === 'VALIDATION' ? tc('errorBody') : state.error.message}
         </p>
       ) : null}
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
-        <Button type="button" variant="ghost" disabled={activeStep === 0} onClick={() => setActiveStep((s) => Math.max(0, s - 1))}>
-          {activeStep === 0 ? td('saved') : 'Back'}
+      <div className="border-border flex items-center justify-between border-t pt-4">
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={activeStep === 0}
+          onClick={() => setActiveStep((s) => Math.max(0, s - 1))}
+        >
+          Back
         </Button>
         {activeStep < SMART_STEPS.length - 1 ? (
-          <Button type="button" onClick={() => setActiveStep((s) => Math.min(SMART_STEPS.length - 1, s + 1))}>
+          <Button
+            type="button"
+            onClick={() => setActiveStep((s) => Math.min(SMART_STEPS.length - 1, s + 1))}
+          >
             Next step <ArrowRight className="ml-2 size-4" />
           </Button>
         ) : (
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" disabled={pending || preview}>
             {pending ? tc('loading') : mode === 'create' ? t('createGoal') : t('save')}
           </Button>
         )}
@@ -295,22 +409,46 @@ export function GoalForm({
 }
 
 function Field({
-  id, label, name, value, onChange, type = 'text',
+  id,
+  label,
+  name,
+  value,
+  onChange,
+  type = 'text',
 }: {
-  id: string; label: string; name: string; value: string; onChange: (v: string) => void; type?: string;
+  id: string;
+  label: string;
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
 }) {
   return (
     <div className="space-y-1">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} name={name} type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input
+        id={id}
+        name={name}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }
 
 function TextField({
-  id, label, name, value, onChange,
+  id,
+  label,
+  name,
+  value,
+  onChange,
 }: {
-  id: string; label: string; name: string; value: string; onChange: (v: string) => void;
+  id: string;
+  label: string;
+  name: string;
+  value: string;
+  onChange: (v: string) => void;
 }) {
   return (
     <div className="space-y-1">

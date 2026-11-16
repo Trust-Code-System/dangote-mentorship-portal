@@ -44,6 +44,7 @@ export function ReviewForm({
   draftKey,
   extraFields,
   submitLabel,
+  preview = false,
 }: {
   formId: string;
   type: ReviewType;
@@ -58,6 +59,7 @@ export function ReviewForm({
   /** Extra hidden inputs (e.g. the assessment window id). */
   extraFields?: Record<string, string>;
   submitLabel?: string;
+  preview?: boolean;
 }) {
   const t = useTranslations('reviews');
   const tc = useTranslations('common');
@@ -68,7 +70,12 @@ export function ReviewForm({
   const [state, action, pending] = useActionState<ReviewFormState, FormData>(submitAction, null);
 
   const formKey = draftKey ?? reviewDraftKey(type, formId);
-  const { status: draftStatus, clear } = useFormDraft({ formKey, values, cohortId });
+  const { status: draftStatus, clear } = useFormDraft({
+    formKey,
+    values,
+    cohortId,
+    enabled: !preview,
+  });
 
   useEffect(() => {
     if (state?.ok) {
@@ -79,14 +86,19 @@ export function ReviewForm({
   }, [state]);
 
   const serialized = useMemo(() => JSON.stringify(values), [values]);
-  const fieldErrors = !state?.ok && state?.error.code === 'VALIDATION' ? state.error.fieldErrors : undefined;
+  const fieldErrors =
+    !state?.ok && state?.error.code === 'VALIDATION' ? state.error.fieldErrors : undefined;
 
   function set(id: string, value: FieldValue) {
     setValues((v) => ({ ...v, [id]: value }));
   }
 
   return (
-    <form action={action} className="space-y-6">
+    <form
+      action={preview ? undefined : action}
+      onSubmit={preview ? (event) => event.preventDefault() : undefined}
+      className="space-y-6"
+    >
       <input type="hidden" name="formId" value={formId} />
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="answers" value={serialized} />
@@ -100,23 +112,30 @@ export function ReviewForm({
         </p>
       ) : null}
 
-      {fields.map((field) => {
+      {fields.map((field, index) => {
         // Fall back rather than render a blank label: an English-only cohort's
         // form carries no French text, and a francophone may still be reading it.
         const label = pickLanguageText(lang, { EN: field.labelEn, FR: field.labelFr });
         const error = fieldErrors?.[field.id]?.[0];
         return (
-          <FieldRenderer
-            key={field.id}
-            field={field}
-            label={label}
-            lang={lang}
-            value={values[field.id] ?? (field.type === 'multi_select' ? [] : '')}
-            onChange={(v) => set(field.id, v)}
-            error={error}
-            yesWord={tc('yes')}
-            noWord={tc('no')}
-          />
+          <div key={field.id} className="space-y-3">
+            {field.sectionEn && field.sectionEn !== fields[index - 1]?.sectionEn ? (
+              <h2 className="border-border border-t pt-6 text-lg font-semibold">
+                {field.sectionEn}
+              </h2>
+            ) : null}
+            {field.helpEn ? <p className="text-muted-foreground text-sm">{field.helpEn}</p> : null}
+            <FieldRenderer
+              field={field}
+              label={label}
+              lang={lang}
+              value={values[field.id] ?? (field.type === 'multi_select' ? [] : '')}
+              onChange={(v) => set(field.id, v)}
+              error={error}
+              yesWord={tc('yes')}
+              noWord={tc('no')}
+            />
+          </div>
         );
       })}
 
@@ -126,7 +145,7 @@ export function ReviewForm({
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" disabled={pending || preview}>
         {pending ? tc('loading') : (submitLabel ?? t('submit'))}
       </Button>
     </form>
@@ -172,6 +191,7 @@ function FieldRenderer({
           onChange={onChange}
           required={field.required}
           rows={field.type === 'long_text' ? 4 : undefined}
+          type={field.inputType}
         />
         {errorNode}
       </div>
@@ -185,7 +205,7 @@ function FieldRenderer({
       <fieldset className="space-y-1.5">
         <legend className="text-h3 text-ink">
           {label}
-          {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
+          {field.required ? <span className="text-risk ml-0.5">*</span> : null}
         </legend>
         <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
           {scale.map((n) => {
@@ -199,7 +219,7 @@ function FieldRenderer({
                 aria-label={`${n} / ${max}`}
                 onClick={() => onChange(String(n))}
                 className={cn(
-                  'flex size-11 items-center justify-center rounded-md border text-body font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-green/30 focus:ring-offset-2 focus:ring-offset-bg',
+                  'text-body focus:ring-green/30 focus:ring-offset-bg flex size-11 items-center justify-center rounded-md border font-semibold transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none',
                   selected
                     ? 'border-green bg-green text-white'
                     : 'border-border bg-bg text-ink hover:border-green',
@@ -224,7 +244,7 @@ function FieldRenderer({
       <fieldset className="space-y-1.5">
         <legend className="text-h3 text-ink">
           {label}
-          {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
+          {field.required ? <span className="text-risk ml-0.5">*</span> : null}
         </legend>
         <div role="radiogroup" aria-label={label} className="flex gap-2">
           {choices.map((c) => {
@@ -237,7 +257,7 @@ function FieldRenderer({
                 aria-checked={selected}
                 onClick={() => onChange(c.v)}
                 className={cn(
-                  'flex h-11 min-w-[5rem] items-center justify-center rounded-md border px-4 text-body transition-colors focus:outline-none focus:ring-2 focus:ring-green/30 focus:ring-offset-2 focus:ring-offset-bg',
+                  'text-body focus:ring-green/30 focus:ring-offset-bg flex h-11 min-w-[5rem] items-center justify-center rounded-md border px-4 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none',
                   selected
                     ? 'border-green bg-green text-white'
                     : 'border-border bg-bg text-ink hover:border-green',
@@ -256,8 +276,7 @@ function FieldRenderer({
   if (field.type === 'multi_select') {
     const options = field.options ?? [];
     const selected = Array.isArray(value) ? value : value ? [value] : [];
-    const atLimit =
-      field.maxSelections !== undefined && selected.length >= field.maxSelections;
+    const atLimit = field.maxSelections !== undefined && selected.length >= field.maxSelections;
 
     function toggle(optionValue: string) {
       // Keep the form's own option order rather than click order, so the stored
@@ -274,7 +293,7 @@ function FieldRenderer({
       <fieldset className="space-y-1.5">
         <legend className="text-h3 text-ink">
           {label}
-          {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
+          {field.required ? <span className="text-risk ml-0.5">*</span> : null}
         </legend>
         {field.maxSelections !== undefined ? (
           <p className="text-small text-ink-3">
@@ -290,7 +309,7 @@ function FieldRenderer({
               <label
                 key={option.value}
                 className={cn(
-                  'flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-body transition-colors',
+                  'text-body flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 transition-colors',
                   checked ? 'border-green bg-green-soft/40 text-ink' : 'border-border text-ink',
                   // Options beyond the cap are disabled rather than silently
                   // ignored on submit.
@@ -302,7 +321,7 @@ function FieldRenderer({
                   checked={checked}
                   disabled={!checked && atLimit}
                   onChange={() => toggle(option.value)}
-                  className="mt-1 size-4 rounded border-border text-green focus:ring-2 focus:ring-green/30"
+                  className="border-border text-green focus:ring-green/30 mt-1 size-4 rounded focus:ring-2"
                 />
                 <span>{pickLanguageText(lang, { EN: option.labelEn, FR: option.labelFr })}</span>
               </label>
@@ -320,7 +339,7 @@ function FieldRenderer({
     <div className="space-y-1.5">
       <Label htmlFor={`f-${field.id}`}>
         {label}
-        {field.required ? <span className="ml-0.5 text-risk">*</span> : null}
+        {field.required ? <span className="text-risk ml-0.5">*</span> : null}
       </Label>
       <Select value={single || undefined} onValueChange={onChange}>
         <SelectTrigger id={`f-${field.id}`} aria-label={label}>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026/2027 stream — 16 November 2026
+
+- Adds role-specific source review forms, coordinator-only confidential follow-up, and updated goal-setting details. Additive migration adds `goals.setting_details` and `form_responses.subject_mentee_id` so mentor reviews remain separate for each mentee; existing records are preserved.
+
 ## M0 — Foundations
 
 - Next.js (App Router) + TypeScript strict, Tailwind CSS, shadcn-style UI primitives.

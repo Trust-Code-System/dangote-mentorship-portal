@@ -75,10 +75,20 @@ function validateField(
     return { ok: true, value: null };
   }
 
+  if (field.declaration && ![true, 'true', 'yes'].includes(raw as string | boolean)) {
+    return { ok: false, message: 'Please confirm the declaration before submitting.' };
+  }
+
   switch (field.type) {
     case 'short_text':
     case 'long_text': {
       const value = typeof raw === 'string' ? raw.trim() : String(raw).trim();
+      if (field.inputType === 'date' && !z.iso.date().safeParse(value).success) {
+        return { ok: false, message: 'Enter a valid date.' };
+      }
+      if (field.inputType === 'email' && !z.email().safeParse(value).success) {
+        return { ok: false, message: 'Enter a valid email address.' };
+      }
       const max = field.type === 'short_text' ? SHORT_TEXT_MAX : LONG_TEXT_MAX;
       if (value.length > max) {
         return { ok: false, message: `Answer is too long (max ${max} characters).` };
@@ -198,6 +208,7 @@ const answersJson = z
 export const submitReviewSchema = z.object({
   formId: z.string().cuid(),
   type: z.nativeEnum(ReviewType),
+  subjectMenteeId: z.string().cuid().optional(),
   answers: answersJson,
 });
 

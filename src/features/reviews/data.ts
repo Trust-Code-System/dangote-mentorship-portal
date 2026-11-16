@@ -16,20 +16,30 @@ import type { ReviewAnswers } from './schema';
 export interface ReviewParticipant {
   cohortId: string;
   roleName: RoleName; // MENTOR | MENTEE
+  subjectMenteeId?: string;
 }
 
 export async function resolveReviewParticipant(
   user: SessionUser,
+  subjectMenteeId?: string,
 ): Promise<ReviewParticipant | null> {
   // A person is a mentor or a mentee in the loop, not both; prefer whichever
   // role has an accepted pairing so the cohort is unambiguous.
-  if (user.roles.includes(RoleName.MENTEE)) {
+  if (user.roles.includes(RoleName.MENTEE) && !subjectMenteeId) {
     const pairing = await getMenteePairing(user.id);
     if (pairing) return { cohortId: pairing.cohortId, roleName: RoleName.MENTEE };
   }
   if (user.roles.includes(RoleName.MENTOR)) {
     const pairings = await getMentorPairings(user.id);
-    if (pairings[0]) return { cohortId: pairings[0].cohortId, roleName: RoleName.MENTOR };
+    const selected = subjectMenteeId
+      ? pairings.find((p) => p.menteeId === subjectMenteeId)
+      : pairings[0];
+    if (selected)
+      return {
+        cohortId: selected.cohortId,
+        roleName: RoleName.MENTOR,
+        subjectMenteeId: selected.menteeId,
+      };
   }
   return null;
 }
@@ -56,8 +66,9 @@ export interface ReviewAssignment {
 export async function getReviewAssignment(
   user: SessionUser,
   type: ReviewType,
+  subjectMenteeId?: string,
 ): Promise<ReviewAssignment | null> {
-  const participant = await resolveReviewParticipant(user);
+  const participant = await resolveReviewParticipant(user, subjectMenteeId);
   if (!participant) return null;
 
   const form = await getActiveFormDefinition(participant.cohortId, type, participant.roleName);
@@ -67,6 +78,10 @@ export async function getReviewAssignment(
     where: {
       formId: form.id,
       respondentId: user.id,
+      subjectMenteeId:
+        form.roleName === RoleName.MENTOR && form.schema.fields.some((f) => f.sourceQuestion)
+          ? participant.subjectMenteeId
+          : null,
       status: ReviewStatus.SUBMITTED,
       deletedAt: null,
     },

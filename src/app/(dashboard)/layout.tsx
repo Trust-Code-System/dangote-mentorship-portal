@@ -14,6 +14,7 @@ import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
 import { getViewerCohortLanguages } from '@/features/cohorts/language-data';
 import type { AppLocale } from '@/i18n/config';
 import { CohortLocaleGuard } from '@/components/cohort-locale-guard';
+import { confidentialReviewCohorts } from '@/features/reviews/confidential';
 
 // Quick Actions (§1.9) shown across the authenticated participant area. Items are
 // filtered to what the user's role can actually do, shortest-path first.
@@ -91,6 +92,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const sections = isAdmin
     ? await buildAdminNavSections(0, user.roles)
     : await buildParticipantNavSections(user.roles, 0, 0);
+  if ((await confidentialReviewCohorts(user.id)).length) {
+    sections.push({
+      label: 'Programme coordination',
+      items: [
+        { href: '/programme-concerns', label: 'Confidential review follow-up', icon: 'support' },
+      ],
+    });
+  }
 
   const labels: AppShellLabels = {
     brand: tCommon('appShortName'),

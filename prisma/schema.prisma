@@ -961,6 +961,8 @@ model Goal {
   startDate        DateTime?  @map("start_date")
   endDate          DateTime?  @map("end_date")
   successMeasure   String?    @map("success_measure")
+  // Updated programme goal-setting form, with mentee acceptance and follow-up.
+  settingDetails   Json?      @map("setting_details")
   // Free-text "evidence of progress" (§7); uploaded files live in GoalEvidence.
   evidence         String?
   mentorComments   String?    @map("mentor_comments")
@@ -1143,6 +1145,8 @@ model FormResponse {
   id                 String       @id @default(cuid())
   formId             String       @map("form_id")
   respondentId       String       @map("respondent_id")
+  // A mentor completes one source review per accepted mentee, not one per cohort.
+  subjectMenteeId    String?       @map("subject_mentee_id")
   answers            Json
   status             ReviewStatus @default(IN_PROGRESS)
   submittedAt        DateTime?    @map("submitted_at")
@@ -1165,6 +1169,7 @@ model FormResponse {
   // The assessment gate runs on every authenticated page load, so the
   // "has this mentee answered this window?" lookup must be indexed.
   @@index([assessmentWindowId, respondentId])
+  @@index([formId, respondentId, subjectMenteeId])
   @@map("form_responses")
 }
 

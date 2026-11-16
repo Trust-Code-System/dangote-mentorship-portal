@@ -12,11 +12,7 @@ import { fail, mapActionError, ok, type ActionResult } from '@/lib/actions/resul
 import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
 import { getFormDefinition } from '@/features/forms/data';
 import { ensureReviewCycle, resolveReviewParticipant } from './data';
-import {
-  getReviewRollup,
-  resolveReviewerCohortId,
-  type ReviewTypeSummary,
-} from './rollup';
+import { getReviewRollup, resolveReviewerCohortId, type ReviewTypeSummary } from './rollup';
 import {
   aggregateToLine,
   buildReviewReportPrompt,
@@ -49,6 +45,7 @@ export async function submitReviewResponse(
     const input = submitReviewSchema.parse({
       formId: formData.get('formId'),
       type: formData.get('type'),
+      subjectMenteeId: formData.get('subjectMenteeId') || undefined,
       answers: formData.get('answers'),
     });
 
@@ -63,7 +60,7 @@ export async function submitReviewResponse(
     }
 
     // Authorize: only a paired mentor/mentee fills a review.
-    const participant = await resolveReviewParticipant(user);
+    const participant = await resolveReviewParticipant(user, input.subjectMenteeId);
     if (!participant) {
       return fail({
         code: 'FORBIDDEN',
@@ -78,10 +75,19 @@ export async function submitReviewResponse(
     if (
       !form ||
       form.cohortId !== participant.cohortId ||
+      (form.roleName !== null && form.roleName !== participant.roleName) ||
       form.type !== input.type ||
       !form.isActive
     ) {
       return fail({ code: 'NOT_FOUND', message: 'This review form is not available.' });
+    }
+
+    const subjectMenteeId =
+      form.roleName === 'MENTOR' && form.schema.fields.some((f) => f.sourceQuestion)
+        ? participant.subjectMenteeId
+        : null;
+    if (subjectMenteeId && input.subjectMenteeId !== subjectMenteeId) {
+      return fail({ code: 'VALIDATION', message: 'Choose the mentee this review is about.' });
     }
 
     // Dynamic per-field validation against the live question set.
@@ -99,14 +105,12 @@ export async function submitReviewResponse(
     const cycleId = await ensureReviewCycle(participant.cohortId, input.type);
     const answersJson = validated.answers as Prisma.InputJsonValue;
     const link =
-      input.type === ReviewType.MIDTERM
-        ? { midtermReviewId: cycleId }
-        : { finalReviewId: cycleId };
+      input.type === ReviewType.MIDTERM ? { midtermReviewId: cycleId } : { finalReviewId: cycleId };
 
     // One submission per respondent per form: update in place if they re-open it,
     // otherwise create. Both stay status SUBMITTED with a fresh submittedAt.
     const existing = await prisma.formResponse.findFirst({
-      where: { formId: form.id, respondentId: user.id, deletedAt: null },
+      where: { formId: form.id, respondentId: user.id, subjectMenteeId, deletedAt: null },
       select: { id: true },
     });
 
@@ -125,6 +129,7 @@ export async function submitReviewResponse(
           data: {
             formId: form.id,
             respondentId: user.id,
+            subjectMenteeId,
             answers: answersJson,
             status: ReviewStatus.SUBMITTED,
             submittedAt: new Date(),
@@ -180,9 +185,7 @@ function pairsMissing(
       ? !(p.mentorMidterm && p.menteeMidterm)
       : !(p.mentorFinal && p.menteeFinal),
   );
-  return incomplete
-    .slice(0, 20)
-    .map((p) => `${p.mentorName ?? '—'} · ${p.menteeName ?? '—'}`);
+  return incomplete.slice(0, 20).map((p) => `${p.mentorName ?? '—'} · ${p.menteeName ?? '—'}`);
 }
 
 const reportInputSchema = z.object({ type: z.nativeEnum(ReviewType) });

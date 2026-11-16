@@ -8,6 +8,7 @@ import type { GoalDraftFields } from '@/features/goals/smart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GoalForm } from './goal-form';
 import { GoalCard } from './goal-card';
+import { prisma } from '@/lib/db/prisma';
 
 export default async function GoalsPage() {
   const user = await requireUser();
@@ -28,11 +29,24 @@ export default async function GoalsPage() {
 
   const newGoalDraft =
     isMentee && pairing ? await getDraft<GoalDraftFields>(user.id, 'goal:new') : null;
+  const extended = pairing
+    ? Boolean(
+        await prisma.featureFlag.findFirst({
+          where: {
+            cohortId: pairing.cohortId,
+            key: 'phase2_goal_setting',
+            enabled: true,
+            deletedAt: null,
+          },
+          select: { id: true },
+        }),
+      )
+    : false;
 
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-body text-ink-2">{t('subtitle')}</p>
       </div>
 
@@ -50,7 +64,19 @@ export default async function GoalsPage() {
                 <GoalForm
                   mode="create"
                   cohortId={pairing.cohortId}
-                  initial={newGoalDraft ?? undefined}
+                  initial={
+                    newGoalDraft ??
+                    (extended
+                      ? {
+                          title: '',
+                          settingDetails: JSON.stringify({
+                            menteeName: user.name ?? '',
+                            mentorName: pairing.mentorName ?? '',
+                          }),
+                        }
+                      : undefined)
+                  }
+                  extended={extended}
                   enableDraft
                 />
               </CardContent>
@@ -83,7 +109,7 @@ export default async function GoalsPage() {
               <div key={group.mentee.menteeId} className="space-y-3">
                 <h3 className="font-medium">{group.mentee.menteeName}</h3>
                 {group.goals.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t('noGoalsMentor')}</p>
+                  <p className="text-muted-foreground text-sm">{t('noGoalsMentor')}</p>
                 ) : (
                   group.goals.map((goal) => (
                     <GoalCard key={goal.id} goal={goal} viewer="mentor" stageLabels={stageLabels} />
