@@ -89,9 +89,18 @@ test('mentee records the session and the paired mentor adds the shared reflectio
       .getByLabel('Discussion summary', { exact: true })
       .fill('Mentee-authored shared session record');
     await participant.getByRole('button', { name: 'Save session log', exact: true }).click();
-    await expect(
-      participant.getByText('Mentee-authored shared session record', { exact: true }),
-    ).toBeVisible();
+    // The textarea already contains this text; wait for persistence rather than
+    // mistaking the unsaved input for a rendered session card.
+    await expect
+      .poll(() =>
+        db.sessionLog.count({
+          where: {
+            cohortId: cohort.id,
+            discussionSummary: 'Mentee-authored shared session record',
+          },
+        }),
+      )
+      .toBe(1);
     const saved = await db.sessionLog.findFirstOrThrow({
       where: { cohortId: cohort.id, discussionSummary: 'Mentee-authored shared session record' },
     });
