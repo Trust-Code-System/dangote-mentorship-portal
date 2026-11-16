@@ -276,10 +276,11 @@ model User {
   auditLogs     AuditLog[]
   notifications Notification[]
 
-  uploadedImports Import[]
-  mentorMatches   Match[]  @relation("MatchMentor")
-  menteeMatches   Match[]  @relation("MatchMentee")
-  approvedMatches Match[]  @relation("MatchApprovedBy")
+  uploadedImports            Import[]
+  mentorMatches              Match[]  @relation("MatchMentor")
+  menteeMatches              Match[]  @relation("MatchMentee")
+  approvedMatches            Match[]  @relation("MatchApprovedBy")
+  approvedMenteeCertificates Match[]  @relation("MenteeCertificateApprovedBy")
 
   trainingAttendance  TrainingAttendance[]
   trainingAssessments TrainingAssessment[]
@@ -818,26 +819,30 @@ model MatchingCriteria {
 }
 
 model Match {
-  id           String      @id @default(cuid())
-  cohortId     String      @map("cohort_id")
-  mentorId     String      @map("mentor_id")
-  menteeId     String      @map("mentee_id")
-  score        Float
-  status       MatchStatus @default(SUGGESTED)
-  aiRationale  String?     @map("ai_rationale")
-  flags        Json?
-  approvedById String?     @map("approved_by_id")
-  acceptedAt   DateTime?   @map("accepted_at")
+  id                            String      @id @default(cuid())
+  cohortId                      String      @map("cohort_id")
+  mentorId                      String      @map("mentor_id")
+  menteeId                      String      @map("mentee_id")
+  score                         Float
+  status                        MatchStatus @default(SUGGESTED)
+  aiRationale                   String?     @map("ai_rationale")
+  flags                         Json?
+  approvedById                  String?     @map("approved_by_id")
+  acceptedAt                    DateTime?   @map("accepted_at")
+  // No automatic certificate release: both values require an explicit admin action.
+  menteeCertificateApprovedAt   DateTime?   @map("mentee_certificate_approved_at")
+  menteeCertificateApprovedById String?     @map("mentee_certificate_approved_by_id")
 
   // First-session icebreaker cache (experience-layer.md §1.17). Generated from
   // both profiles when the pair is active; regenerating overwrites it.
   icebreakerJson        Json?     @map("icebreaker_json")
   icebreakerGeneratedAt DateTime? @map("icebreaker_generated_at")
 
-  cohort     Cohort @relation(fields: [cohortId], references: [id])
-  mentor     User   @relation("MatchMentor", fields: [mentorId], references: [id])
-  mentee     User   @relation("MatchMentee", fields: [menteeId], references: [id])
-  approvedBy User?  @relation("MatchApprovedBy", fields: [approvedById], references: [id])
+  cohort                      Cohort @relation(fields: [cohortId], references: [id])
+  mentor                      User   @relation("MatchMentor", fields: [mentorId], references: [id])
+  mentee                      User   @relation("MatchMentee", fields: [menteeId], references: [id])
+  approvedBy                  User?  @relation("MatchApprovedBy", fields: [approvedById], references: [id])
+  menteeCertificateApprovedBy User?  @relation("MenteeCertificateApprovedBy", fields: [menteeCertificateApprovedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -1146,7 +1151,7 @@ model FormResponse {
   formId             String       @map("form_id")
   respondentId       String       @map("respondent_id")
   // A mentor completes one source review per accepted mentee, not one per cohort.
-  subjectMenteeId    String?       @map("subject_mentee_id")
+  subjectMenteeId    String?      @map("subject_mentee_id")
   answers            Json
   status             ReviewStatus @default(IN_PROGRESS)
   submittedAt        DateTime?    @map("submitted_at")

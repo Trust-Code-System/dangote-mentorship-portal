@@ -33,6 +33,9 @@ function safeCertificate(
       lang === 'FR' ? 'Cohorte Leadership 2026' : 'Leadership Cohort 2026',
     counterpartName: lang === 'FR' ? 'Aminata Koné' : 'Amina Bello',
     earned: true,
+    requirementsMet: true,
+    adminApproved: true,
+    adminApprovedAt: new Date('2026-07-25T00:00:00Z'),
     eligibility: {
       trainingCompleted: true,
       goalApproved: true,
