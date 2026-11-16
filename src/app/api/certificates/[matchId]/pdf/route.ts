@@ -1,4 +1,4 @@
-import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
+import { getCurrentUser, hasAnyRole, canAccessCohort } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import {
   getCertificateForViewer,
@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ matc
   const certificate = await getCertificateForViewer(user, matchId, role);
   if (!certificate) return new Response('Not found', { status: 404 });
 
-  const isAdmin = hasAnyRole(user, ADMIN_ROLES);
+  const isAdmin = hasAnyRole(user, ADMIN_ROLES) && canAccessCohort(user, certificate.cohortId);
   const previewRequested = url.searchParams.get('preview') === '1';
   // Query flags, language switches and the direct URL cannot bypass admin release.
   if (certificate.role === 'mentee' && !certificate.earned && !isAdmin) {
