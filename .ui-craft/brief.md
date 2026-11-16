@@ -36,3 +36,6 @@ The root remains sign-in, with no public-page detour or auth logo linking to `/w
 Shared popovers use 380ms entry / 280ms exit; sidebar 480ms; page content 550ms. Menus stay mounted through exit and become inert immediately on close. Dialog/select primitives retain their Radix focus and keyboard behaviour. Reduced motion removes transitions and reveals immediately. These timings supersede the earlier 160–220ms collapse and no-entrance direction.
 
 Control borders are quieter. Pointer interaction leaves no persistent green ring; keyboard users retain a neutral slate focus indicator. Application authentication, role grants and rate limiting remain unchanged.
+
+## Owner refinement — remove authentication artwork
+The owner rejected the dimensional abstract figures and floating Matched / Goals submitted cards. Remove that illustration and its animation rules. Keep the original logos, forest panel, fine contour background, typography and compact programme journey. Preserve the sign-in form and responsive shell.

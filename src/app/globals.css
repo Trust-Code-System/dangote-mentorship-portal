@@ -1282,8 +1282,7 @@ html[data-input-modality='keyboard']
   color: rgb(var(--ink));
 }
 
-/* A composed identity panel: architectural growth forms and connected steps,
- * inspired by split authentication references, with the supplied brand marks. */
+/* Quiet identity panel: supplied brand marks, fine contours and programme copy. */
 .auth-identity {
   background: #153b30;
 }
@@ -1313,64 +1312,6 @@ html[data-input-modality='keyboard']
   fill: none;
   stroke: #b7d6bd;
   stroke-width: 0.65;
-}
-.auth-arch {
-  position: absolute;
-  width: 145px;
-  height: 205px;
-  bottom: 0;
-  border-radius: 100px 100px 8px 8px;
-  transform: rotate(22deg);
-  box-shadow:
-    inset 1px 1px 0 #ffffff70,
-    inset -16px -8px 30px #06261f40,
-    12px 18px 26px #001c1930;
-}
-.auth-arch-back {
-  left: 32%;
-  background: linear-gradient(115deg, #cce8aa, #88ab76 65%, #537654);
-}
-.auth-arch-front {
-  left: 49%;
-  bottom: -8px;
-  width: 130px;
-  height: 160px;
-  background: linear-gradient(110deg, #e7efdc, #a8c0aa 62%, #527a67);
-  transform: rotate(-18deg);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .auth-arch-back {
-    animation: auth-settle 1.2s var(--motion-soft) both;
-  }
-  .auth-arch-front {
-    animation: auth-settle 1.4s var(--motion-soft) both;
-  }
-  .auth-connection {
-    animation: auth-card-in 900ms 100ms var(--motion-soft) both;
-  }
-  .auth-goal {
-    animation: auth-card-in 900ms 220ms var(--motion-soft) both;
-  }
-}
-@keyframes auth-settle {
-  from {
-    opacity: 0;
-    translate: 0 22px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-@keyframes auth-card-in {
-  from {
-    opacity: 0;
-    translate: 0 10px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .soft-panel,

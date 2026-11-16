@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { ArrowUpRight, Check, LockKeyhole, Target, Users } from 'lucide-react';
+import { ArrowUpRight, Check, LockKeyhole } from 'lucide-react';
 import { BrandMark, BrandPlate } from '@/components/brand-logo';
 import { AnimatedContent } from '@/components/motion/animated-content';
 import { AuthBrandCopy } from './auth-brand-copy';
@@ -33,23 +33,7 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
         </Link>
         <AnimatedContent className="relative mt-8 max-w-lg xl:mt-10">
           <AuthBrandCopy />
-          <div className="auth-journey-art relative mt-6 h-[190px] xl:h-[210px]" aria-hidden="true">
-            <div className="auth-arch auth-arch-back" />
-            <div className="auth-arch auth-arch-front" />
-            <div className="auth-connection absolute top-5 left-0 flex items-center gap-3 rounded-xl border border-white/20 bg-[#21483d]/90 px-4 py-3 shadow-lg">
-              <span className="grid size-9 place-items-center rounded-full bg-white/10">
-                <Users className="size-4" />
-              </span>
-              <span className="text-sm font-medium">{t('steps.matched')}</span>
-              <Check className="ml-4 size-4 text-[#c4e6a6]" />
-            </div>
-            <div className="auth-goal absolute right-0 bottom-4 flex items-center gap-3 rounded-xl border border-white/30 bg-[#edf2e9] px-5 py-4 text-[#183e32] shadow-xl">
-              <Target className="size-5" />
-              <span className="text-sm font-medium">{t('steps.goals')}</span>
-              <ArrowUpRight className="ml-5 size-4" />
-            </div>
-          </div>
-          <div aria-hidden="true" className="mt-5 border-t border-white/20 pt-5">
+          <div aria-hidden="true" className="mt-8 border-t border-white/20 pt-5">
             <div className="text-small mb-5 flex items-center justify-between font-medium">
               <span>{t('title')}</span>
               <ArrowUpRight className="size-4 text-white/60" />
@@ -88,7 +72,9 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
           <LockKeyhole className="text-ink-3 size-4 shrink-0" aria-hidden />
         </header>
         <main className="flex flex-1 items-start justify-center px-5 pt-6 pb-8 sm:px-10 lg:pt-7 xl:pt-9">
-          <AnimatedContent className="w-full max-w-[420px]">{children}</AnimatedContent>
+          <div className="w-full max-w-[420px] motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
+            {children}
+          </div>
         </main>
         <div className="border-border/60 flex flex-col items-center justify-center gap-3 border-t px-5 py-5 sm:flex-row lg:hidden">
           <CollaborationCredit onLight className="[&_*]:!text-ink-2" />
