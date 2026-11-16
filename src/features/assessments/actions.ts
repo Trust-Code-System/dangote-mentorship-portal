@@ -11,6 +11,7 @@ import { getFormDefinition } from '@/features/forms/data';
 import { validateAnswers } from '@/features/reviews/schema';
 import { resolveParticipantCohortId } from './data';
 import { isRecurringFormType, respondentRoleFor } from './participants';
+import { quarterlyAssessmentsEnabled, recurringFormEnabled } from './policy';
 import {
   defaultMonthlyWindowLabel,
   defaultWindowLabel,
@@ -58,6 +59,12 @@ export async function submitAssessment(
     });
     if (!window) {
       return fail({ code: 'NOT_FOUND', message: 'This assessment is not available.' });
+    }
+    if (!(await recurringFormEnabled(cohortId, window.formType))) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Quarterly assessments are disabled for this stream.',
+      });
     }
     if (window.opensAt.getTime() > Date.now()) {
       return fail({ code: 'CONFLICT', message: 'This assessment has not opened yet.' });
@@ -188,6 +195,12 @@ export async function generateAssessmentWindows(
       graceDays: formData.get('graceDays'),
     });
     assertCohortAccess(user, input.cohortId);
+    if (!(await quarterlyAssessmentsEnabled(input.cohortId))) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Quarterly assessments are disabled for this stream.',
+      });
+    }
 
     const cohort = await prisma.cohort.findFirst({
       where: { id: input.cohortId, deletedAt: null },
@@ -346,10 +359,16 @@ export async function updateAssessmentWindow(
 
     const window = await prisma.assessmentWindow.findFirst({
       where: { id: input.windowId, deletedAt: null },
-      select: { id: true, cohortId: true },
+      select: { id: true, cohortId: true, formType: true },
     });
     if (!window) return fail({ code: 'NOT_FOUND', message: 'Assessment not found.' });
     assertCohortAccess(user, window.cohortId);
+    if (input.isActive && !(await recurringFormEnabled(window.cohortId, window.formType))) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Quarterly assessments are disabled for this stream.',
+      });
+    }
 
     await prisma.assessmentWindow.update({
       where: { id: window.id },
@@ -396,10 +415,16 @@ export async function setAssessmentWindowActive(
 
     const window = await prisma.assessmentWindow.findFirst({
       where: { id: input.windowId, deletedAt: null },
-      select: { id: true, cohortId: true },
+      select: { id: true, cohortId: true, formType: true },
     });
     if (!window) return fail({ code: 'NOT_FOUND', message: 'Assessment not found.' });
     assertCohortAccess(user, window.cohortId);
+    if (input.isActive && !(await recurringFormEnabled(window.cohortId, window.formType))) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Quarterly assessments are disabled for this stream.',
+      });
+    }
 
     await prisma.assessmentWindow.update({
       where: { id: window.id },

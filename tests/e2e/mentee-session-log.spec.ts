@@ -28,6 +28,23 @@ test('mentee records the session and the paired mentor adds the shared reflectio
         languages: ['EN'],
       },
     });
+    await db.featureFlag.create({
+      data: { cohortId: cohort.id, key: 'quarterly_assessments_disabled', enabled: true },
+    });
+    // Even an accidentally active overdue quarterly window must not gate this stream.
+    await db.assessmentWindow.create({
+      data: {
+        cohortId: cohort.id,
+        formType: 'QUARTERLY',
+        sequence: 1,
+        label: 'Old quarterly obligation',
+        opensAt: new Date('2020-01-01'),
+        dueAt: new Date('2020-01-02'),
+        graceDays: 0,
+        isActive: true,
+        gatesAccess: true,
+      },
+    });
     const people = [];
     for (const roleName of ['MENTEE', 'MENTOR'] as const) {
       const email = `session-${roleName.toLowerCase()}-${cohort.id}@example.test`;
@@ -70,6 +87,13 @@ test('mentee records the session and the paired mentor adds the shared reflectio
     const reviewer = await mentorContext.newPage();
     const password = process.env.SEED_DEFAULT_PASSWORD!;
     await signInForAudit(participant, mentee.email, password);
+    await participant.goto('/assessment');
+    await expect(participant).toHaveURL(/\/dashboard\/mentee/);
+    await expect(participant.getByRole('link', { name: 'Assessment', exact: true })).toHaveCount(0);
+    await participant.goto('/monthly-form');
+    await expect(
+      participant.getByRole('heading', { name: 'Monthly meeting form', exact: true }),
+    ).toBeVisible();
     await participant.goto('/sessions');
     await expect(
       participant.getByRole('button', { name: 'Save session log', exact: true }),
@@ -118,6 +142,9 @@ test('mentee records the session and the paired mentor adds the shared reflectio
       }),
     ).toBe(0);
     await signInForAudit(reviewer, mentor.email, password);
+    await reviewer.goto('/assessment');
+    await expect(reviewer).toHaveURL(/\/dashboard\/mentor/);
+    await expect(reviewer.getByRole('link', { name: 'Assessment', exact: true })).toHaveCount(0);
     await reviewer.goto('/sessions');
     await expect(
       reviewer.getByRole('button', { name: 'Save session log', exact: true }),

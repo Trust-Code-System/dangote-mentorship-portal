@@ -12,12 +12,14 @@ import { ReviewType, RoleName } from '@prisma/client';
 vi.mock('server-only', () => ({}));
 
 const findMany = vi.fn();
+const findFlag = vi.fn();
 const userRoleFindFirst = vi.fn();
 const getMenteePairing = vi.fn();
 const getMentorPairings = vi.fn();
 
 vi.mock('@/lib/db/prisma', () => ({
   prisma: {
+    featureFlag: { findFirst: (...args: unknown[]) => findFlag(...args) },
     assessmentWindow: { findMany: (...args: unknown[]) => findMany(...args) },
     userRole: { findFirst: (...args: unknown[]) => userRoleFindFirst(...args) },
   },
@@ -71,6 +73,7 @@ const overdueWindow = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  findFlag.mockResolvedValue(null);
   getMenteePairing.mockResolvedValue({ cohortId: 'cohort-1', mentorId: 'm1', mentorName: 'M' });
   getMentorPairings.mockResolvedValue([]);
   findMany.mockResolvedValue([]);
@@ -158,8 +161,21 @@ describe('isGatedRole', () => {
   });
 
   it('does not gate admins, even when they also hold a mentee role', () => {
-    expect(
-      isGatedRole({ ...mentee, roles: [RoleName.SUPER_ADMIN, RoleName.MENTEE] }),
-    ).toBe(false);
+    expect(isGatedRole({ ...mentee, roles: [RoleName.SUPER_ADMIN, RoleName.MENTEE] })).toBe(false);
+  });
+});
+
+describe('stream assessment opt-out', () => {
+  it('never gates a mentor in a stream without quarterly assessments', async () => {
+    findFlag.mockResolvedValue({ enabled: true });
+    findMany.mockResolvedValue([overdueWindow]);
+    const gate = await getAssessmentGate({ ...mentee, roles: [RoleName.MENTOR] });
+    expect(gate.locked).toBe(false);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+  it('excludes quarterly windows from the mentee gate without disabling monthly reads', async () => {
+    findFlag.mockResolvedValue({ enabled: true });
+    await getAssessmentGate(mentee);
+    expect(findMany.mock.calls[0]?.[0]?.where.formType.in).toEqual([ReviewType.MONTHLY]);
   });
 });

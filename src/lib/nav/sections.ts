@@ -114,6 +114,7 @@ export async function buildParticipantNavSections(
   roles: RoleName[],
   unread: number,
   unreadMessages = 0,
+  quarterlyEnabled = true,
 ): Promise<NavSection[]> {
   const [tNav, tShell, tAssessments, tReports, tMonthly] = await Promise.all([
     getTranslations('nav'),
@@ -172,12 +173,15 @@ export async function buildParticipantNavSections(
                     },
                   ]
                 : []),
-              // The quarterly assessment is owed by both sides of the pair.
-              {
-                href: '/assessment',
-                label: tAssessments('navLabel'),
-                icon: 'assessment' as const,
-              },
+              ...(quarterlyEnabled
+                ? [
+                    {
+                      href: '/assessment',
+                      label: tAssessments('navLabel'),
+                      icon: 'assessment' as const,
+                    },
+                  ]
+                : []),
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
               { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },
