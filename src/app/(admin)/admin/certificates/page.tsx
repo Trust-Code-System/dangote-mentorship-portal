@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { CertificateReleaseControl } from './release-control';
 
 function parseSelection(
   value: string | undefined,
@@ -121,10 +122,22 @@ export default async function AdminCertificatesPage({
         </div>
       ) : selected ? (
         <>
+          {selected.role === 'mentee' ? (
+            <CertificateReleaseControl
+              key={`${selected.matchId}:${selected.adminApproved}`}
+              matchId={selected.matchId}
+              approved={selected.adminApproved}
+              requirementsMet={selected.requirementsMet}
+            />
+          ) : null}
           <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={selected.earned ? 'default' : 'outline'}>
-                {selected.earned ? t('eligible') : t('ineligible')}
+                {selected.earned
+                  ? t('eligible')
+                  : selected.role === 'mentee' && selected.requirementsMet
+                    ? 'Awaiting administrator permission'
+                    : t('ineligible')}
               </Badge>
               <span className="text-small text-ink font-medium">{selected.recipientName}</span>
               <span className="text-small text-ink-3">
@@ -165,7 +178,7 @@ export default async function AdminCertificatesPage({
               {t('regeneratedStatus')}
             </p>
           ) : null}
-          {!selected.earned ? (
+          {!selected.requirementsMet ? (
             <p
               role="alert"
               className="border-warning/30 bg-warning/10 text-small text-ink rounded-lg border p-3"

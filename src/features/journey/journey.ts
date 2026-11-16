@@ -41,6 +41,7 @@ export interface JourneyFacts {
   // Per-user review completion isn't modelled until M3 — passed as false for now.
   midtermDone: boolean;
   finalDone: boolean;
+  certificateApproved?: boolean;
   now: Date;
 }
 
@@ -129,9 +130,10 @@ function reviewState(done: boolean): JourneyState {
 }
 
 function completionState(f: JourneyFacts): JourneyState {
-  const earned =
-    f.trainingCompleted && f.goalsApproved && f.midtermDone && f.finalDone;
-  return earned ? 'completed' : 'pending';
+  const earned = f.trainingCompleted && f.goalsApproved && f.midtermDone && f.finalDone;
+  return earned && (f.role !== 'mentee' || f.certificateApproved === true)
+    ? 'completed'
+    : 'pending';
 }
 
 const LINKS: Record<JourneyStepKey, string | null> = {

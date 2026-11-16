@@ -122,6 +122,11 @@ describe('monthly sessions', () => {
 });
 
 describe('completion certificate', () => {
+  it('keeps completed mentees pending until explicit certificate permission', () => {
+    const done = facts({ trainingCompleted: true, goalsApproved: true, midtermDone: true, finalDone: true });
+    expect(stateOf(done, 'completion')).toBe('pending');
+    expect(stateOf({ ...done, certificateApproved: true }, 'completion')).toBe('completed');
+  });
   it('is earned only when training, goals, and both reviews are done', () => {
     const done = facts({
       profileComplete: true,
@@ -134,6 +139,7 @@ describe('completion certificate', () => {
       lastSessionAt: daysAgo(5),
       midtermDone: true,
       finalDone: true,
+      certificateApproved: true,
     });
     const result = computeJourney(done);
     expect(stateOf(done, 'completion')).toBe('completed');

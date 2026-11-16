@@ -1,5 +1,6 @@
 import { signInForAudit } from './helpers/session';
 import { expect, test, type Page } from '@playwright/test';
+import { PrismaClient } from '@prisma/client';
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -101,20 +102,30 @@ test.describe.serial('certificate experience audit', () => {
     });
   });
 
-  test('matched participant sees only their own preview and cannot issue it early', async ({
+  test('matched mentee sees a strict lock without printable certificate or preview', async ({
     page,
   }) => {
     await signIn(page, matchedMenteeEmail);
     await page.goto('/certificate?lang=FR');
-    await expect(page.locator('#certificate')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('#certificate')).toContainText('Aperçu du certificat');
+    await expect(page.getByTestId('certificate-locked')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('#certificate')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /print/i })).toHaveCount(0);
     await page.screenshot({
       path: 'certificate-evidence/participant-certificate-fr.png',
       fullPage: true,
     });
 
-    const response = await page.request.get(`/api/certificates/${matchId}/pdf?role=mentee&lang=FR`);
-    expect(response.status()).toBe(409);
+    const db = new PrismaClient();
+    const ownMatch = await db.match
+      .findFirstOrThrow({
+        where: { mentee: { email: matchedMenteeEmail }, status: 'ACCEPTED', deletedAt: null },
+        select: { id: true },
+      })
+      .finally(() => db.$disconnect());
+    const response = await page.request.get(
+      `/api/certificates/${ownMatch.id}/pdf?role=mentee&lang=FR`,
+    );
+    expect(response.status()).toBe(403);
   });
 
   test('an unrelated participant cannot access a certificate by direct URL', async ({ page }) => {

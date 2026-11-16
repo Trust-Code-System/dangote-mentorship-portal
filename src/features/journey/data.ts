@@ -14,21 +14,25 @@ const SUBMITTED_OR_BEYOND: GoalStatus[] = [
 ];
 const APPROVED_OR_BEYOND: GoalStatus[] = [GoalStatus.APPROVED, GoalStatus.COMPLETED];
 
-function menteeProfileComplete(p: {
-  fullName: string;
-  department: string | null;
-  jobTitle: string | null;
-  careerGoals: string | null;
-} | null): boolean {
+function menteeProfileComplete(
+  p: {
+    fullName: string;
+    department: string | null;
+    jobTitle: string | null;
+    careerGoals: string | null;
+  } | null,
+): boolean {
   return Boolean(p && p.fullName && p.department && p.jobTitle && p.careerGoals);
 }
 
-function mentorProfileComplete(p: {
-  fullName: string;
-  department: string | null;
-  jobTitle: string | null;
-  whyMentor: string | null;
-} | null): boolean {
+function mentorProfileComplete(
+  p: {
+    fullName: string;
+    department: string | null;
+    jobTitle: string | null;
+    whyMentor: string | null;
+  } | null,
+): boolean {
   return Boolean(p && p.fullName && p.department && p.jobTitle && p.whyMentor);
 }
 
@@ -49,12 +53,23 @@ async function menteeFacts(userId: string, now: Date): Promise<JourneyFacts> {
   const [profile, match, goals, sessionAgg, signed] = await Promise.all([
     prisma.menteeProfile.findFirst({
       where: { userId, deletedAt: null },
-      select: { fullName: true, department: true, jobTitle: true, careerGoals: true, trainingStatus: true },
+      select: {
+        fullName: true,
+        department: true,
+        jobTitle: true,
+        careerGoals: true,
+        trainingStatus: true,
+      },
     }),
     prisma.match.findFirst({
       where: { menteeId: userId, status: MatchStatus.ACCEPTED, deletedAt: null },
       orderBy: { acceptedAt: 'desc' },
-      select: { acceptedAt: true, cohortId: true },
+      select: {
+        acceptedAt: true,
+        cohortId: true,
+        menteeCertificateApprovedAt: true,
+        menteeCertificateApprovedById: true,
+      },
     }),
     prisma.goal.findMany({
       where: { menteeId: userId, deletedAt: null },
@@ -79,6 +94,9 @@ async function menteeFacts(userId: string, now: Date): Promise<JourneyFacts> {
 
   return {
     role: 'mentee',
+    certificateApproved: Boolean(
+      match?.menteeCertificateApprovedAt && match.menteeCertificateApprovedById,
+    ),
     profileComplete: menteeProfileComplete(profile),
     trainingCompleted: profile?.trainingStatus === TrainingStatus.COMPLETED,
     trainingInProgress: profile?.trainingStatus === TrainingStatus.IN_PROGRESS,
@@ -107,7 +125,13 @@ async function mentorFacts(userId: string, now: Date): Promise<JourneyFacts> {
   const [profile, goals, sessionAgg, signed] = await Promise.all([
     prisma.mentorProfile.findFirst({
       where: { userId, deletedAt: null },
-      select: { fullName: true, department: true, jobTitle: true, whyMentor: true, trainingStatus: true },
+      select: {
+        fullName: true,
+        department: true,
+        jobTitle: true,
+        whyMentor: true,
+        trainingStatus: true,
+      },
     }),
     menteeIds.length
       ? prisma.goal.findMany({
