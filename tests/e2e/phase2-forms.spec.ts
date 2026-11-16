@@ -53,7 +53,7 @@ test.describe('2026/2027 source forms', () => {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(source.title);
       await expect(page.getByText('Section 1: About you', { exact: true })).toBeVisible();
       await expect(
-        page.getByLabel('Date mentorship officially started', { exact: true }),
+        page.getByLabel(/Date mentorship officially started/),
       ).toHaveAttribute('type', 'date');
       await expect(page.getByRole('button', { name: /submit/i })).toBeDisabled();
       await expect(page.getByText(/Note for reviewers|Next steps once approved/)).toHaveCount(0);
