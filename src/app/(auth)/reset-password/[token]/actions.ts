@@ -66,16 +66,23 @@ export async function resetPassword(
       where: { userId: record.userId, usedAt: null, deletedAt: null, id: { not: record.id } },
       data: { deletedAt: new Date() },
     });
-    await writeAuditLog({
-      actorId: record.userId,
-      action: 'password_reset.completed',
-      entityType: 'User',
-      entityId: record.userId,
-    });
+    await writeAuditLog(
+      {
+        actorId: record.userId,
+        action: 'password_reset.completed',
+        entityType: 'User',
+        entityId: record.userId,
+      },
+      tx,
+    );
   });
 
   try {
-    await signIn('credentials', { email, password: parsed.data.password, redirectTo: '/dashboard' });
+    await signIn('credentials', {
+      email,
+      password: parsed.data.password,
+      redirectTo: '/dashboard',
+    });
     return {};
   } catch (error) {
     if (error instanceof AuthError) return { error: 'invalid' };

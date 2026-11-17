@@ -51,6 +51,15 @@ beforeEach(() => {
 });
 
 describe('newsletter delivery recovery', () => {
+  it('rejects an unapproved issue before resolving recipients or sending mail', async () => {
+    const issue = await mocks.issue();
+    mocks.issue.mockResolvedValue({ ...issue, approvedAt: null, status: 'DRAFT' });
+    await expect(sendNewsletter('issue')).rejects.toThrow('not been approved');
+    expect(mocks.recipients).not.toHaveBeenCalled();
+    expect(mocks.materialize).not.toHaveBeenCalled();
+    expect(mocks.mail).not.toHaveBeenCalled();
+  });
+
   it('keeps partial delivery retryable and sends only the failed recipient on retry', async () => {
     mocks.mail
       .mockResolvedValueOnce(undefined)

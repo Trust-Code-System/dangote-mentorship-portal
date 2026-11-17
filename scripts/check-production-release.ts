@@ -24,6 +24,9 @@ async function main() {
   const aiEnabled = !['false', '0', 'off'].includes(
     process.env.AI_FEATURES_ENABLED?.trim().toLowerCase() ?? '',
   );
+  console.info(
+    `[release] AI features ${aiEnabled ? 'enabled' : 'disabled'}; Microsoft integrations ${process.env.MICROSOFT_INTEGRATIONS_ENABLED?.trim() === 'true' ? 'enabled' : 'disabled'}.`,
+  );
   if (aiEnabled && (!aiLimits().monthlyTokens || !aiLimits().monthlyRequests)) {
     throw new ReleaseCheckError('Set the programme AI allowances before production AI activation.');
   }
@@ -187,6 +190,10 @@ async function main() {
     await sendApprovedLaunchTest();
   }
   if (storageFailure || redisFailure) throw storageFailure ?? redisFailure;
+  if (process.env.EXPORT_APPROVED_STORAGE_BACKUP === 'true') {
+    const { exportStorageBackup } = await import('./export-storage-backup');
+    await exportStorageBackup();
+  }
   console.info('[release] Production service checks passed.');
 }
 
