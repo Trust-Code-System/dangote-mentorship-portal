@@ -12,6 +12,8 @@ test('saved agreements, goal approvals and action completion update real progres
   const db = new PrismaClient();
   const menteeContext = await browser.newContext({ baseURL: 'http://localhost:3001' });
   const mentorContext = await browser.newContext({ baseURL: 'http://localhost:3001' });
+  menteeContext.setDefaultTimeout(15_000);
+  mentorContext.setDefaultTimeout(15_000);
   try {
     const seed = await db.user.findUniqueOrThrow({
       where: { email: process.env.SEED_SUPER_ADMIN_EMAIL! },
@@ -204,7 +206,7 @@ test('saved agreements, goal approvals and action completion update real progres
     });
     await page.goto('/sessions');
     await page.getByRole('combobox', { name: 'Status', exact: true }).click();
-    await page.getByRole('option', { name: 'Done', exact: true }).click();
+    await page.getByRole('option', { name: 'Completed', exact: true }).click();
     await expect
       .poll(async () => (await db.actionItem.findUniqueOrThrow({ where: { id: item.id } })).status)
       .toBe('DONE');
@@ -221,8 +223,7 @@ test('saved agreements, goal approvals and action completion update real progres
       '/journal',
     );
   } finally {
-    await menteeContext.close();
-    await mentorContext.close();
+    await Promise.allSettled([menteeContext.close(), mentorContext.close()]);
     await db.$disconnect();
   }
 });

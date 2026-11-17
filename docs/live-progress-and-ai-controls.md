@@ -41,9 +41,11 @@ overhead margin; they are not billed token reports or a dollar guarantee. Set
 the provider's own currency spending limit as well. Commercial pricing and the
 owner's proposed monthly payment are not configuration values or spend caps.
 
-Production upload verification currently blocks release: the configured Storage
-project `owkgqglwvjlaizsfpuir` does not resolve. The owner opened the Supabase
-dashboard, which shows a paused “Dangote Mentorship” project. Chrome window
-inspection timed out twice, so project recovery requires the correct project
-page/access. The database project remains reachable and was not paused or reset
-by this work. No storage credentials were replaced or files moved.
+Production upload verification caught a paused Storage project,
+`owkgqglwvjlaizsfpuir`. The owner restored it through Edge. Subsequent dashboard
+inspection confirmed Healthy status and the existing `portal-files` bucket.
+The production check then passed a private upload/download, shared Redis ping,
+SMTP authentication and all 19 migration checksums. The approved test email was
+accepted once and the next build skipped it using its audit reservation.
+The final Storage check also exercises the signed browser upload path and
+requires anonymous downloads to fail. No credentials were replaced or files moved.

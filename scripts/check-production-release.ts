@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { PrismaClient } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 import { Redis } from '@upstash/redis';
 import nodemailer from 'nodemailer';
 import { assertProductionEnvironment } from '../src/lib/env/production';
@@ -100,21 +101,36 @@ async function main() {
     const contents = `Production release verification ${randomUUID()}`;
     let uploaded = false;
     try {
-      const { error } = await supabase.storage
+      const publicClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } },
+      );
+      const { data: target, error: targetError } = await supabase.storage
         .from(bucket)
-        .upload(key, contents, { contentType: 'text/plain' });
+        .createSignedUploadUrl(key);
+      if (targetError || !target)
+        throw new ReleaseCheckError('Signed upload target verification failed.');
+      const { error } = await publicClient.storage
+        .from(bucket)
+        .uploadToSignedUrl(key, target.token, Buffer.from(contents), { contentType: 'text/plain' });
       if (error) throw new ReleaseCheckError('Storage upload verification failed.');
       uploaded = true;
       const { data, error: readError } = await supabase.storage.from(bucket).download(key);
       if (readError || !data || (await data.text()) !== contents)
         throw new ReleaseCheckError('Storage download verification failed.');
+      const anonymous = await publicClient.storage.from(bucket).download(key);
+      if (!anonymous.error)
+        throw new ReleaseCheckError('Confidential files allow anonymous downloads.');
     } finally {
       if (uploaded) {
         const { error } = await supabase.storage.from(bucket).remove([key]);
         if (error) throw new ReleaseCheckError('Release probe cleanup failed.');
       }
     }
-    console.info('[release] Private Storage upload/download verified; probe removed.');
+    console.info(
+      '[release] Signed browser upload and private download verified; anonymous read denied; probe removed.',
+    );
   } catch (error) {
     storageFailure =
       error instanceof ReleaseCheckError
