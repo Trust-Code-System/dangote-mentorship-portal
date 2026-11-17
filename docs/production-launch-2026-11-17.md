@@ -55,8 +55,12 @@ promotion. Keep the preceding production deployment as the rollback target.
 GitHub main requires an independent approval and required CI checks. Do not
 bypass those protections or claim main has been merged without evidence.
 
-SMTP authentication is not proof of inbox delivery. A real test delivery needs
-an explicitly approved recipient and sending instruction. Backup/PITR retention,
+The owner also approved one test email to the existing BLAK MOH account, with
+subject "Mentorship portal production check" and the exact informational message
+shown in the chat. Only a production build given `SEND_APPROVED_LAUNCH_TEST=true`
+can attempt it. A durable audit reservation (`launch-mail-2026-11-17`) prevents
+another attempt on a repeated build; credentials and the address are not logged.
+SMTP acceptance is not proof of inbox receipt. Backup/PITR retention,
 a restore drill and external alert routing still need verification in the
 correct Supabase/Sentry accounts; the connected Supabase account does not list
 this project's infrastructure. No paid upgrades are authorized by this record.

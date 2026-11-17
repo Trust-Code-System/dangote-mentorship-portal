@@ -144,6 +144,10 @@ async function main() {
   }
   console.info('[release] SMTP authentication and TLS verified; no email sent.');
   console.info('[release] Production service checks passed.');
+  if (process.env.SEND_APPROVED_LAUNCH_TEST === 'true') {
+    const { sendApprovedLaunchTest } = await import('./send-approved-launch-test');
+    await sendApprovedLaunchTest();
+  }
 }
 
 main().catch((error: unknown) => {
