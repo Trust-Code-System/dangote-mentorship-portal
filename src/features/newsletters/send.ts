@@ -133,9 +133,10 @@ export async function sendNewsletter(newsletterId: string): Promise<SendResult> 
     }
   }
 
-  // Mark SENT when at least one went out; a run where everything failed stays
-  // approved-and-scheduled so it can be retried.
-  if (result.sent > 0) {
+  // A partially delivered issue must remain retryable. Already delivered rows
+  // are skipped on the next attempt, including after a final-state write failed.
+  // An empty audience does not count as a delivered issue.
+  if (result.failed === 0 && result.sent + result.skipped > 0) {
     await prisma.newsletter.update({
       where: { id: newsletter.id },
       data: { status: NewsletterStatus.SENT, sentAt: new Date() },

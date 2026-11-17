@@ -36,7 +36,7 @@ restore unrelated records, or rerun the demo seed. Content and files remain inta
 - `npm run build` runs `npm run release:check` before Next.js compilation.
 - The check runs only for a production environment. Ordinary CI/preview builds skip live provider access.
 - It verifies matching runtime/migration database targets, the selected database schema and all migration checksums, accepting equivalent Windows/Linux line endings.
-- It verifies a private Storage bucket with a unique synthetic upload/download and removes only that probe.
+- It verifies a private Storage bucket using a signed browser upload and server download, rejects anonymous downloads, and removes only that synthetic probe.
 - It pings the configured shared Redis store and authenticates to the approved SMTP provider with TLS. It sends no email.
 - Credentials remain inside the Vercel build environment; provider error bodies and secrets are not printed.
 - Vercel Node version is aligned to the repository's Node 22 requirement. Production mail explicitly selects SMTP.
@@ -50,7 +50,9 @@ no data or files were moved and that failed candidate was not promoted.
 
 ## Verification and remaining operations
 
-Local validation: 757 unit tests passed. Production dependency audit: zero high
+Release source `c3eee69` passed all eight GitHub checks, including the browser
+test that persists signatures, goal approvals, goal stages and action completion
+and verifies the displayed progress. Production dependency audit: zero high
 or critical vulnerabilities; five moderate transitive Sentry/glob/minimatch
 advisories remain. The 19 database migration checksums match this source.
 
@@ -58,6 +60,30 @@ The release must be staged using production environment variables and its
 service check must pass before promotion. Check `/`, `/api/health`, protected
 routes, public security headers, cron authentication and runtime errors after
 promotion. Keep the preceding production deployment as the rollback target.
+
+Rollback deployment before this release: `dpl_3pT9P2LBZtqpEycL1yAMBvsba59c`.
+The owner restored Storage project `owkgqglwvjlaizsfpuir`; all production service
+checks subsequently passed. The approved email was accepted once by SMTP;
+subsequent staged builds skipped it, preserving the once-only audit reservation.
+
+Final follow-up repairs retain a partially delivered newsletter as scheduled so
+failed recipients can be retried without resending to recipients already marked
+delivered. An empty audience is not reported as a successful send. The public
+contact page now points to the existing private support workflow in English and
+French instead of showing an implementation placeholder.
+The request-access page also uses that guidance instead of a demo mailbox.
+
+The retained operational administrator was found using the public demo password.
+It was replaced with a cryptographically generated password, verified against
+the saved hash, and recorded as `production.admin_password_rotated`. The access
+details are stored in an owner-only local file outside this repository; no
+credential was printed, emailed or committed. Production `AUTH_SECRET` is
+rotated for the release to invalidate existing sessions. Participant passwords
+are preserved.
+
+AI and Microsoft integrations remain disabled. AI activation needs commercial
+approval and explicit backend allowances. Newsletters are all drafts, with no
+approval or enabled draft schedule; none is queued for automatic delivery.
 
 GitHub main requires an independent approval and required CI checks. Do not
 bypass those protections or claim main has been merged without evidence.

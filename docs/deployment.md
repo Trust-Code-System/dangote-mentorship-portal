@@ -5,9 +5,10 @@ Storage. Identity stays **Auth.js + Entra** — Supabase Auth is not used.
 
 ## Prerequisites (one-time, already done for the current project)
 
-- Supabase project `Dangote Mentorship` (ref `whgzjjjiruhluqxjjacy`, region
-  `eu-central-1` / Frankfurt).
-- Database migrated + seeded:
+- Runtime database project `whgzjjjiruhluqxjjacy`, schema `mentorship`, in
+  Frankfurt. Private Storage uses the separate project `owkgqglwvjlaizsfpuir`.
+  Do not infer the database target from the Storage URL.
+- Database migrated; never reseed production. For an isolated development database only:
   ```
   npm run prisma:deploy   # applies migrations (uses DIRECT_URL)
   npm run db:seed         # loads the bilingual demo cohort
@@ -18,15 +19,16 @@ Storage. Identity stays **Auth.js + Entra** — Supabase Auth is not used.
 ## Vercel project settings
 
 - **Framework preset:** Next.js
-- **Build command:** `next build` (default). `postinstall: prisma generate`
+- **Build command:** `npm run build`, which checks production services and
+  migration checksums before compilation. `postinstall: prisma generate`
   (in package.json) regenerates the Prisma client on every install — required,
   or Vercel's cached client goes stale and the build fails.
 - **Install / Output:** defaults.
 - **Production branch:** `main`.
 
-> `next build` does NOT run migrations. Apply schema changes yourself with
-> `npm run prisma:deploy` against Supabase before/after deploying, or add it to
-> the Vercel build command if you want it automatic.
+> The build does not run migrations. Apply approved schema changes separately
+> with `npm run prisma:deploy` against the verified database target. Never add
+> seeding to a production build.
 
 ## Environment variables (Vercel → Settings → Environment Variables)
 
@@ -96,9 +98,11 @@ deliberate, gated step so drift can't reach prod silently:
 
 ## Backups, restore & retention — M7
 
-**Backups.** Supabase takes automated daily backups; on Pro+, enable **Point-in-Time
-Recovery (PITR)** for the production project (Dashboard → Database → Backups).
-Confirm the retention window matches the cohort data-retention policy below.
+**Backups.** Backup availability, retention and a restore drill have not been
+verified for the production database. Check the actual project's plan and
+Database → Backups page; do not assume daily backups or PITR are enabled.
+Any paid plan/PITR activation needs the account owner's approval. Confirm the
+retention window against the programme's agreed data-retention policy.
 
 **Restore drill (run at least once before launch, then quarterly).**
 1. Create a throwaway Supabase project (or branch).

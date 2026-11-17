@@ -310,7 +310,7 @@
     "inviteCta": "Continuer",
     "requestTitle": "Pas encore d’invitation ?",
     "requestHint": "Le programme est confidentiel et organisé par cohortes ; l’accès est accordé par un administrateur. Demandez au vôtre de vous envoyer un lien d’invitation.",
-    "requestCta": "Demander l’accès",
+    "requestCta": "Comment demander l’accès",
     "haveAccount": "Vous avez déjà un compte ?",
     "signinLink": "Se connecter"
   },
@@ -2491,8 +2491,8 @@
         "eyebrow": "Contacter l'équipe du programme",
         "title": "Si aucune des pistes ci-dessus ne s'applique",
         "body": "Il n'existe pas de formulaire de contact public pour ce programme. Le portail est un système interne confidentiel, accessible sur invitation, et un formulaire ouvert à tout Internet recueillerait précisément le type d'informations qu'il ne devrait pas recueillir. Adressez-vous à l'administrateur de votre programme via l'adresse publiée par votre organisation, ou via le courriel d'invitation que vous avez reçu.",
-        "placeholderTitle": "Contenu à fournir par le propriétaire",
-        "placeholderBody": "Aucune adresse d'assistance n'a été confirmée pour cette version. L'adresse utilisée ailleurs dans le portail correspond à un compte de démonstration et n'est pas une boîte surveillée ; elle figure parmi les points ouverts du rapport d'implémentation."
+        "supportTitle": "Contactez l'équipe du programme",
+        "supportBody": "Connectez-vous et ouvrez Demander de l'aide pour envoyer une demande privée à l'équipe du programme. Si vous ne pouvez pas vous connecter, répondez au courriel d'invitation ou contactez la personne qui vous a inscrit."
       },
       "urgent": {
         "title": "Ce portail n'est pas un canal d'urgence",

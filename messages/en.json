@@ -310,7 +310,7 @@
     "inviteCta": "Continue",
     "requestTitle": "No invite yet?",
     "requestHint": "The programme is confidential and cohort-based, so access is granted by an administrator. Ask yours to send you an invite link.",
-    "requestCta": "Request access",
+    "requestCta": "How to request access",
     "haveAccount": "Already have an account?",
     "signinLink": "Sign in"
   },
@@ -2491,8 +2491,8 @@
         "eyebrow": "Contacting the programme office",
         "title": "If none of the routes above apply",
         "body": "There is no public contact form for this programme. The portal is a confidential, invitation-only internal system, and a form open to the internet would collect exactly the kind of information it should not. Reach your programme administrator through the address your organisation has published for the programme, or through the invitation email you were sent.",
-        "placeholderTitle": "Owner content required",
-        "placeholderBody": "A programme support address has not been confirmed for this build. The address currently used elsewhere in the portal is a seeded demo account and is not a monitored inbox; it is listed as an open owner item in the implementation report."
+        "supportTitle": "Contact your programme team",
+        "supportBody": "Sign in and open Request Support to send a private request to your programme team. If you cannot sign in, reply to your programme invitation or contact the person who enrolled you."
       },
       "urgent": {
         "title": "This portal is not an emergency channel",
