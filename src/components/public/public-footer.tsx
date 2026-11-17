@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { PublicLockup } from './public-lockup';
-import { PublicLocaleToggle } from './public-locale-toggle';
 import { PublicFooterLink } from './public-footer-link';
 
 /**
@@ -8,7 +7,7 @@ import { PublicFooterLink } from './public-footer-link';
  * page (PUBLIC_PAGES_MASTER_SPEC.md §8).
  *
  * Deep black, one fine top border, one restrained green glow, and three real
- * columns: Programme · Access · Language. It is the map of the public site, so
+ * columns: Programme · Access. It is the map of the public site, so
  * it marks where you currently are (`aria-current="page"` plus a visible green
  * marker — never colour alone).
  *
@@ -45,7 +44,7 @@ export async function PublicFooter() {
   ];
 
   return (
-    <footer className="relative overflow-hidden border-t border-blak-border/12 bg-blak-black px-4 pb-10 pt-20 sm:px-6">
+    <footer className="border-blak-border/12 bg-blak-black relative overflow-hidden border-t px-4 pt-20 pb-10 sm:px-6">
       {/* The restrained green glow: a single wide, very low-opacity wash rising
           off the top border, so the footer reads as the base of the page rather
           than as a separate black box. Decorative only. */}
@@ -55,14 +54,14 @@ export async function PublicFooter() {
       />
 
       <div className="relative mx-auto w-full max-w-[1280px]">
-        <div className="grid gap-12 md:grid-cols-[1.7fr_1fr_1fr_1fr] md:gap-8">
+        <div className="grid gap-12 md:grid-cols-[1.7fr_1fr_1fr] md:gap-8">
           <div className="max-w-md">
             <PublicLockup markClassName="h-9 w-auto" wordmarkClassName="text-base" />
-            <p className="mt-5 text-sm leading-relaxed text-blak-text-2">{t('statement')}</p>
+            <p className="text-blak-text-2 mt-5 text-sm leading-relaxed">{t('statement')}</p>
           </div>
 
           <nav aria-label={t('sectionsLabel')}>
-            <h2 className="text-blak-label uppercase text-blak-text-2">{t('sectionsLabel')}</h2>
+            <h2 className="text-blak-label text-blak-text-2 uppercase">{t('sectionsLabel')}</h2>
             <ul className="mt-5 space-y-1">
               {programme.map((link) => (
                 <li key={link.href}>
@@ -73,7 +72,7 @@ export async function PublicFooter() {
           </nav>
 
           <nav aria-label={t('accessLabel')}>
-            <h2 className="text-blak-label uppercase text-blak-text-2">{t('accessLabel')}</h2>
+            <h2 className="text-blak-label text-blak-text-2 uppercase">{t('accessLabel')}</h2>
             <ul className="mt-5 space-y-1">
               {access.map((link) => (
                 <li key={link.href}>
@@ -82,17 +81,9 @@ export async function PublicFooter() {
               ))}
             </ul>
           </nav>
-
-          <div>
-            <h2 className="text-blak-label uppercase text-blak-text-2">{t('languageLabel')}</h2>
-            <PublicLocaleToggle className="mt-5" />
-            <p className="mt-3 max-w-[26ch] text-xs leading-relaxed text-blak-text-2/80">
-              {t('languageHint')}
-            </p>
-          </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-3 border-t border-blak-border/10 pt-6 text-xs text-blak-text-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-blak-border/10 text-blak-text-2 mt-16 flex flex-col gap-3 border-t pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>{t('copyright', { year })}</p>
           <p>{t('confidential')}</p>
         </div>

@@ -1,270 +1,278 @@
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import {
-  Video,
-  MoreVertical,
   ArrowRight,
+  ArrowUpRight,
   CalendarDays,
+  Circle,
   FileText,
+  Target,
+  Video,
 } from 'lucide-react';
 import type { MenteeDashboard } from '@/features/dashboard/data';
 import { Badge } from '@/components/ui/badge';
-import { ProgressRing } from '@/components/ui/progress-ring';
-import { WeeklyTip } from '@/components/dashboard/weekly-tip';
+import { WeeklyTip } from './weekly-tip';
+import { MetricBand } from './metric-band';
 
-// Mentee "what matters now" bento (experience-layer.md §1.1 / Stitch redesign).
-// Matches the Stitch Mentee Dashboard grid with REAL data only (clinics/resources
-// are M4 and intentionally omitted — no fabricated cards): next-meeting widget
-// with the mentor, active goals with progress rings, the weekly tip, and pending
-// action items. Mobile-first, stacks to one column.
-function fmtDate(d: Date | null): string {
-  return d ? d.toISOString().slice(0, 10) : '—';
-}
-function fmtDateTime(d: Date | null): string {
-  return d ? d.toISOString().slice(0, 16).replace('T', ' ') : '—';
-}
-function initialsOf(name?: string | null): string {
-  const s = (name ?? '?').trim();
-  const [a, b] = s.split(/\s+/).filter(Boolean);
-  if (a && b) return (a.charAt(0) + b.charAt(0)).toUpperCase();
-  return s.slice(0, 2).toUpperCase();
+function initials(name?: string | null) {
+  return (name ?? '?')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join('');
 }
 
 export async function MenteeSummary({ data }: { data: MenteeDashboard }) {
   const t = await getTranslations('dashboardCards');
   const ts = await getTranslations('sessions');
   const tg = await getTranslations('goals');
-
+  const w = await getTranslations('workspace');
+  const locale = await getLocale();
+  const date = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+  const time = new Intl.DateTimeFormat(locale, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  });
+  const progress = data.goals.length
+    ? Math.round(data.goals.reduce((a, g) => a + g.percent, 0) / data.goals.length)
+    : 0;
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-12">
-      {/* Left column — next meeting + upcoming clinic */}
-      <div className="min-w-0 flex flex-col gap-4 md:col-span-4">
-        {/* Next meeting — with the matched mentor */}
-        <section className="flex flex-1 flex-col rounded-lg border border-border bg-surface p-6 shadow-elevation">
-          <div className="flex items-center justify-between">
-            <span className="rounded-full bg-green-soft px-2.5 py-1 text-micro font-bold uppercase tracking-wider text-green-strong">
-              {t('nextMeeting')}
-            </span>
-            <Link
-              href="/meetings"
-              className="text-micro font-bold text-green-light hover:underline"
-            >
-              {t('all')}
-            </Link>
-          </div>
-
-          <div className="mt-4 flex-1">
-            {data.nextMeeting ? (
-              <Link
-                href={`/meetings/${data.nextMeeting.id}/prepare`}
-                className="group block"
-              >
-                <h3 className="text-h2 text-ink group-hover:text-green-strong">
-                  {data.nextMeeting.title}
-                </h3>
-                <p className="mt-1 text-body font-bold text-green">
-                  {fmtDateTime(data.nextMeeting.startsAt)}
-                </p>
-              </Link>
-            ) : (
-              <p className="text-small text-ink-3">{t('noNextMeeting')}</p>
-            )}
-          </div>
-
-          {data.mentor ? (
-            <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-green-soft text-small font-bold text-green-strong">
-                {initialsOf(data.mentor.name)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-small font-bold text-ink">
-                  {data.mentor.name ?? '—'}
-                </p>
-                {data.mentor.jobTitle ? (
-                  <p className="truncate text-small text-ink-2">
-                    {data.mentor.jobTitle}
-                  </p>
-                ) : null}
-              </div>
-              <Link
-                href="/pair"
-                aria-label={t('openPair')}
-                className="rounded-lg border border-green-strong bg-green p-2 text-white transition-colors duration-150 hover:bg-green-strong"
-              >
-                <Video className="size-5" />
+    <div className="space-y-6">
+      <MetricBand
+        items={[
+          { href: '/goals', label: w('activeGoals'), value: data.goals.length },
+          { href: '/sessions', label: w('yourNextSteps'), value: data.actionItems.length },
+          {
+            href: '/goals',
+            label: w('goalProgress'),
+            hint: w('goalProgressHint'),
+            value: `${progress}%`,
+            progress,
+          },
+        ]}
+      />
+      <div className="grid items-start gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <div className="min-w-0 space-y-6">
+          <section className="workspace-section overflow-hidden">
+            <div className="workspace-section-heading">
+              <h2>{t('myGoals')}</h2>
+              <Link href="/goals" className="workspace-link">
+                {t('all')}
+                <ArrowUpRight className="size-3.5" />
               </Link>
             </div>
-          ) : (
-            <p className="mt-6 border-t border-border pt-4 text-small text-ink-3">
-              {t('noMentor')}
-            </p>
-          )}
-        </section>
-
-        {/* Upcoming clinic (real data — deep-teal card, Stitch clinic card) */}
-        {data.nextClinic ? (
-          <section className="relative overflow-hidden rounded-lg bg-gradient-to-br from-green-strong via-green to-green-strong p-6 text-white shadow-elevation">
-            <span className="inline-flex rounded-full bg-white/15 px-2.5 py-1 text-micro font-bold uppercase tracking-wider">
-              {t('upcomingClinic')}
-            </span>
-            <h3 className="mt-3 text-h2 text-white">{data.nextClinic.title}</h3>
-            {data.nextClinic.topic ? (
-              <p className="mt-1 text-small text-green-soft">
-                {data.nextClinic.topic}
-              </p>
-            ) : null}
-            <p className="mt-3 flex items-center gap-2 text-small font-medium">
-              <CalendarDays className="size-4" />
-              {fmtDateTime(data.nextClinic.scheduledAt)}
-            </p>
-            {data.nextClinic.joinUrl ? (
-              <a
-                href={data.nextClinic.joinUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-white py-2.5 text-small font-bold text-green-strong transition-colors hover:bg-green-soft"
-              >
-                {t('clinicJoin')}
-              </a>
-            ) : null}
-          </section>
-        ) : null}
-      </div>
-
-      {/* Active goals — circular progress */}
-      <section className="min-w-0 rounded-lg border border-border bg-surface p-6 shadow-elevation md:col-span-5">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-h2 text-ink">{t('myGoals')}</h3>
-          <Link
-            href="/goals"
-            className="inline-flex items-center gap-1 text-micro font-bold uppercase tracking-wider text-green-strong hover:underline"
-          >
-            {t('all')} <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-        {data.goals.length === 0 ? (
-          <p className="text-small text-ink-3">{t('noGoals')}</p>
-        ) : (
-          <div className="space-y-4">
-            {data.goals.map((g) => (
-              <div
-                key={g.id}
-                className="flex items-center gap-4 rounded-xl bg-surface-2 p-3"
-              >
-                <ProgressRing
-                  value={g.percent}
-                  size={56}
-                  strokeWidth={6}
-                  label={
-                    <span className="text-small font-bold text-green">{`${Math.round(g.percent)}%`}</span>
-                  }
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-ink">{g.title}</p>
-                  <Badge variant="neutral" className="mt-1">
-                    {tg(`status.${g.status}`)}
-                  </Badge>
-                </div>
-                <MoreVertical
-                  className="size-5 shrink-0 text-ink-3"
-                  aria-hidden
-                />
+            {data.goals.length === 0 ? (
+              <div className="flex min-h-52 flex-col items-center justify-center gap-3 p-7 text-center">
+                <span className="border-border grid size-11 place-items-center rounded-xl border">
+                  <Target className="text-ink-3 size-5" />
+                </span>
+                <p className="text-small text-ink-3">{t('noGoals')}</p>
+                <Link href="/goals" className="workspace-link !text-green">
+                  {w('noGoalCta')}
+                  <ArrowRight className="size-3.5" />
+                </Link>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Right column — weekly tip + new resources */}
-      <div className="min-w-0 flex flex-col gap-4 md:col-span-3">
-        <WeeklyTip />
-        {data.resources.length > 0 ? (
-          <section className="rounded-lg border border-border bg-surface p-6 shadow-elevation">
-            <h3 className="mb-4 text-micro font-bold uppercase tracking-wider text-ink-2">
-              {t('newResources')}
-            </h3>
-            <ul className="space-y-3">
-              {data.resources.map((r) => {
-                const inner = (
-                  <span className="flex items-start gap-3">
-                    <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-green-soft text-green-strong">
-                      <FileText className="size-4" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-small font-bold text-ink">
-                        {r.title}
+            ) : (
+              <div className="divide-border/70 divide-y">
+                {data.goals.map((g) => (
+                  <Link
+                    key={g.id}
+                    href="/goals"
+                    className="hover:bg-surface-2/50 block px-6 py-5 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-ink font-semibold">{g.title}</p>
+                        <Badge variant="neutral" className="mt-2">
+                          {tg(`status.${g.status}`)}
+                        </Badge>
+                      </div>
+                      <span className="text-small text-ink-2 font-medium tabular-nums">
+                        {Math.round(g.percent)}%
                       </span>
-                      {r.category ? (
-                        <span className="block text-micro uppercase tracking-wider text-ink-3">
-                          {r.category}
+                    </div>
+                    <div
+                      aria-label={`${Math.round(g.percent)}%`}
+                      role="progressbar"
+                      aria-valuenow={g.percent}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      className="bg-surface-2 mt-4 h-1.5 overflow-hidden rounded-full"
+                    >
+                      <div
+                        className="bg-green/75 h-full rounded-full"
+                        style={{ width: `${Math.max(0, Math.min(100, g.percent))}%` }}
+                      />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+          <section className="workspace-section overflow-hidden">
+            <div className="workspace-section-heading">
+              <h2>{t('myActions')}</h2>
+              <Link href="/sessions" className="workspace-link">
+                {t('all')}
+                <ArrowUpRight className="size-3.5" />
+              </Link>
+            </div>
+            {data.actionItems.length === 0 ? (
+              <p className="text-small text-ink-3 px-6 py-8">{t('noActions')}</p>
+            ) : (
+              <ul className="divide-border/70 divide-y">
+                {data.actionItems.map((a) => (
+                  <li key={a.id}>
+                    <Link
+                      href="/sessions"
+                      className="hover:bg-surface-2/50 flex items-start gap-3 px-6 py-4 transition-colors"
+                    >
+                      <Circle className="text-ink-3/60 mt-0.5 size-4 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="text-small block font-medium">{a.title}</span>
+                        <span className="text-ink-3 mt-1 block text-xs">
+                          {ts(`itemStatus.${a.status}`)}
+                        </span>
+                      </span>
+                      {a.dueDate ? (
+                        <span
+                          className={`shrink-0 text-xs ${a.overdue ? 'text-risk' : 'text-ink-3'}`}
+                        >
+                          {a.overdue ? ts('overdue') : ts('due')} {date.format(a.dueDate)}
                         </span>
                       ) : null}
-                    </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+        <div className="min-w-0 space-y-6">
+          <section className="workspace-section overflow-hidden">
+            <div className="workspace-section-heading">
+              <h2>{t('nextMeeting')}</h2>
+              <CalendarDays className="text-ink-3 size-4" />
+            </div>
+            <div className="p-6">
+              {data.nextMeeting ? (
+                <Link href={`/meetings/${data.nextMeeting.id}/prepare`} className="block">
+                  <p className="text-green text-xs font-medium">
+                    {data.nextMeeting.startsAt ? time.format(data.nextMeeting.startsAt) : '—'}
+                  </p>
+                  <h3 className="text-ink mt-3 text-lg leading-snug font-semibold">
+                    {data.nextMeeting.title}
+                  </h3>
+                  <span className="workspace-link mt-4">
+                    {w('viewProgress')}
+                    <ArrowRight className="size-3.5" />
                   </span>
-                );
-                return (
+                </Link>
+              ) : (
+                <>
+                  <p className="text-small text-ink-3 leading-relaxed">{t('noNextMeeting')}</p>
+                  <Link href="/meetings" className="workspace-link !text-green mt-4">
+                    {w('scheduleSession')}
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </>
+              )}
+              {data.mentor ? (
+                <Link
+                  href="/pair"
+                  className="border-border mt-6 flex items-center gap-3 border-t pt-5"
+                >
+                  <span className="bg-green-soft text-small text-green grid size-10 shrink-0 place-items-center rounded-full font-semibold">
+                    {initials(data.mentor.name)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="text-ink-3 block text-[11px]">{w('yourMentor')}</span>
+                    <span className="text-small block truncate font-semibold">
+                      {data.mentor.name}
+                    </span>
+                    {data.mentor.jobTitle ? (
+                      <span className="text-ink-3 block truncate text-xs">
+                        {data.mentor.jobTitle}
+                      </span>
+                    ) : null}
+                  </span>
+                  <Video className="text-ink-3 size-4" />
+                </Link>
+              ) : (
+                <p className="border-border text-small text-ink-3 mt-6 border-t pt-4">
+                  {t('noMentor')}
+                </p>
+              )}
+            </div>
+          </section>
+          {data.nextClinic ? (
+            <section className="border-green/15 bg-green-soft/60 rounded-lg border p-6">
+              <p className="text-green text-xs font-medium">{t('upcomingClinic')}</p>
+              <h3 className="text-ink mt-2 text-lg font-semibold">{data.nextClinic.title}</h3>
+              {data.nextClinic.topic ? (
+                <p className="text-small text-ink-2 mt-2">{data.nextClinic.topic}</p>
+              ) : null}
+              <p className="text-ink-2 mt-4 text-xs">
+                {data.nextClinic.scheduledAt ? time.format(data.nextClinic.scheduledAt) : '—'}
+              </p>
+              {data.nextClinic.joinUrl ? (
+                <a
+                  href={data.nextClinic.joinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="workspace-link !text-green mt-4"
+                >
+                  {t('clinicJoin')}
+                  <ArrowUpRight className="size-3.5" />
+                </a>
+              ) : null}
+            </section>
+          ) : null}
+          <WeeklyTip />
+          {data.resources.length ? (
+            <section className="workspace-section">
+              <div className="workspace-section-heading">
+                <h2>{t('newResources')}</h2>
+              </div>
+              <ul className="space-y-4 p-5">
+                {data.resources.map((r) => (
                   <li key={r.id}>
                     {r.url ? (
                       <a
                         href={r.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="block hover:opacity-80"
+                        className="text-small hover:text-green flex items-start gap-3"
                       >
-                        {inner}
+                        <FileText className="text-ink-3 mt-0.5 size-4 shrink-0" />
+                        <span>
+                          <span className="block font-medium">{r.title}</span>
+                          {r.category ? (
+                            <span className="text-ink-3 mt-1 block text-xs">{r.category}</span>
+                          ) : null}
+                        </span>
+                        <ArrowUpRight className="ml-auto size-3.5 shrink-0" />
                       </a>
                     ) : (
-                      inner
+                      <span className="text-small">{r.title}</span>
                     )}
                   </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
-      </div>
-
-      {/* Pending action items */}
-      <section className="min-w-0 rounded-lg border border-border bg-surface p-6 shadow-elevation md:col-span-12">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-h2 text-ink">{t('myActions')}</h3>
-          <Link
-            href="/sessions"
-            className="text-micro font-bold uppercase tracking-wider text-green-strong hover:underline"
-          >
-            {t('all')}
-          </Link>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
-        {data.actionItems.length === 0 ? (
-          <p className="text-small text-ink-3">{t('noActions')}</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {data.actionItems.map((a) => (
-              <li
-                key={a.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
-              >
-                <span className="text-body text-ink">{a.title}</span>
-                <span className="flex items-center gap-2 text-small">
-                  {a.dueDate ? (
-                    <span
-                      className={
-                        a.overdue ? 'font-bold text-risk' : 'text-ink-3'
-                      }
-                    >
-                      {a.overdue ? ts('overdue') : ts('due')}{' '}
-                      {fmtDate(a.dueDate)}
-                    </span>
-                  ) : null}
-                  <Badge variant="outline">
-                    {ts(`itemStatus.${a.status}`)}
-                  </Badge>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      </div>
     </div>
   );
 }

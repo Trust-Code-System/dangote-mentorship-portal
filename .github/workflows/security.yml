@@ -16,10 +16,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Fail only on prod-dependency high/critical advisories. Dev-only tooling
+      # Fail on prod-dependency moderate/high/critical advisories. Dev-only tooling
       # vulns (vitest/vite/etc.) don't ship and are tracked separately.
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=moderate
 
   snyk:
     name: Snyk (optional — runs when SNYK_TOKEN is set)

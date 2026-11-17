@@ -15,12 +15,12 @@ export default async function MentorDashboardPage() {
     getMentorDashboard(user.id),
   ]);
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <DashboardHeader titleKey="mentor" userName={user.name} roles={user.roles} />
       {/* Pending/accepted pairings with accept/reject (CLAUDE.md §4: mentors
           accept/reject their own). */}
-      <MatchPanel userId={user.id} role="mentor" />
       <MentorSummary data={dashboard} />
+      <MatchPanel userId={user.id} role="mentor" hideAccepted />
       <NextActionButton />
       <JourneyRail result={journey} />
     </div>

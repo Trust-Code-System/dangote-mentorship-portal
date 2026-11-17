@@ -1,11 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { ActionItemStatus, MeetingType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { requireUser } from '@/lib/auth/rbac';
+import { requireUser, requireRole } from '@/lib/auth/rbac';
+import { getMenteePairing, isAcceptedPair } from '@/lib/pairings';
 import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
@@ -14,9 +16,8 @@ import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
 import { getPairGoalTitles } from './data';
 import { summarizeSession, type SessionSummaryOutcome } from './summary';
 
-// Session logging follows the CLAUDE.md §3 pipeline. Per §4: mentors create/edit
-// their own logs; mentees reflect on their own. The Session Assistant only
-// suggests — the mentor edits and saves (CLAUDE.md §0 rule 5).
+// User-confirmed workflow: mentees record sessions, mentors add reflections.
+// Actor and pairing come from the server. Historical authorship is preserved.
 
 const optionalText = (max: number) => z.string().trim().max(max).optional().or(z.literal(''));
 
@@ -30,36 +31,35 @@ function parseDate(value: string | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** The mentor's accepted pairing for a given mentee, or null if not paired. */
-async function mentorPairCohort(mentorId: string, menteeId: string): Promise<string | null> {
-  const match = await prisma.match.findFirst({
-    where: { mentorId, menteeId, status: 'ACCEPTED', deletedAt: null },
-    orderBy: { acceptedAt: 'desc' },
-    select: { cohortId: true },
-  });
-  return match?.cohortId ?? null;
+async function canRecordLog(
+  userId: string,
+  log: { recordedById: string | null; menteeId: string; mentorId: string; cohortId: string },
+) {
+  return (
+    log.menteeId === userId &&
+    log.recordedById === userId &&
+    isAcceptedPair(log.mentorId, userId, log.cohortId)
+  );
 }
 
 // ── Session Assistant (advisory; no DB write) ───────────────────────────────
 
 const assistantSchema = z.object({
-  menteeId: z.string().cuid(),
   notes: z.string().trim().min(1).max(8000),
 });
 
-export async function requestSessionAssistant(
-  input: { menteeId: string; notes: string },
-): Promise<ActionResult<SessionSummaryOutcome>> {
+export async function requestSessionAssistant(input: {
+  notes: string;
+}): Promise<ActionResult<SessionSummaryOutcome>> {
   try {
-    const user = await requireUser();
+    const user = await requireRole('MENTEE');
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
     await requirePortalAccess(user);
-    const { menteeId, notes } = assistantSchema.parse(input);
-
-    const cohortId = await mentorPairCohort(user.id, menteeId);
-    if (!cohortId) {
-      return fail({ code: 'FORBIDDEN', message: 'You are not paired with this mentee.' });
+    const { notes } = assistantSchema.parse(input);
+    const pairing = await getMenteePairing(user.id);
+    if (!pairing) {
+      return fail({ code: 'FORBIDDEN', message: 'An accepted mentor pairing is required.' });
     }
     // Throttle the AI endpoint per user (production-readiness-report.md M1).
     if (!(await checkRateLimit(`ai:session-assistant:${user.id}`, 10, 60_000)).ok) {
@@ -67,8 +67,8 @@ export async function requestSessionAssistant(
     }
 
     const [goalTitles, mentee] = await Promise.all([
-      getPairGoalTitles(menteeId, cohortId),
-      prisma.user.findUnique({ where: { id: menteeId }, select: { name: true } }),
+      getPairGoalTitles(user.id, pairing.cohortId),
+      prisma.user.findUnique({ where: { id: user.id }, select: { name: true } }),
     ]);
     // QA-I18N-006 follow-up: summarize in the ACTIVE UI locale, not account locale.
     const activeLocale = await getLocale();
@@ -80,7 +80,7 @@ export async function requestSessionAssistant(
   }
 }
 
-// ── Save session log (mentor) ───────────────────────────────────────────────
+// ── Save session log (mentee) ───────────────────────────────────────────────
 
 const suggestedItemSchema = z.object({
   task: z.string().trim().min(1).max(300),
@@ -90,7 +90,6 @@ const suggestedItemSchema = z.object({
 
 const saveSchema = z.object({
   logId: z.string().cuid().optional(),
-  menteeId: z.string().cuid().optional(),
   date: optionalText(40),
   time: optionalText(20),
   meetingType: z.nativeEnum(MeetingType).optional(),
@@ -103,7 +102,6 @@ const saveSchema = z.object({
   nextActionPlan: optionalText(3000),
   timeline: optionalText(500),
   nextMeetingDate: optionalText(40),
-  mentorNotes: optionalText(3000),
   aiSummary: optionalText(5000),
   // JSON array of suggested/edited action items to create with a new log.
   actionItems: z.string().optional(),
@@ -121,20 +119,19 @@ function parseSuggestedItems(raw: string | undefined) {
 }
 
 /**
- * Create or edit a session log (CLAUDE.md §6.9). On create the mentor must be
- * paired with the mentee; on edit they must own the log. Any structured action
+ * Create or edit a session log. The mentee must have an accepted mentor pairing;
+ * editing also requires recorded authorship. Any structured action
  * items supplied (typically AI-extracted then human-edited) are created with the
  * log and assigned to the mentor or mentee.
  */
 export async function saveSessionLog(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireUser();
+    const user = await requireRole('MENTEE');
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
     await requirePortalAccess(user);
     const data = saveSchema.parse({
       logId: (formData.get('logId') as string) || undefined,
-      menteeId: (formData.get('menteeId') as string) || undefined,
       date: formData.get('date'),
       time: formData.get('time'),
       meetingType: (formData.get('meetingType') as string) || undefined,
@@ -147,7 +144,6 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
       nextActionPlan: formData.get('nextActionPlan'),
       timeline: formData.get('timeline'),
       nextMeetingDate: formData.get('nextMeetingDate'),
-      mentorNotes: formData.get('mentorNotes'),
       aiSummary: formData.get('aiSummary'),
       actionItems: (formData.get('actionItems') as string) || undefined,
     });
@@ -165,13 +161,12 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
       nextActionPlan: emptyToNull(data.nextActionPlan),
       timeline: emptyToNull(data.timeline),
       nextMeetingDate: parseDate(data.nextMeetingDate),
-      mentorNotes: emptyToNull(data.mentorNotes),
       aiSummary: emptyToNull(data.aiSummary),
     };
 
     if (data.logId) {
       const log = await prisma.sessionLog.findUnique({ where: { id: data.logId } });
-      if (!log || log.deletedAt || log.mentorId !== user.id) {
+      if (!log || log.deletedAt || !(await canRecordLog(user.id, log))) {
         return fail({ code: 'NOT_FOUND', message: 'Session log not found.' });
       }
       await prisma.sessionLog.update({ where: { id: log.id }, data: fields });
@@ -183,26 +178,25 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
         entityId: log.id,
       });
       revalidatePath('/sessions');
+      revalidateMentorshipProgress();
       return ok({ id: log.id });
     }
 
     // Create
-    if (!data.menteeId) {
-      return fail({ code: 'VALIDATION', message: 'Choose which mentee this session is with.' });
+    const pairing = await getMenteePairing(user.id);
+    if (!pairing) {
+      return fail({ code: 'FORBIDDEN', message: 'An accepted mentor pairing is required.' });
     }
-    const cohortId = await mentorPairCohort(user.id, data.menteeId);
-    if (!cohortId) {
-      return fail({ code: 'FORBIDDEN', message: 'You are not paired with this mentee.' });
-    }
+    const { cohortId, mentorId } = pairing;
 
     const items = parseSuggestedItems(data.actionItems);
     const log = await prisma.$transaction(async (tx) => {
       const created = await tx.sessionLog.create({
-        data: { cohortId, mentorId: user.id, menteeId: data.menteeId!, ...fields },
+        data: { cohortId, mentorId, menteeId: user.id, recordedById: user.id, ...fields },
       });
       for (const item of items) {
         const assigneeId =
-          item.assignee === 'mentor' ? user.id : item.assignee === 'mentee' ? data.menteeId! : null;
+          item.assignee === 'mentor' ? mentorId : item.assignee === 'mentee' ? user.id : null;
         await tx.actionItem.create({
           data: {
             cohortId,
@@ -223,28 +217,31 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
       action: 'session_log.created',
       entityType: 'SessionLog',
       entityId: log.id,
-      metadata: { menteeId: data.menteeId, actionItems: items.length, aiSummary: Boolean(fields.aiSummary) },
+      metadata: {
+        menteeId: user.id,
+        actionItems: items.length,
+        aiSummary: Boolean(fields.aiSummary),
+      },
     });
 
-    // Tell the mentee a session log was added so it reflects on their side and
-    // prompts their reflection (§1.10). Mentor private notes stay private — the
-    // notification only signals that the shared log exists.
+    // The paired mentor receives the shared log and can add their reflection.
     await notify({
-      userId: data.menteeId,
-      type: 'session_logged',
-      params: { mentorName: user.name ?? '' },
+      userId: mentorId,
+      type: 'session_recorded',
+      params: { menteeName: user.name ?? '' },
       link: '/sessions',
       cohortId,
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: log.id });
   } catch (error) {
     return mapActionError(error);
   }
 }
 
-// ── Mentee reflection ───────────────────────────────────────────────────────
+// ── Mentor reflection ───────────────────────────────────────────────────────
 
 const reflectionSchema = z.object({
   logId: z.string().cuid(),
@@ -253,7 +250,7 @@ const reflectionSchema = z.object({
 
 export async function saveReflection(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireUser();
+    const user = await requireRole('MENTOR');
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
     await requirePortalAccess(user);
@@ -263,13 +260,18 @@ export async function saveReflection(formData: FormData): Promise<ActionResult<{
     });
 
     const log = await prisma.sessionLog.findUnique({ where: { id: logId } });
-    if (!log || log.deletedAt || log.menteeId !== user.id) {
+    if (
+      !log ||
+      log.deletedAt ||
+      log.mentorId !== user.id ||
+      !(await isAcceptedPair(user.id, log.menteeId, log.cohortId))
+    ) {
       return fail({ code: 'NOT_FOUND', message: 'Session log not found.' });
     }
 
     await prisma.sessionLog.update({
       where: { id: logId },
-      data: { menteeReflection: emptyToNull(reflection) },
+      data: { mentorReflection: emptyToNull(reflection) },
     });
     await writeAuditLog({
       actorId: user.id,
@@ -280,6 +282,7 @@ export async function saveReflection(formData: FormData): Promise<ActionResult<{
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: logId });
   } catch (error) {
     return mapActionError(error);
@@ -295,10 +298,10 @@ const addItemSchema = z.object({
   due: optionalText(40),
 });
 
-/** Mentor adds an action item to one of their session logs. */
+/** The mentee recorder adds an action item to their session log. */
 export async function addActionItem(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireUser();
+    const user = await requireRole('MENTEE');
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
     // act in the mentorship loop until they submit it (no-op for mentors/admins).
     await requirePortalAccess(user);
@@ -310,7 +313,7 @@ export async function addActionItem(formData: FormData): Promise<ActionResult<{ 
     });
 
     const log = await prisma.sessionLog.findUnique({ where: { id: data.sessionLogId } });
-    if (!log || log.deletedAt || log.mentorId !== user.id) {
+    if (!log || log.deletedAt || !(await canRecordLog(user.id, log))) {
       return fail({ code: 'NOT_FOUND', message: 'Session log not found.' });
     }
 
@@ -338,6 +341,7 @@ export async function addActionItem(formData: FormData): Promise<ActionResult<{ 
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: item.id });
   } catch (error) {
     return mapActionError(error);
@@ -350,8 +354,7 @@ const statusSchema = z.object({
 });
 
 /**
- * Update an action item's status. Allowed for the assignee or the pair's mentor
- * (the creator of the log). Lets a mentee mark their own task done/blocked.
+ * Update an action item's status: its assignee or the mentee who recorded the log.
  */
 export async function updateActionItemStatus(
   formData: FormData,
@@ -368,15 +371,29 @@ export async function updateActionItemStatus(
 
     const item = await prisma.actionItem.findUnique({
       where: { id: itemId },
-      include: { sessionLog: { select: { mentorId: true, menteeId: true, cohortId: true } } },
+      include: {
+        sessionLog: {
+          select: {
+            mentorId: true,
+            menteeId: true,
+            cohortId: true,
+            recordedById: true,
+            deletedAt: true,
+          },
+        },
+      },
     });
     if (!item || item.deletedAt) {
       return fail({ code: 'NOT_FOUND', message: 'Action item not found.' });
     }
 
     const isAssignee = item.assigneeId === user.id;
-    const isMentor = item.sessionLog?.mentorId === user.id;
-    if (!isAssignee && !isMentor) {
+    const isRecorder =
+      user.roles.includes('MENTEE') &&
+      item.sessionLog &&
+      !item.sessionLog.deletedAt &&
+      (await canRecordLog(user.id, item.sessionLog));
+    if (!isAssignee && !isRecorder) {
       return fail({ code: 'FORBIDDEN', message: 'You cannot update this action item.' });
     }
 
@@ -391,6 +408,7 @@ export async function updateActionItemStatus(
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: itemId });
   } catch (error) {
     return mapActionError(error);

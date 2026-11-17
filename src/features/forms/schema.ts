@@ -59,6 +59,14 @@ export const formFieldSchema = z
     labelFr: z.string().trim().max(400).default(''),
     type: z.enum(FORM_FIELD_TYPES),
     required: z.boolean().default(false),
+    sectionEn: z.string().trim().max(180).optional(),
+    helpEn: z.string().trim().max(2000).optional(),
+    inputType: z.enum(['date', 'email']).optional(),
+    sourceQuestion: z.string().max(20).optional(),
+    // Private follow-up answers never enter general reporting or AI prompts.
+    confidential: z.boolean().optional(),
+    reporting: z.boolean().optional(),
+    declaration: z.boolean().optional(),
     // Rating scale upper bound (1..max). Only meaningful for `rating`.
     max: z.number().int().min(2).max(10).optional(),
     // Only meaningful for `single_select` / `multi_select`.
@@ -99,7 +107,7 @@ export const formSchemaShape = z
     fields: z
       .array(formFieldSchema)
       .min(1, 'Add at least one question.')
-      .max(50, 'A form can have at most 50 questions.'),
+      .max(100, 'A form can have at most 100 questions.'),
   })
   .superRefine((value, ctx) => {
     const seen = new Set<string>();
@@ -151,11 +159,13 @@ export function missingFrenchLabels(shape: FormSchemaShape): MissingFrenchLabel[
 
 /** Human-readable summary of the first few missing French labels. */
 export function describeMissingFrenchLabels(missing: MissingFrenchLabel[]): string {
-  const parts = missing.slice(0, 4).map((m) =>
-    m.optionIndex === null
-      ? `question ${m.fieldIndex + 1}`
-      : `question ${m.fieldIndex + 1} option ${m.optionIndex + 1}`,
-  );
+  const parts = missing
+    .slice(0, 4)
+    .map((m) =>
+      m.optionIndex === null
+        ? `question ${m.fieldIndex + 1}`
+        : `question ${m.fieldIndex + 1} option ${m.optionIndex + 1}`,
+    );
   const more = missing.length - parts.length;
   const list = more > 0 ? `${parts.join(', ')} and ${more} more` : parts.join(', ');
   return `This cohort runs in French, so every question needs French text. Missing: ${list}.`;

@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 // it scrolls on small screens; feature grids collapse to cards on mobile.
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
+    // A bare table sits in the same white, hairline-framed surface as the
+    // dashboard workspace (Samir reference). Inside a Card the frame is reset
+    // (see Card), so a table is never double-bordered.
+    <div className="table-frame relative w-full overflow-auto rounded-lg border border-border bg-surface shadow-elevation">
       <table ref={ref} className={cn('w-full caption-bottom text-body', className)} {...props} />
     </div>
   ),

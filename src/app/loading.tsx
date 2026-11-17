@@ -1,23 +1,16 @@
-import { BrandPlate } from '@/components/brand-logo';
-
-// Root Suspense fallback. This boundary sits *outside* every route-group layout,
-// so it only appears on initial/full page loads or when a layout itself is still
-// resolving (e.g. right after login, while the dashboard/admin layout fetches the
-// user + notifications). The group-level loading.tsx files handle in-app
-// navigation with content skeletons inside the shell. Here — where there is no
-// shell yet — a calm, branded splash reads as the app starting up rather than a
-// half-loaded broken page. Language-agnostic (§16); honours reduced motion.
+/** A small startup indicator; route skeletons take over inside the workspace. */
 export default function Loading() {
   return (
     <div
       role="status"
       aria-busy="true"
-      aria-label="Dangote Mentorship Programme"
-      className="flex min-h-screen flex-col items-center justify-center gap-6 bg-bg"
+      aria-label="Loading"
+      className="bg-bg grid min-h-screen place-items-center"
     >
-      <BrandPlate className="brand-splash-mark h-12" />
-      <div className="h-1 w-40 overflow-hidden rounded-full bg-surface-2">
-        <div className="brand-splash-bar h-full w-1/3 rounded-full bg-green" />
+      <div aria-hidden="true" className="flex gap-1.5">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="startup-dot bg-ink-2 size-1.5 rounded-full" />
+        ))}
       </div>
     </div>
   );

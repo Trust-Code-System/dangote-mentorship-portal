@@ -20,14 +20,13 @@ export function NewIssueForm({ cohortId }: { cohortId: string }) {
   return (
     <form action={action} className="flex flex-wrap items-end gap-3">
       <input type="hidden" name="cohortId" value={cohortId} />
-      <div className="space-y-1.5">
+      <div className="min-w-0 flex-[1_1_18rem] space-y-1.5">
         <Label htmlFor="issue-title">{t('fieldTitle')}</Label>
         <Input
           id="issue-title"
           name="title"
           placeholder={t('titlePlaceholder')}
           maxLength={200}
-          className="w-72"
           required
         />
       </div>

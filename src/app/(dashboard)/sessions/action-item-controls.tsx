@@ -16,7 +16,7 @@ import {
 const STATUSES = Object.values(ActionItemStatus);
 
 // Status control for an action item (experience-layer.md §1.6). Editable by the
-// assignee or the pair's mentor; changing the select submits immediately.
+// assignee or the mentee recorder; changing the select submits immediately.
 export function ActionItemStatusControl({
   itemId,
   status,

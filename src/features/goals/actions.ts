@@ -2,16 +2,22 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { GoalStage, GoalStatus } from '@prisma/client';
+import { goalSettingDetailsSchema, goalSettingReady } from './setting-schema';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
 import { requirePortalAccess } from '@/features/assessments/guard';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { notify } from '@/lib/notifications/notify';
 import { getStorageProvider } from '@/lib/storage';
-import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
+import {
+  canUseDirectUploads,
+  createSignedUploadTarget,
+  removeStoredObject,
+} from '@/lib/storage/direct';
 import { verifyFileSignature } from '@/lib/files/sniff';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 import { checkRateLimit } from '@/lib/auth/rate-limit-shared';
@@ -50,9 +56,7 @@ const coachSchema = z.object({
   endDate: optionalText(40),
 });
 
-export async function requestGoalCoach(
-  input: GoalDraftFields,
-): Promise<ActionResult<CoachResult>> {
+export async function requestGoalCoach(input: GoalDraftFields): Promise<ActionResult<CoachResult>> {
   try {
     const user = await requireUser();
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
@@ -87,6 +91,19 @@ const saveSchema = z.object({
   successMeasure: optionalText(1000),
   startDate: optionalText(40),
   endDate: optionalText(40),
+  settingDetails: z
+    .string()
+    .max(20000)
+    .optional()
+    .transform((raw, ctx) => {
+      if (!raw) return undefined;
+      try {
+        return goalSettingDetailsSchema.parse(JSON.parse(raw));
+      } catch {
+        ctx.addIssue({ code: 'custom', message: 'Check the goal-setting details.' });
+        return z.NEVER;
+      }
+    }),
 });
 
 function saveDataFrom(form: FormData) {
@@ -101,6 +118,7 @@ function saveDataFrom(form: FormData) {
     successMeasure: form.get('successMeasure'),
     startDate: form.get('startDate'),
     endDate: form.get('endDate'),
+    settingDetails: (form.get('settingDetails') as string) || undefined,
   };
 }
 
@@ -127,6 +145,15 @@ export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: s
       successMeasure: emptyToNull(data.successMeasure),
       startDate: parseDate(data.startDate),
       endDate: parseDate(data.endDate),
+      ...(data.settingDetails
+        ? {
+            settingDetails: {
+              ...data.settingDetails,
+              acceptedByUserId: data.settingDetails.accepted ? user.id : null,
+              acceptedAt: data.settingDetails.accepted ? new Date().toISOString() : null,
+            },
+          }
+        : {}),
     };
 
     let goalId: string;
@@ -173,6 +200,7 @@ export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: s
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -197,7 +225,33 @@ export async function submitGoal(formData: FormData): Promise<ActionResult<{ id:
     }
     const submittable: GoalStatus[] = [GoalStatus.DRAFT, GoalStatus.REJECTED];
     if (!submittable.includes(goal.status)) {
-      return fail({ code: 'CONFLICT', message: 'This goal is not in a state that can be submitted.' });
+      return fail({
+        code: 'CONFLICT',
+        message: 'This goal is not in a state that can be submitted.',
+      });
+    }
+
+    const updatedForm = await prisma.featureFlag.findFirst({
+      where: {
+        cohortId: goal.cohortId,
+        key: 'phase2_goal_setting',
+        enabled: true,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    if (
+      updatedForm &&
+      (!goalSettingReady(goal.settingDetails) ||
+        !goal.learningActivity ||
+        !goal.endDate ||
+        !goal.successMeasure)
+    ) {
+      return fail({
+        code: 'VALIDATION',
+        message:
+          'Complete the goal, actions, deadline, success indicators, follow-up and mentee sign-off before submitting.',
+      });
     }
 
     await prisma.goal.update({
@@ -227,6 +281,7 @@ export async function submitGoal(formData: FormData): Promise<ActionResult<{ id:
     }
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -318,6 +373,7 @@ export async function reviewGoal(formData: FormData): Promise<ActionResult<{ id:
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goal.id });
   } catch (error) {
     return mapActionError(error);
@@ -331,9 +387,7 @@ const advanceSchema = z.object({
   stage: z.nativeEnum(GoalStage),
 });
 
-export async function advanceGoalStage(
-  formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+export async function advanceGoalStage(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
@@ -351,7 +405,10 @@ export async function advanceGoalStage(
 
     const next = menteeAdvanceTransition({ status: goal.status, stage: goal.stage }, stage);
     if (!next) {
-      return fail({ code: 'CONFLICT', message: 'That progress update is not allowed for this goal.' });
+      return fail({
+        code: 'CONFLICT',
+        message: 'That progress update is not allowed for this goal.',
+      });
     }
 
     await prisma.goal.update({
@@ -369,6 +426,7 @@ export async function advanceGoalStage(
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -443,6 +501,7 @@ async function persistGoalEvidence(input: {
     metadata: { goalId: input.goal.id },
   });
   revalidatePath('/goals');
+  revalidateMentorshipProgress();
   return ok({ id: evidence.id });
 }
 
@@ -452,7 +511,9 @@ export async function prepareGoalEvidenceUpload(input: {
   type: string;
   size: number;
   note?: string;
-}): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
+}): Promise<
+  ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>
+> {
   try {
     const user = await requireUser();
     // Assessment lock: a mentee with an overdue quarterly assessment cannot
@@ -464,7 +525,10 @@ export async function prepareGoalEvidenceUpload(input: {
       return fail({ code: 'NOT_FOUND', message: 'Goal not found.' });
     }
     if (goal.status !== GoalStatus.APPROVED && goal.status !== GoalStatus.COMPLETED) {
-      return fail({ code: 'CONFLICT', message: 'You can add evidence once your goal is approved.' });
+      return fail({
+        code: 'CONFLICT',
+        message: 'You can add evidence once your goal is approved.',
+      });
     }
     const ext = ALLOWED_EVIDENCE_TYPES[file.type];
     if (!ext) return fail({ code: 'VALIDATION', message: 'Unsupported file type.' });
@@ -495,7 +559,10 @@ export async function confirmGoalEvidenceUpload(input: {
       return fail({ code: 'NOT_FOUND', message: 'Goal not found.' });
     }
     if (goal.status !== GoalStatus.APPROVED && goal.status !== GoalStatus.COMPLETED) {
-      return fail({ code: 'CONFLICT', message: 'You can add evidence once your goal is approved.' });
+      return fail({
+        code: 'CONFLICT',
+        message: 'You can add evidence once your goal is approved.',
+      });
     }
     const ext = ALLOWED_EVIDENCE_TYPES[file.type];
     const expectedPrefix = `goals/${goal.cohortId}/${goal.id}/`;
@@ -538,7 +605,10 @@ export async function uploadGoalEvidence(
     }
     // Evidence belongs to the working phase: the goal must be approved.
     if (goal.status !== GoalStatus.APPROVED && goal.status !== GoalStatus.COMPLETED) {
-      return fail({ code: 'CONFLICT', message: 'You can add evidence once your goal is approved.' });
+      return fail({
+        code: 'CONFLICT',
+        message: 'You can add evidence once your goal is approved.',
+      });
     }
 
     const file = formData.get('file');
@@ -580,10 +650,16 @@ export async function uploadGoalEvidence(
 
 export type GoalActionState = ActionResult<{ id: string }> | null;
 
-export async function saveGoalForm(_prev: GoalActionState, formData: FormData): Promise<GoalActionState> {
+export async function saveGoalForm(
+  _prev: GoalActionState,
+  formData: FormData,
+): Promise<GoalActionState> {
   return saveGoal(formData);
 }
-export async function reviewGoalForm(_prev: GoalActionState, formData: FormData): Promise<GoalActionState> {
+export async function reviewGoalForm(
+  _prev: GoalActionState,
+  formData: FormData,
+): Promise<GoalActionState> {
   return reviewGoal(formData);
 }
 export async function uploadGoalEvidenceForm(
@@ -594,6 +670,12 @@ export async function uploadGoalEvidenceForm(
 }
 export async function submitGoalAction(formData: FormData): Promise<void> {
   await submitGoal(formData);
+}
+export async function submitGoalForm(
+  _prev: GoalActionState,
+  formData: FormData,
+): Promise<GoalActionState> {
+  return submitGoal(formData);
 }
 export async function advanceGoalStageAction(formData: FormData): Promise<void> {
   await advanceGoalStage(formData);

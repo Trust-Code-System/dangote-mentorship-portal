@@ -6,10 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 
-// Programme-wide, read-only view of the session reports mentors file (RBAC §4:
+// Programme-wide, read-only view of shared session records (RBAC §4:
 // admins may *view* session logs). The admin-area layout already gates to admin
 // roles. Mentor-private notes are excluded upstream in getProgrammeSessionLogs;
-// mentors keep their own editable read-back on the /sessions page.
+// the paired mentor adds the shared reflection on /sessions.
 export default async function AdminSessionsPage() {
   const [tList, tSess] = await Promise.all([
     getTranslations('adminLists'),
@@ -20,7 +20,9 @@ export default async function AdminSessionsPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{tList('sessionsTitle')}</h1>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">
+          {tList('sessionsTitle')}
+        </h1>
         <p className="text-body text-ink-2">{tList('sessionsSubtitle')}</p>
       </div>
 
@@ -65,15 +67,25 @@ function AdminSessionLogCard({
             {log.time ? ` · ${log.time}` : ''}
           </CardTitle>
           <div className="flex flex-wrap gap-1">
-            {log.meetingType ? <Badge variant="outline">{tSess(`type.${log.meetingType}`)}</Badge> : null}
-            {log.competencyDiscussed ? <Badge variant="secondary">{log.competencyDiscussed}</Badge> : null}
+            {log.meetingType ? (
+              <Badge variant="outline">{tSess(`type.${log.meetingType}`)}</Badge>
+            ) : null}
+            {log.competencyDiscussed ? (
+              <Badge variant="secondary">{log.competencyDiscussed}</Badge>
+            ) : null}
             <Badge variant="outline">{log.cohortName}</Badge>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          <NameLink name={log.mentorName} href={log.mentorProfileId ? `/admin/mentors/${log.mentorProfileId}` : null} />
+        <p className="text-muted-foreground text-xs">
+          <NameLink
+            name={log.mentorName}
+            href={log.mentorProfileId ? `/admin/mentors/${log.mentorProfileId}` : null}
+          />
           {' → '}
-          <NameLink name={log.menteeName} href={log.menteeProfileId ? `/admin/mentees/${log.menteeProfileId}` : null} />
+          <NameLink
+            name={log.menteeName}
+            href={log.menteeProfileId ? `/admin/mentees/${log.menteeProfileId}` : null}
+          />
         </p>
       </CardHeader>
 
@@ -81,26 +93,44 @@ function AdminSessionLogCard({
         {log.summary ? <p className="whitespace-pre-wrap">{log.summary}</p> : null}
 
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
-          {log.goalDiscussed ? <Detail label={tSess('goalDiscussed')} value={log.goalDiscussed} /> : null}
-          {log.actionsAgreed ? <Detail label={tSess('actionsAgreed')} value={log.actionsAgreed} /> : null}
+          {log.goalDiscussed ? (
+            <Detail label={tSess('goalDiscussed')} value={log.goalDiscussed} />
+          ) : null}
+          {log.actionsAgreed ? (
+            <Detail label={tSess('actionsAgreed')} value={log.actionsAgreed} />
+          ) : null}
           {log.challenges ? <Detail label={tSess('challenges')} value={log.challenges} /> : null}
-          {log.nextActionPlan ? <Detail label={tSess('nextActionPlan')} value={log.nextActionPlan} /> : null}
-          {log.resourcesNeeded ? <Detail label={tSess('resourcesNeeded')} value={log.resourcesNeeded} /> : null}
+          {log.nextActionPlan ? (
+            <Detail label={tSess('nextActionPlan')} value={log.nextActionPlan} />
+          ) : null}
+          {log.resourcesNeeded ? (
+            <Detail label={tSess('resourcesNeeded')} value={log.resourcesNeeded} />
+          ) : null}
           {log.timeline ? <Detail label={tSess('timeline')} value={log.timeline} /> : null}
           {log.nextMeetingDate ? (
             <Detail label={tSess('nextMeetingDate')} value={fmtDate(log.nextMeetingDate)} />
           ) : null}
         </dl>
 
+        {log.mentorReflection ? (
+          <div className="border-t pt-3">
+            <p className="text-muted-foreground text-xs font-medium uppercase">
+              {tSess('mentorReflection')}
+            </p>
+            <p className="whitespace-pre-wrap">{log.mentorReflection}</p>
+          </div>
+        ) : null}
         {log.menteeReflection ? (
           <div className="border-t pt-3">
-            <p className="text-xs font-medium uppercase text-muted-foreground">{tSess('menteeReflection')}</p>
+            <p className="text-muted-foreground text-xs font-medium uppercase">
+              {tSess('menteeReflection')}
+            </p>
             <p className="whitespace-pre-wrap">{log.menteeReflection}</p>
           </div>
         ) : null}
 
         {!log.summary && !log.actionsAgreed && !log.challenges && !log.nextActionPlan ? (
-          <p className="text-xs text-muted-foreground">{tList('sessionEmpty')}</p>
+          <p className="text-muted-foreground text-xs">{tList('sessionEmpty')}</p>
         ) : null}
       </CardContent>
     </Card>
@@ -109,9 +139,9 @@ function AdminSessionLogCard({
 
 function NameLink({ name, href }: { name: string | null; href: string | null }) {
   const label = name ?? '—';
-  if (!href) return <span className="font-medium text-ink-2">{label}</span>;
+  if (!href) return <span className="text-ink-2 font-medium">{label}</span>;
   return (
-    <Link href={href} className="font-medium text-green hover:text-green-strong hover:underline">
+    <Link href={href} className="text-green hover:text-green-strong font-medium hover:underline">
       {label}
     </Link>
   );
@@ -120,7 +150,7 @@ function NameLink({ name, href }: { name: string | null; href: string | null }) 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase text-muted-foreground">{label}</dt>
+      <dt className="text-muted-foreground text-xs font-medium uppercase">{label}</dt>
       <dd className="whitespace-pre-wrap">{value}</dd>
     </div>
   );

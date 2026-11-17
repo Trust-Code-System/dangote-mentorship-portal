@@ -161,7 +161,7 @@ export function MessageThread({
   }
 
   return (
-    <section className="flex h-full min-h-[34rem] flex-col overflow-hidden bg-surface">
+    <section className="flex h-full min-h-[34rem] min-w-0 flex-col overflow-hidden bg-surface">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
         <Link
@@ -178,7 +178,7 @@ export function MessageThread({
       </div>
 
       {/* Messages */}
-      <div ref={listRef} className="flex-1 space-y-2 overflow-y-auto p-4">
+      <div ref={listRef} className="min-w-0 flex-1 space-y-2 overflow-y-auto overflow-x-hidden p-4">
         {nextCursor ? (
           <div className="pb-2 text-center">
             <button
@@ -198,7 +198,9 @@ export function MessageThread({
             <div key={m.id} className={cn('flex', m.mine ? 'justify-end' : 'justify-start')}>
               <div
                 className={cn(
-                  'max-w-[80%] whitespace-pre-line rounded-2xl px-3 py-2 text-small',
+                  // `anywhere` lets a very long unbroken string wrap inside the bubble
+                  // instead of widening the thread.
+                  'min-w-0 max-w-[80%] whitespace-pre-line rounded-2xl px-3 py-2 text-small [overflow-wrap:anywhere]',
                   m.mine ? 'bg-green text-white' : 'bg-surface-2 text-ink',
                 )}
               >

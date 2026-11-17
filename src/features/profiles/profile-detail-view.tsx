@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { CompetencyType, type GoalStatus } from '@prisma/client';
-import { Badge, type BadgeProps } from '@/components/ui/badge';
+import { CompetencyType } from '@prisma/client';
+import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatTile } from '@/components/ui/stat-tile';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -17,13 +18,6 @@ function initials(name: string): string {
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? '')
     .join('');
-}
-
-function goalTone(s: GoalStatus): BadgeProps['variant'] {
-  if (s === 'APPROVED') return 'ok';
-  if (s === 'SUBMITTED') return 'info';
-  if (s === 'REJECTED') return 'risk';
-  return 'outline';
 }
 
 // A labelled value; renders an em-dash when empty so the grid stays aligned.
@@ -110,7 +104,7 @@ function ProfileHeader({
       </div>
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h1 className="font-display text-h1 text-ink">{name}</h1>
+          <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{name}</h1>
           <Badge variant="default">{roleLabel}</Badge>
         </div>
         <p className="text-body text-ink-2">
@@ -133,7 +127,7 @@ export async function MentorDetailView({ mentor }: { mentor: MentorDetail }) {
       <BackLink href="/admin/mentors" label={t('backToMentors')} />
       <ProfileHeader name={mentor.fullName} roleLabel={p('mentorRole')} subtitle={subtitle} cohortName={mentor.cohortName} />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={p('training')} value={mentor.trainingStatus} valueClassName="text-h1" tone={mentor.trainingStatus === 'COMPLETED' ? 'ok' : 'default'} />
         <StatTile label={p('matchingCol')} value={mentor.matchingStatus} valueClassName="text-h1" tone={mentor.matchingStatus === 'MATCHED' ? 'ok' : 'default'} />
         <StatTile label={t('mentees')} value={`${mentor.mentees.length} / ${mentor.maxMentees}`} tone="ok" />
@@ -251,7 +245,7 @@ export async function MenteeDetailView({ mentee }: { mentee: MenteeDetail }) {
       <BackLink href="/admin/mentees" label={t('backToMentees')} />
       <ProfileHeader name={mentee.fullName} roleLabel={p('menteeRole')} subtitle={subtitle} cohortName={mentee.cohortName} />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={p('training')} value={mentee.trainingStatus} valueClassName="text-h1" tone={mentee.trainingStatus === 'COMPLETED' ? 'ok' : 'default'} />
         <StatTile label={p('matchingCol')} value={mentee.matchingStatus} valueClassName="text-h1" tone={mentee.matchingStatus === 'MATCHED' ? 'ok' : 'default'} />
         <StatTile label={t('goalsApproved')} value={`${approvedGoals} / ${mentee.goals.length}`} tone="ok" />
@@ -338,7 +332,7 @@ export async function MenteeDetailView({ mentee }: { mentee: MenteeDetail }) {
                     <TableCell className="font-medium">{g.title}</TableCell>
                     <TableCell>{g.competency ?? '—'}</TableCell>
                     <TableCell>
-                      <Badge variant={goalTone(g.status)}>{g.status}</Badge>
+                      <StatusBadge status={g.status} />
                     </TableCell>
                   </TableRow>
                 ))}

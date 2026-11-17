@@ -57,11 +57,7 @@ export interface TextAggregate {
   answered: number;
 }
 
-export type FieldAggregate =
-  | RatingAggregate
-  | SelectAggregate
-  | BooleanAggregate
-  | TextAggregate;
+export type FieldAggregate = RatingAggregate | SelectAggregate | BooleanAggregate | TextAggregate;
 
 const DEFAULT_RATING_MAX = 5;
 
@@ -74,13 +70,13 @@ export function aggregateAnswers(
   fields: FormField[],
   responses: ReviewAnswers[],
 ): FieldAggregate[] {
-  return fields.map((field) => aggregateField(field, responses));
+  return fields
+    .filter((field) => !field.confidential && field.reporting !== false)
+    .map((field) => aggregateField(field, responses));
 }
 
 function aggregateField(field: FormField, responses: ReviewAnswers[]): FieldAggregate {
-  const values = responses
-    .map((r) => r[field.id])
-    .filter((v) => v !== undefined && v !== null);
+  const values = responses.map((r) => r[field.id]).filter((v) => v !== undefined && v !== null);
 
   switch (field.type) {
     case 'rating': {

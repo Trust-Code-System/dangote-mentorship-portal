@@ -14,6 +14,7 @@ export const NOTIFICATION_TYPES = [
   'meeting_reminder',
   'session_log_due',
   'session_logged',
+  'session_recorded',
   'agreement_signed',
   'message_received',
   'review_due',

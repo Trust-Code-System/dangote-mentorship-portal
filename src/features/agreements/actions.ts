@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { AgreementType, Language, MatchStatus, Prisma } from '@prisma/client';
@@ -121,7 +122,13 @@ export async function signAgreement(formData: FormData): Promise<ActionResult<{ 
     // signature intact (the PDF can be regenerated) rather than losing consent.
     const key = pdfKey(cohortId, agreement.id);
     try {
-      const bytes = await renderAgreementPdf({ template, signerName: typedName, counterpartName, signedAt, lang });
+      const bytes = await renderAgreementPdf({
+        template,
+        signerName: typedName,
+        counterpartName,
+        signedAt,
+        lang,
+      });
       await getStorageProvider().put({ key, bytes, contentType: 'application/pdf' });
       await prisma.agreement.update({ where: { id: agreement.id }, data: { pdfUrl: key } });
     } catch (pdfError) {
@@ -149,6 +156,7 @@ export async function signAgreement(formData: FormData): Promise<ActionResult<{ 
     });
 
     revalidatePath('/agreements');
+    revalidateMentorshipProgress();
     return ok({ id: agreement.id });
   } catch (error) {
     return mapActionError(error);

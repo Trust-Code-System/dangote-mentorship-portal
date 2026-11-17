@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default async function MentorsPage() {
@@ -15,7 +16,7 @@ export default async function MentorsPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('mentorsTitle')}</h1>
+      <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('mentorsTitle')}</h1>
       {mentors.length === 0 ? (
         <p className="text-muted-foreground">{t('none')}</p>
       ) : (
@@ -48,14 +49,10 @@ export default async function MentorsPage() {
                 <TableCell>{m.yearsExperience ?? '—'}</TableCell>
                 <TableCell>{m.maxMentees}</TableCell>
                 <TableCell>
-                  <Badge variant={m.trainingStatus === 'COMPLETED' ? 'default' : 'outline'}>
-                    {m.trainingStatus}
-                  </Badge>
+                  <StatusBadge status={m.trainingStatus} />
                 </TableCell>
                 <TableCell>
-                  <Badge variant={m.matchingStatus === 'MATCHED' ? 'default' : 'outline'}>
-                    {m.matchingStatus}
-                  </Badge>
+                  <StatusBadge status={m.matchingStatus} />
                 </TableCell>
               </TableRow>
             ))}

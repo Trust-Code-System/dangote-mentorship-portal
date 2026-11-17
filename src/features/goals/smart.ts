@@ -16,6 +16,7 @@ export interface GoalDraftFields {
   successMeasure?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  settingDetails?: string | null;
 }
 
 export interface SmartAssessment {

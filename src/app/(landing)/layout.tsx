@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { ScrollProgress } from './components/scroll-progress';
-import { FilmGrain } from './visuals/film-grain';
 import { PublicNav } from '@/components/public/public-nav';
 import { PublicFooter } from '@/components/public/public-footer';
 
@@ -26,7 +25,7 @@ export default async function LandingLayout({ children }: { children: React.Reac
     <div className="landing-root relative min-h-screen overflow-x-hidden">
       <a
         href="#landing-main"
-        className="sr-only rounded-full bg-blak-green px-5 py-3 text-sm font-semibold text-blak-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70]"
+        className="bg-blak-green text-blak-black sr-only rounded-full px-5 py-3 text-sm font-semibold focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[70]"
       >
         {t('skip')}
       </a>
@@ -37,7 +36,6 @@ export default async function LandingLayout({ children }: { children: React.Reac
       <main id="landing-main">{children}</main>
 
       <PublicFooter />
-      <FilmGrain />
     </div>
   );
 }

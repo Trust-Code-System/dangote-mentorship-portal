@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const buttonVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium',
-    'transition-colors duration-150 motion-reduce:transition-none',
+    'transition-[background-color,border-color,box-shadow,transform] duration-150 motion-reduce:transition-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
     // Disabled: readable ink on muted surface — do not rely on opacity alone.
     'disabled:pointer-events-none disabled:cursor-not-allowed disabled:border disabled:border-border disabled:bg-surface-2 disabled:text-ink-3 disabled:shadow-none disabled:opacity-100',
@@ -20,14 +20,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'border border-green-strong bg-green text-white hover:bg-green-strong hover:border-green-strong active:translate-y-px',
+          'border border-green-strong bg-green text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(24_32_42/0.08)] hover:bg-green-strong hover:border-green-strong active:translate-y-px',
         secondary:
           'border border-border bg-surface text-ink hover:bg-surface-2 hover:text-green-strong',
-        outline:
-          'border border-border bg-surface text-ink hover:bg-surface-2',
+        outline: 'border border-border bg-surface text-ink hover:bg-surface-2',
         ghost: 'border border-transparent text-ink hover:bg-green-soft/60 hover:text-green-strong',
-        destructive:
-          'border border-risk bg-risk text-white hover:bg-risk/90 active:translate-y-px',
+        destructive: 'border border-risk bg-risk text-white hover:bg-risk/90 active:translate-y-px',
         link: 'border border-transparent text-green underline-offset-4 hover:underline disabled:border-transparent disabled:bg-transparent',
       },
       size: {
@@ -42,8 +40,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

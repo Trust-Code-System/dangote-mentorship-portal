@@ -35,10 +35,8 @@ import { ScrollReveal } from '@/app/(landing)/motion/scroll-reveal';
  * information it should not. So the page routes by situation instead, and every
  * destination on it is a route that exists.
  *
- * **The address.** `admin@blakmoh.com` is the seeded demo super-admin used by
- * `/signup` and the auth footer. It is *not* reproduced here as though it were
- * an official support desk; the page says plainly that a programme address has
- * not been confirmed, which is an owner item, not a gap to paper over.
+ * No public programme inbox has been confirmed. Direct participants to the
+ * existing private support workflow or their invitation contact instead.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('publicPages.contact.meta');
@@ -124,28 +122,28 @@ export default async function ContactPage() {
               <SpotlightCard className="flex h-full flex-col p-8 sm:p-9">
                 <span
                   aria-hidden
-                  className="inline-flex size-11 items-center justify-center rounded-xl border border-blak-green/25 bg-blak-green/10 text-blak-green-soft"
+                  className="border-blak-green/25 bg-blak-green/10 text-blak-green-soft inline-flex size-11 items-center justify-center rounded-xl border"
                 >
                   <Icon className="size-5" />
                 </span>
-                <h3 className="mt-6 text-xl font-semibold text-blak-text">
+                <h3 className="text-blak-text mt-6 text-xl font-semibold">
                   {t(`routes.${key}.title`)}
                 </h3>
-                <p className="mt-4 flex-1 text-blak-body text-blak-text-2">
+                <p className="text-blak-body text-blak-text-2 mt-4 flex-1">
                   {t(`routes.${key}.body`)}
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   <Link
                     href={primary}
-                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-blak-green px-6 text-sm font-semibold text-blak-black transition-colors hover:bg-blak-green-soft"
+                    className="bg-blak-green text-blak-black hover:bg-blak-green-soft inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-colors"
                   >
                     {t(`routes.${key}.primary`)}
                     <ArrowRight className="size-4" aria-hidden />
                   </Link>
                   <Link
                     href={secondary}
-                    className="inline-flex min-h-12 items-center rounded-full px-4 text-sm font-semibold text-blak-text-2 transition-colors hover:text-blak-text"
+                    className="text-blak-text-2 hover:text-blak-text inline-flex min-h-12 items-center rounded-full px-4 text-sm font-semibold transition-colors"
                   >
                     {t(`routes.${key}.secondary`)}
                   </Link>
@@ -173,21 +171,21 @@ export default async function ContactPage() {
                     alone — no "click here" and no hover-only affordance. */}
                 <Link
                   href={href}
-                  className="group flex h-full flex-col rounded-2xl border border-blak-border/10 bg-blak-black/25 p-6 transition-colors hover:border-blak-border/25 hover:bg-blak-black/50"
+                  className="group border-blak-border/10 bg-blak-black/25 hover:border-blak-border/25 hover:bg-blak-black/50 flex h-full flex-col rounded-2xl border p-6 transition-colors"
                 >
                   <span
                     aria-hidden
-                    className="inline-flex size-9 items-center justify-center rounded-lg border border-blak-border/15 text-blak-text-2 transition-colors group-hover:text-blak-green-soft"
+                    className="border-blak-border/15 text-blak-text-2 group-hover:text-blak-green-soft inline-flex size-9 items-center justify-center rounded-lg border transition-colors"
                   >
                     <Icon className="size-4" />
                   </span>
-                  <span className="mt-4 text-base font-semibold text-blak-text">
+                  <span className="text-blak-text mt-4 text-base font-semibold">
                     {t(`topics.${key}.title`)}
                   </span>
-                  <span className="mt-2 flex-1 text-sm leading-relaxed text-blak-text-2">
+                  <span className="text-blak-text-2 mt-2 flex-1 text-sm leading-relaxed">
                     {t(`topics.${key}.body`)}
                   </span>
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-blak-green-soft">
+                  <span className="text-blak-green-soft mt-5 inline-flex items-center gap-1.5 text-sm font-semibold">
                     {t(`topics.${key}.cta`)}
                     <ArrowRight
                       className="size-3.5 transition-transform group-hover:translate-x-0.5"
@@ -211,7 +209,7 @@ export default async function ContactPage() {
               title={t('channel.title')}
             />
             <ScrollReveal delay={0.1}>
-              <p className="mt-8 max-w-[62ch] text-blak-body text-blak-text-2">
+              <p className="text-blak-body text-blak-text-2 mt-8 max-w-[62ch]">
                 {t('channel.body')}
               </p>
             </ScrollReveal>
@@ -219,26 +217,29 @@ export default async function ContactPage() {
 
           <div className="space-y-8 lg:pt-4">
             <ScrollReveal delay={0.08}>
-              {/* An honest, visible placeholder — not fabricated contact copy,
-                  and not a silent gap either. Mirrored in
-                  PUBLIC_PAGES_IMPLEMENTATION_REPORT.md as an owner decision. */}
-              <PublicCallout title={t('channel.placeholderTitle')}>
-                {t('channel.placeholderBody')}
+              <PublicCallout title={t('channel.supportTitle')}>
+                {t('channel.supportBody')}
+                <Link
+                  href="/support"
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold underline underline-offset-4"
+                >
+                  {t('channel.supportTitle')} <ArrowRight aria-hidden className="size-4" />
+                </Link>
               </PublicCallout>
             </ScrollReveal>
 
             <ScrollReveal delay={0.14}>
-              <div className="rounded-2xl border border-blak-gold/20 bg-blak-gold/[0.04] p-6 sm:p-7">
+              <div className="border-blak-gold/20 bg-blak-gold/[0.04] rounded-2xl border p-6 sm:p-7">
                 <div className="flex items-start gap-3.5">
                   <span
                     aria-hidden
-                    className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-blak-gold/25 text-blak-gold-soft"
+                    className="border-blak-gold/25 text-blak-gold-soft mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg border"
                   >
                     <AlertTriangle className="size-4" />
                   </span>
                   <div>
-                    <h3 className="text-base font-semibold text-blak-text">{t('urgent.title')}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-blak-text-2">
+                    <h3 className="text-blak-text text-base font-semibold">{t('urgent.title')}</h3>
+                    <p className="text-blak-text-2 mt-2 text-sm leading-relaxed">
                       {t('urgent.body')}
                     </p>
                   </div>

@@ -10,6 +10,7 @@ import {
   type FormDefinitionFormState,
 } from '@/features/forms/form-actions';
 import { FORM_FIELD_TYPES, type FormField, type FormFieldType } from '@/features/forms/schema';
+import { formFieldMetadata } from '@/features/forms/metadata';
 import { requiresFrench } from '@/features/cohorts/languages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +38,17 @@ type EditableField = {
   required: boolean;
   max: number;
   options: EditableOption[];
-};
+} & Pick<
+  FormField,
+  | 'sectionEn'
+  | 'helpEn'
+  | 'inputType'
+  | 'sourceQuestion'
+  | 'confidential'
+  | 'reporting'
+  | 'declaration'
+  | 'maxSelections'
+>;
 
 export interface FormDefinitionInitial {
   id: string;
@@ -59,24 +70,38 @@ function makeId(): string {
 }
 
 function blankField(): EditableField {
-  return { id: makeId(), labelEn: '', labelFr: '', type: 'short_text', required: false, max: 5, options: [] };
+  return {
+    id: makeId(),
+    labelEn: '',
+    labelFr: '',
+    type: 'short_text',
+    required: false,
+    max: 5,
+    options: [],
+  };
 }
 
 function toEditable(field: FormField): EditableField {
   return {
+    ...formFieldMetadata(field),
     id: field.id,
     labelEn: field.labelEn,
     labelFr: field.labelFr,
     type: field.type,
     required: field.required,
     max: field.max ?? 5,
-    options: (field.options ?? []).map((o) => ({ value: o.value, labelEn: o.labelEn, labelFr: o.labelFr })),
+    options: (field.options ?? []).map((o) => ({
+      value: o.value,
+      labelEn: o.labelEn,
+      labelFr: o.labelFr,
+    })),
   };
 }
 
 function serialize(fields: EditableField[]): string {
   return JSON.stringify({
     fields: fields.map((f) => ({
+      ...formFieldMetadata(f),
       id: f.id,
       labelEn: f.labelEn.trim(),
       labelFr: f.labelFr.trim(),
@@ -84,7 +109,13 @@ function serialize(fields: EditableField[]): string {
       required: f.required,
       ...(f.type === 'rating' ? { max: f.max } : {}),
       ...(f.type === 'single_select' || f.type === 'multi_select'
-        ? { options: f.options.map((o) => ({ value: o.value.trim(), labelEn: o.labelEn.trim(), labelFr: o.labelFr.trim() })) }
+        ? {
+            options: f.options.map((o) => ({
+              value: o.value.trim(),
+              labelEn: o.labelEn.trim(),
+              labelFr: o.labelFr.trim(),
+            })),
+          }
         : {}),
     })),
   });
@@ -117,7 +148,10 @@ export function FormDefinitionEditor({
   const showFrench = requiresFrench(cohorts.find((c) => c.id === cohortId) ?? null);
 
   const action = isEdit ? updateFormDefinitionForm : createFormDefinitionForm;
-  const [state, formAction, pending] = useActionState<FormDefinitionFormState, FormData>(action, null);
+  const [state, formAction, pending] = useActionState<FormDefinitionFormState, FormData>(
+    action,
+    null,
+  );
 
   useEffect(() => {
     if (state?.ok) router.push('/admin/forms');
@@ -153,7 +187,9 @@ export function FormDefinitionEditor({
   function addOption(fieldIndex: number) {
     setFields((prev) =>
       prev.map((f, i) =>
-        i === fieldIndex ? { ...f, options: [...f.options, { value: '', labelEn: '', labelFr: '' }] } : f,
+        i === fieldIndex
+          ? { ...f, options: [...f.options, { value: '', labelEn: '', labelFr: '' }] }
+          : f,
       ),
     );
   }
@@ -174,7 +210,7 @@ export function FormDefinitionEditor({
       {isEdit ? <input type="hidden" name="id" value={initial!.id} /> : null}
       <input type="hidden" name="schema" value={serialize(fields)} />
 
-      <div className="grid gap-4 rounded-lg border border-border bg-surface p-6 sm:grid-cols-2">
+      <div className="border-border bg-surface grid gap-4 rounded-lg border p-6 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cohortId">{t('cohort')}</Label>
           <input type="hidden" name="cohortId" value={cohortId} />
@@ -209,9 +245,15 @@ export function FormDefinitionEditor({
 
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="title">{t('formTitle')}</Label>
-          <Input id="title" name="title" required maxLength={200} defaultValue={initial?.title ?? ''} />
+          <Input
+            id="title"
+            name="title"
+            required
+            maxLength={200}
+            defaultValue={initial?.title ?? ''}
+          />
           {state && !state.ok && state.error.fieldErrors?.title ? (
-            <p className="text-sm text-risk">{state.error.fieldErrors.title[0]}</p>
+            <p className="text-risk text-sm">{state.error.fieldErrors.title[0]}</p>
           ) : null}
         </div>
 
@@ -248,28 +290,35 @@ export function FormDefinitionEditor({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-h1 text-ink">{t('questions')}</h2>
-          <Button type="button" variant="outline" onClick={() => setFields((p) => [...p, blankField()])}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setFields((p) => [...p, blankField()])}
+          >
             {t('addQuestion')}
           </Button>
         </div>
 
         {!showFrench ? (
-          <p className="rounded-md border border-border bg-surface-2 p-3 text-sm text-ink-2">
+          <p className="border-border bg-surface-2 text-ink-2 rounded-md border p-3 text-sm">
             {t('englishOnlyCohort')}
           </p>
         ) : null}
 
-        {schemaError ? <p className="text-sm text-risk">{schemaError}</p> : null}
+        {schemaError ? <p className="text-risk text-sm">{schemaError}</p> : null}
         {fields.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-ink-3">
+          <p className="border-border text-ink-3 rounded-lg border border-dashed p-6 text-center text-sm">
             {t('noQuestions')}
           </p>
         ) : null}
 
         {fields.map((field, index) => (
-          <fieldset key={field.id} className="space-y-3 rounded-lg border border-border bg-surface p-4">
+          <fieldset
+            key={field.id}
+            className="border-border bg-surface space-y-3 rounded-lg border p-4"
+          >
             <div className="flex items-center justify-between gap-2">
-              <legend className="text-micro uppercase text-ink-3">
+              <legend className="text-micro text-ink-3 uppercase">
                 {t('questionN', { n: index + 1 })}
               </legend>
               <div className="flex gap-1">
@@ -375,12 +424,14 @@ export function FormDefinitionEditor({
             </div>
 
             {field.type === 'single_select' || field.type === 'multi_select' ? (
-              <div className="space-y-2 rounded-md border border-border bg-bg p-3">
+              <div className="border-border bg-bg space-y-2 rounded-md border p-3">
                 <p className="text-small text-ink-2">{t('options')}</p>
                 {field.options.map((opt, oi) => (
                   <div
                     key={oi}
-                    className={showFrench ? 'grid gap-2 sm:grid-cols-3' : 'grid gap-2 sm:grid-cols-2'}
+                    className={
+                      showFrench ? 'grid gap-2 sm:grid-cols-3' : 'grid gap-2 sm:grid-cols-2'
+                    }
                   >
                     <Input
                       aria-label={t('optionValue')}
@@ -414,7 +465,7 @@ export function FormDefinitionEditor({
       </div>
 
       {state && !state.ok && !state.error.fieldErrors ? (
-        <p className="text-sm text-risk">{tc('errorBody')}</p>
+        <p className="text-risk text-sm">{tc('errorBody')}</p>
       ) : null}
 
       <div className="flex gap-3">

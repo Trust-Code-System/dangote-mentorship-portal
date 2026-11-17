@@ -1,0 +1,5718 @@
+[
+  {
+    "code": "C1",
+    "type": "MIDTERM",
+    "roleName": "MENTEE",
+    "title": "Mid-term review — mentee (C1) — 2026/2027",
+    "source": {
+      "filename": "Dangote_Phase2_C1_Mentee_MidTerm_Review_2026-2027_Stream.docx",
+      "sha256": "b0d3a42d550838c76b3704d4b0b6f679aa216b2f68f79a4922d3671e96e42aa3"
+    },
+    "schema": {
+      "fields": [
+        {
+          "id": "about_1",
+          "labelEn": "Full name",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "helpEn": "A check-in halfway through your mentoring journey. It asks what is working, what could change, and what support you need for the second half. Your answers help us improve the programme for you and for future participants. Answer honestly. Choose one option unless the question says tick all that apply. Individual answers are confidential; general reports use totals and themes. Optional Other responses let you add your own answer."
+        },
+        {
+          "id": "about_2",
+          "labelEn": "Email (as on the portal)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "email"
+        },
+        {
+          "id": "about_3",
+          "labelEn": "Department or unit",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_4",
+          "labelEn": "Name of your mentor",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_5",
+          "labelEn": "Date mentorship officially started",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "about_6",
+          "labelEn": "Date you completed this form",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "q1",
+          "labelEn": "Programme track",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "1",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management trainee (MTS)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate trainee (DCP)",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Graduate trainee (DIL)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "labelEn": "Training batch (Phase 1)",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "2",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Batch 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Batch 2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Batch 3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Batch 4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Batch 5",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q3",
+          "labelEn": "Since your official kick-off, how many monthly mentoring sessions have you held?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "3",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "0 to 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "4 or more",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q4",
+          "labelEn": "How often have you and your mentor stayed in touch between sessions (bi-weekly check-ins)?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "4",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "As planned",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Less often than planned",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Rarely",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5",
+          "labelEn": "How many of your sessions have you logged on the portal?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Every session",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most sessions",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Some sessions",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not yet, and I need help",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q6",
+          "labelEn": "After your sessions, did you receive a summary and agreed action points?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "6",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes, always",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Sometimes",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_row1",
+          "labelEn": "My mentor listens to me and takes my ideas seriously.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How far do you agree with each statement about your mentor?"
+        },
+        {
+          "id": "q7_row2",
+          "labelEn": "My mentor respects the time and boundaries we agreed.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_row3",
+          "labelEn": "I feel able to be honest with my mentor, including when I disagree.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_row4",
+          "labelEn": "I know who to contact if the relationship is not working.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_row5",
+          "labelEn": "Our sessions are useful for my work.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8",
+          "labelEn": "Does your mentor manage you or sign off your work?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your mentor and your sessions",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9",
+          "labelEn": "Where are your goals on the portal?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Submitted and approved by my mentor",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Submitted, waiting for approval",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Drafted, not yet submitted",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not yet started",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal1_1",
+          "labelEn": "Goal 1 — Goal (in your words)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "helpEn": "List up to three goals and rate your progress on each."
+        },
+        {
+          "id": "q10_goal1_2",
+          "labelEn": "Goal 1 — Progress so far",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal1_3",
+          "labelEn": "Goal 1 — Linked to a Dangote KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal1_4",
+          "labelEn": "Goal 1 — Next step",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q10_goal2_1",
+          "labelEn": "Goal 2 — Goal (in your words)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q10_goal2_2",
+          "labelEn": "Goal 2 — Progress so far",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal2_3",
+          "labelEn": "Goal 2 — Linked to a Dangote KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal2_4",
+          "labelEn": "Goal 2 — Next step",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q10_goal3_1",
+          "labelEn": "Goal 3 — Goal (in your words)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q10_goal3_2",
+          "labelEn": "Goal 3 — Progress so far",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal3_3",
+          "labelEn": "Goal 3 — Linked to a Dangote KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10_goal3_4",
+          "labelEn": "Goal 3 — Next step",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q11",
+          "labelEn": "Are your goals specific and measurable, with a target and a date?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "All of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q12",
+          "labelEn": "What has helped you make progress most so far?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "12"
+        },
+        {
+          "id": "q13",
+          "labelEn": "What has made progress harder? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Time",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Unclear goals",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Little contact from my mentor",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Work pressure",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Portal difficulties",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Your goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q14_row1",
+          "labelEn": "Confidence in my work",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "Compared with when you started, how much have you grown in each area?"
+        },
+        {
+          "id": "q14_row2",
+          "labelEn": "Communication",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row3",
+          "labelEn": "Leadership mindset",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row4",
+          "labelEn": "Problem-solving",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row5",
+          "labelEn": "Clarity about my career direction",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row6",
+          "labelEn": "Understanding of how Dangote works",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row7",
+          "labelEn": "Learning from the people around me",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q15",
+          "labelEn": "Which kinds of conversation with your mentor have been most valuable? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "15",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Career direction",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Work challenges",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Skills and know-how",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Goal setting",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Confidence",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q15_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "15"
+        },
+        {
+          "id": "q16",
+          "labelEn": "What is one change you have made at work because of this mentorship?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 4: Your growth so far",
+          "sourceQuestion": "16"
+        },
+        {
+          "id": "q17",
+          "labelEn": "How well does your mentor match what you asked for?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "17",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Very well",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Well",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not really",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q18",
+          "labelEn": "Which of these did the match get right? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "18",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "My professional background",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "The skill I want to develop",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "My career goal",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Location or format",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Language",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Working style",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "None of these",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19",
+          "labelEn": "Which language do you use in your sessions?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "English",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "French",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Both",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "19"
+        },
+        {
+          "id": "q20",
+          "labelEn": "What format do your sessions use?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "20",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "In person",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Virtual",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Both",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q21",
+          "labelEn": "Is there anything about the match we should know?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 5: Matching and pairing feedback",
+          "sourceQuestion": "21"
+        },
+        {
+          "id": "q22",
+          "labelEn": "What support would help you most in the second half? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 6: Support for the second half",
+          "sourceQuestion": "22",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Clearer goals",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "More time with my mentor",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Help using the portal",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Scheduling support",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "A peer or group circle",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Skills training",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "A conversation with a programme coordinator",
+              "labelFr": ""
+            },
+            {
+              "value": "o8",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q22_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 6: Support for the second half",
+          "sourceQuestion": "22"
+        },
+        {
+          "id": "q23",
+          "labelEn": "What is one change that would most improve your experience?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 6: Support for the second half",
+          "sourceQuestion": "23"
+        },
+        {
+          "id": "q24",
+          "labelEn": "In the past few months, has anything in your mentoring relationship made you feel uncomfortable, unsafe or pressured?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Wellbeing, safety and confidential concerns",
+          "sourceQuestion": "24",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Yes, quite a lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "I would rather talk in person",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false,
+          "helpEn": "For confidential follow-up, only the designated programme coordinators can read these answers. If you need urgent help, contact dangote.mentorship@kennediaconsulting.net directly. In an emergency, call your local emergency number. Where there is a risk of serious harm or a legal duty to report, coordinators may need to act."
+        },
+        {
+          "id": "q25",
+          "labelEn": "Is anything affecting your wellbeing that you would like support with?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Wellbeing, safety and confidential concerns",
+          "sourceQuestion": "25",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Yes, I would like someone to contact me",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Prefer not to say",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q26",
+          "labelEn": "If you ticked a yes above, please describe briefly (optional).",
+          "labelFr": "",
+          "type": "long_text",
+          "required": false,
+          "sectionEn": "Section 7: Wellbeing, safety and confidential concerns",
+          "sourceQuestion": "26",
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q27",
+          "labelEn": "How should we contact you for follow-up?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Wellbeing, safety and confidential concerns",
+          "sourceQuestion": "27",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Email",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Phone",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "In person",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Do not contact me",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q28",
+          "labelEn": "What is the one goal you will focus on in the next three months?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 8: Next steps",
+          "sourceQuestion": "28"
+        },
+        {
+          "id": "q29",
+          "labelEn": "What will you do to make the second half work?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 8: Next steps",
+          "sourceQuestion": "29"
+        },
+        {
+          "id": "about_61",
+          "labelEn": "I confirm that the information I have given is accurate to the best of my knowledge.",
+          "labelFr": "",
+          "type": "boolean",
+          "required": true,
+          "sectionEn": "Section 9: Declaration",
+          "reporting": false,
+          "declaration": true
+        },
+        {
+          "id": "about_62",
+          "labelEn": "Date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 9: Declaration",
+          "reporting": false,
+          "inputType": "date"
+        }
+      ]
+    }
+  },
+  {
+    "code": "C2",
+    "type": "MIDTERM",
+    "roleName": "MENTOR",
+    "title": "Mid-term review — mentor (C2) — 2026/2027",
+    "source": {
+      "filename": "Dangote_Phase2_C2_Mentor_MidTerm_Review_2026-2027_Stream.docx",
+      "sha256": "dc695c8fecd2e21e9223d025ed0579c4d6a7e761e6eeba95f8001566de9ccc29"
+    },
+    "schema": {
+      "fields": [
+        {
+          "id": "about_1",
+          "labelEn": "Full name",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "helpEn": "A reflection halfway through your mentoring relationship. It asks what you are seeing, how the relationship is working, and what would help in the second half. Your answers also shape mentor support and training for future streams. Answer honestly. Choose one option unless the question says tick all that apply. Individual answers are confidential; general reports use totals and themes. Optional Other responses let you add your own answer."
+        },
+        {
+          "id": "about_2",
+          "labelEn": "Email (as on the portal)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "email"
+        },
+        {
+          "id": "about_3",
+          "labelEn": "Department or unit, and discipline as given on your matching form",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_4",
+          "labelEn": "Name of your mentee",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_5",
+          "labelEn": "Date mentorship officially started",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "about_6",
+          "labelEn": "Date you completed this form",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "q1",
+          "labelEn": "Mentor pool",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "1",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management-trainee pool (Dangote list)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate-trainee pool",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "labelEn": "Mentee track",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "2",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management trainee (MTS)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate trainee (DCP)",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Graduate trainee (DIL)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q3",
+          "labelEn": "Training batch you attended (Phase 1)",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "3",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Batch 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Batch 2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Batch 3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Batch 4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Batch 5",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q4",
+          "labelEn": "How many monthly structured sessions have you held with your mentee so far?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "4",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "0 to 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "4 or more",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5",
+          "labelEn": "How many bi-weekly check-ins have taken place?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Most of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Few",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None yet",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q6",
+          "labelEn": "How many of your sessions have you logged on the portal?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "6",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "All",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Few or none",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7",
+          "labelEn": "How would you describe your mentee's engagement so far?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Highly engaged",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Moderately engaged",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Minimally engaged",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not engaged",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Too early to say",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row1",
+          "labelEn": "My mentee arrives prepared for our sessions.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How far do you agree with each statement?"
+        },
+        {
+          "id": "q8_row2",
+          "labelEn": "My mentee follows through on the actions we agree.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row3",
+          "labelEn": "We have agreed our goals and how we will measure them.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row4",
+          "labelEn": "When concerns come up, we can raise and resolve them together.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row5",
+          "labelEn": "I keep to the agreed boundaries: time, confidentiality and no supervisory role.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9",
+          "labelEn": "On average, how many hours a month does this mentoring take (sessions, preparation and logs)?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Under 2",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "2 to 4",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "5 to 6",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "More than 6",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10",
+          "labelEn": "Is the time commitment manageable alongside your role?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "With some strain",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11",
+          "labelEn": "Does your mentee report to you, or do you approve their work?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Sessions and engagement",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q12",
+          "labelEn": "Have you approved your mentee's goals on the portal?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "12",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "All approved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some approved",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Waiting for my mentee to submit",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not yet discussed",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal1_1",
+          "labelEn": "Goal 1 — Mentee goal (short summary)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "helpEn": "Summarise up to three goals and your view of progress."
+        },
+        {
+          "id": "q13_goal1_2",
+          "labelEn": "Goal 1 — Progress",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal1_3",
+          "labelEn": "Goal 1 — Evidence you have seen",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q13_goal1_4",
+          "labelEn": "Goal 1 — Linked to a KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal2_1",
+          "labelEn": "Goal 2 — Mentee goal (short summary)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q13_goal2_2",
+          "labelEn": "Goal 2 — Progress",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal2_3",
+          "labelEn": "Goal 2 — Evidence you have seen",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q13_goal2_4",
+          "labelEn": "Goal 2 — Linked to a KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal3_1",
+          "labelEn": "Goal 3 — Mentee goal (short summary)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q13_goal3_2",
+          "labelEn": "Goal 3 — Progress",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13_goal3_3",
+          "labelEn": "Goal 3 — Evidence you have seen",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q13_goal3_4",
+          "labelEn": "Goal 3 — Linked to a KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "13",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14",
+          "labelEn": "Overall, how much progress has your mentee made?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Limited",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Too early to say",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q15",
+          "labelEn": "What has helped most so far?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "15"
+        },
+        {
+          "id": "q16",
+          "labelEn": "What has held progress back? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "16",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Time",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Unclear goals",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Mentee availability",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Work pressure",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Portal difficulties",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Personal circumstances (no details needed)",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q16_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and progress",
+          "sourceQuestion": "16"
+        },
+        {
+          "id": "q17",
+          "labelEn": "What growth have you observed in your mentee? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 4: Growth you have seen",
+          "sourceQuestion": "17",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Greater confidence",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Clearer communication",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Stronger leadership mindset",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Better problem-solving",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Clearer career direction",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Better understanding of how Dangote works",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "Stronger ownership of their development",
+              "labelFr": ""
+            },
+            {
+              "value": "o8",
+              "labelEn": "None yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o9",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q17_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 4: Growth you have seen",
+          "sourceQuestion": "17"
+        },
+        {
+          "id": "q18",
+          "labelEn": "Give one specific example of change you have seen. Please do not include personal details.",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 4: Growth you have seen",
+          "sourceQuestion": "18"
+        },
+        {
+          "id": "q19_row1",
+          "labelEn": "Listening without interrupting",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How confident do you feel in each practice right now?"
+        },
+        {
+          "id": "q19_row2",
+          "labelEn": "Asking open questions that help my mentee find their own answers",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_row3",
+          "labelEn": "Giving honest, constructive feedback",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_row4",
+          "labelEn": "Helping my mentee set measurable goals",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_row5",
+          "labelEn": "Knowing when to mentor and when to coach",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_row6",
+          "labelEn": "Keeping confidentiality and boundaries",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19_row7",
+          "labelEn": "Using the portal: logs, goal approvals and messages",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Confident",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very confident",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q20",
+          "labelEn": "Which practice do you want to strengthen in the second half?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 5: Your mentoring practice",
+          "sourceQuestion": "20"
+        },
+        {
+          "id": "q21",
+          "labelEn": "How well does your mentee match what you can offer?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "21",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Very well",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Well",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not really",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q22",
+          "labelEn": "Which parts of the match work? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "22",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "My discipline or professional background",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "The development focus",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "The career goal",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Location or format",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Language",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Working style",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "None of these",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q23",
+          "labelEn": "Which language do you use in your sessions?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "23",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "English",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "French",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Both",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q23_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "23"
+        },
+        {
+          "id": "q24",
+          "labelEn": "What format do your sessions use?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "24",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "In person",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Virtual",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Both",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q25",
+          "labelEn": "Is there anything about the match we should know?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 6: Matching and fit",
+          "sourceQuestion": "25"
+        },
+        {
+          "id": "q26",
+          "labelEn": "What support would most help you for the rest of the programme? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": false,
+          "sectionEn": "Section 7: Support, wellbeing and concerns",
+          "sourceQuestion": "26",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Peer mentor circle",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Refresher on mentoring and coaching skills",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Portal refresher",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Clearer guidance from the programme team",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Templates and tools",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Workload conversation with my own line manager",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false,
+          "helpEn": "For confidential follow-up, only the designated programme coordinators can read these answers. If you need urgent help, contact dangote.mentorship@kennediaconsulting.net directly. In an emergency, call your local emergency number. Where there is a risk of serious harm or a legal duty to report, coordinators may need to act."
+        },
+        {
+          "id": "q26_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 7: Support, wellbeing and concerns",
+          "sourceQuestion": "26",
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q27",
+          "labelEn": "Overall, how are you finding the mentoring role?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Support, wellbeing and concerns",
+          "sourceQuestion": "27",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Rewarding",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly good, with some strain",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Strained",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "I would like to talk to the programme team",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q28",
+          "labelEn": "Have you encountered any concern that should be raised confidentially? (For example: safety, harassment, conflict of interest, a mentee in difficulty, or a health concern affecting your mentee.)",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Support, wellbeing and concerns",
+          "sourceQuestion": "28",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Yes, I will describe it below",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Yes, please contact me",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q29",
+          "labelEn": "Describe the concern if you wish (optional, confidential).",
+          "labelFr": "",
+          "type": "long_text",
+          "required": false,
+          "sectionEn": "Section 7: Support, wellbeing and concerns",
+          "sourceQuestion": "29",
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "q30",
+          "labelEn": "What one change would most improve the second half?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 8: Looking ahead",
+          "sourceQuestion": "30"
+        },
+        {
+          "id": "q31",
+          "labelEn": "What is your focus for the next three months?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 8: Looking ahead",
+          "sourceQuestion": "31"
+        },
+        {
+          "id": "about_63",
+          "labelEn": "I confirm that the information I have given is accurate to the best of my knowledge.",
+          "labelFr": "",
+          "type": "boolean",
+          "required": true,
+          "sectionEn": "Section 9: Declaration",
+          "reporting": false,
+          "declaration": true
+        },
+        {
+          "id": "about_64",
+          "labelEn": "Date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 9: Declaration",
+          "reporting": false,
+          "inputType": "date"
+        }
+      ]
+    }
+  },
+  {
+    "code": "D1",
+    "type": "FINAL",
+    "roleName": "MENTEE",
+    "title": "Final review — mentee (D1) — 2026/2027",
+    "source": {
+      "filename": "Dangote_Phase2_D1_Mentee_Final_Review_2026-2027_Stream.docx",
+      "sha256": "a14802b375e7df4c7d24bd6a588222dd428db419ffd91a9a083726266d6b9ff1"
+    },
+    "schema": {
+      "fields": [
+        {
+          "id": "about_1",
+          "labelEn": "Full name",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "helpEn": "A look back on your mentoring journey. It records what you achieved, what you learned and what you will do next. Your answers shape the close-out report, recognition and the alumni network. Answer honestly. Choose one option unless the question says tick all that apply. Individual answers are confidential; general reports use totals and themes. Optional Other responses let you add your own answer."
+        },
+        {
+          "id": "about_2",
+          "labelEn": "Email (as on the portal)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "email"
+        },
+        {
+          "id": "about_3",
+          "labelEn": "Department or unit",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_4",
+          "labelEn": "Name of your mentor",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_5",
+          "labelEn": "Date mentorship officially started",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "about_6",
+          "labelEn": "Date of formal close",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "q1",
+          "labelEn": "Programme track",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "1",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management trainee (MTS)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate trainee (DCP)",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Graduate trainee (DIL)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "labelEn": "Training batch (Phase 1)",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "2",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Batch 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Batch 2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Batch 3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Batch 4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Batch 5",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q3",
+          "labelEn": "How often did you meet your mentor across the journey?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "3",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "As planned, every month",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most months",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Occasionally",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Rarely",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q4",
+          "labelEn": "How many of your sessions did you log on the portal?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "4",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Almost all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Few",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5_row1",
+          "labelEn": "My mentor helped me work towards my goals.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How far do you agree with each statement?"
+        },
+        {
+          "id": "q5_row2",
+          "labelEn": "I felt respected and heard by my mentor.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5_row3",
+          "labelEn": "I felt safe being honest with my mentor.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5_row4",
+          "labelEn": "My mentor shared useful experience without telling me what to do.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5_row5",
+          "labelEn": "I would ask my mentor for advice again.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q6",
+          "labelEn": "How would you describe your mentoring relationship overall?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Your relationship and support across the journey",
+          "sourceQuestion": "6",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Very supportive",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Supportive",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Unsupportive",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_goal1_1",
+          "labelEn": "Goal 1 — Goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "helpEn": "List up to three goals and the result of each."
+        },
+        {
+          "id": "q7_goal1_2",
+          "labelEn": "Goal 1 — Target date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "inputType": "date"
+        },
+        {
+          "id": "q7_goal1_3",
+          "labelEn": "Goal 1 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_goal1_4",
+          "labelEn": "Goal 1 — Evidence (for example a project, a result or a new responsibility)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7"
+        },
+        {
+          "id": "q7_goal2_1",
+          "labelEn": "Goal 2 — Goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7"
+        },
+        {
+          "id": "q7_goal2_2",
+          "labelEn": "Goal 2 — Target date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "inputType": "date"
+        },
+        {
+          "id": "q7_goal2_3",
+          "labelEn": "Goal 2 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_goal2_4",
+          "labelEn": "Goal 2 — Evidence (for example a project, a result or a new responsibility)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7"
+        },
+        {
+          "id": "q7_goal3_1",
+          "labelEn": "Goal 3 — Goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7"
+        },
+        {
+          "id": "q7_goal3_2",
+          "labelEn": "Goal 3 — Target date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "inputType": "date"
+        },
+        {
+          "id": "q7_goal3_3",
+          "labelEn": "Goal 3 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7_goal3_4",
+          "labelEn": "Goal 3 — Evidence (for example a project, a result or a new responsibility)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "7"
+        },
+        {
+          "id": "q8",
+          "labelEn": "Did your goals link to a Dangote KPI?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "All of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Some of them",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "None",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9",
+          "labelEn": "Overall, how much progress did you make?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Significant",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Minimal",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "None",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q10",
+          "labelEn": "Which goals will you carry on after the programme?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 3: Goals and results",
+          "sourceQuestion": "10"
+        },
+        {
+          "id": "q11_row1",
+          "labelEn": "Self-confidence",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "Compared with when you started, how much have you grown in each area?"
+        },
+        {
+          "id": "q11_row2",
+          "labelEn": "Communication",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row3",
+          "labelEn": "Leadership mindset",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row4",
+          "labelEn": "Problem-solving",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row5",
+          "labelEn": "Emotional intelligence: understanding my own reactions and others' feelings",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row6",
+          "labelEn": "Clarity about my career direction",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row7",
+          "labelEn": "Understanding of how Dangote works and what good conduct looks like",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_row8",
+          "labelEn": "Ownership of my own development",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q12",
+          "labelEn": "Which part of the journey helped you most? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "12",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "The first trimester: building the relationship",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "The second trimester: building skills and knowledge",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "The third trimester: making new habits stick",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "The mid-term review",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "The training before matching",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q12_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "12"
+        },
+        {
+          "id": "q13",
+          "labelEn": "What was the most valuable thing you learned?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q14",
+          "labelEn": "Which habit will you keep?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 4: Your growth across the journey",
+          "sourceQuestion": "14"
+        },
+        {
+          "id": "q15_row1",
+          "labelEn": "I can name my next development goal.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Readiness and next steps",
+          "sourceQuestion": "15",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Yes",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How far do these statements describe you now?"
+        },
+        {
+          "id": "q15_row2",
+          "labelEn": "I know how to ask for feedback on my work.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Readiness and next steps",
+          "sourceQuestion": "15",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Yes",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q15_row3",
+          "labelEn": "I feel ready for a bigger role or a stretch assignment.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Readiness and next steps",
+          "sourceQuestion": "15",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Yes",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q16",
+          "labelEn": "How will you keep developing without a formal mentor?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 5: Readiness and next steps",
+          "sourceQuestion": "16"
+        },
+        {
+          "id": "q17",
+          "labelEn": "Which of these would you be interested in? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 5: Readiness and next steps",
+          "sourceQuestion": "17",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Alumni Mentoring Circles",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Contributing a tool or case study to the resource library",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Mentoring a future mentee",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Talking to HR about career pathways",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not for now",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q18",
+          "labelEn": "How easy was the portal to use?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: The programme and the portal",
+          "sourceQuestion": "18",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "1 (hard)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "5 (easy)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19",
+          "labelEn": "Which portal features did you use? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 6: The programme and the portal",
+          "sourceQuestion": "19",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Goal setting with the AI coach",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Session logs and summaries",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Meetings and calendar",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Private messages",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Reviews",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Signed agreements",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q20",
+          "labelEn": "How well did the training before matching prepare you?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: The programme and the portal",
+          "sourceQuestion": "20",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Well",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very well",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q21",
+          "labelEn": "What would make the programme better for the next cohort? Constructive suggestions are welcome.",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 6: The programme and the portal",
+          "sourceQuestion": "21"
+        },
+        {
+          "id": "q22",
+          "labelEn": "Do you agree to be contacted for follow-up surveys at 3, 6 and 12 months after the programme?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "22",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q23",
+          "labelEn": "Would you share your experience as a short case study or testimonial for the resource library?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "23",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes, with my name",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Yes, anonymously",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q24",
+          "labelEn": "Would you like to be considered for recognition for your journey?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "24",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q25",
+          "labelEn": "Would you recommend the programme to others?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "25",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Definitely",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Maybe",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q26",
+          "labelEn": "Do you have a concern you want raised confidentially?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "26",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Yes, please contact me",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false,
+          "helpEn": "For confidential follow-up, only the designated programme coordinators can read these answers. If you need urgent help, contact dangote.mentorship@kennediaconsulting.net directly. In an emergency, call your local emergency number. Where there is a risk of serious harm or a legal duty to report, coordinators may need to act."
+        },
+        {
+          "id": "q27",
+          "labelEn": "Anything else you would like us to know?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": false,
+          "sectionEn": "Section 7: Follow-up, recognition and sharing",
+          "sourceQuestion": "27",
+          "confidential": true,
+          "reporting": false
+        },
+        {
+          "id": "about_59",
+          "labelEn": "I confirm that the information I have given is accurate to the best of my knowledge.",
+          "labelFr": "",
+          "type": "boolean",
+          "required": true,
+          "sectionEn": "Section 8: Declaration",
+          "reporting": false,
+          "declaration": true
+        },
+        {
+          "id": "about_60",
+          "labelEn": "Date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 8: Declaration",
+          "reporting": false,
+          "inputType": "date"
+        }
+      ]
+    }
+  },
+  {
+    "code": "D2",
+    "type": "FINAL",
+    "roleName": "MENTOR",
+    "title": "Final review — mentor (D2) — 2026/2027",
+    "source": {
+      "filename": "Dangote_Phase2_D2_Mentor_Final_Review_2026-2027_Stream.docx",
+      "sha256": "9ba1c9fbd1b932afc9f3166b8aa96d52fb5e15c4e1f36d8489f4ae9dd8be8f2f"
+    },
+    "schema": {
+      "fields": [
+        {
+          "id": "about_1",
+          "labelEn": "Full name",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "helpEn": "A look back on your mentoring journey. It records outcomes for your mentee, what you learned as a mentor, and your advice for future streams. Your reflections feed the close-out report and the mentor community. Answer honestly. Choose one option unless the question says tick all that apply. Individual answers are confidential; general reports use totals and themes. Optional Other responses let you add your own answer."
+        },
+        {
+          "id": "about_2",
+          "labelEn": "Email (as on the portal)",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "email"
+        },
+        {
+          "id": "about_3",
+          "labelEn": "Department or unit, and discipline as given on your matching form",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_4",
+          "labelEn": "Name of your mentee",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false
+        },
+        {
+          "id": "about_5",
+          "labelEn": "Date mentorship officially started",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "about_6",
+          "labelEn": "Date of formal close",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 1: About you",
+          "reporting": false,
+          "inputType": "date"
+        },
+        {
+          "id": "q1",
+          "labelEn": "Mentor pool",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "1",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management-trainee pool (Dangote list)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate-trainee pool",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "labelEn": "Mentee track",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "2",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Management trainee (MTS)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Graduate trainee (DCP)",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Graduate trainee (DIL)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q3",
+          "labelEn": "Training batch you attended (Phase 1)",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 1: About you",
+          "sourceQuestion": "3",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Batch 1",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Batch 2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Batch 3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Batch 4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Batch 5",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q4",
+          "labelEn": "How often did you meet your mentee across the journey?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "4",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Monthly, as planned",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most months",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Occasionally",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Rarely",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q5",
+          "labelEn": "How many of your session logs did you submit?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "5",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "All",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Most",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Some",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Few",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q6",
+          "labelEn": "How would you rate your mentee's overall engagement?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "6",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Excellent",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Good",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Fair",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Poor",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q7",
+          "labelEn": "How would you describe the mentor and mentee relationship?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "7",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Very strong",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Strong",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Average",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Weak",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row1",
+          "labelEn": "I kept the agreed boundaries: time, confidentiality and no supervisory role.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How far do you agree with each statement?"
+        },
+        {
+          "id": "q8_row2",
+          "labelEn": "I shared experience without telling my mentee what to do.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row3",
+          "labelEn": "I gave honest, constructive feedback when it was needed.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row4",
+          "labelEn": "I was able to make time for my mentee each month.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q8_row5",
+          "labelEn": "I would recommend mentoring to a colleague.",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 2: Engagement across the journey",
+          "sourceQuestion": "8",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Strongly disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Disagree",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Neutral",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Agree",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Strongly agree",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9_goal1_1",
+          "labelEn": "Goal 1 — Mentee goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9",
+          "helpEn": "List your mentee's main goals and the result of each."
+        },
+        {
+          "id": "q9_goal1_2",
+          "labelEn": "Goal 1 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9_goal1_3",
+          "labelEn": "Goal 1 — Evidence you saw",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9"
+        },
+        {
+          "id": "q9_goal2_1",
+          "labelEn": "Goal 2 — Mentee goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9"
+        },
+        {
+          "id": "q9_goal2_2",
+          "labelEn": "Goal 2 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9_goal2_3",
+          "labelEn": "Goal 2 — Evidence you saw",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9"
+        },
+        {
+          "id": "q9_goal3_1",
+          "labelEn": "Goal 3 — Mentee goal",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9"
+        },
+        {
+          "id": "q9_goal3_2",
+          "labelEn": "Goal 3 — Result",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q9_goal3_3",
+          "labelEn": "Goal 3 — Evidence you saw",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "9"
+        },
+        {
+          "id": "q10",
+          "labelEn": "Overall, what was the outcome for your mentee?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "10",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Fully achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Mostly achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Partly achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not achieved",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Too early to say",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11",
+          "labelEn": "What growth did you observe? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "11",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Improved communication",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Greater confidence",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Clearer career direction",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Stronger leadership mindset",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Better problem-solving",
+              "labelFr": ""
+            },
+            {
+              "value": "o6",
+              "labelEn": "Better understanding of how Dangote works",
+              "labelFr": ""
+            },
+            {
+              "value": "o7",
+              "labelEn": "Stronger ownership of their development",
+              "labelFr": ""
+            },
+            {
+              "value": "o8",
+              "labelEn": "None",
+              "labelFr": ""
+            },
+            {
+              "value": "o9",
+              "labelEn": "Other",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q11_other",
+          "labelEn": "If you selected Other, please specify.",
+          "labelFr": "",
+          "type": "short_text",
+          "required": false,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "11"
+        },
+        {
+          "id": "q12",
+          "labelEn": "How ready is your mentee for the next step?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "12",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Ready",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Nearly ready",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Developing",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not yet",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q13",
+          "labelEn": "Give one specific example of growth you saw. Please do not include personal details.",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 3: Outcomes for your mentee",
+          "sourceQuestion": "13"
+        },
+        {
+          "id": "q14_row1",
+          "labelEn": "Listening",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ],
+          "helpEn": "How much have your mentoring skills grown over the journey?"
+        },
+        {
+          "id": "q14_row2",
+          "labelEn": "Asking open questions",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row3",
+          "labelEn": "Giving feedback",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row4",
+          "labelEn": "Helping set measurable goals",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row5",
+          "labelEn": "Telling mentoring apart from coaching",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row6",
+          "labelEn": "Ethics and boundaries",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q14_row7",
+          "labelEn": "Using the portal",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "14",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Moderate",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "A lot",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q15",
+          "labelEn": "What did you personally gain from being a mentor?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 4: Your growth as a mentor",
+          "sourceQuestion": "15"
+        },
+        {
+          "id": "q16",
+          "labelEn": "How would you rate the support you received from the programme team?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Support, training and the portal",
+          "sourceQuestion": "16",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Excellent",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Good",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Fair",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Poor",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q17",
+          "labelEn": "How well did the mentor training prepare you?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Support, training and the portal",
+          "sourceQuestion": "17",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Not at all",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "A little",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Well",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Very well",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q18",
+          "labelEn": "How easy was the portal to use?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 5: Support, training and the portal",
+          "sourceQuestion": "18",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "1 (hard)",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "2",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "3",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "4",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "5 (easy)",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q19",
+          "labelEn": "What worked well?",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 5: Support, training and the portal",
+          "sourceQuestion": "19"
+        },
+        {
+          "id": "q20",
+          "labelEn": "What should change for future mentors? Constructive suggestions are welcome.",
+          "labelFr": "",
+          "type": "long_text",
+          "required": true,
+          "sectionEn": "Section 5: Support, training and the portal",
+          "sourceQuestion": "20"
+        },
+        {
+          "id": "q21",
+          "labelEn": "Would you mentor again in a future stream?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Looking ahead",
+          "sourceQuestion": "21",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Maybe",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q22",
+          "labelEn": "Which of these would you be willing to do? (tick all that apply)",
+          "labelFr": "",
+          "type": "multi_select",
+          "required": true,
+          "sectionEn": "Section 6: Looking ahead",
+          "sourceQuestion": "22",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Join an alumni mentoring circle",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Share a tool or case study",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "Champion mentoring in my department",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Coach other mentors",
+              "labelFr": ""
+            },
+            {
+              "value": "o5",
+              "labelEn": "None for now",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q23",
+          "labelEn": "Should mentoring outcomes be linked to performance review, succession planning or leadership development?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Looking ahead",
+          "sourceQuestion": "23",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Partly",
+              "labelFr": ""
+            },
+            {
+              "value": "o3",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o4",
+              "labelEn": "Not sure",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q24",
+          "labelEn": "Do you agree to be contacted for follow-up surveys at 3, 6 and 12 months after the programme?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": true,
+          "sectionEn": "Section 6: Looking ahead",
+          "sourceQuestion": "24",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "Yes",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "No",
+              "labelFr": ""
+            }
+          ]
+        },
+        {
+          "id": "q25",
+          "labelEn": "Is there anything you would like the programme team to know in confidence?",
+          "labelFr": "",
+          "type": "single_select",
+          "required": false,
+          "sectionEn": "Section 6: Looking ahead",
+          "sourceQuestion": "25",
+          "options": [
+            {
+              "value": "o1",
+              "labelEn": "No",
+              "labelFr": ""
+            },
+            {
+              "value": "o2",
+              "labelEn": "Yes, please contact me",
+              "labelFr": ""
+            }
+          ],
+          "confidential": true,
+          "reporting": false,
+          "helpEn": "For confidential follow-up, only the designated programme coordinators can read these answers. If you need urgent help, contact dangote.mentorship@kennediaconsulting.net directly. In an emergency, call your local emergency number. Where there is a risk of serious harm or a legal duty to report, coordinators may need to act."
+        },
+        {
+          "id": "about_51",
+          "labelEn": "I confirm that the information I have given is accurate to the best of my knowledge.",
+          "labelFr": "",
+          "type": "boolean",
+          "required": true,
+          "sectionEn": "Section 7: Declaration",
+          "reporting": false,
+          "declaration": true
+        },
+        {
+          "id": "about_52",
+          "labelEn": "Date",
+          "labelFr": "",
+          "type": "short_text",
+          "required": true,
+          "sectionEn": "Section 7: Declaration",
+          "reporting": false,
+          "inputType": "date"
+        }
+      ]
+    }
+  }
+]

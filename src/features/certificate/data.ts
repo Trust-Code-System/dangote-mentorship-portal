@@ -9,12 +9,7 @@ import {
   type Language,
 } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import {
-  adminCohortFilter,
-  canAccessCohort,
-  hasAnyRole,
-  type SessionUser,
-} from '@/lib/auth/rbac';
+import { adminCohortFilter, canAccessCohort, hasAnyRole, type SessionUser } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { createCertificateId, type CertificateRole } from './id';
 
@@ -39,6 +34,9 @@ export interface CertificateData {
   cohortName: string;
   counterpartName: string | null;
   earned: boolean;
+  requirementsMet: boolean;
+  adminApproved: boolean;
+  adminApprovedAt: Date | null;
   eligibility: CertificateEligibility;
   /** ISO yyyy-mm-dd. Completion date when earned, otherwise preview date. */
   issuedDate: string;
@@ -53,9 +51,7 @@ function asCertificateLanguage(locale: Language | string): CertificateLanguage {
 
 function latestDate(dates: Array<Date | null | undefined>): Date {
   const valid = dates.filter((date): date is Date => date instanceof Date);
-  return valid.length > 0
-    ? new Date(Math.max(...valid.map((date) => date.getTime())))
-    : new Date();
+  return valid.length > 0 ? new Date(Math.max(...valid.map((date) => date.getTime()))) : new Date();
 }
 
 async function loadMatch(matchId: string) {
@@ -65,6 +61,8 @@ async function loadMatch(matchId: string) {
       id: true,
       cohortId: true,
       acceptedAt: true,
+      menteeCertificateApprovedAt: true,
+      menteeCertificateApprovedById: true,
       mentorId: true,
       menteeId: true,
       mentor: { select: { id: true, name: true, locale: true } },
@@ -157,18 +155,19 @@ async function buildCertificateData(
     midtermSubmitted: midterm !== null,
     finalSubmitted: final !== null,
   };
-  const earned = Object.values(eligibility).every(Boolean);
+  const requirementsMet = Object.values(eligibility).every(Boolean);
+  const adminApproved = Boolean(
+    match.menteeCertificateApprovedAt && match.menteeCertificateApprovedById,
+  );
+  const earned = requirementsMet && (role !== 'mentee' || adminApproved);
   const completionDate = latestDate([
     approvedGoal?.updatedAt,
     midterm?.submittedAt,
     final?.submittedAt,
-    match.cohort.endDate && match.cohort.endDate <= new Date()
-      ? match.cohort.endDate
-      : null,
+    role === 'mentee' ? match.menteeCertificateApprovedAt : null,
+    match.cohort.endDate && match.cohort.endDate <= new Date() ? match.cohort.endDate : null,
   ]);
-  const issuedDate = (earned ? completionDate : new Date())
-    .toISOString()
-    .slice(0, 10);
+  const issuedDate = (earned ? completionDate : new Date()).toISOString().slice(0, 10);
 
   return {
     matchId: match.id,
@@ -181,19 +180,16 @@ async function buildCertificateData(
     cohortName: match.cohort.name,
     counterpartName: counterpart.name?.trim() || null,
     earned,
+    requirementsMet,
+    adminApproved,
+    adminApprovedAt: match.menteeCertificateApprovedAt,
     eligibility,
     issuedDate,
-    certificateId: createCertificateId(
-      match.id,
-      role,
-      completionDate.getUTCFullYear(),
-    ),
+    certificateId: createCertificateId(match.id, role, completionDate.getUTCFullYear()),
   };
 }
 
-export async function getCertificateData(
-  userId: string,
-): Promise<CertificateData | null> {
+export async function getCertificateData(userId: string): Promise<CertificateData | null> {
   const match = await prisma.match.findFirst({
     where: {
       status: MatchStatus.ACCEPTED,
@@ -207,10 +203,7 @@ export async function getCertificateData(
 
   const fullMatch = await loadMatch(match.id);
   if (!fullMatch) return null;
-  return buildCertificateData(
-    fullMatch,
-    match.menteeId === userId ? 'mentee' : 'mentor',
-  );
+  return buildCertificateData(fullMatch, match.menteeId === userId ? 'mentee' : 'mentor');
 }
 
 export async function getCertificateForViewer(
@@ -223,8 +216,7 @@ export async function getCertificateForViewer(
 
   const recipientId = role === 'mentee' ? match.menteeId : match.mentorId;
   const ownsCertificate = viewer.id === recipientId;
-  const isScopedAdmin =
-    hasAnyRole(viewer, ADMIN_ROLES) && canAccessCohort(viewer, match.cohortId);
+  const isScopedAdmin = hasAnyRole(viewer, ADMIN_ROLES) && canAccessCohort(viewer, match.cohortId);
   if (!ownsCertificate && !isScopedAdmin) return null;
 
   return buildCertificateData(match, role);

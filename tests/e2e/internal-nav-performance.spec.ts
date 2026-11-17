@@ -1,3 +1,4 @@
+import { signInForAudit } from './helpers/session';
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,11 +29,7 @@ type TimingRow = {
 };
 
 async function signInAsAdmin(page: import('@playwright/test').Page) {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(ADMIN_EMAIL);
-  await page.getByLabel('Password', { exact: true }).fill(ADMIN_PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.waitForURL('**/admin');
+  await signInForAudit(page, ADMIN_EMAIL, ADMIN_PASSWORD);
 }
 
 test.describe('authenticated sidebar navigation performance', () => {
@@ -225,7 +222,5 @@ function median(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? Math.round((sorted[mid - 1]! + sorted[mid]!) / 2)
-    : sorted[mid]!;
+  return sorted.length % 2 === 0 ? Math.round((sorted[mid - 1]! + sorted[mid]!) / 2) : sorted[mid]!;
 }
