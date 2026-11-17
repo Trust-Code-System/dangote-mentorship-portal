@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:webpack": "next dev",
-    "build": "next build",
+    "build": "npm run release:check && next build",
     "build:turbopack": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -19,6 +19,7 @@
     "test:e2e": "playwright test",
     "test:load": "k6 run tests/load/smoke.js",
     "check:services": "node --env-file=.env scripts/check-runtime-services.mjs",
+    "release:check": "node --conditions=react-server --import tsx scripts/check-production-release.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prisma:generate": "prisma generate",
