@@ -35,11 +35,18 @@ restore unrelated records, or rerun the demo seed. Content and files remain inta
 - Includes the pending shared Redis expiry repair from PR #74, retaining the existing sign-in throttle message.
 - `npm run build` runs `npm run release:check` before Next.js compilation.
 - The check runs only for a production environment. Ordinary CI/preview builds skip live provider access.
-- It verifies matching database/Storage targets, the selected database schema and all migration checksums, accepting equivalent Windows/Linux line endings.
+- It verifies matching runtime/migration database targets, the selected database schema and all migration checksums, accepting equivalent Windows/Linux line endings.
 - It verifies a private Storage bucket with a unique synthetic upload/download and removes only that probe.
 - It pings the configured shared Redis store and authenticates to the approved SMTP provider with TLS. It sends no email.
 - Credentials remain inside the Vercel build environment; provider error bodies and secrets are not printed.
 - Vercel Node version is aligned to the repository's Node 22 requirement. Production mail explicitly selects SMTP.
+
+The database uses project `whgzjjjiruhluqxjjacy` and private file Storage uses
+`owkgqglwvjlaizsfpuir`. Storage is provider-independent in this app; these projects
+do not need to be identical. The initial staged candidate stopped because the
+new preflight incorrectly assumed they must match. The check was corrected to
+compare runtime/migration database targets and verify Storage independently;
+no data or files were moved and that failed candidate was not promoted.
 
 ## Verification and remaining operations
 

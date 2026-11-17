@@ -21,14 +21,14 @@ async function main() {
   assertProductionEnvironment();
   const runtime = new URL(process.env.DATABASE_URL!);
   const direct = new URL(process.env.DIRECT_URL!);
-  const storageUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!);
+  // Storage is deliberately provider-independent and can use a different
+  // Supabase project. Only the runtime and migration database must match.
   if (
     runtime.username !== direct.username ||
     runtime.pathname !== direct.pathname ||
-    runtime.searchParams.get('schema') !== direct.searchParams.get('schema') ||
-    runtime.username !== `postgres.${storageUrl.hostname.split('.')[0]}`
+    runtime.searchParams.get('schema') !== direct.searchParams.get('schema')
   ) {
-    throw new ReleaseCheckError('Database, migration and Storage targets do not match.');
+    throw new ReleaseCheckError('Runtime and migration database targets do not match.');
   }
 
   const db = new PrismaClient();
