@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireRole, assertCohortAccess } from '@/lib/auth/rbac';
@@ -62,6 +63,7 @@ export async function setMenteeCertificatePermission(formData: FormData) {
       });
     });
     revalidatePath('/admin/certificates');
+    revalidateMentorshipProgress();
     revalidatePath('/certificate');
     revalidatePath('/dashboard/mentee');
     return ok({ approved });

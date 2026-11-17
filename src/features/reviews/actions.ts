@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { z } from 'zod';
 import { Prisma, ReviewStatus, ReviewType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
@@ -153,6 +154,7 @@ export async function submitReviewResponse(
     });
 
     revalidatePath(REVIEW_PATH[input.type]);
+    revalidateMentorshipProgress();
     return ok({ responseId: response.id });
   } catch (error) {
     return mapActionError(error);

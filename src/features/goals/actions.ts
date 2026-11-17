@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { GoalStage, GoalStatus } from '@prisma/client';
@@ -199,6 +200,7 @@ export async function saveGoal(formData: FormData): Promise<ActionResult<{ id: s
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -279,6 +281,7 @@ export async function submitGoal(formData: FormData): Promise<ActionResult<{ id:
     }
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -370,6 +373,7 @@ export async function reviewGoal(formData: FormData): Promise<ActionResult<{ id:
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goal.id });
   } catch (error) {
     return mapActionError(error);
@@ -422,6 +426,7 @@ export async function advanceGoalStage(formData: FormData): Promise<ActionResult
     });
 
     revalidatePath('/goals');
+    revalidateMentorshipProgress();
     return ok({ id: goalId });
   } catch (error) {
     return mapActionError(error);
@@ -496,6 +501,7 @@ async function persistGoalEvidence(input: {
     metadata: { goalId: input.goal.id },
   });
   revalidatePath('/goals');
+  revalidateMentorshipProgress();
   return ok({ id: evidence.id });
 }
 

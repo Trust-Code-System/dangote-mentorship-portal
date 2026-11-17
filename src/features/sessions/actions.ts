@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import { ActionItemStatus, MeetingType } from '@prisma/client';
@@ -177,6 +178,7 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
         entityId: log.id,
       });
       revalidatePath('/sessions');
+      revalidateMentorshipProgress();
       return ok({ id: log.id });
     }
 
@@ -232,6 +234,7 @@ export async function saveSessionLog(formData: FormData): Promise<ActionResult<{
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: log.id });
   } catch (error) {
     return mapActionError(error);
@@ -279,6 +282,7 @@ export async function saveReflection(formData: FormData): Promise<ActionResult<{
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: logId });
   } catch (error) {
     return mapActionError(error);
@@ -337,6 +341,7 @@ export async function addActionItem(formData: FormData): Promise<ActionResult<{ 
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: item.id });
   } catch (error) {
     return mapActionError(error);
@@ -403,6 +408,7 @@ export async function updateActionItemStatus(
     });
 
     revalidatePath('/sessions');
+    revalidateMentorshipProgress();
     return ok({ id: itemId });
   } catch (error) {
     return mapActionError(error);

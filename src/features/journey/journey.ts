@@ -38,7 +38,7 @@ export interface JourneyFacts {
   goalsApproved: boolean;
   sessionCount: number;
   lastSessionAt: Date | null;
-  // Per-user review completion isn't modelled until M3 — passed as false for now.
+  // Loaded from the user's submitted reviews in the current cohort.
   midtermDone: boolean;
   finalDone: boolean;
   certificateApproved?: boolean;
@@ -125,7 +125,7 @@ function sessionsState(f: JourneyFacts): JourneyState {
 }
 
 function reviewState(done: boolean): JourneyState {
-  // Per-user review state lands in M3; until then a not-done review is upcoming.
+  // A saved submission completes a review; otherwise it remains upcoming.
   return done ? 'completed' : 'pending';
 }
 
@@ -138,8 +138,8 @@ function completionState(f: JourneyFacts): JourneyState {
 
 const LINKS: Record<JourneyStepKey, string | null> = {
   profile: '/profile',
-  training: null,
-  matched: null,
+  training: '/help',
+  matched: '/pair',
   confidentiality: '/agreements',
   goals: '/goals',
   sessions: '/sessions',

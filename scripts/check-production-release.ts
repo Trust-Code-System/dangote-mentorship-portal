@@ -7,6 +7,7 @@ import { assertProductionEnvironment } from '../src/lib/env/production';
 import { getMailTransport } from '../src/lib/mail';
 import { readSmtpMailConfig } from '../src/lib/mail/smtp';
 import { getSupabaseAdmin } from '../src/lib/supabase/server';
+import { aiLimits } from '../src/lib/ai/limits';
 
 class ReleaseCheckError extends Error {}
 
@@ -19,6 +20,12 @@ async function main() {
     return;
   }
   assertProductionEnvironment();
+  const aiEnabled = !['false', '0', 'off'].includes(
+    process.env.AI_FEATURES_ENABLED?.trim().toLowerCase() ?? '',
+  );
+  if (aiEnabled && (!aiLimits().monthlyTokens || !aiLimits().monthlyRequests)) {
+    throw new ReleaseCheckError('Set the programme AI allowances before production AI activation.');
+  }
   const runtime = new URL(process.env.DATABASE_URL!);
   const direct = new URL(process.env.DIRECT_URL!);
   // Storage is deliberately provider-independent and can use a different

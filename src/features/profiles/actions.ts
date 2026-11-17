@@ -2,12 +2,17 @@
 
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
+import { revalidateMentorshipProgress } from '@/features/journey/revalidate';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/rbac';
 import { writeAuditLog } from '@/lib/audit/audit';
 import { getStorageProvider } from '@/lib/storage';
-import { canUseDirectUploads, createSignedUploadTarget, removeStoredObject } from '@/lib/storage/direct';
+import {
+  canUseDirectUploads,
+  createSignedUploadTarget,
+  removeStoredObject,
+} from '@/lib/storage/direct';
 import { verifyFileSignature } from '@/lib/files/sniff';
 import { mapActionError, ok, fail, type ActionResult } from '@/lib/actions/result';
 
@@ -67,9 +72,7 @@ export async function updateOwnAccountForm(formData: FormData): Promise<void> {
 }
 
 // Editable for ALL users (admins included), so everyone has a profile section.
-export async function updateOwnAccount(
-  formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+export async function updateOwnAccount(formData: FormData): Promise<ActionResult<{ id: string }>> {
   try {
     const user = await requireUser();
     const data = accountSchema.parse(Object.fromEntries(formData));
@@ -87,6 +90,7 @@ export async function updateOwnAccount(
     });
 
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     return ok({ id: user.id });
   } catch (error) {
     return mapActionError(error);
@@ -129,6 +133,7 @@ export async function updateOwnMentorProfile(
     });
 
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     return ok({ id: profile.id });
   } catch (error) {
     return mapActionError(error);
@@ -170,6 +175,7 @@ export async function updateOwnMenteeProfile(
     });
 
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     return ok({ id: profile.id });
   } catch (error) {
     return mapActionError(error);
@@ -202,13 +208,18 @@ export async function prepareOwnAvatarUpload(input: {
   name: string;
   type: string;
   size: number;
-}): Promise<ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>> {
+}): Promise<
+  ActionResult<{ mode: 'direct'; bucket: string; path: string; token: string } | { mode: 'server' }>
+> {
   try {
     const user = await requireUser();
     const file = avatarUploadInput.parse(input);
     const ext = ALLOWED_AVATAR_TYPES[file.type];
     if (!ext) {
-      return fail({ code: 'VALIDATION', message: 'Unsupported image type. Use PNG, JPEG, or WebP.' });
+      return fail({
+        code: 'VALIDATION',
+        message: 'Unsupported image type. Use PNG, JPEG, or WebP.',
+      });
     }
     if (!canUseDirectUploads()) return ok({ mode: 'server' });
     const target = await createSignedUploadTarget(avatarKey(user.id, ext));
@@ -228,7 +239,10 @@ export async function confirmOwnAvatarUpload(input: {
     const file = avatarUploadInput.omit({ name: true }).parse(input);
     const ext = ALLOWED_AVATAR_TYPES[file.type];
     if (!ext || !input.path.startsWith(`avatars/${user.id}/`) || !input.path.endsWith(ext)) {
-      return fail({ code: 'FORBIDDEN', message: 'The upload target is not valid for this account.' });
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'The upload target is not valid for this account.',
+      });
     }
 
     const bytes = await getStorageProvider().get(input.path);
@@ -245,6 +259,7 @@ export async function confirmOwnAvatarUpload(input: {
       entityId: user.id,
     });
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     revalidatePath('/', 'layout');
     return ok({ id: user.id });
   } catch (error) {
@@ -268,7 +283,10 @@ export async function uploadOwnAvatar(
     }
     const ext = ALLOWED_AVATAR_TYPES[file.type];
     if (!ext) {
-      return fail({ code: 'VALIDATION', message: 'Unsupported image type. Use PNG, JPEG, or WebP.' });
+      return fail({
+        code: 'VALIDATION',
+        message: 'Unsupported image type. Use PNG, JPEG, or WebP.',
+      });
     }
 
     const key = avatarKey(user.id, ext);
@@ -289,6 +307,7 @@ export async function uploadOwnAvatar(
 
     // Avatar appears in the shell (top bar + sidebar) across every page.
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     revalidatePath('/', 'layout');
     return ok({ id: user.id });
   } catch (error) {
@@ -314,6 +333,7 @@ export async function removeOwnAvatar(
     });
 
     revalidatePath('/profile');
+    revalidateMentorshipProgress();
     revalidatePath('/', 'layout');
     return ok({ id: user.id });
   } catch (error) {

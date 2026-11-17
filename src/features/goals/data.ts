@@ -29,7 +29,10 @@ export async function getMenteeGoals(userId: string): Promise<GoalWithDetail[]> 
     where: { menteeId: userId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
     include: {
-      reviews: { orderBy: { createdAt: 'desc' }, include: { reviewer: { select: { name: true } } } },
+      reviews: {
+        orderBy: { createdAt: 'desc' },
+        include: { reviewer: { select: { name: true } } },
+      },
       evidenceFiles: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' } },
     },
   });
@@ -44,20 +47,23 @@ export async function getGoalsForMentor(userId: string): Promise<MenteeGoalGroup
 
   const goals = await prisma.goal.findMany({
     where: {
-      menteeId: { in: pairings.map((p) => p.menteeId) },
+      OR: pairings.map((pairing) => ({ menteeId: pairing.menteeId, cohortId: pairing.cohortId })),
       deletedAt: null,
       // Mentors never see a goal still in the mentee's private draft.
       status: { not: 'DRAFT' },
     },
     orderBy: { createdAt: 'desc' },
     include: {
-      reviews: { orderBy: { createdAt: 'desc' }, include: { reviewer: { select: { name: true } } } },
+      reviews: {
+        orderBy: { createdAt: 'desc' },
+        include: { reviewer: { select: { name: true } } },
+      },
       evidenceFiles: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' } },
     },
   });
 
   return pairings.map((mentee) => ({
     mentee,
-    goals: goals.filter((g) => g.menteeId === mentee.menteeId),
+    goals: goals.filter((g) => g.menteeId === mentee.menteeId && g.cohortId === mentee.cohortId),
   }));
 }

@@ -11,6 +11,7 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { getMentorPairings } from '@/lib/pairings';
 import { pairAccessFromMatch, type PairRole } from './access';
+import { getCertificateData } from '@/features/certificate/data';
 
 // All Pair Contract Page I/O (experience-layer.md §1.8). The page is the shared
 // home base for one matched pair: it aggregates the records the pair already
@@ -59,6 +60,7 @@ export interface PairMeetingSummary {
 export interface PairWorkspace {
   role: PairRole;
   cohortId: string;
+  cohortName: string;
   mentor: PairPerson;
   mentee: PairPerson;
   agreements: PairAgreementStatus[];
@@ -68,6 +70,9 @@ export interface PairWorkspace {
   sessionCount: number;
   lastSessionAt: Date | null;
   openActionItems: PairActionItem[];
+  totalActionCount: number;
+  certificateEarned: boolean;
+  latestSession: { id: string; date: Date | null; title: string } | null;
 }
 
 const ACTIVE_ACTION_STATUSES: ActionItemStatus[] = [
@@ -78,8 +83,19 @@ const ACTIVE_ACTION_STATUSES: ActionItemStatus[] = [
 
 function person(
   user: { id: string; name: string | null },
-  mentor: { department: string | null; jobTitle: string | null; phone: string | null; preferredLanguage: Language; availability: string | null } | null,
-  mentee: { department: string | null; jobTitle: string | null; phone: string | null; preferredLanguage: Language } | null,
+  mentor: {
+    department: string | null;
+    jobTitle: string | null;
+    phone: string | null;
+    preferredLanguage: Language;
+    availability: string | null;
+  } | null,
+  mentee: {
+    department: string | null;
+    jobTitle: string | null;
+    phone: string | null;
+    preferredLanguage: Language;
+  } | null,
 ): PairPerson {
   const profile = mentor ?? mentee;
   return {
@@ -95,10 +111,8 @@ function person(
 
 /**
  * The full workspace for the pair identified by menteeId, as seen by viewerId,
- * or null when the viewer is not part of that accepted pair. The mentor's draft-
- * stage goals stay hidden from no one here — both parties already share goals
- * once submitted; a still-DRAFT goal is the mentee's alone, so it is excluded
- * from the shared view (mirrors getGoalsForMentor).
+ * or null when the viewer is not part of that accepted pair. Only submitted
+ * goals are shared; the mentee's private drafts are excluded.
  */
 export async function getPairWorkspace(
   viewerId: string,
@@ -108,6 +122,7 @@ export async function getPairWorkspace(
     where: { menteeId, status: MatchStatus.ACCEPTED, deletedAt: null },
     orderBy: { acceptedAt: 'desc' },
     include: {
+      cohort: { select: { name: true } },
       mentor: { select: { id: true, name: true } },
       mentee: { select: { id: true, name: true } },
     },
@@ -120,28 +135,41 @@ export async function getPairWorkspace(
   const { cohortId } = match;
   const now = new Date();
 
-  // Optional widgets (profiles, goals, meetings, …) must not take down the
-  // workspace when one secondary query fails — settle each independently.
+  // A failed query must not turn into a fabricated zero or completed milestone.
   const [
-    mentorProfileResult,
-    menteeProfileResult,
-    agreementsResult,
-    goalsResult,
-    nextMeetingResult,
-    meetingCountResult,
-    sessionAggResult,
-    actionItemsResult,
-  ] = await Promise.allSettled([
+    mentorProfile,
+    menteeProfile,
+    agreements,
+    goals,
+    nextMeeting,
+    meetingCount,
+    sessionAgg,
+    actionItems,
+    totalActionCount,
+    latestSession,
+    certificate,
+  ] = await Promise.all([
     prisma.mentorProfile.findFirst({
       where: { userId: mentorId, cohortId, deletedAt: null },
-      select: { department: true, jobTitle: true, phone: true, preferredLanguage: true, availability: true },
+      select: {
+        department: true,
+        jobTitle: true,
+        phone: true,
+        preferredLanguage: true,
+        availability: true,
+      },
     }),
     prisma.menteeProfile.findFirst({
       where: { userId: menteeId, cohortId, deletedAt: null },
       select: { department: true, jobTitle: true, phone: true, preferredLanguage: true },
     }),
     prisma.agreement.findMany({
-      where: { signedById: { in: [mentorId, menteeId] }, cohortId, signedAt: { not: null }, deletedAt: null },
+      where: {
+        signedById: { in: [mentorId, menteeId] },
+        cohortId,
+        signedAt: { not: null },
+        deletedAt: null,
+      },
       select: { type: true, signedById: true, signedAt: true },
     }),
     prisma.goal.findMany({
@@ -153,6 +181,7 @@ export async function getPairWorkspace(
       where: {
         mentorId,
         menteeId,
+        cohortId,
         deletedAt: null,
         status: MeetingStatus.SCHEDULED,
         didHappen: null,
@@ -161,9 +190,11 @@ export async function getPairWorkspace(
       orderBy: { startsAt: 'asc' },
       select: { id: true, title: true, startsAt: true },
     }),
-    prisma.meeting.count({ where: { mentorId, menteeId, deletedAt: null } }),
+    prisma.meeting.count({
+      where: { mentorId, menteeId, cohortId, deletedAt: null, didHappen: true },
+    }),
     prisma.sessionLog.aggregate({
-      where: { mentorId, menteeId, deletedAt: null },
+      where: { mentorId, menteeId, cohortId, deletedAt: null },
       _count: { _all: true },
       _max: { date: true },
     }),
@@ -177,32 +208,35 @@ export async function getPairWorkspace(
       orderBy: [{ dueDate: 'asc' }, { createdAt: 'asc' }],
       include: { assignee: { select: { name: true } } },
     }),
+    prisma.actionItem.count({
+      where: { cohortId, deletedAt: null, sessionLog: { mentorId, menteeId, deletedAt: null } },
+    }),
+    prisma.sessionLog.findFirst({
+      where: { cohortId, mentorId, menteeId, deletedAt: null },
+      orderBy: [{ date: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+      select: { id: true, date: true, competencyDiscussed: true },
+    }),
+    getCertificateData(menteeId),
   ]);
-
-  const mentorProfile = mentorProfileResult.status === 'fulfilled' ? mentorProfileResult.value : null;
-  const menteeProfile = menteeProfileResult.status === 'fulfilled' ? menteeProfileResult.value : null;
-  const agreements = agreementsResult.status === 'fulfilled' ? agreementsResult.value : [];
-  const goals = goalsResult.status === 'fulfilled' ? goalsResult.value : [];
-  const nextMeeting = nextMeetingResult.status === 'fulfilled' ? nextMeetingResult.value : null;
-  const meetingCount = meetingCountResult.status === 'fulfilled' ? meetingCountResult.value : 0;
-  const sessionAgg =
-    sessionAggResult.status === 'fulfilled'
-      ? sessionAggResult.value
-      : { _count: { _all: 0 }, _max: { date: null } };
-  const actionItems = actionItemsResult.status === 'fulfilled' ? actionItemsResult.value : [];
 
   const agreementStatus = (type: AgreementType): PairAgreementStatus => ({
     type,
-    mentorSignedAt: agreements.find((a) => a.type === type && a.signedById === mentorId)?.signedAt ?? null,
-    menteeSignedAt: agreements.find((a) => a.type === type && a.signedById === menteeId)?.signedAt ?? null,
+    mentorSignedAt:
+      agreements.find((a) => a.type === type && a.signedById === mentorId)?.signedAt ?? null,
+    menteeSignedAt:
+      agreements.find((a) => a.type === type && a.signedById === menteeId)?.signedAt ?? null,
   });
 
   return {
     role,
     cohortId,
+    cohortName: match.cohort.name,
     mentor: person(match.mentor, mentorProfile, null),
     mentee: person(match.mentee, null, menteeProfile),
-    agreements: [agreementStatus(AgreementType.MENTORING), agreementStatus(AgreementType.CONFIDENTIALITY)],
+    agreements: [
+      agreementStatus(AgreementType.MENTORING),
+      agreementStatus(AgreementType.CONFIDENTIALITY),
+    ],
     goals,
     nextMeeting: nextMeeting
       ? { id: nextMeeting.id, title: nextMeeting.title, startsAt: nextMeeting.startsAt }
@@ -210,6 +244,15 @@ export async function getPairWorkspace(
     meetingCount,
     sessionCount: sessionAgg._count._all,
     lastSessionAt: sessionAgg._max.date ?? null,
+    totalActionCount,
+    certificateEarned: certificate?.matchId === match.id && certificate.earned,
+    latestSession: latestSession
+      ? {
+          id: latestSession.id,
+          date: latestSession.date,
+          title: latestSession.competencyDiscussed || 'Mentoring session',
+        }
+      : null,
     openActionItems: actionItems.map((a) => ({
       id: a.id,
       title: a.title,
