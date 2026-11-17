@@ -58,13 +58,17 @@ describe('profile + training gating', () => {
   });
 
   it('training is completed once recorded complete', () => {
-    expect(stateOf(facts({ profileComplete: true, trainingCompleted: true }), 'training')).toBe('completed');
+    expect(stateOf(facts({ profileComplete: true, trainingCompleted: true }), 'training')).toBe(
+      'completed',
+    );
   });
 });
 
 describe('matching is admin-driven, never needs_action', () => {
   it('stays pending until matched, then completed', () => {
-    expect(stateOf(facts({ profileComplete: true, trainingCompleted: true }), 'matched')).toBe('pending');
+    expect(stateOf(facts({ profileComplete: true, trainingCompleted: true }), 'matched')).toBe(
+      'pending',
+    );
     expect(stateOf(facts({ matched: true }), 'matched')).toBe('completed');
   });
 });
@@ -75,13 +79,17 @@ describe('confidentiality agreement', () => {
     expect(stateOf(facts(), 'confidentiality')).toBe('pending');
   });
   it('needs action once matched and recently', () => {
-    expect(stateOf(facts({ ...base, matchedAt: daysAgo(3) }), 'confidentiality')).toBe('needs_action');
+    expect(stateOf(facts({ ...base, matchedAt: daysAgo(3) }), 'confidentiality')).toBe(
+      'needs_action',
+    );
   });
   it('goes overdue when unsigned past the soft deadline', () => {
     expect(stateOf(facts({ ...base, matchedAt: daysAgo(20) }), 'confidentiality')).toBe('overdue');
   });
   it('is completed once signed', () => {
-    expect(stateOf(facts({ ...base, confidentialitySigned: true }), 'confidentiality')).toBe('completed');
+    expect(stateOf(facts({ ...base, confidentialitySigned: true }), 'confidentiality')).toBe(
+      'completed',
+    );
   });
 });
 
@@ -95,11 +103,14 @@ describe('goals — mentee vs mentor', () => {
     expect(stateOf(facts({ ...signed, matchedAt: daysAgo(40) }), 'goals')).toBe('overdue');
   });
   it('mentor: a submitted-but-unapproved goal needs review', () => {
+    expect(stateOf(facts({ role: 'mentor', matched: true, goalsSubmitted: true }), 'goals')).toBe(
+      'needs_action',
+    );
     expect(
-      stateOf(facts({ role: 'mentor', matched: true, goalsSubmitted: true }), 'goals'),
-    ).toBe('needs_action');
-    expect(
-      stateOf(facts({ role: 'mentor', matched: true, goalsSubmitted: true, goalsApproved: true }), 'goals'),
+      stateOf(
+        facts({ role: 'mentor', matched: true, goalsSubmitted: true, goalsApproved: true }),
+        'goals',
+      ),
     ).toBe('completed');
   });
 });
@@ -109,21 +120,37 @@ describe('monthly sessions', () => {
   it('needs the first session once matched', () => {
     expect(stateOf(facts(ready), 'sessions')).toBe('needs_action');
   });
+  it('does not report an undated log as a recent monthly session', () => {
+    expect(stateOf(facts({ ...ready, sessionCount: 1, lastSessionAt: null }), 'sessions')).toBe(
+      'needs_action',
+    );
+  });
   it('is overdue with no session long after matching', () => {
     expect(stateOf(facts({ matched: true, matchedAt: daysAgo(45) }), 'sessions')).toBe('overdue');
   });
   it('is on track right after a recent session', () => {
-    expect(stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(10) }), 'sessions')).toBe('completed');
+    expect(
+      stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(10) }), 'sessions'),
+    ).toBe('completed');
   });
   it('is due again after a month, overdue after two', () => {
-    expect(stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(40) }), 'sessions')).toBe('needs_action');
-    expect(stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(70) }), 'sessions')).toBe('overdue');
+    expect(
+      stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(40) }), 'sessions'),
+    ).toBe('needs_action');
+    expect(
+      stateOf(facts({ ...ready, sessionCount: 2, lastSessionAt: daysAgo(70) }), 'sessions'),
+    ).toBe('overdue');
   });
 });
 
 describe('completion certificate', () => {
   it('keeps completed mentees pending until explicit certificate permission', () => {
-    const done = facts({ trainingCompleted: true, goalsApproved: true, midtermDone: true, finalDone: true });
+    const done = facts({
+      trainingCompleted: true,
+      goalsApproved: true,
+      midtermDone: true,
+      finalDone: true,
+    });
     expect(stateOf(done, 'completion')).toBe('pending');
     expect(stateOf({ ...done, certificateApproved: true }, 'completion')).toBe('completed');
   });

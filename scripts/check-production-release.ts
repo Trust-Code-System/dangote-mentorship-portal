@@ -88,39 +88,55 @@ async function main() {
     await db.$disconnect();
   }
 
-  const supabase = getSupabaseAdmin();
-  if (!supabase) throw new ReleaseCheckError('Private Storage is not configured.');
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET!;
-  const { data: bucketData, error: bucketError } = await supabase.storage.getBucket(bucket);
-  if (bucketError || !bucketData || bucketData.public)
-    throw new ReleaseCheckError('Storage must be reachable and private.');
-  const key = `release-check/${randomUUID()}.txt`;
-  const contents = `Production release verification ${randomUUID()}`;
-  let uploaded = false;
+  let storageFailure: ReleaseCheckError | null = null;
   try {
-    const { error } = await supabase.storage
-      .from(bucket)
-      .upload(key, contents, { contentType: 'text/plain' });
-    if (error) throw new ReleaseCheckError('Storage upload verification failed.');
-    uploaded = true;
-    const { data, error: readError } = await supabase.storage.from(bucket).download(key);
-    if (readError || !data || (await data.text()) !== contents)
-      throw new ReleaseCheckError('Storage download verification failed.');
-  } finally {
-    if (uploaded) {
-      const { error } = await supabase.storage.from(bucket).remove([key]);
-      if (error) throw new ReleaseCheckError('Release probe cleanup failed.');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) throw new ReleaseCheckError('Private Storage is not configured.');
+    const bucket = process.env.SUPABASE_STORAGE_BUCKET!;
+    const { data: bucketData, error: bucketError } = await supabase.storage.getBucket(bucket);
+    if (bucketError || !bucketData || bucketData.public)
+      throw new ReleaseCheckError('Storage must be reachable and private.');
+    const key = `release-check/${randomUUID()}.txt`;
+    const contents = `Production release verification ${randomUUID()}`;
+    let uploaded = false;
+    try {
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(key, contents, { contentType: 'text/plain' });
+      if (error) throw new ReleaseCheckError('Storage upload verification failed.');
+      uploaded = true;
+      const { data, error: readError } = await supabase.storage.from(bucket).download(key);
+      if (readError || !data || (await data.text()) !== contents)
+        throw new ReleaseCheckError('Storage download verification failed.');
+    } finally {
+      if (uploaded) {
+        const { error } = await supabase.storage.from(bucket).remove([key]);
+        if (error) throw new ReleaseCheckError('Release probe cleanup failed.');
+      }
     }
+    console.info('[release] Private Storage upload/download verified; probe removed.');
+  } catch (error) {
+    storageFailure =
+      error instanceof ReleaseCheckError
+        ? error
+        : new ReleaseCheckError('Private Storage is unavailable.');
+    console.error('[release] ' + storageFailure.message);
   }
-  console.info('[release] Private Storage upload/download verified; probe removed.');
 
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
-  if ((await redis.ping()) !== 'PONG')
-    throw new ReleaseCheckError('Shared rate-limit store is unavailable.');
-  console.info('[release] Shared Redis rate-limit store reachable.');
+  let redisFailure: ReleaseCheckError | null = null;
+  try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      retry: { retries: 0 },
+    });
+    if ((await redis.ping()) !== 'PONG')
+      throw new ReleaseCheckError('Shared rate-limit store is unavailable.');
+    console.info('[release] Shared Redis rate-limit store reachable.');
+  } catch {
+    redisFailure = new ReleaseCheckError('Shared Redis rate-limit store is unavailable.');
+    console.error('[release] ' + redisFailure.message);
+  }
 
   // SMTP is the approved programme transport. Checking the actual selector
   // prevents a stale Resend key or log fallback from silently taking precedence.
@@ -150,11 +166,12 @@ async function main() {
     client.close();
   }
   console.info('[release] SMTP authentication and TLS verified; no email sent.');
-  console.info('[release] Production service checks passed.');
   if (process.env.SEND_APPROVED_LAUNCH_TEST === 'true') {
     const { sendApprovedLaunchTest } = await import('./send-approved-launch-test');
     await sendApprovedLaunchTest();
   }
+  if (storageFailure || redisFailure) throw storageFailure ?? redisFailure;
+  console.info('[release] Production service checks passed.');
 }
 
 main().catch((error: unknown) => {

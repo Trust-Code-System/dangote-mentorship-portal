@@ -118,7 +118,7 @@ function sessionsState(f: JourneyFacts): JourneyState {
     return 'needs_action';
   }
   const gap = daysSince(f.now, f.lastSessionAt);
-  if (gap === null) return 'completed';
+  if (gap === null) return 'needs_action';
   if (gap > SESSION_OVERDUE_DAYS) return 'overdue';
   if (gap > SESSION_DUE_DAYS) return 'needs_action';
   return 'completed';
