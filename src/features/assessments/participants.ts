@@ -11,7 +11,7 @@ import { ReviewType, RoleName } from '@prisma/client';
 //
 //   QUARTERLY assessment  → mentors AND mentees, and it gates portal access
 //                           for both.
-//   MONTHLY meeting form  → mentees only, and it gates nothing.
+//   MONTHLY meeting form  → mentors AND mentees, and it gates nothing.
 // ──────────────────────────────────────────────────────────────────────────
 
 /** The recurring forms, in the order a participant sees them. */
@@ -29,7 +29,7 @@ export function rolesRequiredFor(formType: RecurringFormType): RoleName[] {
     case ReviewType.QUARTERLY:
       return [RoleName.MENTOR, RoleName.MENTEE];
     case ReviewType.MONTHLY:
-      return [RoleName.MENTEE];
+      return [RoleName.MENTOR, RoleName.MENTEE];
   }
 }
 
@@ -56,10 +56,7 @@ export function mustComplete(roles: RoleName[], formType: RecurringFormType): bo
  * A user who is somehow both mentor and mentee answers as a mentee: that is the
  * side with the development goals the assessment is mostly about.
  */
-export function respondentRoleFor(
-  roles: RoleName[],
-  formType: RecurringFormType,
-): RoleName | null {
+export function respondentRoleFor(roles: RoleName[], formType: RecurringFormType): RoleName | null {
   const required = rolesRequiredFor(formType);
   if (required.includes(RoleName.MENTEE) && roles.includes(RoleName.MENTEE)) {
     return RoleName.MENTEE;

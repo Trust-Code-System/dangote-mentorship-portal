@@ -139,9 +139,9 @@ const CLEAR: AssessmentGate = {
 export const getAssessmentGate = cache(async (user: SessionUser): Promise<AssessmentGate> => {
   if (!isGatedRole(user)) return CLEAR;
 
-  // Only the forms this user actually owes can gate them — a mentor is never
-  // held to the mentee-only monthly form.
-  let formTypes = formTypesFor(user.roles);
+  // Monthly forms never gate access, even if a window is misconfigured.
+  // Assignment and reminder queries still include them for both roles.
+  let formTypes = formTypesFor(user.roles).filter((type) => type !== ReviewType.MONTHLY);
   if (formTypes.length === 0) return CLEAR;
 
   const cohortId = await resolveParticipantCohortId(user.id);
@@ -315,8 +315,8 @@ export interface AssessmentOverview {
  * User ids in a cohort who owe `formType` — the denominator for completion.
  *
  * Derived from participants.ts rather than hardcoded, so the admin's numbers
- * and the gate can never disagree about who was supposed to submit: the
- * quarterly assessment counts mentors and mentees, the monthly form mentees.
+ * and the gate can never disagree about who was supposed to submit.
+ * Both recurring forms count mentors and mentees.
  */
 export async function listCohortRespondentIds(
   cohortId: string,
