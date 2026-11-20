@@ -419,11 +419,20 @@ const MONTHLY_MENTEE: StandardForm = {
   ],
 };
 
+// Mentors submit their own account of the same meeting. Keep a separate
+// definition so a mentor never submits against a mentee-only form.
+const MONTHLY_MENTOR: StandardForm = {
+  ...MONTHLY_MENTEE,
+  roleName: RoleName.MENTOR,
+  title: 'Monthly meeting form — mentor',
+};
+
 /** Every standard set, in the order an admin sees them. */
 export const STANDARD_FORMS: StandardForm[] = [
   QUARTERLY_MENTEE,
   QUARTERLY_MENTOR,
   MONTHLY_MENTEE,
+  MONTHLY_MENTOR,
 ];
 
 /**
