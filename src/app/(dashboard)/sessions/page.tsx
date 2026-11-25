@@ -26,38 +26,34 @@ export default async function SessionsPage() {
   ]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-ink-2">{t('subtitle')}</p>
       </div>
 
-      {/* Mentor: log a session + review past logs */}
+      {/* Mentor: read the mentee's shared record and add a reflection. */}
       {isMentor ? (
         <section className="space-y-4">
           {mentorPairings.length === 0 ? (
             <p className="text-muted-foreground">{t('noPairings')}</p>
           ) : (
             <>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">{t('logSession')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SessionForm
-                    mentees={mentorPairings.map((p) => ({ id: p.menteeId, name: p.menteeName }))}
-                  />
-                </CardContent>
-              </Card>
+              <p className="text-ink-2">{t('mentorWorkflow')}</p>
 
               {mentorGroups.map((group) => (
                 <div key={group.mentee.menteeId} className="space-y-3">
                   <h2 className="font-display text-h2 text-ink">{group.mentee.menteeName}</h2>
                   {group.logs.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t('noLogsYet')}</p>
+                    <p className="text-muted-foreground text-sm">{t('noLogsYet')}</p>
                   ) : (
                     group.logs.map((log) => (
-                      <SessionLogCard key={log.id} log={log} viewer="mentor" currentUserId={user.id} />
+                      <SessionLogCard
+                        key={log.id}
+                        log={log}
+                        viewer="mentor"
+                        currentUserId={user.id}
+                      />
                     ))
                   )}
                 </div>
@@ -67,13 +63,27 @@ export default async function SessionsPage() {
         </section>
       ) : null}
 
-      {/* Mentee: view logs + reflect */}
+      {/* Mentee: record the session, then read the mentor's reflection. */}
       {isMentee ? (
         <section className="space-y-4">
-          <h2 className="font-display text-h2 text-ink">{t('mySessions')}</h2>
           {!menteePairing ? (
             <p className="text-muted-foreground">{t('notEligible')}</p>
-          ) : menteeLogs.length === 0 ? (
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">{t('logSession')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SessionForm
+                  menteeId={user.id}
+                  cohortId={menteePairing.cohortId}
+                  mentorName={menteePairing.mentorName}
+                />
+              </CardContent>
+            </Card>
+          )}
+          <h2 className="font-display text-h2 text-ink">{t('mySessions')}</h2>
+          {menteeLogs.length === 0 ? (
             <p className="text-muted-foreground">{t('noLogsMentee')}</p>
           ) : (
             menteeLogs.map((log) => (

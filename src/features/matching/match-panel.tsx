@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 // Match panel on the mentor/mentee dashboards: shows pairs awaiting the
 // user's response (admin-approved or overridden) and active accepted pairs.
-export async function MatchPanel({ userId, role }: { userId: string; role: 'mentor' | 'mentee' }) {
+export async function MatchPanel({ userId, role, hideAccepted = false }: { userId: string; role: 'mentor' | 'mentee'; hideAccepted?: boolean }) {
   const t = await getTranslations('matching');
 
   const where = role === 'mentor' ? { mentorId: userId } : { menteeId: userId };
@@ -25,7 +25,8 @@ export async function MatchPanel({ userId, role }: { userId: string; role: 'ment
   });
 
   const pending = matches.filter((m) => m.status !== MatchStatus.ACCEPTED);
-  const accepted = matches.filter((m) => m.status === MatchStatus.ACCEPTED);
+  const accepted = hideAccepted ? [] : matches.filter((m) => m.status === MatchStatus.ACCEPTED);
+  if (hideAccepted && pending.length === 0) return null;
 
   return (
     <Card>

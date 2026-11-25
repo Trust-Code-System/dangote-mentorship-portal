@@ -24,6 +24,9 @@ export function FormRowActions({ id, isActive }: { id: string; isActive: boolean
 
   return (
     <div className="flex flex-wrap justify-end gap-2">
+      <Button asChild variant="outline" size="sm">
+        <Link href={`/admin/forms/${id}/preview`}>Preview</Link>
+      </Button>
       <Button asChild variant="ghost" size="sm">
         <Link href={`/admin/forms/${id}/edit`}>{tc('edit')}</Link>
       </Button>

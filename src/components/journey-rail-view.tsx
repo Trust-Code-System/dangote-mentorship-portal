@@ -40,7 +40,7 @@ function Node({ node }: { node: RailNode }) {
   return (
     <span
       className={cn(
-        'relative flex size-8 shrink-0 items-center justify-center rounded-full border-2 bg-bg transition-colors',
+        'bg-surface relative flex size-7 shrink-0 items-center justify-center rounded-full border transition-colors',
         completed && 'border-green bg-green text-white',
         current && 'border-green text-green',
         attention && 'border-warn text-warn',
@@ -48,13 +48,6 @@ function Node({ node }: { node: RailNode }) {
         node.state === 'pending' && 'border-border text-ink-3',
       )}
     >
-      {/* Current-step pulse — replaced by a static heavier ring for reduced motion. */}
-      {current && (
-        <span
-          aria-hidden
-          className="absolute inset-0 animate-ping rounded-full ring-2 ring-green/40 motion-reduce:hidden"
-        />
-      )}
       {completed ? (
         <Check className="size-4" />
       ) : (
@@ -65,7 +58,7 @@ function Node({ node }: { node: RailNode }) {
         <span
           aria-hidden
           className={cn(
-            'absolute -right-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-bg',
+            'ring-bg absolute -top-0.5 -right-0.5 size-2.5 rounded-full ring-2',
             overdue ? 'bg-risk' : 'bg-warn',
           )}
         />
@@ -74,12 +67,7 @@ function Node({ node }: { node: RailNode }) {
   );
 }
 
-export function JourneyRailView({
-  title,
-  progressLabel,
-  openLabel,
-  nodes,
-}: JourneyRailViewProps) {
+export function JourneyRailView({ title, progressLabel, openLabel, nodes }: JourneyRailViewProps) {
   const n = nodes.length;
   const currentIndex = nodes.findIndex((x) => x.isCurrent);
   // Fill reaches the current node; if the journey is complete, fill the line.
@@ -102,16 +90,19 @@ export function JourneyRailView({
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-h3">{title}</CardTitle>
-          <span className="text-small font-medium tabular-nums text-ink-2">{progressLabel}</span>
+          <span className="text-small text-ink-2 font-medium tabular-nums">{progressLabel}</span>
         </div>
       </CardHeader>
       <CardContent>
         <TooltipProvider delayDuration={150}>
           {/* Desktop: horizontal rail */}
           <div className="relative hidden md:block">
-            <div className="absolute left-4 right-4 top-4 h-0.5 -translate-y-1/2 bg-surface-2" aria-hidden />
             <div
-              className="absolute left-4 top-4 h-0.5 -translate-y-1/2 rounded-full bg-green transition-[width] duration-700 ease-out motion-reduce:transition-none"
+              className="bg-surface-2 absolute top-4 right-4 left-4 h-0.5 -translate-y-1/2"
+              aria-hidden
+            />
+            <div
+              className="bg-green absolute top-4 left-4 h-0.5 -translate-y-1/2 rounded-full transition-[width] duration-700 ease-out motion-reduce:transition-none"
               style={{ width: `calc((100% - 2rem) * ${fill / 100})` }}
               aria-hidden
             />
@@ -126,12 +117,16 @@ export function JourneyRailView({
                           <Link
                             href={node.link}
                             aria-label={`${node.label} — ${node.stateLabel}`}
-                            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                            className="focus-visible:ring-green/30 focus-visible:ring-offset-bg rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                           >
                             <Node node={node} />
                           </Link>
                         ) : (
-                          <span tabIndex={0} aria-label={`${node.label} — ${node.stateLabel}`} className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30">
+                          <span
+                            tabIndex={0}
+                            aria-label={`${node.label} — ${node.stateLabel}`}
+                            className="focus-visible:ring-green/30 rounded-full focus-visible:ring-2 focus-visible:outline-none"
+                          >
                             <Node node={node} />
                           </span>
                         )}
@@ -140,9 +135,9 @@ export function JourneyRailView({
                     </Tooltip>
                     <span
                       className={cn(
-                        'text-center text-micro leading-tight',
+                        'text-micro text-center leading-tight',
                         node.state === 'completed' || node.isCurrent
-                          ? 'font-bold text-green-strong'
+                          ? 'text-green-strong font-bold'
                           : node.state === 'pending'
                             ? 'text-ink-3'
                             : 'text-ink-2',
@@ -165,7 +160,7 @@ export function JourneyRailView({
                   <span
                     aria-hidden
                     className={cn(
-                      'absolute left-4 top-8 h-[calc(100%-1rem)] w-0.5 -translate-x-1/2',
+                      'absolute top-8 left-4 h-[calc(100%-1rem)] w-0.5 -translate-x-1/2',
                       node.state === 'completed' ? 'bg-green' : 'bg-surface-2',
                     )}
                   />
@@ -173,11 +168,16 @@ export function JourneyRailView({
                 {node.link ? (
                   <Link
                     href={node.link}
-                    className="flex flex-1 items-center gap-3 rounded-md px-1 py-1.5 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green/30"
+                    className="hover:bg-surface focus-visible:ring-green/30 flex flex-1 items-center gap-3 rounded-md px-1 py-1.5 focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Node node={node} />
                     <span className="flex flex-1 items-center justify-between gap-2">
-                      <span className={cn('text-body', node.state === 'pending' ? 'text-ink-3' : 'text-ink')}>
+                      <span
+                        className={cn(
+                          'text-body',
+                          node.state === 'pending' ? 'text-ink-3' : 'text-ink',
+                        )}
+                      >
                         {node.label}
                       </span>
                       <span className="text-small text-ink-2">{node.stateLabel}</span>
@@ -187,7 +187,12 @@ export function JourneyRailView({
                   <span className="flex flex-1 items-center gap-3 px-1 py-1.5">
                     <Node node={node} />
                     <span className="flex flex-1 items-center justify-between gap-2">
-                      <span className={cn('text-body', node.state === 'pending' ? 'text-ink-3' : 'text-ink')}>
+                      <span
+                        className={cn(
+                          'text-body',
+                          node.state === 'pending' ? 'text-ink-3' : 'text-ink',
+                        )}
+                      >
                         {node.label}
                       </span>
                       <span className="text-small text-ink-2">{node.stateLabel}</span>

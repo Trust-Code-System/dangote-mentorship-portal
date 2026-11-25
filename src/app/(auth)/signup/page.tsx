@@ -17,9 +17,6 @@ export default async function SignupPage() {
 
   const t = await getTranslations('signup');
   const ta = await getTranslations('auth');
-  // Demo default: the seeded super-admin address. Swap for a real support inbox
-  // (or a routed contact form) before the pilot.
-  const requestHref = 'mailto:admin@blakmoh.com?subject=Mentorship%20programme%20access%20request';
 
   return (
     <div>
@@ -27,37 +24,37 @@ export default async function SignupPage() {
         <AuthHeader heading={ta('requestHeading')} supporting={t('subtitle')} />
 
         {/* Have an invite code → redeem it */}
-        <section className="rounded-xl border border-auth-border bg-auth-field/60 p-4">
+        <section className="border-auth-border bg-auth-field/60 rounded-xl border p-4">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex size-9 items-center justify-center rounded-lg bg-blak-green/15 text-[#0A6E13]">
+            <span className="bg-blak-green/15 inline-flex size-9 items-center justify-center rounded-lg text-[#0A6E13]">
               <Ticket className="size-4" aria-hidden />
             </span>
-            <h2 className="text-base font-semibold text-auth-ink">{t('inviteTitle')}</h2>
+            <h2 className="text-auth-ink text-base font-semibold">{t('inviteTitle')}</h2>
           </div>
-          <p className="mt-2 text-sm leading-relaxed text-auth-ink-2">{t('inviteHint')}</p>
+          <p className="text-auth-ink-2 mt-2 text-sm leading-relaxed">{t('inviteHint')}</p>
           <div className="mt-3">
             <InviteCodeForm />
           </div>
         </section>
 
         {/* No invite yet → ask an administrator */}
-        <section className="mt-4 rounded-xl border border-auth-border bg-auth-field/60 p-4">
+        <section className="border-auth-border bg-auth-field/60 mt-4 rounded-xl border p-4">
           <div className="flex items-center gap-2.5">
-            <span className="inline-flex size-9 items-center justify-center rounded-lg bg-blak-gold/20 text-[#7A5411]">
+            <span className="bg-blak-gold/20 inline-flex size-9 items-center justify-center rounded-lg text-[#7A5411]">
               <Mail className="size-4" aria-hidden />
             </span>
-            <h2 className="text-base font-semibold text-auth-ink">{t('requestTitle')}</h2>
+            <h2 className="text-auth-ink text-base font-semibold">{t('requestTitle')}</h2>
           </div>
-          <p className="mt-2 text-sm leading-relaxed text-auth-ink-2">{t('requestHint')}</p>
-          <a
-            href={requestHref}
-            className="mt-4 inline-flex h-[52px] w-full items-center justify-center rounded-xl border border-auth-border bg-auth-surface text-base font-semibold text-auth-ink transition-colors hover:bg-auth-border/40"
+          <p className="text-auth-ink-2 mt-2 text-sm leading-relaxed">{t('requestHint')}</p>
+          <Link
+            href="/contact"
+            className="border-auth-border bg-auth-surface text-auth-ink hover:bg-auth-border/40 mt-4 inline-flex h-[52px] w-full items-center justify-center rounded-xl border text-base font-semibold transition-colors"
           >
             {t('requestCta')}
-          </a>
+          </Link>
         </section>
 
-        <p className="mt-4 border-t border-auth-border pt-4 text-center text-sm text-auth-ink-2">
+        <p className="border-auth-border text-auth-ink-2 mt-4 border-t pt-4 text-center text-sm">
           {t('haveAccount')}{' '}
           <Link
             href="/login"

@@ -1,36 +1,37 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { CalendarDays, ArrowUpRight } from 'lucide-react';
 import type { RoleName } from '@prisma/client';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
-// Slim header for the personalized dashboards (experience-layer.md §1.1) — the
-// rich "what matters now" content lives in the summary cards below it, so this
-// replaces the M0 stub shell for matched roles.
 export async function DashboardHeader({
   titleKey,
   userName,
-  roles,
 }: {
   titleKey: 'mentor' | 'mentee' | 'reviewer' | 'trainer';
   userName?: string | null;
   roles: RoleName[];
 }) {
   const t = await getTranslations('dashboard');
+  const w = await getTranslations('workspace');
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 className="font-display text-h1 text-ink">{t(titleKey)}</h1>
-        <p className="text-ink-2">
-          {t('welcome')}
-          {userName ? `, ${userName}` : ''}.
+    <header className="flex flex-wrap items-end justify-between gap-5">
+      <div className="space-y-2">
+        <p className="text-ink-3 text-xs font-medium">{t(titleKey)}</p>
+        <h1 className="text-h1 text-ink font-semibold tracking-tight">
+          {userName ? w('greeting', { name: userName.split(' ')[0] ?? userName }) : t(titleKey)}
+        </h1>
+        <p className="text-small text-ink-2 max-w-xl leading-relaxed">
+          {w(titleKey === 'mentee' ? 'menteeSubtitle' : 'mentorSubtitle')}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {roles.map((role) => (
-          <Badge key={role} variant="neutral">
-            {role}
-          </Badge>
-        ))}
-      </div>
-    </div>
+      <Button asChild size="sm" variant="outline">
+        <Link href="/calendar">
+          <CalendarDays className="size-4" />
+          {w('viewCalendar')}
+          <ArrowUpRight className="size-3" />
+        </Link>
+      </Button>
+    </header>
   );
 }

@@ -37,7 +37,10 @@ async function settle(ms = 400) {
 }
 
 const input = () => container.querySelector('input[type="search"]') as HTMLInputElement;
-const panelText = () => container.textContent ?? '';
+// Exit motion keeps the DOM mounted; only the accessible, interactive panel
+// counts as open. Closed content must become inert immediately.
+const panelText = () =>
+  container.querySelector('.soft-panel[aria-hidden="false"]')?.textContent ?? '';
 
 /** Focus, then type a query matching no nav item and no hit, so the panel
  *  settles on its empty state — a stable thing to assert on. */
@@ -91,6 +94,7 @@ describe('GlobalSearch keyboard dismissal', () => {
     await pressEscape(el);
 
     expect(panelText()).not.toContain('noResults');
+    expect(container.querySelector('.soft-panel')?.hasAttribute('inert')).toBe(true);
     expect(document.activeElement).toBe(el);
   });
 

@@ -52,7 +52,7 @@ export default async function AdminInsightsPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <h1 className="font-display text-h1 text-ink">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-body text-ink-2">{t('subtitle')}</p>
       </header>
 

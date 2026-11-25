@@ -84,18 +84,25 @@ export async function acceptInvite(
       data: { status: InviteStatus.ACCEPTED, acceptedByUserId: user.id, acceptedAt: new Date() },
     });
 
-    await writeAuditLog({
-      actorId: user.id,
-      cohortId: invite.cohortId,
-      action: 'invite.accepted',
-      entityType: 'Invite',
-      entityId: invite.id,
-      metadata: { roleName: invite.roleName },
-    });
+    await writeAuditLog(
+      {
+        actorId: user.id,
+        cohortId: invite.cohortId,
+        action: 'invite.accepted',
+        entityType: 'Invite',
+        entityId: invite.id,
+        metadata: { roleName: invite.roleName },
+      },
+      tx,
+    );
   });
 
   try {
-    await signIn('credentials', { email, password: parsed.data.password, redirectTo: '/dashboard' });
+    await signIn('credentials', {
+      email,
+      password: parsed.data.password,
+      redirectTo: '/dashboard',
+    });
     return {};
   } catch (error) {
     if (error instanceof AuthError) return { error: 'invalid' };

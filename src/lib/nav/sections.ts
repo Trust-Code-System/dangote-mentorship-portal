@@ -114,6 +114,7 @@ export async function buildParticipantNavSections(
   roles: RoleName[],
   unread: number,
   unreadMessages = 0,
+  quarterlyEnabled = true,
 ): Promise<NavSection[]> {
   const [tNav, tShell, tAssessments, tReports, tMonthly] = await Promise.all([
     getTranslations('nav'),
@@ -123,7 +124,6 @@ export async function buildParticipantNavSections(
     getTranslations('monthlyForm'),
   ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
-  const isMentee = roles.includes(RoleName.MENTEE);
 
   const pairItems: NavItem[] = isPair
     ? [
@@ -162,22 +162,20 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
-              // Mentees owe the monthly meeting form; mentors do not.
-              ...(isMentee
+              {
+                href: '/monthly-form',
+                label: tMonthly('navLabel'),
+                icon: 'monthly' as const,
+              },
+              ...(quarterlyEnabled
                 ? [
                     {
-                      href: '/monthly-form',
-                      label: tMonthly('navLabel'),
-                      icon: 'monthly' as const,
+                      href: '/assessment',
+                      label: tAssessments('navLabel'),
+                      icon: 'assessment' as const,
                     },
                   ]
                 : []),
-              // The quarterly assessment is owed by both sides of the pair.
-              {
-                href: '/assessment',
-                label: tAssessments('navLabel'),
-                icon: 'assessment' as const,
-              },
               { href: '/mid-term-review', label: tNav('midTermReview'), icon: 'midterm' as const },
               { href: '/final-review', label: tNav('finalReview'), icon: 'final' as const },
               { href: '/reports', label: tReports('navLabel'), icon: 'reports' as const },

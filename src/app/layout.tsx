@@ -3,6 +3,7 @@ import { Public_Sans, Instrument_Serif } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Analytics } from '@vercel/analytics/next';
+import { InteractionMode } from '@/components/motion/interaction-mode';
 import './globals.css';
 
 // Self-hosted font (Stitch redesign — docs/stitch-redesign.md). next/font
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background font-sans text-body text-foreground antialiased">
+        <InteractionMode />
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>

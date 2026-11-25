@@ -35,17 +35,17 @@ export function AuthSubmitButton({
       disabled={pending}
       aria-busy={pending}
       className={cn(
-        'inline-flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl bg-blak-green text-base font-semibold text-blak-black',
-        'shadow-[0_0_0_1px_rgb(var(--blak-green)/0.55),0_12px_28px_-12px_rgb(var(--blak-green)/0.9)]',
-        'transition-colors hover:bg-blak-green-soft',
-        'focus:outline-none focus-visible:ring-4 focus-visible:ring-blak-green/35 focus-visible:ring-offset-2 focus-visible:ring-offset-auth-surface',
-        'disabled:cursor-not-allowed disabled:bg-blak-green/70',
+        'auth-submit bg-green text-small inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-md font-semibold text-white',
+        'shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(24_32_42/0.08)]',
+        'hover:bg-green-strong transition-colors',
+        'focus-visible:ring-blak-green/35 focus-visible:ring-offset-auth-surface focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2',
+        'disabled:bg-blak-green/70 disabled:cursor-not-allowed',
         className,
       )}
     >
       {pending ? (
         <>
-          <Loader2 className="size-5 animate-spin" aria-hidden />
+          <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
           {pendingLabel}
         </>
       ) : (
@@ -92,7 +92,9 @@ export function AuthAlert({
       <Icon className="mt-0.5 size-5 shrink-0" aria-hidden />
       <div className="min-w-0">
         <p className="text-sm font-semibold">{title}</p>
-        {children ? <div className="mt-1 text-sm leading-relaxed opacity-90">{children}</div> : null}
+        {children ? (
+          <div className="mt-1 text-sm leading-relaxed opacity-90">{children}</div>
+        ) : null}
       </div>
     </div>
   );
@@ -103,10 +105,10 @@ export function AuthDivider({ label }: { label: string }) {
   return (
     <div className="relative my-7">
       <div aria-hidden className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-auth-border" />
+        <div className="border-auth-border w-full border-t" />
       </div>
       <div className="relative flex justify-center">
-        <span className="bg-auth-surface px-4 text-xs uppercase tracking-wider text-auth-ink-2">
+        <span className="bg-auth-surface text-auth-ink-2 px-4 text-xs tracking-wider uppercase">
           {label}
         </span>
       </div>

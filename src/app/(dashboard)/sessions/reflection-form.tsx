@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-// Mentee reflection on a session (CLAUDE.md §4: mentees reflect on their own
-// logs). Private reflection journal entries are a separate feature (§1.16); this
-// is the per-log reflection field (§6.9).
+// Mentor's shared reflection on a mentee-recorded session. The private journal
+// is a separate feature; historical mentee reflections remain read-only.
 export function ReflectionForm({ logId, initial }: { logId: string; initial: string }) {
   const t = useTranslations('sessions');
   const tc = useTranslations('common');
@@ -29,9 +28,15 @@ export function ReflectionForm({ logId, initial }: { logId: string; initial: str
   return (
     <form action={action} className="space-y-2 border-t pt-3">
       <input type="hidden" name="logId" value={logId} />
-      <Label htmlFor={fieldId}>{t('yourReflection')}</Label>
-      <Textarea id={fieldId} name="reflection" defaultValue={initial} maxLength={5000} placeholder={t('reflectionHint')} />
-      {state && !state.ok ? <p className="text-sm text-destructive">{tc('errorBody')}</p> : null}
+      <Label htmlFor={fieldId}>{t('mentorReflection')}</Label>
+      <Textarea
+        id={fieldId}
+        name="reflection"
+        defaultValue={initial}
+        maxLength={5000}
+        placeholder={t('reflectionHint')}
+      />
+      {state && !state.ok ? <p className="text-destructive text-sm">{tc('errorBody')}</p> : null}
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? tc('loading') : t('saveReflection')}
       </Button>

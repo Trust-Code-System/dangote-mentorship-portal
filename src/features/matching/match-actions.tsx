@@ -123,7 +123,10 @@ export function OverrideMatchForm({
   return (
     <div className="mt-3 flex flex-wrap items-end gap-3">
       <Select value={mentorId} onValueChange={setMentorId}>
-        <SelectTrigger aria-label={labels.mentor} className="w-auto min-w-[16rem]">
+        <SelectTrigger
+          aria-label={labels.mentor}
+          className="w-full min-w-0 sm:w-auto sm:min-w-[16rem]"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -134,7 +137,7 @@ export function OverrideMatchForm({
           ))}
         </SelectContent>
       </Select>
-      <Button type="button" size="sm" variant="outline" onClick={submit} disabled={pending || !mentorId}>
+      <Button type="button" variant="outline" onClick={submit} disabled={pending || !mentorId}>
         {pending ? labels.assigning : labels.overrideSubmit}
       </Button>
     </div>
@@ -193,12 +196,7 @@ export function RespondMatchButtons({
 
   return (
     <div className="flex gap-2">
-      <Button
-        type="button"
-        size="sm"
-        onClick={() => respond('accept')}
-        disabled={isPending}
-      >
+      <Button type="button" size="sm" onClick={() => respond('accept')} disabled={isPending}>
         {isPending && pending === 'accept' ? labels.accepting : labels.accept}
       </Button>
       <Button

@@ -201,7 +201,7 @@ export interface AdminSessionLogRow {
   meetingType: MeetingType | null;
   competencyDiscussed: string | null;
   goalDiscussed: string | null;
-  // The substance a mentor reports after a session. `mentorNotes` is deliberately
+  // The shared session record. `mentorNotes` is deliberately
   // omitted: the session log UI treats it as the mentor's private scratchpad
   // ("visible to the mentor only"), so admins see the shared record, not that.
   summary: string | null;
@@ -212,6 +212,7 @@ export interface AdminSessionLogRow {
   timeline: string | null;
   nextMeetingDate: Date | null;
   menteeReflection: string | null;
+  mentorReflection: string | null;
   mentorName: string | null;
   mentorProfileId: string | null;
   menteeName: string | null;
@@ -220,8 +221,8 @@ export interface AdminSessionLogRow {
 }
 
 /**
- * Every session log a mentor has filed across the programme, newest first — the
- * admin's read-only window onto the reports mentors submit (RBAC §4: admins may
+ * Shared session logs across the programme, newest first — the
+ * admin's read-only window onto submitted records (RBAC §4: admins may
  * *view* session logs). Read-only and capped; excludes soft-deleted rows and the
  * mentor's private notes. Mentors keep their own read-back on the sessions page.
  */
@@ -246,6 +247,7 @@ export async function getProgrammeSessionLogs(): Promise<AdminSessionLogRow[]> {
       timeline: true,
       nextMeetingDate: true,
       menteeReflection: true,
+      mentorReflection: true,
       mentor: { select: { name: true, mentorProfile: { select: { id: true } } } },
       mentee: { select: { name: true, menteeProfile: { select: { id: true } } } },
       cohort: { select: { name: true } },
@@ -259,7 +261,7 @@ export async function getProgrammeSessionLogs(): Promise<AdminSessionLogRow[]> {
     meetingType: l.meetingType,
     competencyDiscussed: l.competencyDiscussed,
     goalDiscussed: l.goalDiscussed,
-    // Prefer the AI summary (what the mentor accepted) and fall back to the raw notes.
+    // Prefer the human-accepted AI summary and fall back to the shared notes.
     summary: l.aiSummary ?? l.discussionSummary,
     actionsAgreed: l.actionsAgreed,
     challenges: l.challenges,
@@ -268,6 +270,7 @@ export async function getProgrammeSessionLogs(): Promise<AdminSessionLogRow[]> {
     timeline: l.timeline,
     nextMeetingDate: l.nextMeetingDate,
     menteeReflection: l.menteeReflection,
+    mentorReflection: l.mentorReflection,
     mentorName: l.mentor.name,
     mentorProfileId: l.mentor.mentorProfile?.id ?? null,
     menteeName: l.mentee.name,

@@ -1,5 +1,12 @@
 import 'server-only';
-import { CohortStatus, Language, MatchStatus, ReviewStatus, ReviewType, RoleName } from '@prisma/client';
+import {
+  CohortStatus,
+  Language,
+  MatchStatus,
+  ReviewStatus,
+  ReviewType,
+  RoleName,
+} from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getActiveFormDefinition } from '@/features/forms/data';
 import { aggregateAnswers, completionPercent, type FieldAggregate } from './aggregate';
@@ -57,12 +64,14 @@ export interface ReviewRollup {
 async function getEligibleParticipants(cohortId: string): Promise<{
   mentorIds: string[];
   menteeIds: string[];
+  mentorAssignments: number;
 }> {
   const matches = await prisma.match.findMany({
     where: { cohortId, status: MatchStatus.ACCEPTED, deletedAt: null },
     select: { mentorId: true, menteeId: true },
   });
   return {
+    mentorAssignments: matches.length,
     mentorIds: [...new Set(matches.map((m) => m.mentorId))],
     menteeIds: [...new Set(matches.map((m) => m.menteeId))],
   };
@@ -72,29 +81,73 @@ async function summarizeType(
   cohortId: string,
   type: ReviewType,
   eligible: number,
+  mentorAssignments: number,
+  mentorCount: number,
 ): Promise<ReviewTypeSummary> {
   // Aggregate against the currently active form (role-agnostic fallback). The
   // mentee/mentor role here only steers form selection; the seeded forms are
   // role-agnostic, so both resolve to the same definition.
-  const form = await getActiveFormDefinition(cohortId, type, RoleName.MENTEE);
-  if (!form) {
-    return { type, published: false, formTitle: null, eligible, submitted: 0, percent: 0, aggregates: [] };
+  const candidates = await Promise.all([
+    getActiveFormDefinition(cohortId, type, RoleName.MENTEE),
+    getActiveFormDefinition(cohortId, type, RoleName.MENTOR),
+  ]);
+  const forms = candidates.filter(
+    (form, index): form is NonNullable<typeof form> =>
+      Boolean(form) && candidates.findIndex((f) => f?.id === form?.id) === index,
+  );
+  if (!forms.length) {
+    return {
+      type,
+      published: false,
+      formTitle: null,
+      eligible,
+      submitted: 0,
+      percent: 0,
+      aggregates: [],
+    };
   }
 
   const responses = await prisma.formResponse.findMany({
-    where: { formId: form.id, status: ReviewStatus.SUBMITTED, deletedAt: null },
-    select: { answers: true },
+    where: {
+      formId: { in: forms.map((f) => f.id) },
+      status: ReviewStatus.SUBMITTED,
+      deletedAt: null,
+    },
+    select: { formId: true, respondentId: true, subjectMenteeId: true, answers: true },
   });
-  const answers = responses.map((r) => (r.answers as ReviewAnswers) ?? {});
+  if (
+    forms.some(
+      (f) =>
+        f.roleName === RoleName.MENTOR && f.schema.fields.some((field) => field.sourceQuestion),
+    )
+  )
+    eligible = eligible - mentorCount + mentorAssignments;
+  const submitted = new Set(
+    responses.map((r) => `${r.respondentId}:${r.subjectMenteeId ?? 'self'}`),
+  ).size;
 
   return {
     type,
     published: true,
-    formTitle: form.title,
+    formTitle: forms.map((f) => f.title).join(' / '),
     eligible,
-    submitted: responses.length,
-    percent: completionPercent(responses.length, eligible),
-    aggregates: aggregateAnswers(form.schema.fields, answers),
+    submitted,
+    percent: completionPercent(submitted, eligible),
+    aggregates: forms.flatMap((form) =>
+      aggregateAnswers(
+        form.schema.fields,
+        responses
+          .filter((r) => r.formId === form.id)
+          .map((r) => (r.answers as ReviewAnswers) ?? {}),
+      ).map((aggregate) => ({
+        ...aggregate,
+        fieldId: `${form.id}:${aggregate.fieldId}`,
+        labelEn:
+          forms.length > 1
+            ? `${form.roleName === RoleName.MENTOR ? 'Mentor' : 'Mentee'} — ${aggregate.labelEn}`
+            : aggregate.labelEn,
+      })),
+    ),
   };
 }
 
@@ -115,18 +168,21 @@ async function getPairStatuses(cohortId: string): Promise<PairReviewStatus[]> {
       deletedAt: null,
       form: { cohortId, deletedAt: null },
     },
-    select: { respondentId: true, form: { select: { type: true } } },
+    select: { respondentId: true, subjectMenteeId: true, form: { select: { type: true } } },
   });
-  const done = new Set(submitted.map((r) => `${r.respondentId}:${r.form.type}`));
-  const has = (userId: string, type: ReviewType) => done.has(`${userId}:${type}`);
+  const done = new Set(
+    submitted.map((r) => `${r.respondentId}:${r.form.type}:${r.subjectMenteeId ?? 'self'}`),
+  );
+  const has = (userId: string, type: ReviewType, subject = 'self') =>
+    done.has(`${userId}:${type}:${subject}`) || done.has(`${userId}:${type}:self`);
 
   return matches.map((m) => ({
     matchId: m.id,
     mentorName: m.mentor.name,
     menteeName: m.mentee.name,
-    mentorMidterm: has(m.mentorId, ReviewType.MIDTERM),
+    mentorMidterm: has(m.mentorId, ReviewType.MIDTERM, m.menteeId),
     menteeMidterm: has(m.menteeId, ReviewType.MIDTERM),
-    mentorFinal: has(m.mentorId, ReviewType.FINAL),
+    mentorFinal: has(m.mentorId, ReviewType.FINAL, m.menteeId),
     menteeFinal: has(m.menteeId, ReviewType.FINAL),
   }));
 }
@@ -134,7 +190,10 @@ async function getPairStatuses(cohortId: string): Promise<PairReviewStatus[]> {
 async function getParticipation(
   mentorIds: string[],
   menteeIds: string[],
-): Promise<{ language: { en: number; fr: number }; departments: { name: string; count: number }[] }> {
+): Promise<{
+  language: { en: number; fr: number };
+  departments: { name: string; count: number }[];
+}> {
   const [mentors, mentees] = await Promise.all([
     prisma.mentorProfile.findMany({
       where: { userId: { in: mentorIds }, deletedAt: null },
@@ -186,12 +245,12 @@ export async function getReviewSummaries(
 /** Full executive roll-up for a cohort: completion + per-question aggregates for
  *  both reviews, the per-pair completion matrix, and language participation. */
 export async function getReviewRollup(cohortId: string): Promise<ReviewRollup> {
-  const { mentorIds, menteeIds } = await getEligibleParticipants(cohortId);
+  const { mentorIds, menteeIds, mentorAssignments } = await getEligibleParticipants(cohortId);
   const eligible = mentorIds.length + menteeIds.length;
 
   const [midterm, final, pairs, participation] = await Promise.all([
-    summarizeType(cohortId, ReviewType.MIDTERM, eligible),
-    summarizeType(cohortId, ReviewType.FINAL, eligible),
+    summarizeType(cohortId, ReviewType.MIDTERM, eligible, mentorAssignments, mentorIds.length),
+    summarizeType(cohortId, ReviewType.FINAL, eligible, mentorAssignments, mentorIds.length),
     getPairStatuses(cohortId),
     getParticipation(mentorIds, menteeIds),
   ]);

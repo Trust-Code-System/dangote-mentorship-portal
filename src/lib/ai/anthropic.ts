@@ -2,6 +2,7 @@ import 'server-only';
 import type { AiAdapter, CompleteOptions } from './types';
 import { adapterFromComplete } from './assistant';
 import { AI_REQUEST_TIMEOUT_MS, withAiCapacity } from './capacity';
+import { reserveAiUsage } from './budget';
 
 // Anthropic Messages API implementation. Calls the REST API directly to keep
 // the dependency surface small; the adapter interface hides this entirely.
@@ -21,25 +22,28 @@ interface AnthropicResponse {
 }
 
 export function createAnthropicAdapter(apiKey: string, model?: string): AiAdapter {
-  const activeModel = model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
+  const activeModel = model?.trim() || process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL;
 
   async function callMessages(options: CompleteOptions): Promise<string> {
-    const response = await withAiCapacity(() => fetch(API_URL, {
-      method: 'POST',
-      signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': API_VERSION,
-      },
-      body: JSON.stringify({
-        model: activeModel,
-        max_tokens: options.maxTokens ?? 1024,
-        temperature: options.temperature ?? 0.2,
-        ...(options.system ? { system: options.system } : {}),
-        messages: [{ role: 'user', content: options.prompt }],
+    options = await reserveAiUsage(options);
+    const response = await withAiCapacity(() =>
+      fetch(API_URL, {
+        method: 'POST',
+        signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': API_VERSION,
+        },
+        body: JSON.stringify({
+          model: activeModel,
+          max_tokens: options.maxTokens ?? 1024,
+          temperature: options.temperature ?? 0.2,
+          ...(options.system ? { system: options.system } : {}),
+          messages: [{ role: 'user', content: options.prompt }],
+        }),
       }),
-    }));
+    );
 
     if (!response.ok) {
       // Surface status only — never log prompt content (may contain PII, §14).

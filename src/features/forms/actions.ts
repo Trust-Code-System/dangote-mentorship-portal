@@ -19,6 +19,8 @@ import {
 } from './schema';
 import { asLanguageSource, getCohortLanguages } from '@/features/cohorts/language-data';
 import { requiresFrench } from '@/features/cohorts/languages';
+import { formSchemaShape } from './schema';
+import { protectPrivateFields } from './metadata';
 
 // Forms Builder mutations (CLAUDE.md §5 Reviews, §13). Admins author the
 // mid/end review question sets here; the reviews fill flow (later M3 item)
@@ -121,7 +123,7 @@ export async function updateFormDefinition(
 
     const existing = await prisma.formDefinition.findFirst({
       where: { id: data.id, deletedAt: null },
-      select: { id: true, cohortId: true },
+      select: { id: true, cohortId: true, schema: true },
     });
     if (!existing) return fail({ code: 'NOT_FOUND', message: 'Form not found.' });
     // Check against the form's real cohort, not the client-submitted one.
@@ -140,7 +142,13 @@ export async function updateFormDefinition(
         type: data.type,
         roleName: data.roleName,
         title: data.title,
-        schema: data.schema,
+        schema: {
+          ...data.schema,
+          fields: protectPrivateFields(
+            data.schema.fields,
+            formSchemaShape.parse(existing.schema).fields,
+          ),
+        },
         isActive: data.isActive,
       },
     });
@@ -304,4 +312,3 @@ export async function installStandardForms(
     return mapActionError(error);
   }
 }
-

@@ -3,7 +3,7 @@ import { InviteStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser, hasAnyRole } from '@/lib/auth/rbac';
 import { RoleName, ALL_ROLES, ADMIN_ROLES } from '@/lib/auth/roles';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import {
   Table,
   TableBody,
@@ -43,7 +43,7 @@ export default async function InvitesPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
       </div>
 
@@ -70,7 +70,7 @@ export default async function InvitesPage() {
                 <TableCell>{invite.roleName}</TableCell>
                 <TableCell>{invite.cohort?.name ?? '—'}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{invite.status}</Badge>
+                  <StatusBadge status={invite.status} />
                 </TableCell>
                 <TableCell>{invite.expiresAt.toISOString().slice(0, 10)}</TableCell>
                 <TableCell>

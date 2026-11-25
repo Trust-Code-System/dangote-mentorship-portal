@@ -42,7 +42,7 @@ export function BrandPlate({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-lg bg-blak-forest px-1.5 py-1',
+        'bg-ink inline-flex shrink-0 items-center justify-center rounded-md px-1.5 py-1',
         className,
       )}
     >
@@ -75,7 +75,7 @@ export function BrandLogo({
       <BrandMark className={markClassName} />
       <Wordmark
         name={name}
-        className={cn('truncate font-display text-h3 font-bold', wordmarkClassName)}
+        className={cn('font-display text-h3 truncate font-bold', wordmarkClassName)}
         accentClassName={accentClassName}
       />
     </span>

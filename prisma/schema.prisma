@@ -276,10 +276,11 @@ model User {
   auditLogs     AuditLog[]
   notifications Notification[]
 
-  uploadedImports Import[]
-  mentorMatches   Match[]  @relation("MatchMentor")
-  menteeMatches   Match[]  @relation("MatchMentee")
-  approvedMatches Match[]  @relation("MatchApprovedBy")
+  uploadedImports            Import[]
+  mentorMatches              Match[]  @relation("MatchMentor")
+  menteeMatches              Match[]  @relation("MatchMentee")
+  approvedMatches            Match[]  @relation("MatchApprovedBy")
+  approvedMenteeCertificates Match[]  @relation("MenteeCertificateApprovedBy")
 
   trainingAttendance  TrainingAttendance[]
   trainingAssessments TrainingAssessment[]
@@ -292,8 +293,9 @@ model User {
   mentorMeetings    Meeting[]    @relation("MeetingMentor")
   menteeMeetings    Meeting[]    @relation("MeetingMentee")
 
-  mentorSessionLogs SessionLog[] @relation("SessionLogMentor")
-  menteeSessionLogs SessionLog[] @relation("SessionLogMentee")
+  mentorSessionLogs   SessionLog[] @relation("SessionLogMentor")
+  menteeSessionLogs   SessionLog[] @relation("SessionLogMentee")
+  recordedSessionLogs SessionLog[] @relation("SessionLogRecorder")
 
   assignedActionItems ActionItem[] @relation("ActionItemAssignee")
   createdActionItems  ActionItem[] @relation("ActionItemCreatedBy")
@@ -818,26 +820,30 @@ model MatchingCriteria {
 }
 
 model Match {
-  id           String      @id @default(cuid())
-  cohortId     String      @map("cohort_id")
-  mentorId     String      @map("mentor_id")
-  menteeId     String      @map("mentee_id")
-  score        Float
-  status       MatchStatus @default(SUGGESTED)
-  aiRationale  String?     @map("ai_rationale")
-  flags        Json?
-  approvedById String?     @map("approved_by_id")
-  acceptedAt   DateTime?   @map("accepted_at")
+  id                            String      @id @default(cuid())
+  cohortId                      String      @map("cohort_id")
+  mentorId                      String      @map("mentor_id")
+  menteeId                      String      @map("mentee_id")
+  score                         Float
+  status                        MatchStatus @default(SUGGESTED)
+  aiRationale                   String?     @map("ai_rationale")
+  flags                         Json?
+  approvedById                  String?     @map("approved_by_id")
+  acceptedAt                    DateTime?   @map("accepted_at")
+  // No automatic certificate release: both values require an explicit admin action.
+  menteeCertificateApprovedAt   DateTime?   @map("mentee_certificate_approved_at")
+  menteeCertificateApprovedById String?     @map("mentee_certificate_approved_by_id")
 
   // First-session icebreaker cache (experience-layer.md §1.17). Generated from
   // both profiles when the pair is active; regenerating overwrites it.
   icebreakerJson        Json?     @map("icebreaker_json")
   icebreakerGeneratedAt DateTime? @map("icebreaker_generated_at")
 
-  cohort     Cohort @relation(fields: [cohortId], references: [id])
-  mentor     User   @relation("MatchMentor", fields: [mentorId], references: [id])
-  mentee     User   @relation("MatchMentee", fields: [menteeId], references: [id])
-  approvedBy User?  @relation("MatchApprovedBy", fields: [approvedById], references: [id])
+  cohort                      Cohort @relation(fields: [cohortId], references: [id])
+  mentor                      User   @relation("MatchMentor", fields: [mentorId], references: [id])
+  mentee                      User   @relation("MatchMentee", fields: [menteeId], references: [id])
+  approvedBy                  User?  @relation("MatchApprovedBy", fields: [approvedById], references: [id])
+  menteeCertificateApprovedBy User?  @relation("MenteeCertificateApprovedBy", fields: [menteeCertificateApprovedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -961,6 +967,8 @@ model Goal {
   startDate        DateTime?  @map("start_date")
   endDate          DateTime?  @map("end_date")
   successMeasure   String?    @map("success_measure")
+  // Updated programme goal-setting form, with mentee acceptance and follow-up.
+  settingDetails   Json?      @map("setting_details")
   // Free-text "evidence of progress" (§7); uploaded files live in GoalEvidence.
   evidence         String?
   mentorComments   String?    @map("mentor_comments")
@@ -1073,12 +1081,16 @@ model SessionLog {
   nextMeetingDate     DateTime?    @map("next_meeting_date")
   mentorNotes         String?      @map("mentor_notes")
   menteeReflection    String?      @map("mentee_reflection")
+  // Separate from historical mentee reflections; never relabel their author.
+  mentorReflection    String?      @map("mentor_reflection")
+  recordedById        String?      @map("recorded_by_id")
   aiSummary           String?      @map("ai_summary")
 
   cohort            Cohort                   @relation(fields: [cohortId], references: [id])
   meeting           Meeting?                 @relation(fields: [meetingId], references: [id])
   mentor            User                     @relation("SessionLogMentor", fields: [mentorId], references: [id])
   mentee            User                     @relation("SessionLogMentee", fields: [menteeId], references: [id])
+  recordedBy        User?                    @relation("SessionLogRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
   actionItems       ActionItem[]
   reflectionEntries ReflectionJournalEntry[]
 
@@ -1143,6 +1155,8 @@ model FormResponse {
   id                 String       @id @default(cuid())
   formId             String       @map("form_id")
   respondentId       String       @map("respondent_id")
+  // A mentor completes one source review per accepted mentee, not one per cohort.
+  subjectMenteeId    String?      @map("subject_mentee_id")
   answers            Json
   status             ReviewStatus @default(IN_PROGRESS)
   submittedAt        DateTime?    @map("submitted_at")
@@ -1165,6 +1179,7 @@ model FormResponse {
   // The assessment gate runs on every authenticated page load, so the
   // "has this mentee answered this window?" lookup must be indexed.
   @@index([assessmentWindowId, respondentId])
+  @@index([formId, respondentId, subjectMenteeId])
   @@map("form_responses")
 }
 

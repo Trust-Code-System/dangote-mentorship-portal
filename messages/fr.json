@@ -245,7 +245,7 @@
     "termsOfService": "Conditions d’utilisation",
     "supportLink": "Assistance",
     "corporateEmail": "E-mail professionnel",
-    "emailPlaceholder": "nom@blakmoh.com",
+    "emailPlaceholder": "nom@dangote.com",
     "forgotShort": "Oublié ?",
     "dangoteSso": "Connexion SSO Dangote",
     "orCredentials": "Ou utiliser les identifiants",
@@ -310,7 +310,7 @@
     "inviteCta": "Continuer",
     "requestTitle": "Pas encore d’invitation ?",
     "requestHint": "Le programme est confidentiel et organisé par cohortes ; l’accès est accordé par un administrateur. Demandez au vôtre de vous envoyer un lien d’invitation.",
-    "requestCta": "Demander l’accès",
+    "requestCta": "Comment demander l’accès",
     "haveAccount": "Vous avez déjà un compte ?",
     "signinLink": "Se connecter"
   },
@@ -340,7 +340,7 @@
     "pendingReviews": "Objectifs à évaluer",
     "review": "Évaluer",
     "pendingReviewsHint": "Objectifs soumis en attente de votre évaluation.",
-    "logsAwaiting": "Comptes rendus à compléter",
+    "logsAwaiting": "Comptes rendus des mentorés attendus",
     "logNow": "Saisir",
     "logsAwaitingHint": "Rencontres ayant eu lieu sans compte rendu de séance.",
     "nextMeetings": "Prochaines rencontres",
@@ -567,7 +567,7 @@
     "roles": "Rôles",
     "timezone": "Fuseau horaire",
     "timezoneHint": "Utilisé pour afficher les dates et heures dans votre fuseau local.",
-    "uiLanguageHint": "Changez la langue de l’interface avec le sélecteur dans la barre supérieure.",
+    "uiLanguageHint": "Contactez l’administrateur du programme pour modifier votre préférence linguistique.",
     "saveAccount": "Enregistrer le compte",
     "mentorshipProfileTitle": "Profil de mentorat",
     "uploadPhoto": "Téléverser une photo",
@@ -923,13 +923,13 @@
   },
   "sessions": {
     "title": "Comptes rendus de séance",
-    "subtitle": "Notez vos échanges, capturez les actions à mener et réfléchissez — l'IA peut structurer vos notes brutes.",
+    "subtitle": "Les mentorés consignent chaque séance et ses actions ; les mentors ajoutent leur réflexion.",
     "noPairings": "Vous n'avez pas encore de mentoré accepté.",
     "logSession": "Enregistrer une séance",
-    "noLogsYet": "Aucune séance enregistrée pour l'instant.",
+    "noLogsYet": "Votre mentoré n’a pas encore consigné de séance.",
     "mySessions": "Mes séances",
     "notEligible": "Les comptes rendus apparaissent une fois que vous et votre mentor avez accepté votre jumelage.",
-    "noLogsMentee": "Votre mentor n'a pas encore enregistré de séance.",
+    "noLogsMentee": "Aucune séance consignée. Enregistrez votre première séance ci-dessus.",
     "noAccess": "Les comptes rendus sont réservés aux mentors et aux mentorés.",
     "mentee": "Mentoré",
     "meetingType": "Type de rencontre",
@@ -974,7 +974,7 @@
     "synced": "Enregistré",
     "offlineQueued": "Enregistré localement — sera synchronisé une fois de retour en ligne.",
     "aiSummary": "Résumé IA",
-    "menteeReflection": "Réflexion du mentoré",
+    "menteeReflection": "Réflexion du mentoré (ancien fonctionnement)",
     "yourReflection": "Votre réflexion",
     "reflectionHint": "Qu'avez-vous retenu ? Que ferez-vous ensuite ?",
     "saveReflection": "Enregistrer la réflexion",
@@ -993,7 +993,10 @@
       "BLOCKED": "Bloqué"
     },
     "loggingSession": "Enregistrement de la séance",
-    "complete": "complété"
+    "complete": "complété",
+    "mentor": "Mentor",
+    "mentorWorkflow": "Vos mentorés consignent les séances. Consultez chaque compte rendu et ajoutez votre réflexion de mentor.",
+    "mentorReflection": "Réflexion du mentor"
   },
   "messages": {
     "title": "Messages",
@@ -1572,6 +1575,11 @@
         "label": "Rapport d'engagement",
         "title": "Le rapport d'engagement de la semaine est prêt",
         "body": "{cohort} — semaine {week}. Il indique qui s’est fait discret et ce qui reste à faire."
+      },
+      "session_recorded": {
+        "label": "Séance consignée",
+        "title": "Nouveau compte rendu de séance",
+        "body": "{menteeName} a consigné votre dernière séance. Ajoutez votre réflexion de mentor."
       }
     },
     "emptyHint": "Aucun élément en attente pour le moment."
@@ -1666,7 +1674,7 @@
     "notScheduled": "Non planifié",
     "navSessions": "Comptes rendus",
     "sessionsTitle": "Comptes rendus de séance",
-    "sessionsSubtitle": "Chaque séance rapportée par un mentor dans le programme, la plus récente en premier. En lecture seule ; les notes privées du mentor ne sont pas affichées.",
+    "sessionsSubtitle": "Comptes rendus partagés et réflexions des mentors pour le programme.",
     "noSessions": "Aucun compte rendu de séance n'a encore été déposé.",
     "sessionEmpty": "Cette séance a été consignée sans autre détail."
   },
@@ -2483,8 +2491,8 @@
         "eyebrow": "Contacter l'équipe du programme",
         "title": "Si aucune des pistes ci-dessus ne s'applique",
         "body": "Il n'existe pas de formulaire de contact public pour ce programme. Le portail est un système interne confidentiel, accessible sur invitation, et un formulaire ouvert à tout Internet recueillerait précisément le type d'informations qu'il ne devrait pas recueillir. Adressez-vous à l'administrateur de votre programme via l'adresse publiée par votre organisation, ou via le courriel d'invitation que vous avez reçu.",
-        "placeholderTitle": "Contenu à fournir par le propriétaire",
-        "placeholderBody": "Aucune adresse d'assistance n'a été confirmée pour cette version. L'adresse utilisée ailleurs dans le portail correspond à un compte de démonstration et n'est pas une boîte surveillée ; elle figure parmi les points ouverts du rapport d'implémentation."
+        "supportTitle": "Contactez l'équipe du programme",
+        "supportBody": "Connectez-vous et ouvrez Demander de l'aide pour envoyer une demande privée à l'équipe du programme. Si vous ne pouvez pas vous connecter, répondez au courriel d'invitation ou contactez la personne qui vous a inscrit."
       },
       "urgent": {
         "title": "Ce portail n'est pas un canal d'urgence",
@@ -2657,7 +2665,7 @@
     "colDue": "Échéance",
     "colStatus": "Statut",
     "notEligibleTitle": "Aucune évaluation pour vous actuellement",
-    "notEligibleBody": "Les évaluations trimestrielles sont remplies par les mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
+    "notEligibleBody": "Les évaluations trimestrielles sont remplies par les mentors et mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
     "notPublishedTitle": "Le formulaire d'évaluation n'est pas encore prêt",
     "notPublishedBody": "Votre administrateur de programme n'a pas encore publié les questions d'évaluation de cette cohorte. Vous serez averti dès son ouverture.",
     "noneDueTitle": "Vous êtes à jour",
@@ -2707,7 +2715,9 @@
     "stateCLEAR": "Terminée",
     "stateDUE": "Ouverte",
     "stateGRACE": "En retard",
-    "stateLOCKED": "Accès bloqué"
+    "stateLOCKED": "Accès bloqué",
+    "disabledTitle": "Les évaluations trimestrielles sont désactivées",
+    "disabledBody": "Cette promotion utilise les formulaires mensuels et les bilans de mi-parcours et finaux. Les évaluations trimestrielles ne s’appliquent pas."
   },
   "reports": {
     "kindEngagement": "Rapport d'engagement",
@@ -2848,7 +2858,7 @@
     "colDue": "Fin du mois",
     "colStatus": "Statut",
     "notEligibleTitle": "Aucun formulaire mensuel pour vous actuellement",
-    "notEligibleBody": "Le formulaire de rencontre mensuel est rempli par les mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
+    "notEligibleBody": "Le formulaire de rencontre mensuel est rempli par les mentors et mentorés inscrits à une cohorte. Si cela vous semble incorrect, contactez votre administrateur de programme.",
     "notPublishedTitle": "Le formulaire mensuel n'est pas encore prêt",
     "notPublishedBody": "Votre administrateur de programme n'a pas encore publié le formulaire mensuel de cette cohorte. Vous serez averti dès son ouverture.",
     "noneDueTitle": "Vous êtes à jour",
@@ -2897,5 +2907,59 @@
     "colFormsOwed": "Formulaires dus",
     "emptyTitle": "Personne ne correspond à ce filtre",
     "emptyBody": "Essayez un autre statut ou un autre rôle."
+  },
+  "workspace": {
+    "greeting": "Bon retour, {name}.",
+    "mentorSubtitle": "Vos mentorés, vos priorités et vos prochaines conversations, au même endroit.",
+    "menteeSubtitle": "Une vue claire de vos objectifs, prochaines étapes et de votre mentorat.",
+    "viewCalendar": "Voir le calendrier",
+    "peopleYouGuide": "Les personnes que vous accompagnez dans le programme.",
+    "mentee": "Mentoré",
+    "viewProgress": "Voir les progrès",
+    "scheduleSession": "Planifier une séance",
+    "adminTitle": "Vue du programme",
+    "adminSubtitle": "Suivez la participation, les jumelages et les personnes qui ont besoin de votre attention.",
+    "coverage": "Couverture des jumelages",
+    "matchedPairs": "Binômes actifs",
+    "unmatchedMentors": "Mentors non jumelés",
+    "unmatchedMentees": "Mentorés non jumelés",
+    "activeGoals": "Objectifs en vue",
+    "yourNextSteps": "Actions affichées",
+    "yourMentor": "Votre mentor",
+    "goalProgress": "Progression des objectifs",
+    "noGoalCta": "Définir votre premier objectif",
+    "overview": "Vue d’ensemble",
+    "goalProgressHint": "Pour les objectifs affichés ci-dessous."
+  },
+  "statusLabel": {
+    "DRAFT": "Brouillon",
+    "ACTIVE": "Actif",
+    "ARCHIVED": "Archivé",
+    "COMPLETED": "Terminé",
+    "NOT_STARTED": "Non commencé",
+    "IN_PROGRESS": "En cours",
+    "UNMATCHED": "Non apparié",
+    "SUGGESTED": "Suggéré",
+    "MATCHED": "Apparié",
+    "PENDING": "En attente",
+    "VALIDATING": "Validation en cours",
+    "VALIDATED": "Validé",
+    "COMMITTED": "Importé",
+    "FAILED": "Échec",
+    "ACCEPTED": "Accepté",
+    "EXPIRED": "Expiré",
+    "REVOKED": "Révoqué",
+    "SUBMITTED": "Soumis",
+    "APPROVED": "Approuvé",
+    "REJECTED": "Refusé",
+    "SCHEDULED": "Planifié",
+    "CANCELLED": "Annulé",
+    "ZOOM": "Zoom",
+    "PHYSICAL": "En présentiel",
+    "PHONE": "Téléphone",
+    "TEAMS": "Teams",
+    "MEET": "Google Meet",
+    "MENTOR": "Mentor",
+    "MENTEE": "Mentoré"
   }
 }

@@ -29,7 +29,7 @@ export default async function CohortEditPage({ params }: { params: Promise<{ id:
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('editCohort')}</h1>
+      <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('editCohort')}</h1>
       <CohortEditForm
         cohort={{
           id: cohort.id,

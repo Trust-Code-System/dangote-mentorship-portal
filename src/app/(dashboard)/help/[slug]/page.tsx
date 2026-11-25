@@ -20,7 +20,7 @@ export default async function HelpArticlePage({ params }: { params: Promise<{ sl
         <Link href="/help" className="text-sm text-muted-foreground hover:underline">
           ← {t('back')}
         </Link>
-        <h1 className="mt-1 text-2xl font-bold">{t(`articles.${slug}.title`)}</h1>
+        <h1 className="mt-1 font-display text-h1 font-semibold tracking-tight text-ink">{t(`articles.${slug}.title`)}</h1>
         <p className="text-muted-foreground">{t(`articles.${slug}.summary`)}</p>
       </div>
 

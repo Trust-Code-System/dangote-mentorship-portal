@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 import { adminCohortFilter, requireRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { getAssessmentOverview, listWindowCompletion } from '@/features/assessments/data';
+import { quarterlyAssessmentsEnabled } from '@/features/assessments/policy';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,8 +52,24 @@ export default async function AdminAssessmentsPage({
   if (!cohort) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('adminTitle')}</h1>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">
+          {t('adminTitle')}
+        </h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
+      </section>
+    );
+  }
+
+  if (!isMonthly && !(await quarterlyAssessmentsEnabled(cohort.id))) {
+    return (
+      <section className="space-y-6">
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">
+          {t('adminTitle')}
+        </h1>
+        <EmptyState title={t('disabledTitle')} description={t('disabledBody')} />
+        <Button asChild variant="outline">
+          <Link href="/admin/assessments?type=MONTHLY">{t('tabMonthly')}</Link>
+        </Button>
       </section>
     );
   }
@@ -61,7 +78,9 @@ export default async function AdminAssessmentsPage({
   if (!overview) {
     return (
       <section className="space-y-6">
-        <h1 className="font-display text-display text-ink">{t('adminTitle')}</h1>
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">
+          {t('adminTitle')}
+        </h1>
         <EmptyState title={t('noActiveCohort')} description={t('noActiveCohortHelp')} />
       </section>
     );
@@ -84,7 +103,7 @@ export default async function AdminAssessmentsPage({
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="font-display text-display text-ink">
+        <h1 className="font-display text-h1 text-ink font-semibold tracking-tight">
           {isMonthly ? t('adminMonthlyTitle') : t('adminTitle')}
         </h1>
         <p className="text-small text-ink-2">
@@ -107,8 +126,8 @@ export default async function AdminAssessmentsPage({
               aria-current={selected ? 'page' : undefined}
               className={
                 selected
-                  ? 'rounded-md border border-green bg-green-soft px-3 py-1.5 text-small font-semibold text-green-strong'
-                  : 'rounded-md border border-border px-3 py-1.5 text-small text-ink-2 hover:border-green'
+                  ? 'border-green bg-green-soft text-small text-green-strong rounded-md border px-3 py-1.5 font-semibold'
+                  : 'border-border text-small text-ink-2 hover:border-green rounded-md border px-3 py-1.5'
               }
             >
               {tab.label}
@@ -118,8 +137,11 @@ export default async function AdminAssessmentsPage({
       </nav>
 
       {!overview.formPublished ? (
-        <div className="rounded-md border border-warn/40 bg-warn/10 px-4 py-3 text-small" role="alert">
-          <p className="font-semibold text-ink">{t('noFormTitle')}</p>
+        <div
+          className="border-warn/40 bg-warn/10 text-small rounded-md border px-4 py-3"
+          role="alert"
+        >
+          <p className="text-ink font-semibold">{t('noFormTitle')}</p>
           <p className="text-ink-2">{isMonthly ? t('noFormBodyMonthly') : t('noFormBody')}</p>
           <Button asChild variant="outline" className="mt-2">
             <Link href="/admin/forms/new">{t('createForm')}</Link>
@@ -127,14 +149,11 @@ export default async function AdminAssessmentsPage({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="workspace-section stat-band overflow-hidden">
         <StatTile label={t('statMentees')} value={String(overview.menteeCount)} />
         <StatTile label={t('statSubmitted')} value={`${submitted}/${completion.length}`} />
         {isMonthly ? (
-          <StatTile
-            label={t('statOutstanding')}
-            value={String(completion.length - submitted)}
-          />
+          <StatTile label={t('statOutstanding')} value={String(completion.length - submitted)} />
         ) : (
           <>
             <StatTile label={t('statGrace')} value={String(inGrace)} />
@@ -214,7 +233,7 @@ export default async function AdminAssessmentsPage({
                     <TableRow key={row.userId}>
                       <TableCell>
                         <span className="text-ink">{row.name ?? row.email}</span>
-                        <span className="block text-small text-ink-3">{row.email}</span>
+                        <span className="text-small text-ink-3 block">{row.email}</span>
                       </TableCell>
                       <TableCell>
                         <Badge variant={stateVariant(row.state)}>{t(`state${row.state}`)}</Badge>

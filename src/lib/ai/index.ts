@@ -2,6 +2,7 @@ import 'server-only';
 import { createAnthropicAdapter } from './anthropic';
 import { createOpenAiAdapter } from './openai';
 import type { AiAdapter, AiScore } from './types';
+import { AiUsageLimitError } from './limits';
 
 export type { AiAdapter, AiLanguage, AiScore } from './types';
 
@@ -31,13 +32,11 @@ const disabledAdapter: AiAdapter = {
 // throws (it catches parse errors internally), so a primary that merely returns
 // garbage won't trigger the fallback — only a transport-level failure does.
 function withFallback(primary: AiAdapter, fallback: AiAdapter): AiAdapter {
-  async function tryBoth<T>(
-    op: (a: AiAdapter) => Promise<T>,
-    label: string,
-  ): Promise<T> {
+  async function tryBoth<T>(op: (a: AiAdapter) => Promise<T>, label: string): Promise<T> {
     try {
       return await op(primary);
     } catch (primaryError) {
+      if (primaryError instanceof AiUsageLimitError) throw primaryError;
       // Status only — never log prompt content (may contain PII, §14).
       console.warn(
         `AI primary (${primary.id}) failed on ${label}; falling back to ${fallback.id}.`,

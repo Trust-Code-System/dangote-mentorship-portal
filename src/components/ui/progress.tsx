@@ -14,27 +14,28 @@ const toneClass = {
   risk: 'bg-risk',
 } as const;
 
-interface ProgressProps
-  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
+interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
   tone?: keyof typeof toneClass;
 }
 
-const Progress = React.forwardRef<
-  React.ComponentRef<typeof ProgressPrimitive.Root>,
-  ProgressProps
->(({ className, value, tone = 'green', ...props }, ref) => (
-  <ProgressPrimitive.Root
-    ref={ref}
-    className={cn('relative h-2 w-full overflow-hidden rounded-full bg-surface-2', className)}
-    value={value}
-    {...props}
-  >
-    <ProgressPrimitive.Indicator
-      className={cn('h-full w-full flex-1 rounded-full transition-transform', toneClass[tone])}
-      style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
-    />
-  </ProgressPrimitive.Root>
-));
+const Progress = React.forwardRef<React.ComponentRef<typeof ProgressPrimitive.Root>, ProgressProps>(
+  ({ className, value, tone = 'green', ...props }, ref) => (
+    <ProgressPrimitive.Root
+      ref={ref}
+      className={cn('bg-surface-2 relative h-2 w-full overflow-hidden rounded-full', className)}
+      value={value}
+      {...props}
+    >
+      <ProgressPrimitive.Indicator
+        className={cn(
+          'h-full w-full flex-1 rounded-full transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none',
+          toneClass[tone],
+        )}
+        style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
+      />
+    </ProgressPrimitive.Root>
+  ),
+);
 Progress.displayName = ProgressPrimitive.Root.displayName;
 
 export { Progress };

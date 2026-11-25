@@ -110,6 +110,9 @@ const LOCKED_ALLOWED_PREFIXES = [
 
 /** True when a locked mentee is allowed to view `pathname`. */
 export function isAllowedWhileLocked(pathname: string): boolean {
+  // Designated coordinators must retain access to confidential follow-up even
+  // if their own participant assessment is overdue. The page checks its grant.
+  if (pathname === '/programme-concerns') return true;
   return LOCKED_ALLOWED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );

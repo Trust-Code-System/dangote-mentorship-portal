@@ -16,13 +16,19 @@ import { cn } from '@/lib/utils';
  */
 
 /** "In collaboration with · [Kennedia Consulting]" — sits under the body copy. */
-export async function CollaborationCredit({ className }: { className?: string }) {
+export async function CollaborationCredit({
+  className,
+  onLight = false,
+}: {
+  className?: string;
+  onLight?: boolean;
+}) {
   const t = await getTranslations('auth');
 
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-blak-text-2',
+        'text-blak-text-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.6rem] font-semibold tracking-[0.14em] uppercase',
         className,
       )}
     >
@@ -32,7 +38,10 @@ export async function CollaborationCredit({ className }: { className?: string })
         alt="Kennedia Consulting"
         width={320}
         height={91}
-        className="h-5 w-auto max-w-[9.5rem] object-contain"
+        className={cn(
+          'h-5 w-auto max-w-[9.5rem] object-contain',
+          onLight && 'bg-ink h-8 rounded-md px-2 py-1',
+        )}
       />
     </div>
   );
@@ -50,12 +59,12 @@ export async function PoweredByCredit({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-x-2 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-blak-text-2',
+        'text-blak-text-2 flex flex-wrap items-center gap-x-2 text-[0.6rem] font-semibold tracking-[0.14em] uppercase',
         className,
       )}
     >
       {t('poweredBy')}
-      <span className="font-display text-[0.8rem] font-extrabold normal-case tracking-tight text-blak-text">
+      <span className="font-display text-blak-text text-[0.8rem] font-extrabold tracking-tight normal-case">
         BLAK <span className="text-blak-green">MOH</span>
       </span>
     </div>

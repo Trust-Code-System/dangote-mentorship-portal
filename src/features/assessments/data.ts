@@ -13,12 +13,8 @@ import {
   type RecurringFormType,
 } from './participants';
 import { getActiveFormDefinition, type FormDefinitionDetail } from '@/features/forms/data';
-import {
-  evaluateAssessmentGate,
-  lockDateFor,
-  type AssessmentGate,
-  type GateWindow,
-} from './gate';
+import { quarterlyAssessmentsEnabled, recurringFormEnabled } from './policy';
+import { evaluateAssessmentGate, lockDateFor, type AssessmentGate, type GateWindow } from './gate';
 
 // Server reads for the recurring quarterly assessment (CLAUDE.md §5 Reviews).
 // The gate runs on every authenticated page load, so every read here is a
@@ -45,27 +41,25 @@ export function isGatedRole(user: SessionUser): boolean {
  * Kept under the old name as well (below) because it is the mentee-specific
  * case several call sites still want.
  */
-export const resolveParticipantCohortId = cache(
-  async (userId: string): Promise<string | null> => {
-    const menteePairing = await getMenteePairing(userId);
-    if (menteePairing) return menteePairing.cohortId;
+export const resolveParticipantCohortId = cache(async (userId: string): Promise<string | null> => {
+  const menteePairing = await getMenteePairing(userId);
+  if (menteePairing) return menteePairing.cohortId;
 
-    const mentorPairings = await getMentorPairings(userId);
-    if (mentorPairings[0]) return mentorPairings[0].cohortId;
+  const mentorPairings = await getMentorPairings(userId);
+  if (mentorPairings[0]) return mentorPairings[0].cohortId;
 
-    const grant = await prisma.userRole.findFirst({
-      where: {
-        userId,
-        deletedAt: null,
-        cohortId: { not: null },
-        role: { name: { in: [RoleName.MENTEE, RoleName.MENTOR] } },
-      },
-      orderBy: { createdAt: 'desc' },
-      select: { cohortId: true },
-    });
-    return grant?.cohortId ?? null;
-  },
-);
+  const grant = await prisma.userRole.findFirst({
+    where: {
+      userId,
+      deletedAt: null,
+      cohortId: { not: null },
+      role: { name: { in: [RoleName.MENTEE, RoleName.MENTOR] } },
+    },
+    orderBy: { createdAt: 'desc' },
+    select: { cohortId: true },
+  });
+  return grant?.cohortId ?? null;
+});
 
 /** The cohort a mentee is assessed in. Mentee-specific by design. */
 export const resolveMenteeCohortId = cache(async (userId: string): Promise<string | null> => {
@@ -145,13 +139,18 @@ const CLEAR: AssessmentGate = {
 export const getAssessmentGate = cache(async (user: SessionUser): Promise<AssessmentGate> => {
   if (!isGatedRole(user)) return CLEAR;
 
-  // Only the forms this user actually owes can gate them — a mentor is never
-  // held to the mentee-only monthly form.
-  const formTypes = formTypesFor(user.roles);
+  // Monthly forms never gate access, even if a window is misconfigured.
+  // Assignment and reminder queries still include them for both roles.
+  let formTypes = formTypesFor(user.roles).filter((type) => type !== ReviewType.MONTHLY);
   if (formTypes.length === 0) return CLEAR;
 
   const cohortId = await resolveParticipantCohortId(user.id);
   if (!cohortId) return CLEAR;
+
+  if (!(await quarterlyAssessmentsEnabled(cohortId))) {
+    formTypes = formTypes.filter((type) => type !== ReviewType.QUARTERLY);
+  }
+  if (formTypes.length === 0) return CLEAR;
 
   const windows = await loadGateWindows(cohortId, user.id, formTypes);
   return evaluateAssessmentGate(windows, new Date());
@@ -197,6 +196,7 @@ export async function getAssessmentAssignment(
 
   const cohortId = await resolveParticipantCohortId(user.id);
   if (!cohortId) return null;
+  if (!(await recurringFormEnabled(cohortId, formType))) return null;
 
   const [gate, form, windows] = await Promise.all([
     getAssessmentGate(user),
@@ -315,8 +315,8 @@ export interface AssessmentOverview {
  * User ids in a cohort who owe `formType` — the denominator for completion.
  *
  * Derived from participants.ts rather than hardcoded, so the admin's numbers
- * and the gate can never disagree about who was supposed to submit: the
- * quarterly assessment counts mentors and mentees, the monthly form mentees.
+ * and the gate can never disagree about who was supposed to submit.
+ * Both recurring forms count mentors and mentees.
  */
 export async function listCohortRespondentIds(
   cohortId: string,
@@ -373,9 +373,7 @@ export async function getAssessmentOverview(
     listCohortRespondentIds(cohortId, formType),
     // "Is a form published?" means: is there one for every role that owes it.
     Promise.all(
-      rolesRequiredFor(formType).map((role) =>
-        getActiveFormDefinition(cohortId, formType, role),
-      ),
+      rolesRequiredFor(formType).map((role) => getActiveFormDefinition(cohortId, formType, role)),
     ),
   ]);
 
@@ -476,10 +474,7 @@ export async function listWindowCompletion(
 
   return users.map((user) => {
     const submittedAt = submittedAtBy.get(user.id) ?? null;
-    const gate = evaluateAssessmentGate(
-      [{ ...window, submitted: submittedAt !== null }],
-      now,
-    );
+    const gate = evaluateAssessmentGate([{ ...window, submitted: submittedAt !== null }], now);
     return {
       userId: user.id,
       name: user.name,

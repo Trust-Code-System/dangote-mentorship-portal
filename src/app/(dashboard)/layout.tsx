@@ -5,7 +5,8 @@ import { Language, RoleName } from '@prisma/client';
 import { getCurrentUser, hasAnyRole } from '@/lib/auth/rbac';
 import { ADMIN_ROLES } from '@/lib/auth/roles';
 import { isMaintenanceMode } from '@/features/settings/maintenance';
-import { getAssessmentGate } from '@/features/assessments/data';
+import { getAssessmentGate, resolveParticipantCohortId } from '@/features/assessments/data';
+import { quarterlyAssessmentsEnabled } from '@/features/assessments/policy';
 import { isAllowedWhileLocked } from '@/features/assessments/gate';
 import { AssessmentGateBanner } from '@/features/assessments/gate-banner';
 import { AppShell, type AppShellLabels } from '@/components/shell/app-shell';
@@ -13,6 +14,8 @@ import { buildAdminNavSections, buildParticipantNavSections } from '@/lib/nav/se
 import { QuickActions, type QuickActionItem } from '@/components/quick-actions';
 import { getViewerCohortLanguages } from '@/features/cohorts/language-data';
 import type { AppLocale } from '@/i18n/config';
+import { CohortLocaleGuard } from '@/components/cohort-locale-guard';
+import { confidentialReviewCohorts } from '@/features/reviews/confidential';
 
 // Quick Actions (§1.9) shown across the authenticated participant area. Items are
 // filtered to what the user's role can actually do, shortest-path first.
@@ -24,14 +27,14 @@ function quickActionsFor(roles: RoleName[]): QuickActionItem[] {
   if (isMentor || isMentee) {
     items.push({ labelKey: 'scheduleMeeting', href: '/meetings' });
   }
-  if (isMentor) {
+  if (isMentee) {
     items.push({ labelKey: 'addSessionLog', href: '/sessions' });
   }
   if (isMentee) {
     items.push({ labelKey: 'submitGoal', href: '/goals' });
   }
   if (isMentor || isMentee) {
-    items.push({ labelKey: 'addReflection', href: '/journal' });
+    items.push({ labelKey: 'addReflection', href: isMentor ? '/sessions' : '/journal' });
     items.push({ labelKey: 'requestSupport', href: '/support' });
   }
   return items;
@@ -86,10 +89,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
     language === Language.FR ? 'fr' : 'en',
   );
 
+  const participantCohort = isAdmin ? null : await resolveParticipantCohortId(user.id);
+  const quarterlyEnabled = participantCohort
+    ? await quarterlyAssessmentsEnabled(participantCohort)
+    : true;
   // Badges start at 0; AppShell hydrates real counts via fetchShellBadges().
   const sections = isAdmin
     ? await buildAdminNavSections(0, user.roles)
-    : await buildParticipantNavSections(user.roles, 0, 0);
+    : await buildParticipantNavSections(user.roles, 0, 0, quarterlyEnabled);
+  if ((await confidentialReviewCohorts(user.id)).length) {
+    sections.push({
+      label: 'Programme coordination',
+      items: [
+        { href: '/programme-concerns', label: 'Confidential review follow-up', icon: 'support' },
+      ],
+    });
+  }
 
   const labels: AppShellLabels = {
     brand: tCommon('appShortName'),
@@ -113,7 +128,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       sections={sections}
       unread={0}
       loadBadges
-      availableLocales={availableLocales}
       user={{
         name: user.name ?? user.email,
         roleLabel: user.roles.map(roleLabelOf).join(' · '),
@@ -122,6 +136,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }}
       labels={labels}
     >
+      <CohortLocaleGuard availableLocales={availableLocales} />
       <AssessmentGateBanner gate={gate} />
       {children}
       <QuickActions items={quickActionsFor(user.roles)} />

@@ -1,5 +1,13 @@
 # Changelog
 
+## Mentor recurring forms — 20 November 2026
+
+- Mentors can open and submit their own monthly meeting form from the Reviews menu. Role-specific definitions keep mentor and mentee submissions separate; monthly windows never lock either role out. Quarterly stream opt-outs remain supported.
+
+## 2026/2027 stream — 16 November 2026
+
+- Adds role-specific source review forms, coordinator-only confidential follow-up, and updated goal-setting details. Additive migration adds `goals.setting_details` and `form_responses.subject_mentee_id` so mentor reviews remain separate for each mentee; existing records are preserved.
+
 ## M0 — Foundations
 
 - Next.js (App Router) + TypeScript strict, Tailwind CSS, shadcn-style UI primitives.
@@ -599,6 +607,7 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - Footer nav links keep `min-h-11` — that is a pointer target size (WCAG 2.2 §2.5.8), not spare padding.
 - `/signup` improved from 132px to 100px of overflow at 1366×768 but still scrolls a little there: it presents two full option cards (redeem an invite code / request access), and compressing that further would cost more than the scroll does. It fits at 1440×900.
 
+
 ## Ops — bootstrap a real Super Admin without the demo seed
 
 - `scripts/create-admin.ts` (`npm run admin:create`) creates or resets one Super Admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (`ADMIN_NAME` optional), for the production case where `db:seed` must never run. Credentials come from the environment, not argv.
@@ -633,3 +642,9 @@ Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*`
 - It now throws a `CredentialsSignin` carrying a `rate_limited` code, which Auth.js passes through to the caller, and the action classifies on that. No re-reading of the counter, which would have consumed another attempt or needed a second, subtly different threshold.
 - The budget, the bucket key and the classifier moved into `lib/auth/login-throttle.ts` so the action and `authorize` share one definition. Pure and unit-tested (9 cases): unrecognised errors fall back to "invalid" so a wrong guess stays indistinguishable from an unknown account, and the key stays IP + lower-cased email so one office cannot lock out a building and nobody can lock a colleague out by guessing their address.
 - The window is fixed rather than sliding, so waiting it out always clears the block.
+
+
+## Fix — shared sign-in counters recover after an expiry failure
+
+- A transient failure between Redis INCR and EXPIRE could leave a permanent sign-in throttle. The shared limiter now repairs counters without an expiry on the next request. Existing live windows keep their original expiry.
+- Seven regression cases cover the limit boundary, stuck counters, repair and recovery. The existing rate-limited sign-in message is preserved.

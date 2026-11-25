@@ -71,7 +71,7 @@ export function AuthField({
   return (
     <div className={className}>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <label htmlFor={fieldId} className="text-sm font-semibold text-auth-ink">
+        <label htmlFor={fieldId} className="text-auth-ink text-sm font-semibold">
           {label}
         </label>
         {trailing}
@@ -94,16 +94,16 @@ export function AuthField({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
         className={cn(
-          'h-14 w-full rounded-xl border bg-auth-field px-4 text-base text-auth-ink transition-colors',
+          'bg-auth-field text-auth-ink h-11 w-full rounded-md border px-3 text-base transition-colors',
           'placeholder:text-auth-ink-2/60',
-          'focus:outline-none focus-visible:border-blak-green focus-visible:ring-4 focus-visible:ring-blak-green/25',
-          'disabled:cursor-not-allowed disabled:opacity-70 read-only:text-auth-ink-2',
+          'focus-visible:border-green focus-visible:ring-green/20 focus:outline-none focus-visible:ring-2',
+          'read-only:text-auth-ink-2 disabled:cursor-not-allowed disabled:opacity-70',
           error ? 'border-[#B3261E] ring-2 ring-[#B3261E]/20' : 'border-auth-border',
         )}
       />
 
       {hint ? (
-        <p id={hintId} className="mt-2 text-sm text-auth-ink-2">
+        <p id={hintId} className="text-auth-ink-2 mt-2 text-sm">
           {hint}
         </p>
       ) : null}
@@ -170,7 +170,7 @@ export function PasswordField({
   return (
     <div className={className}>
       <div className="mb-2 flex items-baseline justify-between gap-3">
-        <label htmlFor={fieldId} className="text-sm font-semibold text-auth-ink">
+        <label htmlFor={fieldId} className="text-auth-ink text-sm font-semibold">
           {label}
         </label>
         {trailing}
@@ -190,18 +190,22 @@ export function PasswordField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            'h-14 w-full rounded-xl border bg-auth-field pl-4 pr-14 text-base text-auth-ink transition-colors',
-            'focus:outline-none focus-visible:border-blak-green focus-visible:ring-4 focus-visible:ring-blak-green/25',
+            'bg-auth-field text-auth-ink h-11 w-full rounded-md border pr-14 pl-4 text-base transition-colors',
+            'focus-visible:border-green focus-visible:ring-green/20 focus:outline-none focus-visible:ring-2',
             error ? 'border-[#B3261E] ring-2 ring-[#B3261E]/20' : 'border-auth-border',
           )}
         />
         <button
           type="button"
           onClick={() => setVisible((current) => !current)}
-          className="absolute right-1.5 top-1/2 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg text-auth-ink-2 transition-colors hover:text-auth-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-blak-green/25"
+          className="text-auth-ink-2 hover:text-auth-ink focus-visible:ring-green/20 absolute top-1/2 right-1.5 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2"
         >
           <span className="sr-only">{visible ? t('hidePassword') : t('showPassword')}</span>
-          {visible ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
+          {visible ? (
+            <EyeOff className="size-5" aria-hidden />
+          ) : (
+            <Eye className="size-5" aria-hidden />
+          )}
         </button>
       </div>
 
@@ -211,7 +215,7 @@ export function PasswordField({
         </p>
       ) : null}
       {hint ? (
-        <p id={hintId} className="mt-2 text-sm text-auth-ink-2">
+        <p id={hintId} className="text-auth-ink-2 mt-2 text-sm">
           {hint}
         </p>
       ) : null}

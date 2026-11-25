@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireUser, hasAnyRole } from '@/lib/auth/rbac';
 import { RoleName } from '@/lib/auth/roles';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CohortCreateForm } from './cohort-create-form';
 
@@ -28,7 +28,7 @@ export default async function CohortsPage() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('cohorts')}</h1>
+      <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('cohorts')}</h1>
 
       {canManage ? <CohortCreateForm programmes={programmes} /> : null}
 
@@ -52,7 +52,7 @@ export default async function CohortsPage() {
                 <TableCell>{c.programme.name}</TableCell>
                 <TableCell>{c.languages.join(', ')}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{c.status}</Badge>
+                  <StatusBadge status={c.status} />
                 </TableCell>
                 {canManage ? (
                   <TableCell>

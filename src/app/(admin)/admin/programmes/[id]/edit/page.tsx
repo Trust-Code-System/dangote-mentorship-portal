@@ -18,7 +18,7 @@ export default async function ProgrammeEditPage({ params }: { params: Promise<{ 
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('editProgramme')}</h1>
+      <h1 className="font-display text-h1 font-semibold tracking-tight text-ink">{t('editProgramme')}</h1>
       <ProgrammeEditForm
         programme={{
           id: programme.id,

@@ -409,7 +409,6 @@ export default function DesignSystemPreview() {
             id="bf-why"
             name="why"
             label="Why this goal matters"
-            lang="EN"
             placeholder="A sentence or two — in English or French…"
             helperText="Write in your language"
           />

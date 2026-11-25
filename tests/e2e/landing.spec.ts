@@ -4,8 +4,8 @@ import { test, expect, type Page } from '@playwright/test';
  * Happy-path E2E for the public landing page.
  *
  * Deliberately covers the things that a visual review cannot: that the page is
- * still usable with a keyboard, that the language control really swaps both
- * locales without losing the visitor's place, that every CTA points at a route
+ * still usable with a keyboard, that public pages no longer expose language
+ * switchers, that every CTA points at a route
  * that exists, and that nothing overflows at 320px.
  */
 
@@ -101,7 +101,9 @@ test.describe('landing page', () => {
     // flaky in headless browsers because the browser viewport does not always
     // begin with document focus.
     const firstFocusable = page
-      .locator('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      .locator(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
       .first();
     await expect(firstFocusable).toHaveAttribute('href', '#landing-main');
     await firstFocusable.focus();
@@ -124,24 +126,15 @@ test.describe('landing page', () => {
     );
   });
 
-  test('switching to French translates the page and keeps the visitor in place', async ({
-    page,
-  }) => {
-    await page.goto('/welcome');
-
-    // Move down the page first: the language switch is a cookie write inside a
-    // transition, not a navigation, so scroll position must survive it.
-    await page.locator('#matching').scrollIntoViewIfNeeded();
-    const before = await page.evaluate(() => window.scrollY);
-    expect(before).toBeGreaterThan(0);
-
-    await page.getByRole('group', { name: /language/i }).first().getByText('FR').click();
-
-    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
-    await expect(page.locator('main h1')).toContainText("L'expérience devient une direction.");
-
-    const after = await page.evaluate(() => window.scrollY);
-    expect(Math.abs(after - before)).toBeLessThan(200);
+  test('public and authentication pages do not expose language switchers', async ({ page }) => {
+    for (const path of ['/welcome', '/login', '/signup']) {
+      await page.goto(path);
+      await expect(page.locator('main h1')).toBeVisible();
+      await expect(page.getByRole('group', { name: /language/i })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /^(EN|FR|English|Français)$/i })).toHaveCount(
+        0,
+      );
+    }
   });
 
   test('has no horizontal overflow at 320px', async ({ page }) => {

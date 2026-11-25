@@ -25,6 +25,8 @@ export function AvatarUploader({
   const t = useTranslations('profile');
   const tc = useTranslations('common');
   const fileId = useId();
+  const uploadFormId = useId();
+  const hintId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [preview, setPreview] = useState<string | null>(null);
@@ -44,7 +46,11 @@ export function AvatarUploader({
     setUploading(true);
     setUploadState(null);
     try {
-      const prepared = await prepareOwnAvatarUpload({ name: file.name, type: file.type, size: file.size });
+      const prepared = await prepareOwnAvatarUpload({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
       if (!prepared.ok) return setUploadState(prepared);
       if (prepared.data.mode === 'server') {
         setUploadState(await uploadOwnAvatar(null, formData));
@@ -61,7 +67,10 @@ export function AvatarUploader({
     } catch (error) {
       setUploadState({
         ok: false,
-        error: { code: 'UNKNOWN', message: error instanceof Error ? error.message : 'Upload failed.' },
+        error: {
+          code: 'UNKNOWN',
+          message: error instanceof Error ? error.message : 'Upload failed.',
+        },
       });
     } finally {
       setUploading(false);
@@ -90,43 +99,59 @@ export function AvatarUploader({
     null;
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
-      <Avatar className="size-16 ring-2 ring-border">
-        {shown ? <AvatarImage src={shown} alt="" /> : null}
-        <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-      </Avatar>
+    <div className="@container">
+      <div className="flex flex-col items-start gap-4 @sm:flex-row">
+        <Avatar className="ring-border size-16 shrink-0 ring-2">
+          {shown ? <AvatarImage src={shown} alt="" /> : null}
+          <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+        </Avatar>
 
-      <div className="space-y-2">
-        <form ref={formRef} onSubmit={(event) => void submitUpload(event)} className="flex flex-wrap items-center gap-2">
-          <Input
-            id={fileId}
-            name="file"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            className="max-w-xs"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              setPreview(file ? URL.createObjectURL(file) : null);
-            }}
-          />
-          <Button type="submit" size="sm" disabled={uploading}>
-            {uploading ? tc('loading') : t('uploadPhoto')}
-          </Button>
-        </form>
+        <div className="w-full min-w-0 flex-1 space-y-2">
+          <div className="flex flex-col gap-2 @2xl:flex-row @2xl:items-center">
+            <form
+              id={uploadFormId}
+              ref={formRef}
+              onSubmit={(event) => void submitUpload(event)}
+              className="w-full min-w-0 @2xl:flex-1"
+            >
+              <Input
+                id={fileId}
+                name="file"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                aria-label={t('uploadPhoto')}
+                aria-describedby={hintId}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  setPreview(file ? URL.createObjectURL(file) : null);
+                }}
+              />
+            </form>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Button form={uploadFormId} type="submit" disabled={uploading}>
+                {uploading ? tc('loading') : t('uploadPhoto')}
+              </Button>
 
-        {imageUrl ? (
-          <form action={remove}>
-            <Button type="submit" size="sm" variant="ghost" disabled={removing}>
-              {removing ? tc('loading') : t('removePhoto')}
-            </Button>
-          </form>
-        ) : null}
+              {imageUrl ? (
+                <form action={remove}>
+                  <Button type="submit" variant="outline" disabled={removing}>
+                    {removing ? tc('loading') : t('removePhoto')}
+                  </Button>
+                </form>
+              ) : null}
+            </div>
+          </div>
 
-        {error ? (
-          <p className="text-sm text-destructive">{error}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t('photoHint')}</p>
-        )}
+          {error ? (
+            <p id={hintId} role="alert" className="text-destructive text-sm">
+              {error}
+            </p>
+          ) : (
+            <p id={hintId} className="text-muted-foreground text-xs">
+              {t('photoHint')}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
