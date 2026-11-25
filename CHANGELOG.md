@@ -1,9 +1,5 @@
 # Changelog
 
-## Assessment tab removal — 25 November 2026
-
-- Disables quarterly assessments for the 2026/2027 stream through its existing production policy. The participant Assessment tab, quarterly obligations and access gate are removed; monthly forms and other reviews are preserved. See `docs/assessment-tab-removal-2026-11-25.md` for verification and scope.
-
 ## Mentor recurring forms — 20 November 2026
 
 - Mentors can open and submit their own monthly meeting form from the Reviews menu. Role-specific definitions keep mentor and mentee submissions separate; monthly windows never lock either role out. Quarterly stream opt-outs remain supported.
@@ -547,7 +543,7 @@ Production stores `MICROSOFT_INTEGRATIONS_ENABLED` with a trailing CRLF **inside
 
 - The flag is now trimmed before comparison, matching the per-variable checks in the same file, which already trimmed. That inconsistency was the whole bug.
 - Still deliberately strict about the value itself: `1`, `yes`, `TRUE` and `enabled` all remain OFF. A flag that guesses at intent is worse than one that does not.
-- 7 new tests pin it, including the exact shape production holds today (`'false
+- 7 new tests pin it, including the exact shape production holds today (`'false
 '`) and that `graphMail.missing` names precisely which variables are absent once the flag is on.
 
 Found while establishing why no email leaves the portal: the four `GRAPH_MAIL_*` variables are absent **and** this flag is off, so adding the credentials alone would not have switched delivery on.
