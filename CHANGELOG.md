@@ -1,5 +1,9 @@
 # Changelog
 
+## Assessment tab removal — 25 November 2026
+
+- Disables quarterly assessments for the 2026/2027 stream through its existing production policy. The participant Assessment tab, quarterly obligations and access gate are removed; monthly forms and other reviews are preserved. See `docs/assessment-tab-removal-2026-11-25.md` for verification and scope.
+
 ## Mentor recurring forms — 20 November 2026
 
 - Mentors can open and submit their own monthly meeting form from the Reviews menu. Role-specific definitions keep mentor and mentee submissions separate; monthly windows never lock either role out. Quarterly stream opt-outs remain supported.
