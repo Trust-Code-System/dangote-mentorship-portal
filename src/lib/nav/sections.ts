@@ -124,7 +124,6 @@ export async function buildParticipantNavSections(
     getTranslations('monthlyForm'),
   ]);
   const isPair = roles.includes(RoleName.MENTOR) || roles.includes(RoleName.MENTEE);
-  const isMentee = roles.includes(RoleName.MENTEE);
 
   const pairItems: NavItem[] = isPair
     ? [
@@ -163,16 +162,11 @@ export async function buildParticipantNavSections(
           {
             label: tShell('navReviews'),
             items: [
-              // Mentees owe the monthly meeting form; mentors do not.
-              ...(isMentee
-                ? [
-                    {
-                      href: '/monthly-form',
-                      label: tMonthly('navLabel'),
-                      icon: 'monthly' as const,
-                    },
-                  ]
-                : []),
+              {
+                href: '/monthly-form',
+                label: tMonthly('navLabel'),
+                icon: 'monthly' as const,
+              },
               ...(quarterlyEnabled
                 ? [
                     {

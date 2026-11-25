@@ -9,12 +9,13 @@ import { formSchemaShape } from '@/features/forms/schema';
 // than discovered when the installer fails.
 
 describe('standard form catalogue', () => {
-  it('contains the three recurring sets', () => {
-    expect(STANDARD_FORMS).toHaveLength(3);
+  it('contains both role-specific sets for each recurring form', () => {
+    expect(STANDARD_FORMS).toHaveLength(4);
     expect(STANDARD_FORMS.map((f) => `${f.type}/${f.roleName}`)).toEqual([
       `${ReviewType.QUARTERLY}/${RoleName.MENTEE}`,
       `${ReviewType.QUARTERLY}/${RoleName.MENTOR}`,
       `${ReviewType.MONTHLY}/${RoleName.MENTEE}`,
+      `${ReviewType.MONTHLY}/${RoleName.MENTOR}`,
     ]);
   });
 
@@ -49,10 +50,10 @@ describe('standard form catalogue', () => {
   );
 
   it('never targets a role that does not answer the form', () => {
-    // The monthly meeting form is a mentee obligation; a mentor set would be
-    // published but never served, which is worse than absent.
     const monthly = STANDARD_FORMS.filter((f) => f.type === ReviewType.MONTHLY);
-    expect(monthly.every((f) => f.roleName === RoleName.MENTEE)).toBe(true);
+    expect(monthly.map((f) => f.roleName).sort()).toEqual(
+      [RoleName.MENTEE, RoleName.MENTOR].sort(),
+    );
   });
 
   it('gives every set a title an admin can recognise', () => {
@@ -73,12 +74,7 @@ describe('transcription fidelity', () => {
     const field = bySet(ReviewType.QUARTERLY, RoleName.MENTEE).fields.find(
       (f) => f.id === 'goal_progress',
     );
-    expect(field?.options?.map((o) => o.value)).toEqual([
-      'significant',
-      'some',
-      'limited',
-      'none',
-    ]);
+    expect(field?.options?.map((o) => o.value)).toEqual(['significant', 'some', 'limited', 'none']);
   });
 
   it('the mentee assessment lets several difficulties be ticked', () => {

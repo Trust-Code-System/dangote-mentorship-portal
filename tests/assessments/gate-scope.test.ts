@@ -123,16 +123,14 @@ describe('getAssessmentGate window scope', () => {
     expect(findMany).not.toHaveBeenCalled();
   });
 
-  it('scopes a mentee to both recurring forms', async () => {
+  it('excludes the non-gating monthly form for a mentee', async () => {
     await getAssessmentGate({ ...mentee, id: 'user-mentee-scope' });
 
     const where = findMany.mock.calls[0]?.[0]?.where;
-    expect(where?.formType?.in).toEqual(
-      expect.arrayContaining([ReviewType.MONTHLY, ReviewType.QUARTERLY]),
-    );
+    expect(where?.formType?.in).toEqual([ReviewType.QUARTERLY]);
   });
 
-  it('scopes a mentor to the quarterly assessment only, never the monthly form', async () => {
+  it('excludes the non-gating monthly form for a mentor', async () => {
     getMenteePairing.mockResolvedValue(null);
     getMentorPairings.mockResolvedValue([
       { cohortId: 'cohort-1', menteeId: 'mentee-1', menteeName: 'A' },
@@ -141,9 +139,8 @@ describe('getAssessmentGate window scope', () => {
     await getAssessmentGate({ ...mentee, id: 'user-mentor', roles: [RoleName.MENTOR] });
 
     const where = findMany.mock.calls[0]?.[0]?.where;
-    // The monthly meeting form is a mentee obligation; a mentor must never be
-    // gated on one.
     expect(where?.formType?.in).toEqual([ReviewType.QUARTERLY]);
+    expect(where?.gatesAccess).toBe(true);
   });
 });
 
@@ -173,9 +170,9 @@ describe('stream assessment opt-out', () => {
     expect(gate.locked).toBe(false);
     expect(findMany).not.toHaveBeenCalled();
   });
-  it('excludes quarterly windows from the mentee gate without disabling monthly reads', async () => {
+  it('never queries gating windows for an opted-out mentee', async () => {
     findFlag.mockResolvedValue({ enabled: true });
     await getAssessmentGate(mentee);
-    expect(findMany.mock.calls[0]?.[0]?.where.formType.in).toEqual([ReviewType.MONTHLY]);
+    expect(findMany).not.toHaveBeenCalled();
   });
 });

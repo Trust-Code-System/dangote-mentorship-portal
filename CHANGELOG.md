@@ -1,5 +1,9 @@
 # Changelog
 
+## Mentor recurring forms — 20 November 2026
+
+- Mentors can open and submit their own monthly meeting form from the Reviews menu. Role-specific definitions keep mentor and mentee submissions separate; monthly windows never lock either role out. Quarterly stream opt-outs remain supported.
+
 ## 2026/2027 stream — 16 November 2026
 
 - Adds role-specific source review forms, coordinator-only confidential follow-up, and updated goal-setting details. Additive migration adds `goals.setting_details` and `form_responses.subject_mentee_id` so mentor reviews remain separate for each mentee; existing records are preserved.

@@ -20,8 +20,10 @@ describe('rolesRequiredFor', () => {
     );
   });
 
-  it('requires only mentees for the monthly meeting form', () => {
-    expect(rolesRequiredFor(ReviewType.MONTHLY)).toEqual([RoleName.MENTEE]);
+  it('requires mentors and mentees for the monthly meeting form', () => {
+    expect(rolesRequiredFor(ReviewType.MONTHLY).sort()).toEqual(
+      [RoleName.MENTEE, RoleName.MENTOR].sort(),
+    );
   });
 
   it('never requires an admin role', () => {
@@ -38,8 +40,8 @@ describe('formTypesFor', () => {
     );
   });
 
-  it('gives a mentor only the quarterly assessment', () => {
-    expect(formTypesFor([RoleName.MENTOR])).toEqual([ReviewType.QUARTERLY]);
+  it('gives a mentor both recurring forms', () => {
+    expect(formTypesFor([RoleName.MENTOR])).toEqual([ReviewType.MONTHLY, ReviewType.QUARTERLY]);
   });
 
   it('gives an admin nothing', () => {
@@ -52,15 +54,16 @@ describe('formTypesFor', () => {
 
   it('gives an admin who is also a mentor the mentor set', () => {
     expect(formTypesFor([RoleName.SUPER_ADMIN, RoleName.MENTOR])).toEqual([
+      ReviewType.MONTHLY,
       ReviewType.QUARTERLY,
     ]);
   });
 });
 
 describe('mustComplete', () => {
-  it('holds a mentor to the quarterly assessment but not the monthly form', () => {
+  it('holds a mentor to both recurring forms', () => {
     expect(mustComplete([RoleName.MENTOR], ReviewType.QUARTERLY)).toBe(true);
-    expect(mustComplete([RoleName.MENTOR], ReviewType.MONTHLY)).toBe(false);
+    expect(mustComplete([RoleName.MENTOR], ReviewType.MONTHLY)).toBe(true);
   });
 
   it('holds a mentee to both', () => {
@@ -89,8 +92,8 @@ describe('respondentRoleFor', () => {
     );
   });
 
-  it('returns null for a mentor on the monthly form, which is not theirs', () => {
-    expect(respondentRoleFor([RoleName.MENTOR], ReviewType.MONTHLY)).toBeNull();
+  it('selects the mentor question set for the monthly form', () => {
+    expect(respondentRoleFor([RoleName.MENTOR], ReviewType.MONTHLY)).toBe(RoleName.MENTOR);
   });
 
   it('returns null for an admin', () => {
